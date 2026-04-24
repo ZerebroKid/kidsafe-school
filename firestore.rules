@@ -1,0 +1,96 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers -----------------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myUid() {
+      return request.auth.uid;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && myUid() == uid;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    // True if the signed-in user is the linked parent of `childUid`.
+    function isParentOf(childUid) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(childUid))
+        && userDoc(childUid).data.parentUid == myUid();
+    }
+
+    // Fields the parent is allowed to edit on the child's main doc.
+    function parentEditableFields() {
+      return ['lockState', 'geofence', 'screenTime'];
+    }
+
+    // users -------------------------------------------------------------------
+    match /users/{uid} {
+      // Anyone signed in can look up a user by pairing code; we need this so a
+      // child can resolve a parent's 6-digit code to a uid. The returned doc
+      // only exposes public fields that are safe to read.
+      allow read: if isSignedIn();
+
+      // A user can only create / update their own doc. Role and parentUid are
+      // set at creation; parentUid may also be set by the child during pairing.
+      allow create: if isSelf(uid)
+        && request.resource.data.role in ['parent', 'child']
+        && request.resource.data.keys().hasAll(['role', 'email', 'createdAt']);
+
+      allow update: if isSelf(uid);
+
+      allow delete: if isSelf(uid);
+    }
+
+    // children/{childUid} -----------------------------------------------------
+    // Main doc: status, lockState, currentLocation, geofence, screenTime...
+    match /children/{childUid} {
+      allow read: if isSelf(childUid) || isParentOf(childUid);
+
+      // Child can create/update own doc freely.
+      allow create, update: if isSelf(childUid);
+
+      // Parent can update ONLY the command fields. We enforce this by checking
+      // that the diff between old and new only touches allowed keys.
+      allow update: if isParentOf(childUid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(parentEditableFields());
+
+      allow delete: if isSelf(childUid);
+
+      // apps subcollection ------------------------------------------------
+      match /apps/{packageName} {
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+
+        // Child writes app list entries from PackageReceiver.
+        allow create, update, delete: if isSelf(childUid);
+
+        // Parent can flip `isBlocked` only.
+        allow update: if isParentOf(childUid)
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['isBlocked']);
+      }
+
+      // contacts subcollection --------------------------------------------
+      match /contacts/{contactId} {
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+        allow write: if isSelf(childUid);
+      }
+
+      // events subcollection (append-only, read by parent) ----------------
+      match /events/{eventId} {
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+        allow create: if isSelf(childUid);
+        allow update, delete: if false;
+      }
+    }
+  }
+}

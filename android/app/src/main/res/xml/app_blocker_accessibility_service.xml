@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    NOTE: do NOT add `android:packageNames`. When present (even as empty ""), Android
+    filters accessibility events to ONLY those packages in the list, so an empty list
+    means "receive events from no apps". Omitting the attribute means "receive events
+    from every app" which is what we need to detect blocked-app launches.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagReportViewIds"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/accessibility_service_description"
+    android:notificationTimeout="50"
+    android:summary="@string/accessibility_service_label" />
