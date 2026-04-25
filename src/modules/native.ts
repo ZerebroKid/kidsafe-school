@@ -8,6 +8,7 @@ const {
   KidSafeLocationModule: LocationNative,
   Geofence: GeofenceNative,
   ForegroundService: ForegroundServiceNative,
+  Schedule: ScheduleNative,
 } = NativeModules;
 
 function assert(mod: unknown, name: string) {
@@ -127,4 +128,30 @@ export const ForegroundService = {
     (assert(ForegroundServiceNative, 'ForegroundService') as typeof ForegroundServiceNative).start(childUid),
   isRunning: (): Promise<boolean> =>
     (assert(ForegroundServiceNative, 'ForegroundService') as typeof ForegroundServiceNative).isRunning(),
+};
+
+// -------- Schedule --------
+
+export const Schedule = {
+  /**
+   * @param daysMask  bitmask of days the schedule applies to. Bit 0 = Sun .. bit 6 = Sat.
+   * @param startMins start time in minutes since local midnight (0..1439).
+   * @param endMins   end time in minutes since local midnight. If <= startMins the window crosses midnight.
+   */
+  setSchedule: (
+    enabled: boolean,
+    daysMask: number,
+    startMins: number,
+    endMins: number,
+    allowedPackages: string[],
+  ): Promise<boolean> =>
+    (assert(ScheduleNative, 'Schedule') as typeof ScheduleNative).setSchedule(
+      enabled,
+      daysMask,
+      startMins,
+      endMins,
+      allowedPackages,
+    ),
+  isActiveNow: (): Promise<boolean> =>
+    (assert(ScheduleNative, 'Schedule') as typeof ScheduleNative).isActiveNow(),
 };

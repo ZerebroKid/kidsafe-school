@@ -2,6 +2,7 @@ package com.kidsafe.store
 
 import android.content.Context
 import android.content.SharedPreferences
+import java.util.Calendar
 
 /**
  * Simple SharedPreferences-backed cache that the native receivers and services read from.
@@ -27,6 +28,11 @@ object KidSafeStore {
     const val GEOFENCE_CENTER_LNG = "gf_lng"
     const val GEOFENCE_RADIUS_M = "gf_radius"
     const val GEOFENCE_ACTIVE = "gf_active"
+    const val SCHEDULE_ENABLED = "sch_enabled"
+    const val SCHEDULE_DAYS_MASK = "sch_days_mask"     // bit 0 = Sun .. bit 6 = Sat
+    const val SCHEDULE_START_MINS = "sch_start"
+    const val SCHEDULE_END_MINS = "sch_end"
+    const val SCHEDULE_ALLOWED = "sch_allowed"          // semicolon-joined list
 
     private fun prefs(context: Context): SharedPreferences =
         context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -94,4 +100,59 @@ object KidSafeStore {
 
     fun getGeofenceActive(context: Context): Boolean =
         prefs(context).getBoolean(GEOFENCE_ACTIVE, false)
+
+    // -- Scheduler ----------------------------------------------------------
+
+    fun setSchedule(
+        context: Context,
+        enabled: Boolean,
+        daysMask: Int,
+        startMins: Int,
+        endMins: Int,
+        allowed: Collection<String>,
+    ) {
+        prefs(context).edit()
+            .putBoolean(SCHEDULE_ENABLED, enabled)
+            .putInt(SCHEDULE_DAYS_MASK, daysMask)
+            .putInt(SCHEDULE_START_MINS, startMins)
+            .putInt(SCHEDULE_END_MINS, endMins)
+            .putString(SCHEDULE_ALLOWED, allowed.joinToString(";"))
+            .apply()
+    }
+
+    fun getScheduleAllowed(context: Context): Set<String> {
+        val raw = prefs(context).getString(SCHEDULE_ALLOWED, "") ?: ""
+        return if (raw.isBlank()) emptySet() else raw.split(";").toSet()
+    }
+
+    /**
+     * Returns true if the parent-configured schedule window covers "now" in the
+     * device's local time. Handles windows that wrap past midnight (e.g. 21:00 → 07:00)
+     * by inspecting the previous day's day-of-week bit.
+     *
+     * Reads SharedPreferences cheaply enough to call from `onAccessibilityEvent`.
+     */
+    fun isScheduleActiveNow(context: Context): Boolean {
+        val p = prefs(context)
+        if (!p.getBoolean(SCHEDULE_ENABLED, false)) return false
+        val daysMask = p.getInt(SCHEDULE_DAYS_MASK, 0)
+        if (daysMask == 0) return false
+        val start = p.getInt(SCHEDULE_START_MINS, 0)
+        val end = p.getInt(SCHEDULE_END_MINS, 0)
+
+        val cal = Calendar.getInstance()
+        // Calendar.DAY_OF_WEEK: SUNDAY=1..SATURDAY=7; convert to 0..6 (Sun..Sat).
+        val dow = cal.get(Calendar.DAY_OF_WEEK) - 1
+        val nowMins = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
+
+        return if (start <= end) {
+            (daysMask shr dow and 1) == 1 && nowMins in start until end
+        } else {
+            // Wraps midnight: window is [start..1440) on day X plus [0..end) on day X+1.
+            val fromStartToday = (daysMask shr dow and 1) == 1 && nowMins >= start
+            val prevDow = (dow + 6) % 7
+            val intoEndFromYday = (daysMask shr prevDow and 1) == 1 && nowMins < end
+            fromStartToday || intoEndFromYday
+        }
+    }
 }

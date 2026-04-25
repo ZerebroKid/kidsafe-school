@@ -29,7 +29,7 @@ service cloud.firestore {
 
     // Fields the parent is allowed to edit on the child's main doc.
     function parentEditableFields() {
-      return ['lockState', 'geofence', 'screenTime'];
+      return ['lockState', 'geofence', 'screenTime', 'schedule'];
     }
 
     // users -------------------------------------------------------------------

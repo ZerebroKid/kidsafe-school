@@ -1,6 +1,6 @@
 import firestore from '@react-native-firebase/firestore';
 
-import type {AppEntry, ChildDoc, ContactEntry, Geofence, Geo, UserDoc} from './types';
+import type {AppEntry, ChildDoc, ContactEntry, Geofence, Geo, Schedule, UserDoc} from './types';
 
 /**
  * Paths helpers keep collection names in one place — change here, update nowhere else.
@@ -124,6 +124,10 @@ export async function setAppBlocked(
 
 export async function setGeofence(childUid: string, g: Geofence) {
   await paths.child(childUid).set({geofence: g}, {merge: true});
+}
+
+export async function setSchedule(childUid: string, s: Schedule) {
+  await paths.child(childUid).set({schedule: s}, {merge: true});
 }
 
 // --- Child-side helpers ------------------------------------------------------

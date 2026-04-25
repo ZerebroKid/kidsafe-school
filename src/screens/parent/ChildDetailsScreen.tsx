@@ -13,8 +13,8 @@ type Props = NativeStackScreenProps<ParentStackParamList, 'ChildDetails'>;
 
 type Tab = 'apps' | 'location' | 'contacts';
 
-export function ChildDetailsScreen({route}: Props) {
-  const {childUid} = route.params;
+export function ChildDetailsScreen({navigation, route}: Props) {
+  const {childUid, childName} = route.params;
   const [tab, setTab] = useState<Tab>('apps');
 
   return (
@@ -24,6 +24,12 @@ export function ChildDetailsScreen({route}: Props) {
         <TabButton label="Location" active={tab === 'location'} onPress={() => setTab('location')} />
         <TabButton label="Contacts" active={tab === 'contacts'} onPress={() => setTab('contacts')} />
       </View>
+      <Pressable
+        style={styles.scheduleBtn}
+        onPress={() => navigation.navigate('Schedule', {childUid, childName})}>
+        <Text style={styles.scheduleBtnLabel}>Schedule</Text>
+        <Text style={styles.scheduleBtnHint}>Allow only specific apps during chosen hours</Text>
+      </Pressable>
       <View style={{flex: 1}}>
         {tab === 'apps' && <AppsTab childUid={childUid} />}
         {tab === 'location' && <LocationTab childUid={childUid} />}
@@ -67,4 +73,16 @@ const styles = StyleSheet.create({
   tabActive: {backgroundColor: colors.primary},
   tabLabel: {color: colors.textMuted, fontWeight: '600'},
   tabLabelActive: {color: colors.primaryText},
+  scheduleBtn: {
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  scheduleBtnLabel: {color: colors.text, fontSize: 15, fontWeight: '700'},
+  scheduleBtnHint: {color: colors.textMuted, fontSize: 12, marginTop: 2},
 });

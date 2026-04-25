@@ -9,6 +9,7 @@ export type AuthStackParamList = {
 export type ParentStackParamList = {
   ParentTabs: undefined;
   ChildDetails: {childUid: string; childName: string};
+  Schedule: {childUid: string; childName: string};
 };
 
 export type ParentTabsParamList = {

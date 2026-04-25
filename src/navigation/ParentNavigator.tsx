@@ -4,6 +4,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {ChildDetailsScreen} from '../screens/parent/ChildDetailsScreen';
 import {ChildrenListScreen} from '../screens/parent/ChildrenListScreen';
+import {ScheduleScreen} from '../screens/parent/ScheduleScreen';
 import {SettingsScreen} from '../screens/parent/SettingsScreen';
 import {colors} from '../theme';
 import type {ParentStackParamList, ParentTabsParamList} from './types';
@@ -44,6 +45,11 @@ export function ParentNavigator() {
         name="ChildDetails"
         component={ChildDetailsScreen}
         options={({route}) => ({title: route.params.childName})}
+      />
+      <Stack.Screen
+        name="Schedule"
+        component={ScheduleScreen}
+        options={({route}) => ({title: `${route.params.childName} \u2022 Schedule`})}
       />
     </Stack.Navigator>
   );

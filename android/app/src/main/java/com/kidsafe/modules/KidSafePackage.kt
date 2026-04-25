@@ -19,6 +19,7 @@ class KidSafePackage : ReactPackage {
             LocationModule(reactContext),
             GeofenceModule(reactContext),
             ForegroundServiceModule(reactContext),
+            ScheduleModule(reactContext),
         )
 
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> =

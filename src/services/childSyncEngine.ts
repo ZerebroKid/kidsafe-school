@@ -18,6 +18,7 @@ import {
   Geofence,
   InstalledApps,
   Location,
+  Schedule,
   ScreenTime,
 } from '../modules/native';
 import type {AppEntry, ChildDoc} from '../firebase/types';
@@ -157,6 +158,26 @@ async function reactToChildDoc(doc: ChildDoc) {
     } catch {
       // ignore, probably wasn't set
     }
+  }
+
+  // Schedule (parent-defined "only-these-apps-allowed" time window).
+  // We always push the latest config — if doc.schedule is missing, treat as disabled.
+  try {
+    const s = doc.schedule;
+    if (s) {
+      const daysMask = s.daysOfWeek.reduce((m, d) => m | (1 << d), 0);
+      await Schedule.setSchedule(
+        s.enabled,
+        daysMask,
+        s.startMinutes,
+        s.endMinutes,
+        s.allowedPackages,
+      );
+    } else {
+      await Schedule.setSchedule(false, 0, 0, 0, []);
+    }
+  } catch (e) {
+    console.warn('Schedule.setSchedule failed', e);
   }
 }
 

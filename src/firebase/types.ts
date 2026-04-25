@@ -42,6 +42,18 @@ export interface Geofence {
   active: boolean;
 }
 
+export interface Schedule {
+  enabled: boolean;
+  /** 0 = Sunday .. 6 = Saturday */
+  daysOfWeek: number[];
+  /** Minutes since local midnight, 0..1439. */
+  startMinutes: number;
+  /** Minutes since local midnight, 0..1439. If <= startMinutes the window crosses midnight. */
+  endMinutes: number;
+  /** Apps that remain usable while the window is active. Everything else gets blocked. */
+  allowedPackages: string[];
+}
+
 export interface ChildDoc {
   status: 'online' | 'offline';
   lastSeenAt: FirebaseFirestoreTypes.FieldValue | number;
@@ -49,6 +61,7 @@ export interface ChildDoc {
   screenTime?: ScreenTime;
   currentLocation?: Geo;
   geofence?: Geofence;
+  schedule?: Schedule;
   deviceAdminActive?: boolean;
   lastGeofenceEvent?: {
     transition: 'enter' | 'exit' | 'dwell';

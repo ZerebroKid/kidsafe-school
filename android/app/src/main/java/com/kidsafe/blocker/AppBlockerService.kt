@@ -50,12 +50,22 @@ class AppBlockerService : AccessibilityService() {
         // System launcher / settings are never blocked — always allow them so the user isn't stuck
         if (pkg.startsWith("com.android.launcher") || pkg == "com.android.systemui") return
 
-        val blocked = KidSafeStore.getBlockedPackages(applicationContext)
-        // Visible at default logcat level so we can confirm events are actually arriving.
-        Log.d(TAG, "Foreground change: $pkg (blocklist size=${blocked.size})")
-        if (!blocked.contains(pkg)) return
+        val ctx = applicationContext
+        val scheduleActive = KidSafeStore.isScheduleActiveNow(ctx)
+        val isBlocked = if (scheduleActive) {
+            // Inside the parent's schedule window: deny everything except the allowlist.
+            val allowed = KidSafeStore.getScheduleAllowed(ctx)
+            val allow = pkg in allowed
+            Log.d(TAG, "Foreground change: $pkg (schedule active, allowlist=${allowed.size}, allow=$allow)")
+            !allow
+        } else {
+            val blocked = KidSafeStore.getBlockedPackages(ctx)
+            Log.d(TAG, "Foreground change: $pkg (blocklist size=${blocked.size})")
+            blocked.contains(pkg)
+        }
+        if (!isBlocked) return
 
-        Log.i(TAG, "Blocking foreground app: $pkg")
+        Log.i(TAG, "Blocking foreground app: $pkg (scheduleActive=$scheduleActive)")
         try {
             val intent = Intent(applicationContext, BlockedAppActivity::class.java).apply {
                 addFlags(
