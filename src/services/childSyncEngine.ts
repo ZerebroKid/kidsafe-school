@@ -1,5 +1,5 @@
 import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+import firestore, {firebase} from '@react-native-firebase/firestore';
 import Contacts from 'react-native-contacts';
 import {PermissionsAndroid} from 'react-native';
 
@@ -194,7 +194,7 @@ async function syncInstalledApps(childUid: string) {
         appName: a.appName,
         icon: a.icon ?? null,
         isBlocked: false,
-        installedAt: firestore.FieldValue.serverTimestamp(),
+        installedAt: firebase.firestore.FieldValue.serverTimestamp(),
       },
       {merge: true},
     );

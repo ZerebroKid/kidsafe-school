@@ -58,6 +58,13 @@ service cloud.firestore {
       // Child can create/update own doc freely.
       allow create, update: if isSelf(childUid);
 
+      // Parent can ALSO create the doc if it doesn't exist yet, but only with
+      // command fields. This lets a parent set things like `schedule` before
+      // the child has finished onboarding (when set+merge implicitly creates
+      // the doc).
+      allow create: if isParentOf(childUid)
+        && request.resource.data.keys().hasOnly(parentEditableFields());
+
       // Parent can update ONLY the command fields. We enforce this by checking
       // that the diff between old and new only touches allowed keys.
       allow update: if isParentOf(childUid)

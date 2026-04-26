@@ -1,5 +1,5 @@
 import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
+import firestore, {firebase} from '@react-native-firebase/firestore';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 import {ENV} from '../config/env';
@@ -109,7 +109,7 @@ export async function ensureUserDoc(
     email: partial.email,
     photoURL: partial.photoURL ?? null,
     fcmToken: partial.fcmToken ?? null,
-    createdAt: firestore.FieldValue.serverTimestamp(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
   await withFirestoreRetry(() => ref.set(doc));
 }

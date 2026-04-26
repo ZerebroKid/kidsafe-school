@@ -1,4 +1,4 @@
-import firestore from '@react-native-firebase/firestore';
+import firestore, {firebase} from '@react-native-firebase/firestore';
 
 import type {AppEntry, ChildDoc, ContactEntry, Geofence, Geo, Schedule, UserDoc} from './types';
 
@@ -139,7 +139,7 @@ export async function writeChildStatus(
   await paths.child(childUid).set(
     {
       status,
-      lastSeenAt: firestore.FieldValue.serverTimestamp(),
+      lastSeenAt: firebase.firestore.FieldValue.serverTimestamp(),
     },
     {merge: true},
   );
@@ -155,7 +155,7 @@ export async function writeAppEntry(childUid: string, entry: AppEntry) {
     {
       ...rest,
       isBlocked: rest.isBlocked ?? false,
-      installedAt: firestore.FieldValue.serverTimestamp(),
+      installedAt: firebase.firestore.FieldValue.serverTimestamp(),
     },
     {merge: true},
   );

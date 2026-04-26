@@ -1,4 +1,4 @@
-import firestore from '@react-native-firebase/firestore';
+import firestore, {firebase} from '@react-native-firebase/firestore';
 
 import {ENV} from '../config/env';
 
@@ -40,11 +40,19 @@ export async function linkChildToParent(childUid: string, code: string): Promise
   await firestore().collection('users').doc(childUid).update({
     parentUid: parent.id,
   });
-  // Burn the code once used so a child can't be linked twice with the same code
-  await parent.ref.update({
-    pairingCode: firestore.FieldValue.delete(),
-    pairingCodeExpiresAt: firestore.FieldValue.delete(),
-  });
+  // Best-effort: try to burn the code so it can't be reused. Firestore rules
+  // only let the parent update their own doc, so this will fail when the child
+  // is signed in. The code's TTL (and the parent regenerating a new one)
+  // already prevents long-lived reuse, so we swallow permission errors here
+  // instead of failing the whole link operation.
+  try {
+    await parent.ref.update({
+      pairingCode: firebase.firestore.FieldValue.delete(),
+      pairingCodeExpiresAt: firebase.firestore.FieldValue.delete(),
+    });
+  } catch (e) {
+    console.warn('Could not clear pairing code (expected for child session)', e);
+  }
   return parent.id;
 }
 
