@@ -50,15 +50,37 @@ class ScreenTimeModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun openUsageAccessSettings(promise: Promise) {
-        try {
-            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        // OEM-first / generic-fallback / app-details-final, same pattern as
+        // AppBlockerModule.openAccessibilitySettings. On Xiaomi the MIUI permission editor lands
+        // directly on KidSafe's permission page; the generic intent dumps the user at a long
+        // alphabetised list where they have to scroll.
+        val pkg = reactApplicationContext.packageName
+        val candidates = mutableListOf<Intent>()
+        if (OemSettingsModule.detectOem() == OemSettingsModule.OEM_XIAOMI) {
+            candidates += Intent("miui.intent.action.APP_PERM_EDITOR").apply {
+                setClassName(
+                    "com.miui.securitycenter",
+                    "com.miui.permcenter.permissions.PermissionsEditorActivity",
+                )
+                putExtra("extra_pkgname", pkg)
             }
-            reactApplicationContext.startActivity(intent)
-            promise.resolve(null)
-        } catch (e: Exception) {
-            promise.reject("E_SCREENTIME", e)
         }
+        candidates += Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+        candidates += Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = android.net.Uri.parse("package:$pkg")
+        }
+
+        for (intent in candidates) {
+            try {
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                reactApplicationContext.startActivity(intent)
+                promise.resolve(null)
+                return
+            } catch (_: Exception) {
+                // Try the next candidate
+            }
+        }
+        promise.reject("E_SCREENTIME", "No usage-access settings activity found")
     }
 
     @ReactMethod

@@ -9,13 +9,14 @@ const {
   Geofence: GeofenceNative,
   ForegroundService: ForegroundServiceNative,
   Schedule: ScheduleNative,
+  OemSettings: OemSettingsNative,
 } = NativeModules;
 
 function assert(mod: unknown, name: string) {
   if (!mod) {
     throw new Error(
       `Native module "${name}" not linked. Rebuild the Android app after pulling: ` +
-        `cd android && ./gradlew clean && cd .. && npm run android`,
+        'cd android && ./gradlew clean && cd .. && npm run android',
     );
   }
   return mod;
@@ -154,4 +155,25 @@ export const Schedule = {
     ),
   isActiveNow: (): Promise<boolean> =>
     (assert(ScheduleNative, 'Schedule') as typeof ScheduleNative).isActiveNow(),
+};
+
+// -------- OemSettings --------
+//
+// Deep links into OEM-specific system settings pages so the user lands directly on KidSafe's
+// permission row instead of an alphabetised list. Every method falls back to a generic intent and
+// finally to the app's "App info" page if the OEM-specific activity is missing.
+
+export type Oem = 'xiaomi' | 'samsung' | 'oppo' | 'vivo' | 'huawei' | 'generic';
+
+export const OemSettings = {
+  getOem: (): Promise<Oem> =>
+    (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).getOem(),
+  openAppDetailsSettings: (): Promise<void> =>
+    (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).openAppDetailsSettings(),
+  openAutostartSettings: (): Promise<void> =>
+    (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).openAutostartSettings(),
+  openBatteryUnrestricted: (): Promise<void> =>
+    (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).openBatteryUnrestricted(),
+  openMiuiOtherPermissions: (): Promise<void> =>
+    (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).openMiuiOtherPermissions(),
 };

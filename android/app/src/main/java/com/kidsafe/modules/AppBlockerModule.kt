@@ -55,14 +55,36 @@ class AppBlockerModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun openAccessibilitySettings(promise: Promise) {
-        try {
-            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            reactApplicationContext.startActivity(intent)
-            promise.resolve(null)
-        } catch (e: Exception) {
-            promise.reject("E_APP_BLOCKER", e)
+        // Try OEM deep links first so the user lands on KidSafe's row directly. Fall back to the
+        // generic accessibility list, then to the app's "App info" page so they can tap
+        // "⋮ → Allow restricted settings" if Android 13+ has blocked the toggle.
+        val pkg = reactApplicationContext.packageName
+        val candidates = mutableListOf<Intent>()
+        if (OemSettingsModule.detectOem() == OemSettingsModule.OEM_XIAOMI) {
+            candidates += Intent("miui.intent.action.APP_PERM_EDITOR").apply {
+                setClassName(
+                    "com.miui.securitycenter",
+                    "com.miui.permcenter.permissions.PermissionsEditorActivity",
+                )
+                putExtra("extra_pkgname", pkg)
+            }
         }
+        candidates += Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        candidates += Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = android.net.Uri.parse("package:$pkg")
+        }
+
+        for (intent in candidates) {
+            try {
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                reactApplicationContext.startActivity(intent)
+                promise.resolve(null)
+                return
+            } catch (_: Exception) {
+                // Try the next candidate
+            }
+        }
+        promise.reject("E_APP_BLOCKER", "No accessibility settings activity found")
     }
 
     @ReactMethod
@@ -72,17 +94,31 @@ class AppBlockerModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun openOverlaySettings(promise: Promise) {
-        try {
-            val intent = Intent(
+        // Try the package-targeted intent first (lands directly on KidSafe's toggle on most
+        // OEMs). If that throws — some HyperOS / ColorOS builds have rejected it — fall back to
+        // the un-targeted "Display over other apps" list.
+        val pkg = reactApplicationContext.packageName
+        val candidates = listOf(
+            Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                android.net.Uri.parse("package:${reactApplicationContext.packageName}"),
-            )
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            reactApplicationContext.startActivity(intent)
-            promise.resolve(null)
-        } catch (e: Exception) {
-            promise.reject("E_APP_BLOCKER", e)
+                android.net.Uri.parse("package:$pkg"),
+            ),
+            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION),
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = android.net.Uri.parse("package:$pkg")
+            },
+        )
+        for (intent in candidates) {
+            try {
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                reactApplicationContext.startActivity(intent)
+                promise.resolve(null)
+                return
+            } catch (_: Exception) {
+                // Try next
+            }
         }
+        promise.reject("E_APP_BLOCKER", "No overlay settings activity found")
     }
 
     private fun isAccessibilityEnabled(context: Context): Boolean {

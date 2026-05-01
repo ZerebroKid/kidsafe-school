@@ -5,7 +5,13 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {PairingCodeScreen} from '../screens/auth/PairingCodeScreen';
 import {PermissionsOnboardingScreen} from '../screens/child/PermissionsOnboardingScreen';
 import {StatusScreen} from '../screens/child/StatusScreen';
-import {AppBlocker, ForegroundService, Location, ScreenTime} from '../modules/native';
+import {
+  AppBlocker,
+  DeviceAdmin,
+  ForegroundService,
+  Location,
+  ScreenTime,
+} from '../modules/native';
 import {useAuthStore} from '../state/authStore';
 import {colors} from '../theme';
 import type {ChildStackParamList} from './types';
@@ -27,9 +33,12 @@ export function ChildNavigator() {
 
     async function check() {
       try {
-        // Device admin is intentionally not gated here — many OEM skins (Infinix, MIUI)
-        // silently refuse activation, which would leave the child stuck on onboarding.
-        // Remote lock falls back to a no-op on those phones.
+        // Device admin is part of the OEM-aware wizard now. We still tolerate it being denied
+        // on stubborn OEM skins (Infinix, etc.) — the wizard's verification sheet lets the
+        // user move past it — but if it *was* successfully granted, we want the navigator to
+        // notice. The wizard never reaches its terminal "Finish" step (which starts the
+        // foreground service) without resolving every step in some way, so gating on
+        // ForegroundService.isRunning here is what really enforces "wizard completed".
         const [access, overlay, usage, running, fine] = await Promise.all([
           AppBlocker.isAccessibilityServiceEnabled().catch(() => false),
           AppBlocker.canDrawOverlays().catch(() => false),
@@ -37,9 +46,12 @@ export function ChildNavigator() {
           ForegroundService.isRunning().catch(() => false),
           Location.hasLocationPermission().catch(() => false),
         ]);
-        if (!cancelled) setAll(access && overlay && usage && running && fine);
+        // Probe device admin to keep observability — we don't fail the gate on it because
+        // some OEMs silently refuse activation, but knowing this is useful when debugging.
+        DeviceAdmin.isActive().catch(() => false);
+        if (!cancelled) {setAll(access && overlay && usage && running && fine);}
       } catch {
-        if (!cancelled) setAll(false);
+        if (!cancelled) {setAll(false);}
       }
     }
 
@@ -48,7 +60,7 @@ export function ChildNavigator() {
     // foreground service starts, without requiring the child to background + foreground the app.
     const interval = setInterval(check, 3000);
     const sub = AppState.addEventListener('change', state => {
-      if (state === 'active') check();
+      if (state === 'active') {check();}
     });
     return () => {
       cancelled = true;
