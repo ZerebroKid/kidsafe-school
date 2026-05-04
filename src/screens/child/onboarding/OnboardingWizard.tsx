@@ -13,7 +13,14 @@ import {RuntimePermissionStep} from './RuntimePermissionStep';
 import {stepsForOem} from './steps';
 import type {Step} from './types';
 
-const STORAGE_KEY = 'kidsafe.onboarding.lastCompletedIndex';
+/**
+ * Per-uid storage key. Using a per-uid key means:
+ *   - signing in as a different child (e.g. for testing) starts the wizard from step 0
+ *   - signing the same child back in resumes wherever they left off
+ *   - we never accidentally show step 0 to a user who already finished onboarding
+ */
+const storageKey = (uid: string | null | undefined) =>
+  `kidsafe.onboarding.${uid ?? 'anonymous'}.lastCompletedIndex`;
 
 /**
  * Wizard controller. Picks the OEM-specific step list, tracks the user's position, persists
@@ -23,6 +30,11 @@ const STORAGE_KEY = 'kidsafe.onboarding.lastCompletedIndex';
  * Auto-skip: if a step's `check()` returns true (e.g. the user has already granted the
  * permission from a previous attempt), the controller silently advances. This is what makes
  * the wizard feel snappy when the user reopens the app after granting half the permissions.
+ *
+ * NOTE: we do NOT clear AsyncStorage on `Finish`. If `ChildNavigator` doesn't immediately flip
+ * to Status (e.g. because a permission was lied through), the user lands back on this screen —
+ * we want them to see the FinalStep again (which will show what's missing) instead of being
+ * dropped at step 0.
  */
 export function OnboardingWizard() {
   // Optimistic OEM detection: start with whatever Platform.constants knows synchronously, then
@@ -42,7 +54,7 @@ export function OnboardingWizard() {
     (async () => {
       const [resolvedOem, savedIndexStr] = await Promise.all([
         detectOem().catch(() => oem),
-        AsyncStorage.getItem(STORAGE_KEY),
+        AsyncStorage.getItem(storageKey(childUid)),
       ]);
       if (cancelled) {return;}
       setOem(resolvedOem);
@@ -59,7 +71,7 @@ export function OnboardingWizard() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [childUid]);
 
   // -- Auto-skip already-granted steps when arriving at a new index ---------------------------
 
@@ -93,15 +105,18 @@ export function OnboardingWizard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepIndex, hydrated, steps]);
 
-  // -- Advance / skip helpers -----------------------------------------------------------------
+  // -- Advance / jump helpers -----------------------------------------------------------------
 
-  const persistIndex = useCallback(async (idx: number) => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, String(idx));
-    } catch {
-      // best-effort
-    }
-  }, []);
+  const persistIndex = useCallback(
+    async (idx: number) => {
+      try {
+        await AsyncStorage.setItem(storageKey(childUid), String(idx));
+      } catch {
+        // best-effort
+      }
+    },
+    [childUid],
+  );
 
   const advance = useCallback(() => {
     setStepIndex(prev => {
@@ -110,6 +125,20 @@ export function OnboardingWizard() {
       return next;
     });
   }, [steps.length, persistIndex]);
+
+  /**
+   * FinalStep uses this to jump back to a missing-permission step. Falls back to advancing if
+   * the id is unknown (e.g. an OEM-specific step that isn't in the current step list).
+   */
+  const jumpToStepId = useCallback(
+    (stepId: string) => {
+      const idx = steps.findIndex(s => s.id === stepId);
+      if (idx < 0) {return;}
+      setStepIndex(idx);
+      persistIndex(idx);
+    },
+    [steps, persistIndex],
+  );
 
   const skipPair = useCallback(
     (pairId: string) => {
@@ -198,16 +227,7 @@ export function OnboardingWizard() {
           totalSteps={totalSteps}
           stepIndex={stepIndex}
           childUid={childUid ?? ''}
-          onFinish={async () => {
-            // Wipe persistence so a re-onboard (after sign out / sign back in) starts fresh.
-            try {
-              await AsyncStorage.removeItem(STORAGE_KEY);
-            } catch {
-              // best-effort
-            }
-            // ChildNavigator watches `ForegroundService.isRunning` and flips to StatusScreen
-            // automatically — nothing else to do here.
-          }}
+          jumpToStep={jumpToStepId}
         />
       );
   }

@@ -46,10 +46,6 @@ export function detectOemFromPlatform(): Oem {
   return 'generic';
 }
 
-/**
- * Friendly label for showing in the UI ("Xiaomi", "Samsung", etc.). The wizard uses this in copy
- * like "Grant Xiaomi-specific permissions".
- */
 export function oemLabel(oem: Oem): string {
   switch (oem) {
     case 'xiaomi':

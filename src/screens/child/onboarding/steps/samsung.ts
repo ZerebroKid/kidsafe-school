@@ -4,6 +4,7 @@ import {
   accessibilityCheck,
   accessibilityDisclosureStep,
   activityStep,
+  batteryCheck,
   contactsStep,
   deviceAdminStep,
   finalStep,
@@ -88,13 +89,13 @@ export const samsungSteps: Step[] = [
     subtitle:
       "Samsung's Sleeping apps system kills background services. KidSafe needs an exemption.",
     bullets: [
-      {icon: '1', text: 'Tap "Go to settings"'},
-      {icon: '2', text: 'Tap "Battery"'},
-      {icon: '3', text: 'Choose "Unrestricted"'},
+      {icon: '1', text: 'Tap "Allow" on the system dialog'},
+      {icon: '2', text: 'If you see App info instead, tap "Battery" → "Unrestricted"'},
     ],
     ctaLabel: 'Go to settings',
     openSettings: () => OemSettings.openBatteryUnrestricted(),
-    check: async () => false,
+    check: batteryCheck,
+    optional: true,
   },
 
   deviceAdminStep,

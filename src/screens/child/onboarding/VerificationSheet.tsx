@@ -6,6 +6,16 @@ import {Illustration} from './Illustration';
 
 interface Props {
   visible: boolean;
+  /**
+   * Title shown at the top of the sheet. Defaults to a friendly "did you do it?" line. Steps
+   * that already double-checked (re-ran their `check()` after a delay) can pass a stronger
+   * message like "We still can't detect the change".
+   */
+  title?: string;
+  /** Optional secondary line. Useful for surfacing what to look for the next time. */
+  body?: string;
+  yesLabel?: string;
+  noLabel?: string;
   onYes: () => void;
   onNo: () => void;
 }
@@ -17,7 +27,15 @@ interface Props {
  * Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) — so we ask explicitly instead of forcing them
  * to redo the steps.
  */
-export function VerificationSheet({visible, onYes, onNo}: Props) {
+export function VerificationSheet({
+  visible,
+  title = 'Did you manage to set the permission?',
+  body,
+  yesLabel = 'Yes',
+  noLabel = 'No, try again',
+  onYes,
+  onNo,
+}: Props) {
   return (
     <Modal
       visible={visible}
@@ -27,7 +45,8 @@ export function VerificationSheet({visible, onYes, onNo}: Props) {
       <View style={styles.scrim}>
         <View style={styles.sheet}>
           <Illustration name="welcome" size={120} />
-          <Text style={styles.title}>Did you manage to set the permission?</Text>
+          <Text style={styles.title}>{title}</Text>
+          {body && <Text style={styles.body}>{body}</Text>}
           <View style={styles.row}>
             <Pressable
               onPress={onNo}
@@ -36,7 +55,7 @@ export function VerificationSheet({visible, onYes, onNo}: Props) {
                 styles.btnSecondary,
                 pressed && {opacity: 0.85},
               ]}>
-              <Text style={styles.btnSecondaryLabel}>No, try again</Text>
+              <Text style={styles.btnSecondaryLabel}>{noLabel}</Text>
             </Pressable>
             <Pressable
               onPress={onYes}
@@ -45,7 +64,7 @@ export function VerificationSheet({visible, onYes, onNo}: Props) {
                 styles.btnPrimary,
                 pressed && {opacity: 0.9},
               ]}>
-              <Text style={styles.btnPrimaryLabel}>Yes</Text>
+              <Text style={styles.btnPrimaryLabel}>{yesLabel}</Text>
             </Pressable>
           </View>
         </View>
@@ -73,6 +92,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     textAlign: 'center',
+  },
+  body: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: 'center',
+    paddingHorizontal: spacing.sm,
   },
   row: {
     flexDirection: 'row',

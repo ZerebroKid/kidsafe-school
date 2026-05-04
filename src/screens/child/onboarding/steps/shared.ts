@@ -1,6 +1,11 @@
 import {PermissionsAndroid, Platform} from 'react-native';
 
-import {AppBlocker, DeviceAdmin, ScreenTime} from '../../../../modules/native';
+import {
+  AppBlocker,
+  DeviceAdmin,
+  OemSettings,
+  ScreenTime,
+} from '../../../../modules/native';
 import type {Step} from '../types';
 
 /**
@@ -143,7 +148,7 @@ export const finalStep: Step = {
   ctaLabel: 'Finish',
 };
 
-// -- Permission checks reused by Accessibility / Usage / Overlay -------------
+// -- Permission checks reused by Accessibility / Usage / Overlay / Battery ---
 
 export const accessibilityCheck = () =>
   AppBlocker.isAccessibilityServiceEnabled().catch(() => false);
@@ -152,3 +157,11 @@ export const usageAccessCheck = () =>
   ScreenTime.hasUsageAccess().catch(() => false);
 
 export const overlayCheck = () => AppBlocker.canDrawOverlays().catch(() => false);
+
+/**
+ * Real read-back for battery optimization — backed by `PowerManager.isIgnoringBatteryOptimizations`
+ * via the `OemSettings` native module. Pre-Android-M and devices where the lookup throws return
+ * `true` so we don't get stuck (those phones don't enforce battery optimization on FG services).
+ */
+export const batteryCheck = () =>
+  OemSettings.isIgnoringBatteryOptimizations().catch(() => true);

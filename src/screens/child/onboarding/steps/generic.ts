@@ -4,6 +4,7 @@ import {
   accessibilityCheck,
   accessibilityDisclosureStep,
   activityStep,
+  batteryCheck,
   contactsStep,
   deviceAdminStep,
   finalStep,
@@ -91,15 +92,12 @@ export const genericSteps: Step[] = [
     subtitle:
       'Stops Android from killing KidSafe in the background, especially overnight.',
     bullets: [
-      {icon: '1', text: 'Tap "Go to settings"'},
-      {icon: '2', text: 'Tap "Allow" on the confirmation dialog'},
+      {icon: '1', text: 'Tap "Allow" on the confirmation dialog'},
     ],
     ctaLabel: 'Go to settings',
     openSettings: () => OemSettings.openBatteryUnrestricted(),
-    // The system grants this synchronously when the user taps "Allow" on the dialog. We don't
-    // have a clean read-back API on every Android version, so just trust the user — verification
-    // sheet covers them if they cancel.
-    check: async () => false,
+    check: batteryCheck,
+    optional: true,
   },
 
   deviceAdminStep,

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {AppState, StyleSheet, Text, View} from 'react-native';
+import {Alert, AppState, StyleSheet, Text, View} from 'react-native';
 
 import {colors, spacing} from '../../../theme';
 import {Illustration} from './Illustration';
@@ -72,12 +72,45 @@ export function IllustrationStep({
       returningFromAction.current = true;
       try {
         await step.onCtaAction();
+      } catch (e) {
+        // Some OEMs refuse certain activation intents (e.g. device admin on Pixel-flavoured
+        // Android Go) — surface that to the user rather than swallowing it silently.
+        returningFromAction.current = false;
+        Alert.alert(
+          'Could not open the system page',
+          (e as Error)?.message ||
+            'This feature might not be supported on your device. You can skip this step and continue.',
+          [
+            {text: 'Skip', onPress: onComplete},
+            {text: 'OK'},
+          ],
+        );
+        return;
       } finally {
         setBusy(false);
       }
       // When the step has both onCtaAction and a check, we wait for AppState to flip back to
       // active before advancing — otherwise we'd race past the system grant dialog.
       if (step.check) {return;}
+    }
+    onComplete();
+  }
+
+  async function handleVerifyYes() {
+    setShowVerify(false);
+    if (step.check) {
+      // Honest re-check after a delay, same logic as InstructionStep — caters for OEMs that
+      // flush the secure setting asynchronously.
+      await new Promise(r => setTimeout(r, 600));
+      try {
+        const ok = await step.check();
+        if (ok) {
+          onComplete();
+          return;
+        }
+      } catch {
+        // fall through
+      }
     }
     onComplete();
   }
@@ -95,10 +128,7 @@ export function IllustrationStep({
       </View>
       <VerificationSheet
         visible={showVerify}
-        onYes={() => {
-          setShowVerify(false);
-          onComplete();
-        }}
+        onYes={handleVerifyYes}
         onNo={() => {
           setShowVerify(false);
           handleCta();

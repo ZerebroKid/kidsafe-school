@@ -176,4 +176,11 @@ export const OemSettings = {
     (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).openBatteryUnrestricted(),
   openMiuiOtherPermissions: (): Promise<void> =>
     (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).openMiuiOtherPermissions(),
+  /**
+   * Reads `PowerManager.isIgnoringBatteryOptimizations(packageName)` so the wizard can
+   * auto-detect when the user grants the battery exemption — we no longer have to fall back to
+   * the "Did you do it?" verification sheet for this step.
+   */
+  isIgnoringBatteryOptimizations: (): Promise<boolean> =>
+    (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).isIgnoringBatteryOptimizations(),
 };

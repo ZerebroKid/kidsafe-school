@@ -17,6 +17,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
+    <!--
+      Battery: required so we can fire ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS directly at our
+      package. Without this permission Android silently rejects the intent on most OEMs, which is
+      what was causing the "tap Open Settings, nothing happens" bug on Redmi / Vivo phones.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <!-- Screen-time + App blocking -->
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"

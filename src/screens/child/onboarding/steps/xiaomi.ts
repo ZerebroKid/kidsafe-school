@@ -4,6 +4,7 @@ import {
   accessibilityCheck,
   accessibilityDisclosureStep,
   activityStep,
+  batteryCheck,
   contactsStep,
   deviceAdminStep,
   finalStep,
@@ -107,8 +108,10 @@ export const xiaomiSteps: Step[] = [
     ],
     ctaLabel: 'Go to settings',
     openSettings: () => OemSettings.openMiuiOtherPermissions(),
-    // No reliable read-back API for this MIUI-private permission. Verification sheet handles it.
+    // No public read-back API for MIUI's private permission table. Verification sheet decides.
     check: async () => false,
+    unverifiable: true,
+    optional: true,
   },
 
   {
@@ -126,6 +129,8 @@ export const xiaomiSteps: Step[] = [
     ctaLabel: 'Go to settings',
     openSettings: () => OemSettings.openAutostartSettings(),
     check: async () => false,
+    unverifiable: true,
+    optional: true,
   },
 
   {
@@ -142,7 +147,8 @@ export const xiaomiSteps: Step[] = [
     ],
     ctaLabel: 'Go to settings',
     openSettings: () => OemSettings.openBatteryUnrestricted(),
-    check: async () => false,
+    check: batteryCheck,
+    optional: true,
   },
 
   deviceAdminStep,

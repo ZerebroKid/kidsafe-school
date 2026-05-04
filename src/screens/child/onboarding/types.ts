@@ -48,6 +48,23 @@ export interface InstructionsStep extends StepBase {
   ctaLabel: string;
   openSettings: () => Promise<void>;
   check: () => Promise<boolean>;
+  /**
+   * `true` for steps with no public read-back API (e.g. MIUI "Display pop-up" toggle, OEM
+   * autostart). Tells the verification sheet that "Yes" can't be cross-checked, so we accept
+   * the user's word without flagging it as a skipped requirement on the Final step.
+   *
+   * Default `false` — unverified positives are recorded as "skipped" and surfaced on the
+   * Final step so the user has a chance to re-do the step before tapping Finish.
+   */
+  unverifiable?: boolean;
+  /**
+   * `true` for steps that are nice-to-have but won't block ChildNavigator from flipping to
+   * Status (e.g. battery optimization, autostart). The Final step still warns if these are
+   * missing but the user can proceed.
+   *
+   * Default `false` — the step is treated as required-for-Finish.
+   */
+  optional?: boolean;
 }
 
 export interface RuntimeStep extends StepBase {

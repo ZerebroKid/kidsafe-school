@@ -1,9 +1,11 @@
 package com.kidsafe.modules
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import com.facebook.react.bridge.Promise
@@ -97,30 +99,94 @@ class OemSettingsModule(reactContext: ReactApplicationContext) :
         finish(promise, ok, "openAutostartSettings")
     }
 
-    /** Battery optimization exemption — "Unrestricted" / "No restrictions". */
+    /**
+     * Battery optimization exemption — "Unrestricted" / "No restrictions".
+     *
+     * Strategy (in order): the per-app system dialog first because it is the only one that lands
+     * directly on KidSafe (and now actually works thanks to the manifest permission we added). If
+     * that's rejected we try the OEM-specific battery management activities. Last resort is the
+     * App Info page — Xiaomi HyperOS and Samsung One UI both expose a "Battery" section there
+     * that takes the user one tap from the right toggle, which is the Kids360-style experience
+     * we're aiming for.
+     */
     @ReactMethod
     fun openBatteryUnrestricted(promise: Promise) {
         val candidates = mutableListOf<Intent>()
+        // System dialog first — works on every OEM as long as the manifest permission is granted.
+        candidates += ignoreBatteryOptimizationIntent()
+
         when (detectOem()) {
             OEM_XIAOMI -> {
+                // MIUI/HyperOS Power saver list. The exact activity name has churned across MIUI
+                // versions; we list both the modern and legacy paths.
                 candidates += componentIntent(
                     "com.miui.powerkeeper",
                     "com.miui.powerkeeper.ui.HiddenAppsConfigActivity",
                 )
+                candidates += componentIntent(
+                    "com.miui.powerkeeper",
+                    "com.miui.powerkeeper.ui.PowerSaveModeActivity",
+                )
             }
             OEM_SAMSUNG -> {
+                // Device Care → Battery → App power management on One UI.
                 candidates += componentIntent(
                     "com.samsung.android.lool",
                     "com.samsung.android.sm.ui.battery.BatteryActivity",
                 )
             }
-            else -> { /* fall through to generic */ }
+            OEM_OPPO -> {
+                candidates += componentIntent(
+                    "com.coloros.oppoguardelf",
+                    "com.coloros.powermanager.fuelgaue.PowerUsageModelActivity",
+                )
+                candidates += componentIntent(
+                    "com.coloros.safecenter",
+                    "com.coloros.privacypermissionsentry.PermissionTopActivity",
+                )
+            }
+            OEM_VIVO -> {
+                // Funtouch OS — high-power consumption / background app refresh page.
+                candidates += componentIntent(
+                    "com.iqoo.secure",
+                    "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager",
+                )
+                candidates += componentIntent(
+                    "com.vivo.abe",
+                    "com.vivo.applicationbehaviorengine.ui.ExcessivePowerManagerActivity",
+                )
+            }
+            OEM_HUAWEI -> {
+                candidates += componentIntent(
+                    "com.huawei.systemmanager",
+                    "com.huawei.systemmanager.optimize.process.ProtectActivity",
+                )
+            }
+            else -> { /* generic — system dialog above is enough */ }
         }
-        candidates += ignoreBatteryOptimizationIntent()
+        // Generic system battery list (no per-app target).
         candidates += Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+        // Final fallback — always succeeds. Lands on KidSafe → Battery → Unrestricted is one tap
+        // away on every modern OEM.
         candidates += appDetailsIntent()
         val ok = tryStart(candidates)
         finish(promise, ok, "openBatteryUnrestricted")
+    }
+
+    /** Reads the current battery-optimization status for KidSafe. */
+    @ReactMethod
+    fun isIgnoringBatteryOptimizations(promise: Promise) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            promise.resolve(true)
+            return
+        }
+        try {
+            val pm = reactApplicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+            promise.resolve(pm.isIgnoringBatteryOptimizations(reactApplicationContext.packageName))
+        } catch (e: Exception) {
+            Log.w(TAG, "isIgnoringBatteryOptimizations failed", e)
+            promise.resolve(false)
+        }
     }
 
     /**
