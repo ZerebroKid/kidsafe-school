@@ -54,6 +54,11 @@ export interface Schedule {
   allowedPackages: string[];
 }
 
+export interface PinResetRequest {
+  /** Unix-ms when the parent issued the reset. Mostly informational; presence is what matters. */
+  requestedAt: number;
+}
+
 export interface ChildDoc {
   status: 'online' | 'offline';
   lastSeenAt: FirebaseFirestoreTypes.FieldValue | number;
@@ -63,6 +68,12 @@ export interface ChildDoc {
   geofence?: Geofence;
   schedule?: Schedule;
   deviceAdminActive?: boolean;
+  /**
+   * Set by the parent when they want to clear the on-device PIN (e.g. parent forgot it). The
+   * child sync engine clears the local PIN on next foreground sync and immediately deletes the
+   * field so the request is one-shot.
+   */
+  pinResetRequest?: PinResetRequest;
   lastGeofenceEvent?: {
     transition: 'enter' | 'exit' | 'dwell';
     lat: number;

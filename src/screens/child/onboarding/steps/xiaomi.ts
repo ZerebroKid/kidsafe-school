@@ -12,6 +12,7 @@ import {
   locationForegroundStep,
   notificationsStep,
   overlayCheck,
+  pinSetupStep,
   usageAccessCheck,
   welcomeStep,
 } from './shared';
@@ -25,6 +26,7 @@ import {
  */
 export const xiaomiSteps: Step[] = [
   welcomeStep,
+  pinSetupStep,
   notificationsStep,
   activityStep,
   locationForegroundStep,

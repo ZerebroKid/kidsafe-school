@@ -130,6 +130,22 @@ export async function setSchedule(childUid: string, s: Schedule) {
   await paths.child(childUid).set({schedule: s}, {merge: true});
 }
 
+/**
+ * Parent asks the child device to clear its on-device PIN. The child sync engine watches for
+ * this field and calls `Pin.clearPin()` then deletes the field, so the request is one-shot.
+ *
+ * The child will be re-prompted for a new PIN on next foreground (the onboarding wizard's
+ * pinSetupStep `check` returns false when no PIN is stored).
+ */
+export async function requestPinReset(childUid: string) {
+  await paths.child(childUid).set(
+    {
+      pinResetRequest: {requestedAt: Date.now()},
+    },
+    {merge: true},
+  );
+}
+
 // --- Child-side helpers ------------------------------------------------------
 
 export async function writeChildStatus(

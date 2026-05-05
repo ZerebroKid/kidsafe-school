@@ -10,6 +10,7 @@ const {
   ForegroundService: ForegroundServiceNative,
   Schedule: ScheduleNative,
   OemSettings: OemSettingsNative,
+  Pin: PinNative,
 } = NativeModules;
 
 function assert(mod: unknown, name: string) {
@@ -183,4 +184,23 @@ export const OemSettings = {
    */
   isIgnoringBatteryOptimizations: (): Promise<boolean> =>
     (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).isIgnoringBatteryOptimizations(),
+};
+
+// -------- Pin (uninstall protection PIN) --------
+//
+// The PIN is set on the child device during onboarding (parent supposed to be physically present)
+// and stored salted-and-hashed in SharedPreferences. JS only ever sees boolean / numeric results.
+
+export const Pin = {
+  setPin: (pin: string): Promise<void> =>
+    (assert(PinNative, 'Pin') as typeof PinNative).setPin(pin),
+  hasPin: (): Promise<boolean> =>
+    (assert(PinNative, 'Pin') as typeof PinNative).hasPin(),
+  verifyPin: (pin: string): Promise<boolean> =>
+    (assert(PinNative, 'Pin') as typeof PinNative).verifyPin(pin),
+  clearPin: (): Promise<void> =>
+    (assert(PinNative, 'Pin') as typeof PinNative).clearPin(),
+  /** Milliseconds remaining in the current lockout (0 if entry is allowed). */
+  lockoutRemainingMs: (): Promise<number> =>
+    (assert(PinNative, 'Pin') as typeof PinNative).lockoutRemainingMs(),
 };

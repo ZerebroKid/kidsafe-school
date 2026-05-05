@@ -8,6 +8,7 @@ import {useAuthStore} from '../../../state/authStore';
 import {FinalStep} from './FinalStep';
 import {IllustrationStep} from './IllustrationStep';
 import {InstructionStep} from './InstructionStep';
+import {PinSetupStep} from './PinSetupStep';
 import {ProminentDisclosureStep} from './ProminentDisclosureStep';
 import {RuntimePermissionStep} from './RuntimePermissionStep';
 import {stepsForOem} from './steps';
@@ -88,7 +89,7 @@ export function OnboardingWizard() {
       const check =
         step.kind === 'illustration'
           ? step.check
-          : step.kind === 'instructions' || step.kind === 'runtime'
+          : step.kind === 'instructions' || step.kind === 'runtime' || step.kind === 'pin'
             ? step.check
             : undefined;
       if (!check) {return;}
@@ -218,6 +219,16 @@ export function OnboardingWizard() {
               skipPair(step.pairsWithStepId);
             }
           }}
+        />
+      );
+    case 'pin':
+      return (
+        <PinSetupStep
+          step={step}
+          totalSteps={totalSteps}
+          stepIndex={stepIndex}
+          timeRemaining={timeRemaining}
+          onComplete={advance}
         />
       );
     case 'final':

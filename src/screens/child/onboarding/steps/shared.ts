@@ -4,6 +4,7 @@ import {
   AppBlocker,
   DeviceAdmin,
   OemSettings,
+  Pin,
   ScreenTime,
 } from '../../../../modules/native';
 import type {Step} from '../types';
@@ -119,6 +120,25 @@ export const accessibilityDisclosureStep: Step = {
   ],
   agreeLabel: 'Agree and continue',
   pairsWithStepId: 'accessibility',
+};
+
+// -- Parent PIN (uninstall protection) ---------------------------------------
+
+/**
+ * Set on the child device — parent must be physically present. The PIN is required later if
+ * anyone tries to disable accessibility, uninstall KidSafe, or change OEM autostart settings.
+ *
+ * `check` returning true (PIN already set) makes the wizard auto-skip this step on resume so
+ * a re-onboard after relaunch doesn't ask the parent to set the PIN again.
+ */
+export const pinSetupStep: Step = {
+  kind: 'pin',
+  id: 'pin',
+  illustration: 'shield',
+  title: 'Set a parent PIN',
+  subtitle:
+    'Pick a 4-6 digit PIN. KidSafe will ask for it if anyone tries to uninstall the app or turn off the accessibility service.',
+  check: () => Pin.hasPin().catch(() => false),
 };
 
 // -- Device admin (uninstall protection) -------------------------------------

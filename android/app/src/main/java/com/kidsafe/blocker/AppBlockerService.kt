@@ -5,6 +5,8 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import com.kidsafe.security.PinGateActivity
+import com.kidsafe.security.TamperWatcher
 import com.kidsafe.store.KidSafeStore
 
 /**
@@ -47,10 +49,35 @@ class AppBlockerService : AccessibilityService() {
         val pkg = event.packageName?.toString() ?: return
         if (pkg == packageName) return // ignore our own overlay
 
+        val ctx = applicationContext
+
+        // 1. Tamper-protection gate. If a PIN is set and the user opened a KidSafe-targeted
+        //    Settings page (uninstall, device admin disable, accessibility, OEM autostart, ...),
+        //    we pop PinGateActivity over the top and force a parent PIN entry. Done first so it
+        //    runs even when the schedule isn't active and even when no apps are blocked.
+        if (KidSafeStore.hasPin(ctx)) {
+            try {
+                val kind = TamperWatcher.shouldGate(
+                    event,
+                    rootInActiveWindow,
+                    packageName,
+                    getString(com.kidsafe.R.string.app_name),
+                )
+                if (kind != null) {
+                    Log.i(TAG, "Tamper screen detected (kind=$kind, pkg=$pkg) — launching PinGate")
+                    startActivity(PinGateActivity.intent(ctx, kind))
+                    return
+                }
+            } catch (e: Exception) {
+                // Accessibility tree access can race during window transitions — never break the
+                // whole service over it.
+                Log.w(TAG, "TamperWatcher failed (non-fatal)", e)
+            }
+        }
+
         // System launcher / settings are never blocked — always allow them so the user isn't stuck
         if (pkg.startsWith("com.android.launcher") || pkg == "com.android.systemui") return
 
-        val ctx = applicationContext
         val scheduleActive = KidSafeStore.isScheduleActiveNow(ctx)
         val isBlocked = if (scheduleActive) {
             // Inside the parent's schedule window: deny everything except the allowlist.

@@ -18,6 +18,7 @@ import {
   Geofence,
   InstalledApps,
   Location,
+  Pin,
   Schedule,
   ScreenTime,
 } from '../modules/native';
@@ -46,7 +47,7 @@ export async function startChildSyncEngine(childUid: string) {
   const docUnsub = paths.child(childUid).onSnapshot(async snap => {
     if (!snap.exists) return;
     const data = snap.data() as ChildDoc;
-    await reactToChildDoc(data);
+    await reactToChildDoc(childUid, data);
   });
   unsubs.push(docUnsub);
 
@@ -126,7 +127,7 @@ export function stopChildSyncEngine() {
 
 // -- Reactive handlers --------------------------------------------------------
 
-async function reactToChildDoc(doc: ChildDoc) {
+async function reactToChildDoc(childUid: string, doc: ChildDoc) {
   // Remote lock
   if (doc.lockState?.locked) {
     try {
@@ -178,6 +179,22 @@ async function reactToChildDoc(doc: ChildDoc) {
     }
   } catch (e) {
     console.warn('Schedule.setSchedule failed', e);
+  }
+
+  // Parent-issued PIN reset. One-shot: clear locally then delete the field so we don't loop.
+  if (doc.pinResetRequest) {
+    try {
+      await Pin.clearPin();
+    } catch (e) {
+      console.warn('Pin.clearPin failed', e);
+    }
+    try {
+      await paths.child(childUid).update({
+        pinResetRequest: firebase.firestore.FieldValue.delete(),
+      });
+    } catch (e) {
+      console.warn('clearing pinResetRequest failed', e);
+    }
   }
 }
 

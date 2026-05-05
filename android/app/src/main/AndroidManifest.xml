@@ -77,6 +77,16 @@
             android:taskAffinity=""
             android:theme="@style/AppTheme" />
 
+        <!-- Parent PIN gate shown when the child opens a tamper-relevant Settings screen -->
+        <activity
+            android:name=".security.PinGateActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:showOnLockScreen="true"
+            android:theme="@style/AppTheme" />
+
         <!-- Keeps monitoring alive while child app runs -->
         <service
             android:name=".services.KidSafeForegroundService"

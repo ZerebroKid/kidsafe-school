@@ -10,6 +10,7 @@ import type {IllustrationName} from './Illustration';
  *   - `instructions` — numbered "1. Tap X, 2. Tap Y" with a "Go to settings" deep link.
  *   - `runtime`      — single-tap PermissionsAndroid request.
  *   - `disclosure`   — Play Store-mandated prominent disclosure (paired with the next step).
+ *   - `pin`          — parent sets a 4-6 digit PIN that gates uninstall / device-admin / accessibility tamper screens.
  *   - `final`        — last "All set!" screen with the optional blocking test.
  */
 export type Step =
@@ -17,6 +18,7 @@ export type Step =
   | InstructionsStep
   | RuntimeStep
   | DisclosureStep
+  | PinStep
   | FinalStep;
 
 /** Required for every step so the wizard can persist progress and skip it once granted. */
@@ -89,6 +91,15 @@ export interface DisclosureStep extends StepBase {
   agreeLabel: string;
   /** id of the step paired with this disclosure (skipped together if user taps "Skip"). */
   pairsWithStepId: string;
+}
+
+export interface PinStep extends StepBase {
+  kind: 'pin';
+  title: string;
+  subtitle: string;
+  illustration: IllustrationName;
+  /** Returns true if a PIN is already set on this device — used for auto-skip on resume. */
+  check: () => Promise<boolean>;
 }
 
 export interface FinalStep extends StepBase {

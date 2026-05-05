@@ -21,4 +21,15 @@
     <string name="blocked_title">This app is blocked</string>
     <string name="blocked_subtitle">Your parent has blocked this app with KidSafe.</string>
     <string name="blocked_button">Go back</string>
+
+    <!-- PIN gate (uninstall protection) -->
+    <string name="pin_gate_title">Parent PIN required to %1$s</string>
+    <string name="pin_gate_subtitle">Enter the parent PIN to continue, or go back home.</string>
+    <string name="pin_gate_hint">PIN</string>
+    <string name="pin_gate_submit">Unlock</string>
+    <string name="pin_gate_cancel">Cancel and go home</string>
+    <string name="pin_gate_branding">Managed by KidSafe</string>
+    <string name="pin_gate_wrong">Wrong PIN. Try again.</string>
+    <string name="pin_gate_too_short">PIN must be at least 4 digits.</string>
+    <string name="pin_gate_locked_out">Too many wrong attempts. Try again in %1$d s.</string>
 </resources>
