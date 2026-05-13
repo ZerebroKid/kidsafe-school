@@ -3,6 +3,8 @@ package com.kidsafe.blocker
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.kidsafe.security.PinGateActivity
@@ -56,22 +58,21 @@ class AppBlockerService : AccessibilityService() {
         //    we pop PinGateActivity over the top and force a parent PIN entry. Done first so it
         //    runs even when the schedule isn't active and even when no apps are blocked.
         if (KidSafeStore.hasPin(ctx)) {
-            try {
-                val kind = TamperWatcher.shouldGate(
-                    event,
-                    rootInActiveWindow,
-                    packageName,
-                    getString(com.kidsafe.R.string.app_name),
-                )
-                if (kind != null) {
-                    Log.i(TAG, "Tamper screen detected (kind=$kind, pkg=$pkg) — launching PinGate")
-                    startActivity(PinGateActivity.intent(ctx, kind))
-                    return
+            // Suppression layer 1: the parent's onboarding wizard explicitly armed a supervision
+            // window. They are intentionally walking through Settings — don't gate them.
+            if (KidSafeStore.isUnderSupervision(ctx)) {
+                // Skip tamper checks entirely; fall through to normal app-blocking logic.
+            } else {
+                val cls = event.className?.toString()
+                // Suppression layer 2: PinGateActivity just cleared this exact window. The
+                // Settings activity is about to resume and re-fire TYPE_WINDOW_STATE_CHANGED;
+                // re-launching the gate would create the loop the user reported.
+                if (KidSafeStore.isGateBypassed(ctx, pkg, cls)) {
+                    // Bypass active — fall through to normal blocking logic without re-gating.
+                } else {
+                    val handled = tryTamperGate(event, pkg, cls, retry = true)
+                    if (handled) return
                 }
-            } catch (e: Exception) {
-                // Accessibility tree access can race during window transitions — never break the
-                // whole service over it.
-                Log.w(TAG, "TamperWatcher failed (non-fatal)", e)
             }
         }
 
@@ -112,7 +113,95 @@ class AppBlockerService : AccessibilityService() {
 
     override fun onInterrupt() { /* no-op */ }
 
+    /**
+     * Runs [TamperWatcher] against the current accessibility tree and, if it matches, launches
+     * the PIN gate. Returns true when the gate fired (caller should `return` to skip the
+     * normal app-blocking logic for this event).
+     *
+     * If `rootInActiveWindow` is null on the very first `TYPE_WINDOW_STATE_CHANGED` (a known
+     * race — Android builds the tree lazily), and [retry] is true, we re-post ourselves on the
+     * main thread after a short delay so we can read the populated tree on the second pass. We
+     * always pass an [eventFallbackText] derived from `event.text` + `event.contentDescription`
+     * so detection can still match by app-label mention even when the tree is unavailable.
+     */
+    private fun tryTamperGate(
+        event: AccessibilityEvent,
+        pkg: String,
+        cls: String?,
+        retry: Boolean,
+    ): Boolean {
+        val ctx = applicationContext
+        return try {
+            val root = rootInActiveWindow
+            val fallback = eventFallbackText(event)
+            val kind = TamperWatcher.shouldGate(
+                event,
+                root,
+                packageName,
+                getString(com.kidsafe.R.string.app_name),
+                fallback,
+            )
+            if (kind != null) {
+                Log.i(TAG, "Tamper screen detected (kind=$kind, pkg=$pkg, cls=$cls) — launching PinGate")
+                startActivity(PinGateActivity.intent(ctx, kind, pkg, cls))
+                true
+            } else if (root == null && retry && shouldRetry(pkg, fallback)) {
+                // Tree wasn't ready yet but the event looks suspicious. Try once more after a
+                // short delay; by then the system has usually populated the tree. The retry is
+                // fire-and-forget — if it matches it launches the gate, otherwise it no-ops.
+                mainHandler.postDelayed({
+                    if (KidSafeStore.isUnderSupervision(ctx)) return@postDelayed
+                    if (KidSafeStore.isGateBypassed(ctx, pkg, cls)) return@postDelayed
+                    tryTamperGate(event, pkg, cls, retry = false)
+                }, RETRY_DELAY_MS)
+                false
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            // Accessibility tree access can race during window transitions — never break the
+            // whole service over it.
+            Log.w(TAG, "TamperWatcher failed (non-fatal)", e)
+            false
+        }
+    }
+
+    /**
+     * Decides whether a null-root event is worth retrying. We retry when either the package
+     * looks like one of our suspect set OR the event's own text already mentions our label —
+     * both cheap to check and avoid retrying for every random window transition.
+     */
+    private fun shouldRetry(pkg: String, fallback: String): Boolean {
+        val ourLabel = getString(com.kidsafe.R.string.app_name)
+        if (fallback.contains(ourLabel, ignoreCase = true)) return true
+        return pkg == "com.android.settings" ||
+            pkg == "com.miui.securitycenter" ||
+            pkg == "com.miui.powerkeeper" ||
+            pkg == "com.android.packageinstaller" ||
+            pkg == "com.google.android.packageinstaller" ||
+            pkg.endsWith(".packageinstaller")
+    }
+
+    /**
+     * Concatenates the event's `text` list and `contentDescription`. Some Android builds
+     * populate these synchronously even when the accessibility tree itself isn't ready yet,
+     * giving us a last-chance signal to recognise a tamper screen.
+     */
+    private fun eventFallbackText(event: AccessibilityEvent): String {
+        val parts = mutableListOf<String>()
+        try {
+            event.text?.forEach { it?.toString()?.let(parts::add) }
+        } catch (_: Exception) { /* tree may be detached; ignore */ }
+        try {
+            event.contentDescription?.toString()?.let(parts::add)
+        } catch (_: Exception) { /* ignore */ }
+        return parts.joinToString(" ")
+    }
+
+    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
+
     companion object {
         private const val TAG = "AppBlockerService"
+        private const val RETRY_DELAY_MS = 150L
     }
 }

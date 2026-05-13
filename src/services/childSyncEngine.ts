@@ -8,7 +8,6 @@ import {
   paths,
   writeAppEntry,
   writeChildStatus,
-  writeContact,
   writeGeofenceEvent,
   writeLocation,
 } from '../firebase/firestore';
@@ -225,14 +224,21 @@ async function syncContacts(childUid: string) {
   );
   if (!granted) return;
   const all = await Contacts.getAll();
+  const batch = firestore().batch();
+  let writes = 0;
   for (const c of all.slice(0, 500)) {
     const phone = c.phoneNumbers[0]?.number;
     if (!phone) continue;
-    await writeContact(childUid, {
+    const ref = paths.contacts(childUid).doc(c.recordID);
+    batch.set(ref, {
       id: c.recordID,
       name: `${c.givenName || ''} ${c.familyName || ''}`.trim() || phone,
       phone,
     });
+    writes++;
+  }
+  if (writes > 0) {
+    await batch.commit();
   }
 }
 

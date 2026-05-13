@@ -43,6 +43,8 @@ class PinGateActivity : AppCompatActivity() {
     private var lockoutTimer: CountDownTimer? = null
     private var tamperKindName: String = "unknown"
     private var tamperKindLabel: String = "settings change"
+    private var tamperPkg: String? = null
+    private var tamperClass: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +59,8 @@ class PinGateActivity : AppCompatActivity() {
 
         tamperKindName = intent.getStringExtra(EXTRA_KIND_NAME) ?: tamperKindName
         tamperKindLabel = intent.getStringExtra(EXTRA_KIND_LABEL) ?: tamperKindLabel
+        tamperPkg = intent.getStringExtra(EXTRA_TAMPER_PKG)
+        tamperClass = intent.getStringExtra(EXTRA_TAMPER_CLASS)
 
         titleText = findViewById(R.id.pin_title)
         pinInput = findViewById(R.id.pin_input)
@@ -109,8 +113,11 @@ class PinGateActivity : AppCompatActivity() {
         logTamperAttempt(success = ok)
 
         if (ok) {
-            // Allow the child through. The Settings page is still in the back stack — they
-            // continue with whatever they were doing (e.g. legitimately changing device settings).
+            // Tag the underlying window with a 60s bypass so AppBlockerService doesn't immediately
+            // re-launch us when the Settings activity resumes (TYPE_WINDOW_STATE_CHANGED fires
+            // again as we finish). The bypass is keyed on (pkg, class) so unrelated tamper screens
+            // still gate normally.
+            KidSafeStore.setGateBypass(ctx, tamperPkg, tamperClass, BYPASS_AFTER_SUCCESS_MS)
             finish()
         } else {
             pinInput.text.clear()
@@ -175,12 +182,36 @@ class PinGateActivity : AppCompatActivity() {
         // important for parent visibility — the child may have realised they couldn't pass and
         // backed out, but we still want a record.
         logTamperAttempt(success = false)
+        // For sensitive kinds (accessibility / overlay / device admin / app info / package
+        // installer uninstall) we deliberately do NOT set a bypass — the gate must re-fire the
+        // moment the child re-enters the same Settings page so they cannot complete the tamper.
+        // For lower-stakes kinds (battery, autostart) a short bypass keeps the dismiss UX from
+        // looping when the user legitimately backs out.
+        if (!isSensitiveKind(tamperKindName)) {
+            KidSafeStore.setGateBypass(
+                applicationContext,
+                tamperPkg,
+                tamperClass,
+                BYPASS_AFTER_CANCEL_MS,
+            )
+        }
         val home = Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_HOME)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         startActivity(home)
         finish()
+    }
+
+    /**
+     * Returns true for tamper kinds where the child must NOT be allowed any grace period after
+     * cancelling the PIN gate — i.e. anywhere the tamper would defeat KidSafe's protection if
+     * completed (uninstall, accessibility, overlay, device admin). Kept in sync with the
+     * `telemetryName` values on [TamperWatcher.TamperKind].
+     */
+    private fun isSensitiveKind(name: String): Boolean = when (name) {
+        "accessibility", "overlay", "device_admin", "app_info" -> true
+        else -> false
     }
 
     private fun logTamperAttempt(success: Boolean) {
@@ -209,8 +240,18 @@ class PinGateActivity : AppCompatActivity() {
     companion object {
         private const val EXTRA_KIND_NAME = "extra_tamper_kind_name"
         private const val EXTRA_KIND_LABEL = "extra_tamper_kind_label"
+        private const val EXTRA_TAMPER_PKG = "extra_tamper_pkg"
+        private const val EXTRA_TAMPER_CLASS = "extra_tamper_class"
 
-        fun intent(context: Context, kind: TamperWatcher.TamperKind): Intent =
+        private const val BYPASS_AFTER_SUCCESS_MS = 60_000L
+        private const val BYPASS_AFTER_CANCEL_MS = 5_000L
+
+        fun intent(
+            context: Context,
+            kind: TamperWatcher.TamperKind,
+            pkg: String? = null,
+            cls: String? = null,
+        ): Intent =
             Intent(context, PinGateActivity::class.java).apply {
                 addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -219,6 +260,8 @@ class PinGateActivity : AppCompatActivity() {
                 )
                 putExtra(EXTRA_KIND_NAME, kind.telemetryName)
                 putExtra(EXTRA_KIND_LABEL, kind.displayLabel)
+                putExtra(EXTRA_TAMPER_PKG, pkg)
+                putExtra(EXTRA_TAMPER_CLASS, cls)
             }
     }
 }

@@ -43,6 +43,11 @@ object KidSafeStore {
     const val PARENT_PIN_FAIL_COUNT = "parent_pin_fail_count"
     const val PARENT_PIN_LOCKED_UNTIL = "parent_pin_locked_until" // millis epoch
 
+    // -- Gate bypass + supervision (anti-loop / onboarding) ----------------
+    const val GATE_BYPASS_KEY = "gate_bypass_key"        // "<pkg>|<class>" the gate just cleared
+    const val GATE_BYPASS_UNTIL = "gate_bypass_until"    // millis epoch when the bypass expires
+    const val SUPERVISION_UNTIL = "supervision_until"    // millis epoch the parent's wizard owns
+
     private fun prefs(context: Context): SharedPreferences =
         context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
@@ -256,5 +261,62 @@ object KidSafeStore {
         var diff = 0
         for (i in a.indices) diff = diff or (a[i].code xor b[i].code)
         return diff == 0
+    }
+
+    // -- Gate bypass --------------------------------------------------------
+    //
+    // After the user enters the correct PIN, we don't want `AppBlockerService` to immediately
+    // re-launch `PinGateActivity` when the underlying Settings window resumes (which would fire
+    // another `TYPE_WINDOW_STATE_CHANGED`). We tag a short bypass keyed on the *exact* window
+    // (pkg|class) so unrelated tamper screens still get gated.
+
+    fun setGateBypass(context: Context, pkg: String?, cls: String?, durationMs: Long) {
+        val key = bypassKey(pkg, cls)
+        prefs(context).edit()
+            .putString(GATE_BYPASS_KEY, key)
+            .putLong(GATE_BYPASS_UNTIL, System.currentTimeMillis() + durationMs)
+            .apply()
+    }
+
+    fun isGateBypassed(context: Context, pkg: String?, cls: String?): Boolean {
+        val p = prefs(context)
+        val until = p.getLong(GATE_BYPASS_UNTIL, 0L)
+        if (until <= System.currentTimeMillis()) return false
+        val storedKey = p.getString(GATE_BYPASS_KEY, null) ?: return false
+        val nowKey = bypassKey(pkg, cls)
+        // Match by exact window OR by package alone — Settings sometimes routes the same screen
+        // through a different inner activity (e.g. `SubSettings`) on resume.
+        return storedKey == nowKey || (pkg != null && storedKey.startsWith("$pkg|"))
+    }
+
+    fun clearGateBypass(context: Context) {
+        prefs(context).edit()
+            .remove(GATE_BYPASS_KEY)
+            .remove(GATE_BYPASS_UNTIL)
+            .apply()
+    }
+
+    private fun bypassKey(pkg: String?, cls: String?): String =
+        "${pkg ?: ""}|${cls ?: ""}"
+
+    // -- Supervision window -------------------------------------------------
+    //
+    // When the parent is actively running the onboarding wizard, they are intentionally opening
+    // Settings pages that would otherwise be considered "tamper". The wizard arms a supervision
+    // window (default 3 min, auto-expiring) so the gate stops firing during setup. `FinalStep`
+    // disarms it immediately, but the auto-expiry guarantees protection comes back even if the
+    // parent abandons mid-onboarding.
+
+    fun setSupervisionUntil(context: Context, untilMillis: Long) {
+        prefs(context).edit().putLong(SUPERVISION_UNTIL, untilMillis).apply()
+    }
+
+    fun isUnderSupervision(context: Context): Boolean {
+        val until = prefs(context).getLong(SUPERVISION_UNTIL, 0L)
+        return until > System.currentTimeMillis()
+    }
+
+    fun clearSupervision(context: Context) {
+        prefs(context).edit().remove(SUPERVISION_UNTIL).apply()
     }
 }

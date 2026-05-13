@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Alert, AppState, StyleSheet, Text, View} from 'react-native';
 
-import {OemSettings} from '../../../modules/native';
+import {OemSettings, Supervision} from '../../../modules/native';
 import {colors, radius, spacing} from '../../../theme';
 import {Illustration} from './Illustration';
 import {VerificationSheet} from './VerificationSheet';
@@ -81,6 +81,15 @@ export function InstructionStep({
   async function handleOpen() {
     setOpening(true);
     try {
+      // The wizard is intentionally about to open a Settings page that the tamper-protection
+      // layer would otherwise treat as a "child trying to disable KidSafe" attempt. Arm
+      // supervision for 3 minutes so AppBlockerService suppresses the PIN gate while the user
+      // walks through the toggle. Auto-expires on its own; FinalStep also disarms explicitly.
+      try {
+        await Supervision.arm(3 * 60_000);
+      } catch {
+        // Best-effort. Older builds without the Supervision module shouldn't break onboarding.
+      }
       // Optimistically arm the AppState listener — if openSettings throws below we'll disarm it
       // again so the user doesn't get a phantom verification sheet on the next foreground.
       returningFromSettings.current = true;

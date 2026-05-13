@@ -50,34 +50,31 @@ class ScreenTimeModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun openUsageAccessSettings(promise: Promise) {
-        // OEM-first / generic-fallback / app-details-final, same pattern as
-        // AppBlockerModule.openAccessibilitySettings. On Xiaomi the MIUI permission editor lands
-        // directly on KidSafe's permission page; the generic intent dumps the user at a long
-        // alphabetised list where they have to scroll.
+        // We deliberately do NOT use MIUI's `miui.intent.action.APP_PERM_EDITOR` here — it
+        // opens the per-app permission hub, not the Usage access list. The AOSP intent works
+        // on MIUI/HyperOS; users have to scroll to find KidSafe (the bullets explain that).
         val pkg = reactApplicationContext.packageName
-        val candidates = mutableListOf<Intent>()
-        if (OemSettingsModule.detectOem() == OemSettingsModule.OEM_XIAOMI) {
-            candidates += Intent("miui.intent.action.APP_PERM_EDITOR").apply {
-                setClassName(
-                    "com.miui.securitycenter",
-                    "com.miui.permcenter.permissions.PermissionsEditorActivity",
-                )
-                putExtra("extra_pkgname", pkg)
-            }
-        }
-        candidates += Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-        candidates += Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            data = android.net.Uri.parse("package:$pkg")
-        }
-
+        val candidates = listOf(
+            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS),
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = android.net.Uri.parse("package:$pkg")
+            },
+        )
+        val pm = reactApplicationContext.packageManager
         for (intent in candidates) {
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            val resolves = try {
+                intent.resolveActivity(pm) != null
+            } catch (_: Exception) {
+                false
+            }
+            if (!resolves) continue
             try {
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 reactApplicationContext.startActivity(intent)
                 promise.resolve(null)
                 return
             } catch (_: Exception) {
-                // Try the next candidate
+                // Try next
             }
         }
         promise.reject("E_SCREENTIME", "No usage-access settings activity found")

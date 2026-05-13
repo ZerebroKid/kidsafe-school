@@ -43,11 +43,14 @@ export const xiaomiSteps: Step[] = [
       'Required for app blocking. KidSafe only reads the package name of apps you open — never their content.',
     bullets: [
       {icon: '1', text: 'Tap "Go to settings" below'},
-      {icon: '2', text: 'Tap "Installed services" or "Downloaded apps"'},
-      {icon: '3', text: 'Find KidSafe and toggle it on'},
+      {
+        icon: '2',
+        text: 'On HyperOS the page opens directly. Tap "Downloaded apps" if shown — otherwise scroll the "Installed services" list',
+      },
+      {icon: '3', text: 'Find KidSafe and tap it, then toggle "Use KidSafe" on'},
       {
         icon: '4',
-        text: 'A red "Danger" dialog appears — tick the checkbox, wait 7 seconds, tap OK',
+        text: 'A red "Danger" dialog appears — tick the checkbox, wait 7 seconds, then tap OK',
       },
     ],
     ctaLabel: 'Go to settings',
@@ -80,11 +83,14 @@ export const xiaomiSteps: Step[] = [
     subtitle: 'So KidSafe can count screen time and apply daily limits.',
     bullets: [
       {icon: '1', text: 'Tap "Go to settings"'},
-      {icon: '2', text: 'Find KidSafe and tap it'},
+      {
+        icon: '2',
+        text: 'You\'ll land on the system "Usage access" list — scroll to find KidSafe and tap it',
+      },
       {icon: '3', text: 'Toggle "Permit usage access" on'},
       {
         icon: '4',
-        text: 'On the "Danger" dialog: tick the checkbox, wait 7 seconds, tap OK',
+        text: 'If a red "Danger" dialog appears — tick the checkbox, wait 7 seconds, then tap OK',
       },
     ],
     ctaLabel: 'Go to settings',

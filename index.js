@@ -1,3 +1,9 @@
+// Silence RNFirebase deprecation warnings until we migrate to the modular API.
+// Per https://rnfirebase.io/migrating-to-v22 this is the documented escape hatch
+// while staying on v21.x. MUST be set before any @react-native-firebase/* import
+// so the deprecation tracker sees it during module init.
+globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
+
 import {AppRegistry} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 

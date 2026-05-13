@@ -143,18 +143,44 @@ export const pinSetupStep: Step = {
 
 // -- Device admin (uninstall protection) -------------------------------------
 
+/**
+ * Device admin gives KidSafe the right to lock the screen remotely AND prevents the child from
+ * uninstalling the app without the parent PIN. The system "Activate this device admin app?" page
+ * shown by ACTION_ADD_DEVICE_ADMIN is unfamiliar to most users, so we model this as an
+ * `instructions` step (numbered bullets + system page) rather than a barebones illustration.
+ *
+ * Marked `optional: true` so the wizard can advance even if the user truly cannot grant it on
+ * a stripped-down OEM build — the FinalStep audit still surfaces a "Recommended — tap to fix"
+ * row and warns the user before they tap Finish.
+ */
 export const deviceAdminStep: Step = {
-  kind: 'illustration',
+  kind: 'instructions',
   id: 'deviceAdmin',
   illustration: 'shield',
   title: 'Activate uninstall protection',
   subtitle:
-    'Stops anyone from accidentally deleting KidSafe. Your parent can lock the device remotely too.',
-  ctaLabel: 'Activate',
-  onCtaAction: async () => {
+    "Stops anyone from accidentally deleting KidSafe. You'll see a system page describing what KidSafe will be allowed to do.",
+  bullets: [
+    {icon: '1', text: 'Tap "Open device admin settings" below'},
+    {
+      icon: '2',
+      text: 'On the next screen, read the description of what KidSafe will be allowed to do',
+    },
+    {
+      icon: '3',
+      text: 'Scroll down and tap "Activate this device admin app" (sometimes labelled just "Activate")',
+    },
+    {
+      icon: '4',
+      text: 'If you only see a Security list, tap "Device admin apps", then tap KidSafe and toggle it on',
+    },
+  ],
+  ctaLabel: 'Open device admin settings',
+  openSettings: async () => {
     await DeviceAdmin.requestActivation();
   },
   check: () => DeviceAdmin.isActive().catch(() => false),
+  optional: true,
 };
 
 // -- Final step --------------------------------------------------------------

@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Alert, AppState, StyleSheet, Text, View} from 'react-native';
 
+import {Supervision} from '../../../modules/native';
 import {colors, spacing} from '../../../theme';
 import {Illustration} from './Illustration';
 import {VerificationSheet} from './VerificationSheet';
@@ -70,6 +71,14 @@ export function IllustrationStep({
     if (step.onCtaAction) {
       setBusy(true);
       returningFromAction.current = true;
+      // Arm the supervision window before the CTA fires (e.g. device-admin enable). Otherwise
+      // AccessibilityService sees the system "Activate device admin?" page, which mentions our
+      // app label, and would gate it behind the parent PIN — exactly during onboarding.
+      try {
+        await Supervision.arm(3 * 60_000);
+      } catch {
+        // Best-effort — don't fail onboarding if the native module isn't linked.
+      }
       try {
         await step.onCtaAction();
       } catch (e) {

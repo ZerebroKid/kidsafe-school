@@ -10,15 +10,21 @@ import {
   View,
 } from 'react-native';
 
+import {firebase} from '@react-native-firebase/firestore';
+
+import {paths} from '../../../firebase/firestore';
 import {
   AppBlocker,
+  DeviceAdmin,
   ForegroundService,
   Location,
   OemSettings,
   ScreenTime,
+  Supervision,
 } from '../../../modules/native';
 import {colors, radius, spacing} from '../../../theme';
 import {Illustration} from './Illustration';
+import {ParentPinPromptModal} from './ParentPinPromptModal';
 import {WizardStep} from './WizardStep';
 import type {FinalStep as Step} from './types';
 
@@ -71,16 +77,20 @@ export function FinalStep({
 }: Props) {
   const [audit, setAudit] = useState<AuditEntry[] | null>(null);
   const [busy, setBusy] = useState(false);
+  // Drives the parent-PIN modal that gates the "skip device admin" escape hatch. Holding it
+  // here keeps the destructive flow declarative and re-checkable.
+  const [showSkipPinModal, setShowSkipPinModal] = useState(false);
 
   // -- Audit ----------------------------------------------------------------------------------
 
   const runAudit = useCallback(async () => {
-    const [access, overlay, usage, fine, battery] = await Promise.all([
+    const [access, overlay, usage, fine, battery, deviceAdmin] = await Promise.all([
       AppBlocker.isAccessibilityServiceEnabled().catch(() => false),
       AppBlocker.canDrawOverlays().catch(() => false),
       ScreenTime.hasUsageAccess().catch(() => false),
       Location.hasLocationPermission().catch(() => false),
       OemSettings.isIgnoringBatteryOptimizations().catch(() => true),
+      DeviceAdmin.isActive().catch(() => false),
     ]);
     setAudit([
       {
@@ -100,6 +110,16 @@ export function FinalStep({
         label: 'Usage access — needed for screen time and daily limits',
         kind: 'required',
         granted: usage,
+      },
+      {
+        // Soft-recommended (per design) so that phones where activation flakes (Infinix /
+        // Tecno / certain MIUI builds) still let the user finish onboarding. The Finish
+        // handler shows an explicit warning when this is missing.
+        id: 'deviceAdmin',
+        label:
+          'Uninstall protection — prevents the child from removing KidSafe',
+        kind: 'recommended',
+        granted: deviceAdmin,
       },
       {
         id: 'locationForeground',
@@ -165,7 +185,57 @@ export function FinalStep({
       return;
     }
 
+    // Hard gate: if uninstall protection isn't on, the only way past this screen is for the
+    // parent to physically enter the parent PIN to acknowledge that uninstall cannot be
+    // blocked on this device. The child cannot click through it because PIN verification is
+    // done against the salted hash stored at PIN setup.
+    const deviceAdminMissing = audit.some(
+      a => a.id === 'deviceAdmin' && !a.granted,
+    );
+    if (deviceAdminMissing) {
+      Alert.alert(
+        'Uninstall protection is required',
+        "Without device admin, your child can long-press KidSafe and uninstall it. KidSafe cannot work as a parental control without this — please activate it.",
+        [
+          {text: 'Activate now', onPress: () => jumpToStep('deviceAdmin')},
+          {
+            text: 'Skip with parent PIN',
+            style: 'destructive',
+            onPress: () => setShowSkipPinModal(true),
+          },
+        ],
+      );
+      return;
+    }
+
+    await continueFinish();
+  }
+
+  /**
+   * Called when the parent enters the correct PIN in the skip modal. Logs the skip to Firestore
+   * for parent visibility, then proceeds to the normal Finish flow. Wrong PINs are handled
+   * inside [ParentPinPromptModal] (it stays open and shows an error).
+   */
+  async function handleConfirmSkipDeviceAdmin() {
+    setShowSkipPinModal(false);
+    try {
+      await logDeviceAdminSkipped();
+    } catch {
+      // Best-effort: a missing alert event shouldn't block onboarding.
+    }
+    await continueFinish();
+  }
+
+  async function continueFinish() {
     setBusy(true);
+    // Onboarding is over — disarm the supervision window so the tamper-protection gate re-arms
+    // immediately. (It would auto-expire after 3 min anyway, but disarming here closes the gap
+    // between Finish and the auto-expiry where a child could open Settings unguarded.)
+    try {
+      await Supervision.disarm();
+    } catch {
+      // Best-effort.
+    }
     try {
       await ForegroundService.start(childUid);
     } catch (e) {
@@ -196,6 +266,22 @@ export function FinalStep({
     }
     // Happy path: FG service is up. ChildNavigator's 3-second poll will pick this up on the
     // next tick and swap us out for the Status screen — there's nothing else to do here.
+  }
+
+  /**
+   * Silent Firestore event logged when the user finishes onboarding without device admin.
+   * Surfaces in the parent's "Recent uninstall attempts" panel alongside other tamper events
+   * (mirrors the schema used by `AccessibilityWatchdog` / `PinGateActivity` on the native side).
+   */
+  async function logDeviceAdminSkipped() {
+    if (!childUid) {return;}
+    await paths.events(childUid).add({
+      type: 'tamper_attempt',
+      kind: 'device_admin_skipped_at_setup',
+      success: true,
+      timestamp: Date.now(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
   }
 
   // -- Render --------------------------------------------------------------------------------
@@ -303,6 +389,16 @@ export function FinalStep({
           </View>
         )}
       </ScrollView>
+
+      <ParentPinPromptModal
+        visible={showSkipPinModal}
+        title="Skip uninstall protection?"
+        message="Enter the parent PIN to acknowledge that KidSafe cannot prevent uninstall on this device. The child will be able to long-press and remove the app."
+        confirmLabel="Skip protection"
+        destructive
+        onConfirm={handleConfirmSkipDeviceAdmin}
+        onCancel={() => setShowSkipPinModal(false)}
+      />
     </WizardStep>
   );
 }

@@ -11,6 +11,7 @@ const {
   Schedule: ScheduleNative,
   OemSettings: OemSettingsNative,
   Pin: PinNative,
+  Supervision: SupervisionNative,
 } = NativeModules;
 
 function assert(mod: unknown, name: string) {
@@ -203,4 +204,21 @@ export const Pin = {
   /** Milliseconds remaining in the current lockout (0 if entry is allowed). */
   lockoutRemainingMs: (): Promise<number> =>
     (assert(PinNative, 'Pin') as typeof PinNative).lockoutRemainingMs(),
+};
+
+// -------- Supervision (onboarding gate-suppression window) --------
+//
+// The onboarding wizard arms a short supervision window before opening Settings screens that the
+// tamper guard would otherwise intercept (Accessibility, Usage access, Autostart, Battery). The
+// window auto-expires so protection always comes back on its own. The wizard also disarms it on
+// `Finish` so the gate re-arms instantly once setup is done.
+
+export const Supervision = {
+  /** Arm supervision for [durationMs] milliseconds. Returns the resulting expiry timestamp. */
+  arm: (durationMs: number): Promise<number> =>
+    (assert(SupervisionNative, 'Supervision') as typeof SupervisionNative).arm(durationMs),
+  disarm: (): Promise<void> =>
+    (assert(SupervisionNative, 'Supervision') as typeof SupervisionNative).disarm(),
+  isActive: (): Promise<boolean> =>
+    (assert(SupervisionNative, 'Supervision') as typeof SupervisionNative).isActive(),
 };
