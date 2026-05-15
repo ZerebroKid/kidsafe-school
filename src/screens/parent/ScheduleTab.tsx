@@ -3,11 +3,12 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 
@@ -29,15 +30,29 @@ const DEFAULT_SCHEDULE: Schedule = {
   allowedPackages: [],
 };
 
-/**
- * Schedule editor, rendered inline inside `ChildDetailsScreen`'s outer `ScrollView`.
- *
- * Lifted from the previous `ScheduleScreen` stack route. The only structural change is
- * replacing the top-level `FlatList` with a `View + map` over the app list — nesting a
- * virtualised list inside a `ScrollView` triggers a runtime warning and breaks scroll
- * physics. Phones typically have well under a few hundred installed apps, so the lost
- * virtualisation is a fair trade for layout sanity.
- */
+const TIME_STEP_MINUTES = 5;
+const MINUTES_PER_DAY = 24 * 60;
+
+function formatTime(minutes: number): string {
+  const safe = ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+  const hh = Math.floor(safe / 60);
+  const mm = safe % 60;
+  return `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}`;
+}
+
+function normalizeToStep(minutes: number): number {
+  const safe = ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+  return Math.floor(safe / TIME_STEP_MINUTES) * TIME_STEP_MINUTES;
+}
+
+const TIME_OPTIONS = Array.from(
+  {length: MINUTES_PER_DAY / TIME_STEP_MINUTES},
+  (_, index) => {
+    const minutes = index * TIME_STEP_MINUTES;
+    return {minutes, label: formatTime(minutes)};
+  },
+);
+
 export function ScheduleTab({childUid}: Props) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -50,8 +65,8 @@ export function ScheduleTab({childUid}: Props) {
         setDraft({
           enabled: !!doc.schedule.enabled,
           daysOfWeek: doc.schedule.daysOfWeek ?? [],
-          startMinutes: doc.schedule.startMinutes ?? 0,
-          endMinutes: doc.schedule.endMinutes ?? 0,
+          startMinutes: normalizeToStep(doc.schedule.startMinutes ?? 0),
+          endMinutes: normalizeToStep(doc.schedule.endMinutes ?? 0),
           allowedPackages: doc.schedule.allowedPackages ?? [],
         });
       }
@@ -246,66 +261,47 @@ function TimeField({
   minutes: number;
   onChange: (m: number) => void;
 }) {
-  const hh = Math.floor(minutes / 60);
-  const mm = minutes % 60;
-
-  function setHour(text: string) {
-    const n = parseInt(text.replace(/\D/g, ''), 10);
-    const safe = Number.isFinite(n) ? Math.min(23, Math.max(0, n)) : 0;
-    onChange(safe * 60 + mm);
-  }
-  function setMinute(text: string) {
-    const n = parseInt(text.replace(/\D/g, ''), 10);
-    const safe = Number.isFinite(n) ? Math.min(59, Math.max(0, n)) : 0;
-    onChange(hh * 60 + safe);
-  }
+  const [open, setOpen] = useState(false);
+  const safeValue = normalizeToStep(minutes);
 
   return (
-    <View style={timeStyles.wrap}>
-      <Text style={timeStyles.label}>{label}</Text>
-      <View style={timeStyles.fields}>
-        <TextInput
-          style={timeStyles.input}
-          keyboardType="number-pad"
-          maxLength={2}
-          value={hh.toString().padStart(2, '0')}
-          onChangeText={setHour}
-          selectTextOnFocus
-        />
-        <Text style={timeStyles.colon}>:</Text>
-        <TextInput
-          style={timeStyles.input}
-          keyboardType="number-pad"
-          maxLength={2}
-          value={mm.toString().padStart(2, '0')}
-          onChangeText={setMinute}
-          selectTextOnFocus
-        />
-      </View>
+    <View style={styles.timeFieldWrap}>
+      <Text style={styles.timeFieldLabel}>{label}</Text>
+      <Pressable style={styles.timeFieldButton} onPress={() => setOpen(true)}>
+        <Text style={styles.timeFieldButtonText}>{formatTime(safeValue)}</Text>
+      </Pressable>
+      <Modal transparent visible={open} animationType="fade" onRequestClose={() => setOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <Pressable style={styles.modalDismissArea} onPress={() => setOpen(false)} />
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Select {label.toLowerCase()} time</Text>
+            <ScrollView contentContainerStyle={styles.modalList}>
+              {TIME_OPTIONS.map(option => {
+                const active = option.minutes === safeValue;
+                return (
+                  <Pressable
+                    key={`${label}-${option.minutes}`}
+                    style={[styles.timeOption, active && styles.timeOptionActive]}
+                    onPress={() => {
+                      onChange(option.minutes);
+                      setOpen(false);
+                    }}>
+                    <Text style={[styles.timeOptionLabel, active && styles.timeOptionLabelActive]}>
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+            <Pressable style={styles.modalCloseButton} onPress={() => setOpen(false)}>
+              <Text style={styles.modalCloseText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
-
-const timeStyles = StyleSheet.create({
-  wrap: {flex: 1},
-  label: {color: colors.textMuted, fontSize: 12, marginBottom: 4},
-  fields: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.sm,
-  },
-  input: {
-    color: colors.text,
-    fontSize: 22,
-    fontWeight: '700',
-    width: 44,
-    textAlign: 'center',
-    paddingVertical: spacing.sm,
-  },
-  colon: {color: colors.text, fontSize: 22, fontWeight: '700'},
-});
 
 const styles = StyleSheet.create({
   container: {
@@ -345,8 +341,74 @@ const styles = StyleSheet.create({
   dayChipLabel: {color: colors.textMuted, fontSize: 12, fontWeight: '600'},
   dayChipLabelOn: {color: colors.primaryText},
   timeRow: {flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm},
-  dash: {color: colors.textMuted, paddingHorizontal: spacing.xs, paddingBottom: spacing.sm},
+  timeFieldWrap: {flex: 1},
+  timeFieldLabel: {color: colors.textMuted, fontSize: 12, marginBottom: 4},
+  timeFieldButton: {
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  timeFieldButtonText: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  dash: {color: colors.textMuted, paddingHorizontal: spacing.xs, paddingBottom: spacing.md},
   helper: {color: colors.warning, fontSize: 12, marginTop: spacing.sm},
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  modalDismissArea: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  modalCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    maxHeight: '70%',
+  },
+  modalTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: spacing.sm,
+  },
+  modalList: {
+    gap: spacing.xs,
+    paddingBottom: spacing.sm,
+  },
+  timeOption: {
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  timeOptionActive: {
+    backgroundColor: colors.primary,
+  },
+  timeOptionLabel: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  timeOptionLabelActive: {
+    color: colors.primaryText,
+  },
+  modalCloseButton: {
+    marginTop: spacing.sm,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  modalCloseText: {
+    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
   appList: {gap: spacing.sm},
   appRow: {
     flexDirection: 'row',

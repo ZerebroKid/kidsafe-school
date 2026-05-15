@@ -80,6 +80,14 @@ export interface ChildDoc {
     lng: number;
     timestamp: number;
   };
+  /**
+   * Opaque per-install id of the phone that most recently completed an apps reconcile. Lets the
+   * parent UI tell "this child has never opened KidSafe" from "we have a stale list" — and lets
+   * us detect a device switch (same Firebase account, different phone) to refresh state.
+   */
+  currentDeviceId?: string;
+  /** Unix-ms when the child device last finished a full apps reconcile. */
+  appsLastSyncedAt?: number;
 }
 
 export interface AppEntry {

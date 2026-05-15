@@ -1,9 +1,11 @@
 import auth from '@react-native-firebase/auth';
 import firestore, {firebase} from '@react-native-firebase/firestore';
+import {AppState, type AppStateStatus} from 'react-native';
 
 import {
   deleteAppEntry,
   paths,
+  setChildAppsSyncMeta,
   setUsageDaily,
   writeAppEntry,
   writeChildStatus,
@@ -22,6 +24,7 @@ import {
 } from '../modules/native';
 import type {AppEntry, ChildDoc} from '../firebase/types';
 import {ENV} from '../config/env';
+import {getOrCreateDeviceId} from './deviceId';
 
 /**
  * Wires the child side together:
@@ -35,12 +38,29 @@ import {ENV} from '../config/env';
 const unsubs: Array<() => void> = [];
 let locationSub: {remove: () => void} | null = null;
 let geofenceSub: {remove: () => void} | null = null;
+let appStateSub: {remove: () => void} | null = null;
 let lastLocationWriteAt = 0;
+let lastReconcileAt = 0;
 let screenTimeTicker: ReturnType<typeof setInterval> | null = null;
 let perAppUsageTicker: ReturnType<typeof setInterval> | null = null;
 
 /** 10 minutes between per-app usage uploads — see comment on the ticker setup below. */
 const PER_APP_USAGE_INTERVAL_MS = 10 * 60 * 1000;
+
+/**
+ * Re-reconcile the apps list every time the child app returns to foreground after this long.
+ * Catches the (rare) case where a long-running session survives an account swap without the
+ * `startChildSyncEngine` restart, plus the (common) case of returning from background after a
+ * batch of installs/uninstalls happened while the receiver wasn't running.
+ */
+const RECONCILE_REFRESH_MS = 5 * 60 * 1000;
+
+/**
+ * Firestore batches are capped at 500 writes. A handful of phones with bloated OEM bloatware
+ * push close to that, and a device-switch reconcile may add a chunk of deletes on top. We
+ * commit in 450-op slices to leave a comfortable buffer.
+ */
+const BATCH_CHUNK = 450;
 
 export async function startChildSyncEngine(childUid: string) {
   await writeChildStatus(childUid, 'online');
@@ -67,10 +87,20 @@ export async function startChildSyncEngine(childUid: string) {
   });
   unsubs.push(appsUnsub);
 
-  // 3. Sync installed apps (one-off, then rely on PackageReceiver for deltas).
-  syncInstalledApps(childUid).catch(e => console.warn('syncInstalledApps', e));
+  // 3. Reconcile installed apps. Unlike a plain "write current device's apps and call it a
+  //    day" pass, this also deletes Firestore docs for packages absent on this device — so a
+  //    device switch (same Firebase account, different phone) doesn't leave the parent staring
+  //    at a merged list. Failures are logged but not fatal; we retry on every foreground.
+  reconcileInstalledApps(childUid).catch(e => console.warn('reconcileInstalledApps', e));
 
-  // 4. Start watching location if allowed.
+  // 4. Re-run the reconcile when the app returns to foreground after a quiet stretch.
+  appStateSub = AppState.addEventListener('change', (status: AppStateStatus) => {
+    if (status !== 'active') return;
+    if (Date.now() - lastReconcileAt < RECONCILE_REFRESH_MS) return;
+    reconcileInstalledApps(childUid).catch(e => console.warn('reconcile on foreground', e));
+  });
+
+  // 5. Start watching location if allowed.
   try {
     if (await Location.hasLocationPermission()) {
       await Location.startWatching();
@@ -85,12 +115,12 @@ export async function startChildSyncEngine(childUid: string) {
     console.warn('location start failed', e);
   }
 
-  // 5. Listen to geofence events (raised from the GeofenceModule event emitter).
+  // 6. Listen to geofence events (raised from the GeofenceModule event emitter).
   geofenceSub = Geofence.subscribe(async t => {
     await writeGeofenceEvent(childUid, t.transition, t.lat, t.lng);
   });
 
-  // 6. Periodically tally screen-time and enforce the limit.
+  // 7. Periodically tally screen-time and enforce the limit.
   screenTimeTicker = setInterval(async () => {
     try {
       if (!(await ScreenTime.hasUsageAccess())) return;
@@ -105,7 +135,7 @@ export async function startChildSyncEngine(childUid: string) {
     }
   }, 60_000);
 
-  // 7. Per-app usage breakdown for the parent's App Usage screen.
+  // 8. Per-app usage breakdown for the parent's App Usage screen.
   //
   // Two phases:
   //   (a) On startup, push 7 days at once. UsageStatsManager keeps history independently of
@@ -130,6 +160,10 @@ export function stopChildSyncEngine() {
     geofenceSub.remove();
     geofenceSub = null;
   }
+  if (appStateSub) {
+    appStateSub.remove();
+    appStateSub = null;
+  }
   if (screenTimeTicker) {
     clearInterval(screenTimeTicker);
     screenTimeTicker = null;
@@ -138,6 +172,7 @@ export function stopChildSyncEngine() {
     clearInterval(perAppUsageTicker);
     perAppUsageTicker = null;
   }
+  lastReconcileAt = 0;
   Location.stopWatching().catch(() => {});
 }
 
@@ -216,23 +251,105 @@ async function reactToChildDoc(childUid: string, doc: ChildDoc) {
 
 // -- Sync helpers -------------------------------------------------------------
 
-async function syncInstalledApps(childUid: string) {
-  const apps = await InstalledApps.list(true);
-  const batch = firestore().batch();
-  for (const a of apps) {
-    const ref = paths.apps(childUid).doc(a.packageName);
-    batch.set(
-      ref,
-      {
+/**
+ * Reconciles the installed-apps list against Firestore in a single atomic-per-chunk pass:
+ *
+ *   - Upserts current device's packages (preserving any parent-set `isBlocked` on existing
+ *     docs — only newly created docs get the default `isBlocked: false`).
+ *   - **Deletes** Firestore docs for packages that aren't on this device anymore. This is the
+ *     piece that fixes the "merged list across phones" bug: when the same Firebase child
+ *     account signs in on a new handset, the old phone's package list gets pruned in the
+ *     same pass that adds the new phone's apps.
+ *
+ * After the writes commit we also:
+ *   - Trim `schedule.allowedPackages` to drop packages that no longer exist (otherwise a
+ *     stale allowlist entry never matches anything on the new device).
+ *   - Write `{currentDeviceId, appsLastSyncedAt}` so the parent UI can render a clean
+ *     "waiting for child to open KidSafe" empty state vs. a stale list.
+ */
+async function reconcileInstalledApps(childUid: string) {
+  const [localApps, remoteSnap] = await Promise.all([
+    InstalledApps.list(true),
+    paths.apps(childUid).get(),
+  ]);
+
+  const localByPkg = new Map(localApps.map(a => [a.packageName, a]));
+  const remoteDocs = remoteSnap.docs.map(d => ({
+    id: d.id,
+    data: d.data() as AppEntry,
+  }));
+
+  type Batch = ReturnType<ReturnType<typeof firestore>['batch']>;
+  const ops: Array<(b: Batch) => void> = [];
+  for (const a of localApps) {
+    const existing = remoteDocs.find(r => r.id === a.packageName);
+    ops.push(batch => {
+      const payload: Record<string, unknown> = {
         appName: a.appName,
         icon: a.icon ?? null,
-        isBlocked: false,
         installedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      },
+      };
+      if (!existing) {
+        payload.isBlocked = false;
+      }
+      batch.set(paths.apps(childUid).doc(a.packageName), payload, {merge: true});
+    });
+  }
+
+  const removed: string[] = [];
+  for (const r of remoteDocs) {
+    if (!localByPkg.has(r.id)) {
+      removed.push(r.id);
+      ops.push(batch => {
+        batch.delete(paths.apps(childUid).doc(r.id));
+      });
+    }
+  }
+
+  for (let i = 0; i < ops.length; i += BATCH_CHUNK) {
+    const batch = firestore().batch();
+    for (const op of ops.slice(i, i + BATCH_CHUNK)) {
+      op(batch);
+    }
+    await batch.commit();
+  }
+
+  if (removed.length > 0) {
+    await pruneScheduleAllowlist(childUid, removed);
+  }
+
+  try {
+    await setChildAppsSyncMeta(childUid, getOrCreateDeviceId());
+  } catch (e) {
+    console.warn('setChildAppsSyncMeta failed', e);
+  }
+
+  lastReconcileAt = Date.now();
+  console.log(
+    `[KidSafe] Reconciled apps: kept=${localApps.length} removed=${removed.length}`,
+  );
+}
+
+/**
+ * If the parent's schedule allowlist mentions packages that this device doesn't have, drop
+ * them. Without this, an allowlist set on one phone keeps referencing apps that don't exist
+ * on the new phone — confusing, but mostly harmless (matchless rules block nothing).
+ */
+async function pruneScheduleAllowlist(childUid: string, removed: string[]) {
+  try {
+    const snap = await paths.child(childUid).get();
+    const data = snap.data() as ChildDoc | undefined;
+    const sched = data?.schedule;
+    if (!sched || !sched.allowedPackages?.length) return;
+    if (!sched.allowedPackages.some(p => removed.includes(p))) return;
+    const trimmed = sched.allowedPackages.filter(p => !removed.includes(p));
+    await paths.child(childUid).set(
+      {schedule: {...sched, allowedPackages: trimmed}},
       {merge: true},
     );
+  } catch (e) {
+    console.warn('pruneScheduleAllowlist failed', e);
   }
-  await batch.commit();
 }
 
 /**
@@ -254,7 +371,13 @@ async function pushPerAppUsage(childUid: string, days: number) {
 
 // -- Headless tasks (called from native receivers when the app is not running) ---
 
-/** Registered under "PackageSync" in `index.js`. */
+/**
+ * Registered under "PackageSync" in `index.js`. Called by the native PackageReceiver
+ * (BroadcastReceiver for PACKAGE_ADDED / PACKAGE_REMOVED) via a Headless JS task.
+ *
+ * `writeAppEntry` preserves any existing `isBlocked` on the doc, so a reinstall of a
+ * previously-blocked app keeps the block in place rather than silently unblocking it.
+ */
 export async function handlePackageSyncTask(params: {
   type: 'added' | 'removed';
   packageName: string;

@@ -2,8 +2,12 @@ import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, Switch, Text, View} from 'react-native';
 
 import {colors, radius, spacing} from '../../theme';
-import {setAppBlocked, subscribeChildApps} from '../../firebase/firestore';
-import type {AppEntry} from '../../firebase/types';
+import {
+  setAppBlocked,
+  subscribeChildApps,
+  subscribeChildDoc,
+} from '../../firebase/firestore';
+import type {AppEntry, ChildDoc} from '../../firebase/types';
 
 /**
  * Apps list rendered inline inside `ChildDetailsScreen`'s outer `ScrollView`.
@@ -12,17 +16,48 @@ import type {AppEntry} from '../../firebase/types';
  * a `ScrollView` of the same orientation triggers a runtime warning and breaks both
  * virtualisation and scroll physics. A typical child's phone has well under a few hundred
  * apps, so the lost virtualisation is a fair trade for layout correctness.
+ *
+ * Three rendering states, driven by `ChildDoc.appsLastSyncedAt` so we can tell them apart:
+ *   - never-synced (no device has opened KidSafe yet) -> instructional card.
+ *   - synced + empty (child has zero installed apps, very unusual) -> "no apps" copy.
+ *   - synced + non-empty -> the normal blockable list.
  */
 export function AppsTab({childUid}: {childUid: string}) {
   const [apps, setApps] = useState<AppEntry[]>([]);
+  const [childDoc, setChildDoc] = useState<ChildDoc | null>(null);
+  const [docLoaded, setDocLoaded] = useState(false);
 
   useEffect(() => subscribeChildApps(childUid, setApps), [childUid]);
+  useEffect(
+    () =>
+      subscribeChildDoc(childUid, doc => {
+        setChildDoc(doc);
+        setDocLoaded(true);
+      }),
+    [childUid],
+  );
+
+  const neverSynced = docLoaded && !childDoc?.appsLastSyncedAt;
+
+  if (neverSynced) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.waitingCard}>
+          <Text style={styles.waitingTitle}>Waiting for your child's phone</Text>
+          <Text style={styles.waitingBody}>
+            Ask your child to open KidSafe on their phone at least once. As soon as they do,
+            their installed apps will appear here and you can choose which ones to block.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   if (apps.length === 0) {
     return (
       <View style={styles.container}>
         <Text style={styles.empty}>
-          No apps synced yet. Open KidSafe on your child's phone.
+          Synced — but no apps were reported by the child's phone yet.
         </Text>
       </View>
     );
@@ -105,5 +140,23 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     padding: spacing.lg,
+  },
+  waitingCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.lg,
+    gap: spacing.sm,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  waitingTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  waitingBody: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 19,
   },
 });

@@ -216,20 +216,44 @@ export async function setUsageDaily(
   );
 }
 
+/**
+ * Writes one app entry. `isBlocked` is only seeded on first create — for an existing doc we
+ * preserve whatever value is already stored so a re-sync (PackageReceiver "added" delta or a
+ * reconcile pass) does not clobber a parent-set block.
+ */
 export async function writeAppEntry(childUid: string, entry: AppEntry) {
   const {packageName, ...rest} = entry;
-  await paths.apps(childUid).doc(packageName).set(
-    {
-      ...rest,
-      isBlocked: rest.isBlocked ?? false,
-      installedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    },
-    {merge: true},
-  );
+  const ref = paths.apps(childUid).doc(packageName);
+  const existing = await ref.get();
+  const payload: Record<string, unknown> = {
+    ...rest,
+    installedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  };
+  if (!existing.exists) {
+    payload.isBlocked = rest.isBlocked ?? false;
+  } else {
+    delete payload.isBlocked;
+  }
+  await ref.set(payload, {merge: true});
 }
 
 export async function deleteAppEntry(childUid: string, packageName: string) {
   await paths.apps(childUid).doc(packageName).delete();
+}
+
+/**
+ * Records that this device just finished a successful apps reconcile. The parent UI reads
+ * `appsLastSyncedAt` to differentiate "no child device has opened KidSafe yet" from "the child
+ * device synced and has zero installed apps".
+ */
+export async function setChildAppsSyncMeta(childUid: string, deviceId: string) {
+  await paths.child(childUid).set(
+    {
+      currentDeviceId: deviceId,
+      appsLastSyncedAt: Date.now(),
+    },
+    {merge: true},
+  );
 }
 
 export async function writeGeofenceEvent(
