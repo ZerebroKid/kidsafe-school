@@ -67,6 +67,16 @@ export const AppBlocker = {
 
 // -------- ScreenTime --------
 
+/**
+ * Per-app usage breakdown for a single day. `date` is a `YYYY-MM-DD` string in the child
+ * device's local timezone; `perApp` maps package name → minutes of foreground time.
+ */
+export interface UsageDay {
+  date: string;
+  totalMins: number;
+  perApp: Record<string, number>;
+}
+
 export const ScreenTime = {
   hasUsageAccess: (): Promise<boolean> =>
     (assert(ScreenTimeNative, 'ScreenTime') as typeof ScreenTimeNative).hasUsageAccess(),
@@ -78,6 +88,13 @@ export const ScreenTime = {
     (assert(ScreenTimeNative, 'ScreenTime') as typeof ScreenTimeNative).getTodayUsedMinutes(),
   lockIfOverLimit: (): Promise<boolean> =>
     (assert(ScreenTimeNative, 'ScreenTime') as typeof ScreenTimeNative).lockIfOverLimit(),
+  /**
+   * Returns the per-app foreground time for the last `days` days. The last entry of `days`
+   * is "today" (midnight → now). Per-app maps are pre-sorted by minutes desc and capped at
+   * `topN` apps each (default 30) — the parent UI never needs the long tail.
+   */
+  getPerAppUsage: (days = 7, topN = 30): Promise<{days: UsageDay[]}> =>
+    (assert(ScreenTimeNative, 'ScreenTime') as typeof ScreenTimeNative).getPerAppUsage(days, topN),
 };
 
 // -------- Location (emits 'KidSafeLocation') --------

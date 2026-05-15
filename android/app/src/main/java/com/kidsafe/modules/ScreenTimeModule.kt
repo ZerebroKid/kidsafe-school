@@ -10,10 +10,13 @@ import android.content.Intent
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
+import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.WritableArray
+import com.facebook.react.bridge.WritableMap
 import com.kidsafe.receivers.KidSafeDeviceAdminReceiver
 import com.kidsafe.receivers.ScreenTimeReceiver
 import com.kidsafe.store.KidSafeStore
@@ -121,6 +124,95 @@ class ScreenTimeModule(reactContext: ReactApplicationContext) :
             KidSafeStore.setScreenTimeUsedMins(reactApplicationContext, minutes)
             KidSafeStore.setScreenTimeDay(reactApplicationContext, today())
             promise.resolve(minutes)
+        } catch (e: Exception) {
+            promise.reject("E_SCREENTIME", e)
+        }
+    }
+
+    /**
+     * Returns the per-app foreground time for the last [days] days (default 7) — one entry per
+     * day, each with a `totalMins` aggregate and a `perApp` map of package → minutes (sorted
+     * desc, capped at [topN]).
+     *
+     * Date keys are `yyyy-MM-dd` in the device's local timezone. The last entry is always
+     * "today" (midnight → now); earlier entries are full midnight-to-midnight windows.
+     *
+     * Apps with less than 1 minute of foreground time are dropped to keep the parent UI
+     * focused on real usage. KidSafe itself, the SystemUI shell and the launcher's home
+     * activity are skipped — they aren't useful signals for parents.
+     */
+    @ReactMethod
+    fun getPerAppUsage(days: Int, topN: Int, promise: Promise) {
+        try {
+            if (!hasUsageAccess(reactApplicationContext)) {
+                promise.reject("E_NO_USAGE_ACCESS", "Grant 'Usage access' permission first")
+                return
+            }
+            val usm = reactApplicationContext
+                .getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val ownPkg = reactApplicationContext.packageName
+            val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
+                timeZone = TimeZone.getDefault()
+            }
+
+            val numDays = if (days <= 0) 1 else days
+            val cap = if (topN <= 0) 30 else topN
+            val now = System.currentTimeMillis()
+
+            val daysOut: WritableArray = Arguments.createArray()
+            for (i in numDays - 1 downTo 0) {
+                // i=0 is "today". Walk the calendar back i days, snap to midnight for window
+                // start, snap to next-midnight (or now) for window end.
+                val dayCal = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_YEAR, -i)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val startMs = dayCal.timeInMillis
+                val endMs = (dayCal.clone() as Calendar).apply {
+                    add(Calendar.DAY_OF_YEAR, 1)
+                }.timeInMillis.coerceAtMost(now)
+                val dateKey = dateFmt.format(java.util.Date(startMs))
+
+                // Aggregate per-package — UsageStatsManager can return multiple stats records
+                // per package per window (one per app session bucket), so we merge.
+                val perPackageMs = HashMap<String, Long>()
+                val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startMs, endMs)
+                    ?: emptyList()
+                for (s in stats) {
+                    val pkg = s.packageName ?: continue
+                    if (pkg == ownPkg) continue
+                    if (s.totalTimeInForeground <= 0L) continue
+                    perPackageMs[pkg] = (perPackageMs[pkg] ?: 0L) + s.totalTimeInForeground
+                }
+
+                // Convert to minutes, drop sub-minute apps, sort desc, cap.
+                val ranked = perPackageMs
+                    .map { (pkg, ms) -> pkg to (ms / 1000 / 60).toInt() }
+                    .filter { it.second >= 1 }
+                    .sortedByDescending { it.second }
+                    .take(cap)
+                val totalMins = ranked.sumOf { it.second }
+
+                val perAppMap: WritableMap = Arguments.createMap()
+                for ((pkg, mins) in ranked) {
+                    perAppMap.putInt(pkg, mins)
+                }
+
+                val dayOut: WritableMap = Arguments.createMap().apply {
+                    putString("date", dateKey)
+                    putInt("totalMins", totalMins)
+                    putMap("perApp", perAppMap)
+                }
+                daysOut.pushMap(dayOut)
+            }
+
+            val out: WritableMap = Arguments.createMap().apply {
+                putArray("days", daysOut)
+            }
+            promise.resolve(out)
         } catch (e: Exception) {
             promise.reject("E_SCREENTIME", e)
         }

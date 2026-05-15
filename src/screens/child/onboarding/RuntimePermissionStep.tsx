@@ -15,9 +15,9 @@ interface Props {
 }
 
 /**
- * Runtime PermissionsAndroid step: notifications, location (foreground/background), contacts,
- * physical activity. The user taps "Allow", we fire the system request dialog, and on
- * `AppState` returning to active we re-check via the step's `check()`.
+ * Runtime PermissionsAndroid step: notifications, location (foreground/background), physical
+ * activity. The user taps "Allow", we fire the system request dialog, and on `AppState`
+ * returning to active we re-check via the step's `check()`.
  *
  * If a permission is "never ask again", the dialog won't appear; we fall through to the
  * `check()` which will report false, and the user can re-tap "Allow" to manually grant from

@@ -93,18 +93,6 @@ export const locationBackgroundStep: Step = {
     ),
 };
 
-export const contactsStep: Step = {
-  kind: 'runtime',
-  id: 'contacts',
-  illustration: 'contacts',
-  title: 'Allow contacts',
-  subtitle:
-    'Shares your contacts list with your parent so they know who to call in an emergency.',
-  permission: PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
-  check: async () =>
-    PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_CONTACTS),
-};
-
 // -- Prominent disclosure (paired with the Accessibility step) ---------------
 
 export const accessibilityDisclosureStep: Step = {

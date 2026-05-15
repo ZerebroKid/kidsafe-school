@@ -5,7 +5,6 @@ import {
   accessibilityDisclosureStep,
   activityStep,
   batteryCheck,
-  contactsStep,
   deviceAdminStep,
   finalStep,
   locationBackgroundStep,
@@ -29,7 +28,6 @@ export const samsungSteps: Step[] = [
   activityStep,
   locationForegroundStep,
   locationBackgroundStep,
-  contactsStep,
 
   accessibilityDisclosureStep,
   {

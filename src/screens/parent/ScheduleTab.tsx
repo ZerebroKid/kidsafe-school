@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   Image,
   Pressable,
   StyleSheet,
@@ -11,34 +10,40 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {colors, radius, spacing} from '../../theme';
-import type {ParentStackParamList} from '../../navigation/types';
 import {setSchedule, subscribeChildApps, subscribeChildDoc} from '../../firebase/firestore';
 import type {AppEntry, ChildDoc, Schedule} from '../../firebase/types';
 
-type Props = NativeStackScreenProps<ParentStackParamList, 'Schedule'>;
+interface Props {
+  childUid: string;
+}
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const DEFAULT_SCHEDULE: Schedule = {
   enabled: false,
-  daysOfWeek: [1, 2, 3, 4, 5], // Mon-Fri
+  daysOfWeek: [1, 2, 3, 4, 5],
   startMinutes: 9 * 60,
   endMinutes: 15 * 60,
   allowedPackages: [],
 };
 
-export function ScheduleScreen({route}: Props) {
-  const {childUid} = route.params;
+/**
+ * Schedule editor, rendered inline inside `ChildDetailsScreen`'s outer `ScrollView`.
+ *
+ * Lifted from the previous `ScheduleScreen` stack route. The only structural change is
+ * replacing the top-level `FlatList` with a `View + map` over the app list — nesting a
+ * virtualised list inside a `ScrollView` triggers a runtime warning and breaks scroll
+ * physics. Phones typically have well under a few hundred installed apps, so the lost
+ * virtualisation is a fair trade for layout sanity.
+ */
+export function ScheduleTab({childUid}: Props) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [apps, setApps] = useState<AppEntry[]>([]);
   const [draft, setDraft] = useState<Schedule>(DEFAULT_SCHEDULE);
 
-  // Load existing schedule once.
   useEffect(() => {
     const unsub = subscribeChildDoc(childUid, (doc: ChildDoc | null) => {
       if (doc?.schedule) {
@@ -55,7 +60,6 @@ export function ScheduleScreen({route}: Props) {
     return unsub;
   }, [childUid]);
 
-  // Live list of installed apps so the parent can pick the allowlist.
   useEffect(() => subscribeChildApps(childUid, setApps), [childUid]);
 
   const sortedApps = useMemo(
@@ -116,128 +120,122 @@ export function ScheduleScreen({route}: Props) {
   const wrapsMidnight = draft.endMinutes <= draft.startMinutes;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <FlatList
-        contentContainerStyle={{padding: spacing.md, paddingBottom: spacing.xl}}
-        data={sortedApps}
-        keyExtractor={a => a.packageName}
-        ListHeaderComponent={
-          <View>
-            <View style={styles.card}>
-              <View style={styles.row}>
-                <View style={{flex: 1}}>
-                  <Text style={styles.title}>Enable schedule</Text>
-                  <Text style={styles.subtitle}>
-                    During the window only the apps you tick below stay usable. Everything else
-                    is blocked.
-                  </Text>
-                </View>
-                <Switch
-                  value={draft.enabled}
-                  onValueChange={v => setDraft(d => ({...d, enabled: v}))}
-                  trackColor={{true: colors.primary, false: colors.surfaceAlt}}
-                  thumbColor={colors.text}
-                />
-              </View>
-            </View>
-
-            <View style={styles.card}>
-              <Text style={styles.sectionLabel}>Days</Text>
-              <View style={styles.dayRow}>
-                {DAY_LABELS.map((label, idx) => {
-                  const on = draft.daysOfWeek.includes(idx);
-                  return (
-                    <Pressable
-                      key={label}
-                      onPress={() => toggleDay(idx)}
-                      style={[styles.dayChip, on && styles.dayChipOn]}>
-                      <Text style={[styles.dayChipLabel, on && styles.dayChipLabelOn]}>{label}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-
-            <View style={styles.card}>
-              <Text style={styles.sectionLabel}>Time window</Text>
-              <View style={styles.timeRow}>
-                <TimeField
-                  label="Start"
-                  minutes={draft.startMinutes}
-                  onChange={m => setDraft(d => ({...d, startMinutes: m}))}
-                />
-                <Text style={styles.dash}>—</Text>
-                <TimeField
-                  label="End"
-                  minutes={draft.endMinutes}
-                  onChange={m => setDraft(d => ({...d, endMinutes: m}))}
-                />
-              </View>
-              {wrapsMidnight && (
-                <Text style={styles.helper}>End time is on the next day.</Text>
-              )}
-            </View>
-
-            <View style={[styles.card, {marginBottom: spacing.sm}]}>
-              <Text style={styles.sectionLabel}>
-                Allowed apps ({draft.allowedPackages.length})
-              </Text>
-              <Text style={styles.subtitle}>
-                These apps stay open during the window. Phone, Settings and the launcher are always
-                available.
-              </Text>
-            </View>
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <View style={styles.rowText}>
+            <Text style={styles.title}>Enable schedule</Text>
+            <Text style={styles.subtitle}>
+              During the window only the apps you tick below stay usable. Everything else is
+              blocked.
+            </Text>
           </View>
-        }
-        ItemSeparatorComponent={() => <View style={{height: spacing.sm}} />}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No apps synced yet from the child's phone.</Text>
-        }
-        renderItem={({item}) => {
-          const checked = draft.allowedPackages.includes(item.packageName);
-          return (
-            <Pressable
-              onPress={() => togglePackage(item.packageName)}
-              style={[styles.appRow, checked && styles.appRowOn]}>
-              {item.icon ? (
-                <Image source={{uri: item.icon}} style={styles.icon} />
-              ) : (
-                <View style={[styles.icon, styles.iconFallback]}>
-                  <Text style={styles.iconFallbackText}>
-                    {item.appName.charAt(0).toUpperCase()}
+          <Switch
+            value={draft.enabled}
+            onValueChange={v => setDraft(d => ({...d, enabled: v}))}
+            trackColor={{true: colors.primary, false: colors.surfaceAlt}}
+            thumbColor={colors.text}
+          />
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionLabel}>Days</Text>
+        <View style={styles.dayRow}>
+          {DAY_LABELS.map((label, idx) => {
+            const on = draft.daysOfWeek.includes(idx);
+            return (
+              <Pressable
+                key={label}
+                onPress={() => toggleDay(idx)}
+                style={[styles.dayChip, on && styles.dayChipOn]}>
+                <Text style={[styles.dayChipLabel, on && styles.dayChipLabelOn]}>
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionLabel}>Time window</Text>
+        <View style={styles.timeRow}>
+          <TimeField
+            label="Start"
+            minutes={draft.startMinutes}
+            onChange={m => setDraft(d => ({...d, startMinutes: m}))}
+          />
+          <Text style={styles.dash}>—</Text>
+          <TimeField
+            label="End"
+            minutes={draft.endMinutes}
+            onChange={m => setDraft(d => ({...d, endMinutes: m}))}
+          />
+        </View>
+        {wrapsMidnight && <Text style={styles.helper}>End time is on the next day.</Text>}
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionLabel}>
+          Allowed apps ({draft.allowedPackages.length})
+        </Text>
+        <Text style={styles.subtitle}>
+          These apps stay open during the window. Phone, Settings and the launcher are always
+          available.
+        </Text>
+      </View>
+
+      {sortedApps.length === 0 ? (
+        <Text style={styles.empty}>No apps synced yet from the child's phone.</Text>
+      ) : (
+        <View style={styles.appList}>
+          {sortedApps.map(item => {
+            const checked = draft.allowedPackages.includes(item.packageName);
+            return (
+              <Pressable
+                key={item.packageName}
+                onPress={() => togglePackage(item.packageName)}
+                style={[styles.appRow, checked && styles.appRowOn]}>
+                {item.icon ? (
+                  <Image source={{uri: item.icon}} style={styles.icon} />
+                ) : (
+                  <View style={[styles.icon, styles.iconFallback]}>
+                    <Text style={styles.iconFallbackText}>
+                      {item.appName.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                )}
+                <View style={styles.appText}>
+                  <Text style={styles.appName} numberOfLines={1}>
+                    {item.appName}
+                  </Text>
+                  <Text style={styles.appPkg} numberOfLines={1}>
+                    {item.packageName}
                   </Text>
                 </View>
-              )}
-              <View style={{flex: 1}}>
-                <Text style={styles.appName}>{item.appName}</Text>
-                <Text style={styles.appPkg}>{item.packageName}</Text>
-              </View>
-              <View style={[styles.checkbox, checked && styles.checkboxOn]}>
-                {checked && <Text style={styles.checkboxTick}>✓</Text>}
-              </View>
-            </Pressable>
-          );
-        }}
-        ListFooterComponent={
-          <Pressable
-            onPress={handleSave}
-            disabled={saving}
-            style={[styles.saveBtn, saving && {opacity: 0.6}]}>
-            {saving ? (
-              <ActivityIndicator color={colors.primaryText} />
-            ) : (
-              <Text style={styles.saveBtnLabel}>Save schedule</Text>
-            )}
-          </Pressable>
-        }
-      />
-    </SafeAreaView>
+                <View style={[styles.checkbox, checked && styles.checkboxOn]}>
+                  {checked && <Text style={styles.checkboxTick}>✓</Text>}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
+
+      <Pressable
+        onPress={handleSave}
+        disabled={saving}
+        style={[styles.saveBtn, saving && styles.saveBtnDisabled]}>
+        {saving ? (
+          <ActivityIndicator color={colors.primaryText} />
+        ) : (
+          <Text style={styles.saveBtnLabel}>Save schedule</Text>
+        )}
+      </Pressable>
+    </View>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Inline HH / MM editor — keeps the bundle free of @react-native-community/datetimepicker.
-// ---------------------------------------------------------------------------
 
 function TimeField({
   label,
@@ -310,15 +308,23 @@ const timeStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-  safe: {flex: 1, backgroundColor: colors.bg},
-  loading: {flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg},
+  container: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
+    gap: spacing.md,
+  },
+  loading: {
+    paddingVertical: spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
     padding: spacing.md,
-    marginBottom: spacing.md,
   },
   row: {flexDirection: 'row', alignItems: 'center', gap: spacing.md},
+  rowText: {flex: 1},
   title: {color: colors.text, fontSize: 16, fontWeight: '700'},
   subtitle: {color: colors.textMuted, fontSize: 13, marginTop: 4},
   sectionLabel: {
@@ -341,6 +347,7 @@ const styles = StyleSheet.create({
   timeRow: {flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm},
   dash: {color: colors.textMuted, paddingHorizontal: spacing.xs, paddingBottom: spacing.sm},
   helper: {color: colors.warning, fontSize: 12, marginTop: spacing.sm},
+  appList: {gap: spacing.sm},
   appRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -352,6 +359,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   appRowOn: {borderColor: colors.primary},
+  appText: {flex: 1},
   icon: {width: 36, height: 36, borderRadius: 8},
   iconFallback: {
     backgroundColor: colors.surfaceAlt,
@@ -372,13 +380,18 @@ const styles = StyleSheet.create({
   },
   checkboxOn: {backgroundColor: colors.primary, borderColor: colors.primary},
   checkboxTick: {color: colors.primaryText, fontWeight: '700'},
-  empty: {color: colors.textMuted, textAlign: 'center', padding: spacing.lg},
+  empty: {
+    color: colors.textMuted,
+    textAlign: 'center',
+    paddingVertical: spacing.lg,
+  },
   saveBtn: {
     backgroundColor: colors.primary,
     paddingVertical: spacing.md,
     borderRadius: radius.md,
     alignItems: 'center',
-    marginTop: spacing.lg,
+    marginTop: spacing.sm,
   },
+  saveBtnDisabled: {opacity: 0.6},
   saveBtnLabel: {color: colors.primaryText, fontSize: 16, fontWeight: '700'},
 });

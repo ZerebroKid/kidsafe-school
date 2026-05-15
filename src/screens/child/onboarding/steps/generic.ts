@@ -5,7 +5,6 @@ import {
   accessibilityDisclosureStep,
   activityStep,
   batteryCheck,
-  contactsStep,
   deviceAdminStep,
   finalStep,
   locationBackgroundStep,
@@ -31,7 +30,6 @@ export const genericSteps: Step[] = [
   activityStep,
   locationForegroundStep,
   locationBackgroundStep,
-  contactsStep,
 
   accessibilityDisclosureStep,
   {

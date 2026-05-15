@@ -1,18 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 import {colors, radius, spacing} from '../../theme';
 import type {ParentStackParamList} from '../../navigation/types';
-import {paths, requestPinReset} from '../../firebase/firestore';
+import {paths} from '../../firebase/firestore';
 import {AppsTab} from './AppsTab';
 import {LocationTab} from './LocationTab';
-import {ContactsTab} from './ContactsTab';
+import {PinTab} from './PinTab';
+import {ScheduleTab} from './ScheduleTab';
+import {UsageTab} from './UsageTab';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<ParentStackParamList, 'ChildDetails'>;
 
-type Tab = 'apps' | 'location' | 'contacts';
+type Tab = 'apps' | 'usage' | 'schedule' | 'location' | 'pin';
 
 interface TamperEvent {
   id: string;
@@ -21,14 +23,11 @@ interface TamperEvent {
   timestamp: number;
 }
 
-export function ChildDetailsScreen({navigation, route}: Props) {
+export function ChildDetailsScreen({route}: Props) {
   const {childUid, childName} = route.params;
   const [tab, setTab] = useState<Tab>('apps');
   const [tamperEvents, setTamperEvents] = useState<TamperEvent[]>([]);
-  const [resetting, setResetting] = useState(false);
 
-  // Subscribe to the most recent tamper attempts so the parent can see what's been happening on
-  // the child's phone. We pull the last 5 — anything older lives only in the audit log.
   useEffect(() => {
     const unsub = paths
       .events(childUid)
@@ -54,67 +53,33 @@ export function ChildDetailsScreen({navigation, route}: Props) {
     return unsub;
   }, [childUid]);
 
-  function confirmResetPin() {
-    Alert.alert(
-      'Reset parent PIN?',
-      `${childName}'s phone will be asked to set a new PIN the next time the app is opened. Use this only if you forgot the PIN.`,
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'Reset PIN',
-          style: 'destructive',
-          onPress: async () => {
-            setResetting(true);
-            try {
-              await requestPinReset(childUid);
-              Alert.alert(
-                'PIN reset requested',
-                "When the child's phone next syncs, the existing PIN will be cleared and they'll be prompted to set a new one.",
-              );
-            } catch (e: any) {
-              Alert.alert('Could not request reset', e?.message ?? 'Unknown error');
-            } finally {
-              setResetting(false);
-            }
-          },
-        },
-      ],
-    );
-  }
-
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={{paddingBottom: spacing.xl}}>
         <View style={styles.tabbar}>
           <TabButton label="Apps" active={tab === 'apps'} onPress={() => setTab('apps')} />
-          <TabButton label="Location" active={tab === 'location'} onPress={() => setTab('location')} />
-          <TabButton label="Contacts" active={tab === 'contacts'} onPress={() => setTab('contacts')} />
+          <TabButton label="Usage" active={tab === 'usage'} onPress={() => setTab('usage')} />
+          <TabButton
+            label="Schedule"
+            active={tab === 'schedule'}
+            onPress={() => setTab('schedule')}
+          />
+          <TabButton
+            label="Location"
+            active={tab === 'location'}
+            onPress={() => setTab('location')}
+          />
+          <TabButton label="PIN" active={tab === 'pin'} onPress={() => setTab('pin')} />
         </View>
-        <Pressable
-          style={styles.scheduleBtn}
-          onPress={() => navigation.navigate('Schedule', {childUid, childName})}>
-          <Text style={styles.scheduleBtnLabel}>Schedule</Text>
-          <Text style={styles.scheduleBtnHint}>Allow only specific apps during chosen hours</Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.actionBtn, resetting && {opacity: 0.6}]}
-          disabled={resetting}
-          onPress={confirmResetPin}>
-          <Text style={styles.actionBtnLabel}>Reset child PIN</Text>
-          <Text style={styles.actionBtnHint}>
-            {resetting
-              ? 'Requesting…'
-              : 'Use if you forgot the PIN. Child phone will re-prompt to set a new one.'}
-          </Text>
-        </Pressable>
 
         <TamperPanel events={tamperEvents} />
 
         <View style={{minHeight: 360}}>
           {tab === 'apps' && <AppsTab childUid={childUid} />}
+          {tab === 'usage' && <UsageTab childUid={childUid} />}
+          {tab === 'schedule' && <ScheduleTab childUid={childUid} />}
           {tab === 'location' && <LocationTab childUid={childUid} />}
-          {tab === 'contacts' && <ContactsTab childUid={childUid} />}
+          {tab === 'pin' && <PinTab childUid={childUid} childName={childName} />}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -136,7 +101,7 @@ function TamperPanel({events}: {events: TamperEvent[]}) {
               {backgroundColor: e.success ? colors.warning : colors.danger},
             ]}
           />
-          <View style={{flex: 1}}>
+          <View style={styles.tamperRowText}>
             <Text style={styles.tamperKind}>{labelForKind(e.kind)}</Text>
             <Text style={styles.tamperMeta}>
               {e.success ? 'Unlocked with PIN' : 'PIN gate blocked'} ·{' '}
@@ -204,35 +169,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 10,
+    paddingHorizontal: 4,
     borderRadius: radius.pill,
   },
   tabActive: {backgroundColor: colors.primary},
-  tabLabel: {color: colors.textMuted, fontWeight: '600'},
+  tabLabel: {color: colors.textMuted, fontWeight: '600', fontSize: 12},
   tabLabelActive: {color: colors.primaryText},
-  scheduleBtn: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.primary,
-  },
-  scheduleBtnLabel: {color: colors.text, fontSize: 15, fontWeight: '700'},
-  scheduleBtnHint: {color: colors.textMuted, fontSize: 12, marginTop: 2},
-  actionBtn: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
-  },
-  actionBtnLabel: {color: colors.text, fontSize: 15, fontWeight: '700'},
-  actionBtnHint: {color: colors.textMuted, fontSize: 12, marginTop: 2},
   tamperCard: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.md,
@@ -251,6 +193,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
+  tamperRowText: {flex: 1},
   tamperDot: {
     width: 8,
     height: 8,

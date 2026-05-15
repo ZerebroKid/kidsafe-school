@@ -90,9 +90,18 @@ export interface AppEntry {
   installedAt?: FirebaseFirestoreTypes.FieldValue | number;
 }
 
-export interface ContactEntry {
-  id: string;
-  name: string;
-  phone: string;
-  normalizedPhone?: string;
+/**
+ * One day's screen-time breakdown. Stored at `children/{childUid}/usageDaily/{date}` so we can
+ * cheaply query a sliding 7-day window without bloating the parent dashboard `ChildDoc`.
+ *
+ * `date` is `YYYY-MM-DD` in the **child** device's local timezone. Both writer (child sync
+ * engine) and reader (parent UI) use the date string verbatim — no UTC conversion — so the
+ * chart always reads as "the child's day" even when the parent is in a different zone.
+ */
+export interface UsageDailyDoc {
+  date: string;
+  totalMins: number;
+  /** Package name → minutes of foreground time. Pre-sorted by minutes desc on the child side. */
+  perApp: Record<string, number>;
+  updatedAt: FirebaseFirestoreTypes.FieldValue | number;
 }

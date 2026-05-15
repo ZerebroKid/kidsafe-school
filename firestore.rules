@@ -86,17 +86,29 @@ service cloud.firestore {
                .hasOnly(['isBlocked']);
       }
 
-      // contacts subcollection --------------------------------------------
-      match /contacts/{contactId} {
-        allow read: if isSelf(childUid) || isParentOf(childUid);
-        allow write: if isSelf(childUid);
-      }
-
       // events subcollection (append-only, read by parent) ----------------
       match /events/{eventId} {
         allow read: if isSelf(childUid) || isParentOf(childUid);
         allow create: if isSelf(childUid);
         allow update, delete: if false;
+      }
+
+      // usageDaily subcollection -----------------------------------------
+      // One doc per child-local-day, id = `YYYY-MM-DD`. Powers the parent's
+      // App Usage screen (7-day chart + per-app list).
+      match /usageDaily/{day} {
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+
+        // Child writes its own usage breakdown. We pin the schema so a
+        // misbehaving client can't bloat the doc with extras.
+        allow create, update: if isSelf(childUid)
+          && request.resource.data.keys().hasOnly(
+               ['date', 'totalMins', 'perApp', 'updatedAt']
+             );
+
+        // Day docs are append-mostly; only the child can clear them (e.g.
+        // when the user signs out and re-pairs).
+        allow delete: if isSelf(childUid);
       }
     }
   }

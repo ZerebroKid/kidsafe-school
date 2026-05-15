@@ -1,11 +1,10 @@
 import auth from '@react-native-firebase/auth';
 import firestore, {firebase} from '@react-native-firebase/firestore';
-import Contacts from 'react-native-contacts';
-import {PermissionsAndroid} from 'react-native';
 
 import {
   deleteAppEntry,
   paths,
+  setUsageDaily,
   writeAppEntry,
   writeChildStatus,
   writeGeofenceEvent,
@@ -26,7 +25,7 @@ import {ENV} from '../config/env';
 
 /**
  * Wires the child side together:
- *   - Pushes local state (apps, contacts, location) up to Firestore.
+ *   - Pushes local state (apps, location, usage) up to Firestore.
  *   - Listens to the child's Firestore doc and reacts to parent-issued commands:
  *       lock, geofence, screenTime, blocked apps.
  *
@@ -38,6 +37,10 @@ let locationSub: {remove: () => void} | null = null;
 let geofenceSub: {remove: () => void} | null = null;
 let lastLocationWriteAt = 0;
 let screenTimeTicker: ReturnType<typeof setInterval> | null = null;
+let perAppUsageTicker: ReturnType<typeof setInterval> | null = null;
+
+/** 10 minutes between per-app usage uploads — see comment on the ticker setup below. */
+const PER_APP_USAGE_INTERVAL_MS = 10 * 60 * 1000;
 
 export async function startChildSyncEngine(childUid: string) {
   await writeChildStatus(childUid, 'online');
@@ -67,10 +70,7 @@ export async function startChildSyncEngine(childUid: string) {
   // 3. Sync installed apps (one-off, then rely on PackageReceiver for deltas).
   syncInstalledApps(childUid).catch(e => console.warn('syncInstalledApps', e));
 
-  // 4. Sync contacts (one-off).
-  syncContacts(childUid).catch(e => console.warn('syncContacts', e));
-
-  // 5. Start watching location if allowed.
+  // 4. Start watching location if allowed.
   try {
     if (await Location.hasLocationPermission()) {
       await Location.startWatching();
@@ -85,12 +85,12 @@ export async function startChildSyncEngine(childUid: string) {
     console.warn('location start failed', e);
   }
 
-  // 6. Listen to geofence events (raised from the GeofenceModule event emitter).
+  // 5. Listen to geofence events (raised from the GeofenceModule event emitter).
   geofenceSub = Geofence.subscribe(async t => {
     await writeGeofenceEvent(childUid, t.transition, t.lat, t.lng);
   });
 
-  // 7. Periodically tally screen-time and enforce the limit.
+  // 6. Periodically tally screen-time and enforce the limit.
   screenTimeTicker = setInterval(async () => {
     try {
       if (!(await ScreenTime.hasUsageAccess())) return;
@@ -104,6 +104,19 @@ export async function startChildSyncEngine(childUid: string) {
       // transient — ignore
     }
   }, 60_000);
+
+  // 7. Per-app usage breakdown for the parent's App Usage screen.
+  //
+  // Two phases:
+  //   (a) On startup, push 7 days at once. UsageStatsManager keeps history independently of
+  //       whether KidSafe was running, so this backfills any day the child app missed.
+  //   (b) Every 10 minutes thereafter, push only today's doc. 10 minutes is a comfortable
+  //       cadence: ~100 writes/day per child during waking hours (well within free tier),
+  //       fresh enough that the parent's chart updates within "open the app, blink twice".
+  pushPerAppUsage(childUid, 7).catch(e => console.warn('initial pushPerAppUsage', e));
+  perAppUsageTicker = setInterval(() => {
+    pushPerAppUsage(childUid, 1).catch(e => console.warn('pushPerAppUsage', e));
+  }, PER_APP_USAGE_INTERVAL_MS);
 }
 
 export function stopChildSyncEngine() {
@@ -120,6 +133,10 @@ export function stopChildSyncEngine() {
   if (screenTimeTicker) {
     clearInterval(screenTimeTicker);
     screenTimeTicker = null;
+  }
+  if (perAppUsageTicker) {
+    clearInterval(perAppUsageTicker);
+    perAppUsageTicker = null;
   }
   Location.stopWatching().catch(() => {});
 }
@@ -218,28 +235,21 @@ async function syncInstalledApps(childUid: string) {
   await batch.commit();
 }
 
-async function syncContacts(childUid: string) {
-  const granted = await PermissionsAndroid.check(
-    PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+/**
+ * Pulls the last `days` days of per-app foreground time from the native module and writes one
+ * `usageDaily/{date}` doc per day. Used for both the startup backfill (`days=7`) and the
+ * periodic ticker (`days=1`).
+ *
+ * Silently no-ops if Usage Access isn't granted — same pattern as the screen-time ticker.
+ */
+async function pushPerAppUsage(childUid: string, days: number) {
+  if (!(await ScreenTime.hasUsageAccess())) return;
+  const {days: data} = await ScreenTime.getPerAppUsage(days);
+  // Each day write is idempotent (set+merge by date doc id), so we don't bother batching:
+  // separate writes parallelise nicely and are tiny.
+  await Promise.all(
+    data.map(d => setUsageDaily(childUid, d.date, d.totalMins, d.perApp)),
   );
-  if (!granted) return;
-  const all = await Contacts.getAll();
-  const batch = firestore().batch();
-  let writes = 0;
-  for (const c of all.slice(0, 500)) {
-    const phone = c.phoneNumbers[0]?.number;
-    if (!phone) continue;
-    const ref = paths.contacts(childUid).doc(c.recordID);
-    batch.set(ref, {
-      id: c.recordID,
-      name: `${c.givenName || ''} ${c.familyName || ''}`.trim() || phone,
-      phone,
-    });
-    writes++;
-  }
-  if (writes > 0) {
-    await batch.commit();
-  }
 }
 
 // -- Headless tasks (called from native receivers when the app is not running) ---

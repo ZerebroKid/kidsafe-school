@@ -8,7 +8,6 @@ export type IllustrationName =
   | 'welcome'
   | 'notifications'
   | 'location'
-  | 'contacts'
   | 'usage'
   | 'overlay'
   | 'accessibility'
@@ -73,16 +72,6 @@ function render(name: IllustrationName) {
             fill={colors.primary}
           />
           <Circle cx={100} cy={80} r={20} fill={colors.bg} />
-        </G>
-      );
-    case 'contacts':
-      return (
-        <G>
-          <Circle cx={100} cy={70} r={28} fill={colors.primary} />
-          <Path
-            d="M50 160 C50 130 70 110 100 110 C130 110 150 130 150 160 Z"
-            fill={colors.primary}
-          />
         </G>
       );
     case 'usage':

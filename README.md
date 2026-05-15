@@ -57,7 +57,7 @@ KidSafe/
 | Installed-apps sync        | ✓              | `PackageManager.getInstalledApplications` + `PackageReceiver` for deltas         |
 | Live location              | ✓              | `FusedLocationProviderClient` @ 60s / 50m filter                                 |
 | Geofence                   | ✓              | `GeofencingClient` exit → Firestore event → parent in-app alert                  |
-| Contacts sync              | ✓              | `react-native-contacts` on child → `children/{uid}/contacts`                     |
+| App usage tracking         | ✓              | `UsageStatsManager` per-app foreground time → `children/{uid}/usageDaily/{date}` |
 | **Deferred**               |                |                                                                                  |
 | SMS & call-log forwarding  | v1.1           | Blocked by Play Store Permissions Declaration for SMS/Call log                   |
 | Cold-start FCM wake-up     | v1.1           | One Cloud Function, see `docs/FCM_WAKEUP.md`                                     |
@@ -65,7 +65,7 @@ KidSafe/
 
 ## Development notes
 
-- **New Arch** is **off** for MVP — a couple of our native deps (`react-native-contacts`, `react-native-maps@1.20`) still have New-Arch caveats. Flip back on in `android/gradle.properties` in v1.1 once we audit.
+- **New Arch** is **off** for MVP — `react-native-maps@1.20` still has New-Arch caveats. Flip back on in `android/gradle.properties` in v1.1 once we audit.
 - **Firestore listeners**, not polling, drive every parent ↔ child command. The foreground service on the child keeps the JS thread alive so latency is < 1 s end-to-end while the child phone is awake.
 - **Native code reuses the ideas from the original Java app** (`Application/`) but is written fresh in Kotlin, targeting Android 14 and using modern APIs (`foregroundServiceType`, `FLAG_IMMUTABLE`, `SCHEDULE_EXACT_ALARM`, `ServiceInfo.FOREGROUND_SERVICE_TYPE_*`). Keep `Application/` around only as reference until v1.1 ships.
 - **Cost envelope at 1000 DAU**: Firestore writes are the dominant cost. Location writes are throttled to one every 60 s / 50 m (see `src/config/env.ts`). Expect ~$30–60 / month on Blaze.

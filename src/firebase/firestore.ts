@@ -1,6 +1,14 @@
 import firestore, {firebase} from '@react-native-firebase/firestore';
 
-import type {AppEntry, ChildDoc, ContactEntry, Geofence, Geo, Schedule, UserDoc} from './types';
+import type {
+  AppEntry,
+  ChildDoc,
+  Geofence,
+  Geo,
+  Schedule,
+  UsageDailyDoc,
+  UserDoc,
+} from './types';
 
 /**
  * Paths helpers keep collection names in one place — change here, update nowhere else.
@@ -11,11 +19,22 @@ export const paths = {
   child: (childUid: string) => firestore().collection('children').doc(childUid),
   apps: (childUid: string) =>
     firestore().collection('children').doc(childUid).collection('apps'),
-  contacts: (childUid: string) =>
-    firestore().collection('children').doc(childUid).collection('contacts'),
   events: (childUid: string) =>
     firestore().collection('children').doc(childUid).collection('events'),
+  usageDaily: (childUid: string) =>
+    firestore().collection('children').doc(childUid).collection('usageDaily'),
 };
+
+/**
+ * Format a `Date` as `YYYY-MM-DD` in the local timezone — matches the format the child writes
+ * to `usageDaily/{date}` doc ids.
+ */
+export function formatDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 
 // --- Parent-side helpers -----------------------------------------------------
 
@@ -73,20 +92,29 @@ export function subscribeChildApps(
     );
 }
 
-export function subscribeChildContacts(
+/**
+ * Streams the most recent N days (default 7) of `usageDaily` docs for a child. Documents are
+ * keyed by a `YYYY-MM-DD` date string in the child's local timezone, which is also stored as
+ * the `date` field on the doc — we query and order by that field rather than `__name__` to
+ * sidestep a `@react-native-firebase` quirk where `FieldPath.documentId()` returns a fresh
+ * instance per call and the SDK's where/orderBy validator rejects the mismatched references.
+ */
+export function subscribeUsageWeek(
   childUid: string,
-  cb: (c: ContactEntry[]) => void,
+  cb: (days: UsageDailyDoc[]) => void,
+  daysBack = 7,
 ) {
-  return paths.contacts(childUid).onSnapshot(
-    snap =>
-      cb(
-        snap.docs.map(d => ({
-          ...(d.data() as ContactEntry),
-          id: d.id,
-        })),
-      ),
-    err => console.warn('subscribeChildContacts error', err),
-  );
+  const start = new Date();
+  start.setDate(start.getDate() - (daysBack - 1));
+  const startKey = formatDateKey(start);
+  return paths
+    .usageDaily(childUid)
+    .where('date', '>=', startKey)
+    .orderBy('date')
+    .onSnapshot(
+      snap => cb(snap.docs.map(d => d.data() as UsageDailyDoc)),
+      err => console.warn('subscribeUsageWeek error', err),
+    );
 }
 
 export async function setLock(childUid: string, locked: boolean, until?: number | null) {
@@ -165,6 +193,29 @@ export async function writeLocation(childUid: string, loc: Geo) {
   await paths.child(childUid).set({currentLocation: loc}, {merge: true});
 }
 
+/**
+ * Child-side: writes one day's screen-time breakdown. The `date` doubles as the document id so
+ * a re-write for the same day is an idempotent merge — perfect for the 10-minute sync ticker.
+ *
+ * Empty `perApp` maps are valid (a day where the child only used KidSafe itself, for example).
+ */
+export async function setUsageDaily(
+  childUid: string,
+  date: string,
+  totalMins: number,
+  perApp: Record<string, number>,
+) {
+  await paths.usageDaily(childUid).doc(date).set(
+    {
+      date,
+      totalMins,
+      perApp,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true},
+  );
+}
+
 export async function writeAppEntry(childUid: string, entry: AppEntry) {
   const {packageName, ...rest} = entry;
   await paths.apps(childUid).doc(packageName).set(
@@ -179,10 +230,6 @@ export async function writeAppEntry(childUid: string, entry: AppEntry) {
 
 export async function deleteAppEntry(childUid: string, packageName: string) {
   await paths.apps(childUid).doc(packageName).delete();
-}
-
-export async function writeContact(childUid: string, c: ContactEntry) {
-  await paths.contacts(childUid).doc(c.id).set(c);
 }
 
 export async function writeGeofenceEvent(
