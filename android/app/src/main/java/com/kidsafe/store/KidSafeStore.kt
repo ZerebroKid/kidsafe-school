@@ -48,6 +48,31 @@ object KidSafeStore {
     const val GATE_BYPASS_UNTIL = "gate_bypass_until"    // millis epoch when the bypass expires
     const val SUPERVISION_UNTIL = "supervision_until"    // millis epoch the parent's wizard owns
 
+    // -- Shared phone / Child Mode -----------------------------------------
+    const val DEVICE_MODE = "device_mode"                // "shared" | "two_device" | null
+    const val CHILD_MODE_ACTIVE = "child_mode_active"
+    const val CHILD_MODE_STARTED_AT = "child_mode_started_at"
+    const val CHILD_MODE_PROFILE_ID = "child_mode_profile_id"
+
+    // -- Native live-pill resolver cache ------------------------------------
+    //
+    // `KidSafeForegroundService` polls `UsageStatsManager.queryEvents` every ~1.5s, resolves the
+    // most recent non-launcher foreground package, and persists it here so the native Firestore
+    // writer + heartbeat have a stable source of truth that survives RN engine death. We track
+    // two slots:
+    //   CURRENT_FG_PACKAGE / CURRENT_FG_AT — last resolved foreground package (may be null when
+    //                                         only launcher activity is in view; consumers fall
+    //                                         back to LAST_REAL_FG_PACKAGE).
+    //   LAST_REAL_FG_PACKAGE / LAST_REAL_FG_AT — last non-launcher foreground package observed.
+    //                                            Drives the "keep last real app" pill behavior.
+    //   LAST_NATIVE_WRITE_AT — last successful Firestore write. JS uses this to decide whether
+    //                          to skip its (secondary) coalesce write.
+    const val CURRENT_FG_PACKAGE = "current_fg_package"
+    const val CURRENT_FG_AT = "current_fg_at"
+    const val LAST_REAL_FG_PACKAGE = "last_real_fg_package"
+    const val LAST_REAL_FG_AT = "last_real_fg_at"
+    const val LAST_NATIVE_WRITE_AT = "last_native_write_at"
+
     private fun prefs(context: Context): SharedPreferences =
         context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
@@ -318,5 +343,93 @@ object KidSafeStore {
 
     fun clearSupervision(context: Context) {
         prefs(context).edit().remove(SUPERVISION_UNTIL).apply()
+    }
+
+    // -- Shared phone / Child Mode -----------------------------------------
+    //
+    // Shared mode means a single phone is used by both the parent and the child. We persist
+    // the device mode plus a `CHILD_MODE_ACTIVE` flag so the native accessibility service can
+    // make routing decisions even before the JS engine boots (post-reboot, OEM kill, etc.):
+    //
+    //   shared device, child mode OFF → AppBlockerService is a no-op (parent's own phone)
+    //   shared device, child mode ON  → normal blocklist + schedule enforcement
+    //   two-device                    → normal enforcement, regardless of these flags
+    //
+    // The JS layer (`ChildModeModule` + `childSyncEngine`) is the writer; native is the reader.
+
+    fun isSharedDevice(context: Context): Boolean =
+        prefs(context).getString(DEVICE_MODE, null) == "shared"
+
+    fun setSharedDevice(context: Context, shared: Boolean) {
+        prefs(context).edit()
+            .putString(DEVICE_MODE, if (shared) "shared" else "two_device")
+            .apply()
+    }
+
+    fun isChildModeActive(context: Context): Boolean =
+        prefs(context).getBoolean(CHILD_MODE_ACTIVE, false)
+
+    fun getChildModeProfileId(context: Context): String? =
+        prefs(context).getString(CHILD_MODE_PROFILE_ID, null)
+
+    fun getChildModeStartedAt(context: Context): Long =
+        prefs(context).getLong(CHILD_MODE_STARTED_AT, 0L)
+
+    fun setChildModeActive(context: Context, active: Boolean, profileId: String? = null) {
+        val edit = prefs(context).edit().putBoolean(CHILD_MODE_ACTIVE, active)
+        if (active) {
+            edit.putLong(CHILD_MODE_STARTED_AT, System.currentTimeMillis())
+            if (profileId != null) edit.putString(CHILD_MODE_PROFILE_ID, profileId)
+        } else {
+            edit.putLong(CHILD_MODE_STARTED_AT, 0L)
+            // Keep the profile id around so a re-entry doesn't lose it; the parent can clear
+            // it explicitly when switching modes.
+        }
+        edit.apply()
+    }
+
+    // -- Native live-pill resolver cache ------------------------------------
+
+    fun getCurrentForegroundPackage(context: Context): String? =
+        prefs(context).getString(CURRENT_FG_PACKAGE, null)
+
+    fun getCurrentForegroundAt(context: Context): Long =
+        prefs(context).getLong(CURRENT_FG_AT, 0L)
+
+    fun setCurrentForegroundPackage(context: Context, pkg: String?, at: Long) {
+        val edit = prefs(context).edit()
+        if (pkg.isNullOrBlank()) {
+            edit.remove(CURRENT_FG_PACKAGE).putLong(CURRENT_FG_AT, at)
+        } else {
+            edit.putString(CURRENT_FG_PACKAGE, pkg).putLong(CURRENT_FG_AT, at)
+        }
+        edit.apply()
+    }
+
+    fun getLastRealForegroundPackage(context: Context): String? =
+        prefs(context).getString(LAST_REAL_FG_PACKAGE, null)
+
+    fun getLastRealForegroundAt(context: Context): Long =
+        prefs(context).getLong(LAST_REAL_FG_AT, 0L)
+
+    fun setLastRealForegroundPackage(context: Context, pkg: String, at: Long) {
+        prefs(context).edit()
+            .putString(LAST_REAL_FG_PACKAGE, pkg)
+            .putLong(LAST_REAL_FG_AT, at)
+            .apply()
+    }
+
+    fun clearLastRealForegroundPackage(context: Context) {
+        prefs(context).edit()
+            .remove(LAST_REAL_FG_PACKAGE)
+            .remove(LAST_REAL_FG_AT)
+            .apply()
+    }
+
+    fun getLastNativeWriteAt(context: Context): Long =
+        prefs(context).getLong(LAST_NATIVE_WRITE_AT, 0L)
+
+    fun setLastNativeWriteAt(context: Context, at: Long) {
+        prefs(context).edit().putLong(LAST_NATIVE_WRITE_AT, at).apply()
     }
 }

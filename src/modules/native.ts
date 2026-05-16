@@ -12,6 +12,7 @@ const {
   OemSettings: OemSettingsNative,
   Pin: PinNative,
   Supervision: SupervisionNative,
+  ChildMode: ChildModeNative,
 } = NativeModules;
 
 function assert(mod: unknown, name: string) {
@@ -50,6 +51,16 @@ export const InstalledApps = {
 
 // -------- AppBlocker --------
 
+/**
+ * Foreground app event emitted by the native accessibility service whenever the kid switches
+ * apps. `packageName` is the raw Android package id; the parent dashboard resolves it to a
+ * friendly name + icon via the `apps` subcollection.
+ */
+export interface ForegroundAppEvent {
+  packageName: string;
+  timestamp: number;
+}
+
 export const AppBlocker = {
   setBlockedPackages: (pkgs: string[]): Promise<boolean> =>
     (assert(AppBlockerNative, 'AppBlocker') as typeof AppBlockerNative).setBlockedPackages(pkgs),
@@ -63,6 +74,23 @@ export const AppBlocker = {
     (assert(AppBlockerNative, 'AppBlocker') as typeof AppBlockerNative).canDrawOverlays(),
   openOverlaySettings: (): Promise<void> =>
     (assert(AppBlockerNative, 'AppBlocker') as typeof AppBlockerNative).openOverlaySettings(),
+  /**
+   * Launches an installed app by package name. Used by the shared-phone "Child Mode" kiosk
+   * which renders the allowlist as a tappable grid.
+   */
+  launchApp: (packageName: string): Promise<void> =>
+    (assert(AppBlockerNative, 'AppBlocker') as typeof AppBlockerNative).launchApp(packageName),
+  /**
+   * Subscribes to `KidSafeForegroundApp` events fired by `AppBlockerService` on every
+   * `TYPE_WINDOW_STATE_CHANGED`. Used by `childSyncEngine` to keep `ChildDoc.currentApp`
+   * fresh so the parent's "Currently using" pill updates within a few seconds.
+   */
+  subscribeForegroundApp: (cb: (e: ForegroundAppEvent) => void) => {
+    const emitter = new NativeEventEmitter(
+      assert(AppBlockerNative, 'AppBlocker') as typeof AppBlockerNative,
+    );
+    return emitter.addListener('KidSafeForegroundApp', cb);
+  },
 };
 
 // -------- ScreenTime --------
@@ -75,6 +103,11 @@ export interface UsageDay {
   date: string;
   totalMins: number;
   perApp: Record<string, number>;
+}
+
+export interface RecentForegroundApp {
+  packageName: string | null;
+  updatedAt: number;
 }
 
 export const ScreenTime = {
@@ -95,6 +128,14 @@ export const ScreenTime = {
    */
   getPerAppUsage: (days = 7, topN = 30): Promise<{days: UsageDay[]}> =>
     (assert(ScreenTimeNative, 'ScreenTime') as typeof ScreenTimeNative).getPerAppUsage(days, topN),
+  /**
+   * Returns the most recently foregrounded package detected by UsageStats events inside the
+   * supplied lookback window. Used as a launcher-conflict cross-check for the live pill scorer.
+   */
+  getRecentForegroundApp: (lookbackMs = 15_000): Promise<RecentForegroundApp> =>
+    (assert(ScreenTimeNative, 'ScreenTime') as typeof ScreenTimeNative).getRecentForegroundApp(
+      lookbackMs,
+    ),
 };
 
 // -------- Location (emits 'KidSafeLocation') --------
@@ -143,11 +184,32 @@ export const Geofence = {
 
 // -------- ForegroundService --------
 
+/**
+ * Screen on/off event emitted by `KidSafeForegroundService`'s `BroadcastReceiver`.
+ * `state` is `'foreground'` once the user has dismissed the keyguard (so we don't show the
+ * pill as "active" while the lockscreen is up) and `'screen_off'` the moment the display
+ * powers down.
+ */
+export interface ScreenStateEvent {
+  state: 'foreground' | 'screen_off';
+  timestamp: number;
+}
+
 export const ForegroundService = {
   start: (childUid: string): Promise<boolean> =>
     (assert(ForegroundServiceNative, 'ForegroundService') as typeof ForegroundServiceNative).start(childUid),
   isRunning: (): Promise<boolean> =>
     (assert(ForegroundServiceNative, 'ForegroundService') as typeof ForegroundServiceNative).isRunning(),
+  /**
+   * Subscribes to `KidSafeScreenState` events fired when the device screen turns off
+   * (`ACTION_SCREEN_OFF`) or the user unlocks (`ACTION_USER_PRESENT`).
+   */
+  subscribeScreenState: (cb: (e: ScreenStateEvent) => void) => {
+    const emitter = new NativeEventEmitter(
+      assert(ForegroundServiceNative, 'ForegroundService') as typeof ForegroundServiceNative,
+    );
+    return emitter.addListener('KidSafeScreenState', cb);
+  },
 };
 
 // -------- Schedule --------
@@ -238,4 +300,34 @@ export const Supervision = {
     (assert(SupervisionNative, 'Supervision') as typeof SupervisionNative).disarm(),
   isActive: (): Promise<boolean> =>
     (assert(SupervisionNative, 'Supervision') as typeof SupervisionNative).isActive(),
+};
+
+// -------- ChildMode (shared phone kiosk) --------
+//
+// Two persistent flags backing the shared-phone feature. Native is the reader (the
+// accessibility service consults them before blocking) and JS is the writer. Mirrored
+// into Firestore for parent-side visibility, but the native flag is the source of truth
+// since it survives JS engine death and OEM kills.
+
+export const ChildMode = {
+  /** True if this install was set up as a "one shared phone" family. */
+  isSharedDevice: (): Promise<boolean> =>
+    (assert(ChildModeNative, 'ChildMode') as typeof ChildModeNative).isSharedDevice(),
+  /** Persist the shared-vs-two-device choice. Called once at signup; also on mode-switch. */
+  setSharedDevice: (shared: boolean): Promise<void> =>
+    (assert(ChildModeNative, 'ChildMode') as typeof ChildModeNative).setSharedDevice(shared),
+  /** True when the parent has flipped the kiosk on for the child. Polled by the root nav gate. */
+  isActive: (): Promise<boolean> =>
+    (assert(ChildModeNative, 'ChildMode') as typeof ChildModeNative).isActive(),
+  /**
+   * Flip Child Mode. `profileId` is the shared profile's `childUid` so native can persist it
+   * alongside the flag — keeps reboot recovery deterministic.
+   */
+  setActive: (active: boolean, profileId: string | null): Promise<void> =>
+    (assert(ChildModeNative, 'ChildMode') as typeof ChildModeNative).setActive(active, profileId),
+  getProfileId: (): Promise<string | null> =>
+    (assert(ChildModeNative, 'ChildMode') as typeof ChildModeNative).getProfileId(),
+  /** Returns the millis-epoch when the current Child Mode session started (0 if inactive). */
+  getStartedAt: (): Promise<number> =>
+    (assert(ChildModeNative, 'ChildMode') as typeof ChildModeNative).getStartedAt(),
 };

@@ -6,6 +6,7 @@ import {colors, radius, spacing} from '../../theme';
 import type {ParentStackParamList} from '../../navigation/types';
 import {paths} from '../../firebase/firestore';
 import {AppsTab} from './AppsTab';
+import {CurrentAppPill} from './CurrentAppPill';
 import {LocationTab} from './LocationTab';
 import {PinTab} from './PinTab';
 import {ScheduleTab} from './ScheduleTab';
@@ -55,6 +56,12 @@ export function ChildDetailsScreen({route}: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      {/* Sticky status strip — sits OUTSIDE the ScrollView so the live "Currently using"
+          pill stays visible regardless of which tab is selected or how far the user has
+          scrolled. Padding mirrors the inner content gutter so the pill aligns with cards. */}
+      <View style={styles.statusStrip}>
+        <CurrentAppPill childUid={childUid} />
+      </View>
       <ScrollView contentContainerStyle={{paddingBottom: spacing.xl}}>
         <View style={styles.tabbar}>
           <TabButton label="Apps" active={tab === 'apps'} onPress={() => setTab('apps')} />
@@ -158,6 +165,10 @@ function TabButton({
 
 const styles = StyleSheet.create({
   safe: {flex: 1, backgroundColor: colors.bg},
+  statusStrip: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+  },
   tabbar: {
     flexDirection: 'row',
     margin: spacing.md,

@@ -2,6 +2,30 @@ import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 
 export type Role = 'parent' | 'child';
 
+/**
+ * How the parent intends to use KidSafe on this install.
+ *
+ * - `two_device` (legacy / default): parent phone + separate child phone. Child has its own
+ *   Firebase user; parent monitors via Firestore.
+ * - `shared`: family only owns one phone. The parent's own install hosts a single child
+ *   profile and flips between "Parent dashboard" and a locked "Child Mode" kiosk on demand.
+ *   No second Firebase user is created — the parent writes the child profile doc directly,
+ *   guarded by `parentOwns(...)` in `firestore.rules`.
+ *
+ * Treated as `'two_device'` whenever absent so pre-existing users keep working unchanged.
+ */
+export type DeviceMode = 'two_device' | 'shared';
+
+/**
+ * Metadata for the single child profile that lives on a shared phone. The doc itself lives
+ * at `children/{childUid}` where `childUid === ${parentUid}_shared`.
+ */
+export interface SharedProfile {
+  childUid: string;
+  childName: string;
+  createdAt: number;
+}
+
 export interface UserDoc {
   role: Role;
   name: string;
@@ -14,6 +38,14 @@ export interface UserDoc {
   pairingCodeExpiresAt?: number;
   // Child only: uid of the linked parent. Set during pairing.
   parentUid?: string;
+  /**
+   * Parent only. Drives `RootNavigator`'s routing decision (shared-mode parents can be
+   * pushed into a locked kiosk) and the engine's "treat my own phone as a child device"
+   * gating. Absent === `'two_device'`.
+   */
+  deviceMode?: DeviceMode;
+  /** Parent + shared mode only. Child profile that lives on this same install. */
+  sharedProfile?: SharedProfile;
 }
 
 export interface LockState {
@@ -59,9 +91,80 @@ export interface PinResetRequest {
   requestedAt: number;
 }
 
+/**
+ * Live "Child Mode" flag on a shared-phone install. Mirrors the native
+ * `KidSafeStore.CHILD_MODE_ACTIVE` flag so the parent's dashboard and the kiosk both have a
+ * single source of truth. Native is authoritative — Firestore is mirrored for visibility
+ * and so the parent can flip child mode from any signed-in instance.
+ */
+export interface ChildModeState {
+  active: boolean;
+  /** Unix-ms when the parent last started Child Mode. */
+  startedAt: number;
+  /** Firebase uid of the parent that flipped the switch. */
+  startedByParentUid: string;
+}
+
+/**
+ * Live "what is the child using right now" snapshot, written by the child sync engine and
+ * read by the parent's `CurrentAppPill`. Kept intentionally tiny (~80 bytes) — the parent
+ * resolves `packageName` against the `apps` subcollection for the friendly name + icon so
+ * the doc itself doesn't drift when the device locale changes.
+ *
+ * States:
+ *  - `foreground` — accessibility service saw a `TYPE_WINDOW_STATE_CHANGED` for this package
+ *  - `screen_off` — `ACTION_SCREEN_OFF` fired, or sync engine stopped cleanly
+ *  - `unavailable` — accessibility service is disabled on the child device
+ */
+export interface ChildForegroundApp {
+  /** Null when the screen is off, the device is locked, or the data source is unavailable. */
+  packageName: string | null;
+  state: 'foreground' | 'screen_off' | 'unavailable';
+  /** Unix-ms when the child last refreshed this field. Used for staleness detection. */
+  updatedAt: number;
+  /**
+   * Optional confidence hint from the child scorer.
+   * - `high`: strong non-launcher signal (or confirmed by cross-check)
+   * - `low`: launcher-like signal that may be transitional on some OEMs
+   */
+  confidence?: 'high' | 'low';
+  /**
+   * Why this write happened. Useful for OEM diagnostics and for pill rendering subtleties.
+   * Kept as a broad union — the native foreground service may add new reason values
+   * (`usage_stats_poll`, `heartbeat_keep_last_real`, ...) without us needing to update this
+   * type on every iteration.
+   */
+  reason?: string;
+  /** Which detector produced the winning package for this write. */
+  source?: 'accessibility' | 'usage_stats' | 'screen_state' | 'native_usage_stats';
+  /**
+   * Raw package from the latest accessibility event before scorer normalization. When the
+   * scorer prefers a different package (e.g. launcher conflict), this helps debug OEM behavior.
+   */
+  rawPackage?: string | null;
+  /** Last non-launcher package observed in the recent scoring window. */
+  lastNonLauncherPackage?: string | null;
+  /** Unix-ms when `lastNonLauncherPackage` was observed. */
+  lastNonLauncherAt?: number;
+}
+
 export interface ChildDoc {
   status: 'online' | 'offline';
   lastSeenAt: FirebaseFirestoreTypes.FieldValue | number;
+  /**
+   * `'child_owned'` (legacy / default): doc was created by a child Firebase user signed in
+   * on their own phone. `'shared'`: the parent owns this profile on a shared-phone install
+   * and writes the doc directly (auth uid !== doc id). Absent === `'child_owned'`.
+   */
+  mode?: 'child_owned' | 'shared';
+  /**
+   * Always set for `mode === 'shared'` docs — used by the Firestore `parentOwns(...)` rule
+   * to verify the writer. Optional/absent for legacy child-owned docs (the parent is
+   * resolved via `users/{childUid}.parentUid` there).
+   */
+  parentUid?: string;
+  /** Live Child Mode flag for shared-phone installs. Always absent on `child_owned` docs. */
+  childMode?: ChildModeState;
   lockState: LockState;
   screenTime?: ScreenTime;
   currentLocation?: Geo;
@@ -88,6 +191,13 @@ export interface ChildDoc {
   currentDeviceId?: string;
   /** Unix-ms when the child device last finished a full apps reconcile. */
   appsLastSyncedAt?: number;
+  /**
+   * Live "what is the child using right now" snapshot. Updated by the child sync engine
+   * on foreground app changes (3s coalesce + 30s heartbeat) and on screen on/off events.
+   * Absent means the child hasn't reported yet (or the engine hasn't started since this
+   * field was introduced) — parent UI shows a neutral placeholder in that case.
+   */
+  currentApp?: ChildForegroundApp;
 }
 
 export interface AppEntry {

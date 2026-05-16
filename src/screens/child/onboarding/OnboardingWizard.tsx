@@ -23,6 +23,16 @@ import type {Step} from './types';
 const storageKey = (uid: string | null | undefined) =>
   `kidsafe.onboarding.${uid ?? 'anonymous'}.lastCompletedIndex`;
 
+interface OnboardingWizardProps {
+  /**
+   * Optional override for the "child" identity the wizard sets up. Defaults to the signed-in
+   * Firebase uid (the standard two-device child-on-their-own-phone flow). Shared-phone mode
+   * passes `${parentUid}_shared` so the foreground service + tamper events bind to the
+   * shared profile rather than the parent's own user doc.
+   */
+  childUidOverride?: string;
+}
+
 /**
  * Wizard controller. Picks the OEM-specific step list, tracks the user's position, persists
  * progress to AsyncStorage so a relaunch resumes mid-flow, and routes each step to the matching
@@ -37,7 +47,7 @@ const storageKey = (uid: string | null | undefined) =>
  * we want them to see the FinalStep again (which will show what's missing) instead of being
  * dropped at step 0.
  */
-export function OnboardingWizard() {
+export function OnboardingWizard({childUidOverride}: OnboardingWizardProps = {}) {
   // Optimistic OEM detection: start with whatever Platform.constants knows synchronously, then
   // upgrade to the native module's answer once it resolves. This avoids a "loading…" flash for
   // users on devices the helper recognises immediately.
@@ -45,7 +55,8 @@ export function OnboardingWizard() {
   const [hydrated, setHydrated] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
 
-  const childUid = useAuthStore(s => s.firebaseUid);
+  const signedInUid = useAuthStore(s => s.firebaseUid);
+  const childUid = childUidOverride ?? signedInUid;
   const steps = useMemo<Step[]>(() => stepsForOem(oem), [oem]);
 
   // -- Boot: detect OEM (real, not just Platform.constants) and load saved progress -----------

@@ -7,6 +7,10 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import com.facebook.react.ReactApplication
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.modules.core.DeviceEventManagerModule
+import com.kidsafe.BuildConfig
 import com.kidsafe.security.PinGateActivity
 import com.kidsafe.security.TamperWatcher
 import com.kidsafe.store.KidSafeStore
@@ -49,9 +53,37 @@ class AppBlockerService : AccessibilityService() {
         if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
 
         val pkg = event.packageName?.toString() ?: return
+        val cls = event.className?.toString()
+        val eventTime = event.eventTime
         if (pkg == packageName) return // ignore our own overlay
 
         val ctx = applicationContext
+        val sharedInactive = KidSafeStore.isSharedDevice(ctx) && !KidSafeStore.isChildModeActive(ctx)
+        if (BuildConfig.DEBUG) {
+            Log.d(
+                TAG,
+                "fg_event pkg=$pkg cls=$cls eventTime=$eventTime sharedInactive=$sharedInactive",
+            )
+        }
+
+        // Tell JS about the new foreground app so the parent dashboard can show a live pill.
+        // SystemUI windows (notification shade, status bar, etc.) are transient and would just
+        // make the pill flicker, so drop them here. Launcher packages ARE forwarded — the pill
+        // component maps them to a friendly "Home screen" label.
+        //
+        // On a shared phone with Child Mode OFF, the parent is using their OWN device — we
+        // would be tracking the parent's foreground app, which is both privacy-invasive and
+        // pointless for the dashboard. Suppress the emit in that case.
+        if (pkg != "com.android.systemui" && !sharedInactive) {
+            emitForegroundApp(pkg)
+        } else if (BuildConfig.DEBUG) {
+            val reason = when {
+                pkg == "com.android.systemui" -> "systemui_filtered"
+                sharedInactive -> "shared_inactive"
+                else -> "unknown"
+            }
+            Log.d(TAG, "fg_emit_skipped reason=$reason pkg=$pkg cls=$cls")
+        }
 
         // 1. Tamper-protection gate. If a PIN is set and the user opened a KidSafe-targeted
         //    Settings page (uninstall, device admin disable, accessibility, OEM autostart, ...),
@@ -63,7 +95,6 @@ class AppBlockerService : AccessibilityService() {
             if (KidSafeStore.isUnderSupervision(ctx)) {
                 // Skip tamper checks entirely; fall through to normal app-blocking logic.
             } else {
-                val cls = event.className?.toString()
                 // Suppression layer 2: PinGateActivity just cleared this exact window. The
                 // Settings activity is about to resume and re-fire TYPE_WINDOW_STATE_CHANGED;
                 // re-launching the gate would create the loop the user reported.
@@ -75,6 +106,13 @@ class AppBlockerService : AccessibilityService() {
                 }
             }
         }
+
+        // Shared-phone short-circuit. On a shared install where Child Mode is OFF, the phone
+        // belongs to the PARENT — we must not block anything they open. Tamper detection above
+        // still runs so accessibility/admin tamper from a curious child remains PIN-gated even
+        // when Child Mode hasn't been started yet. Two-device installs never trip this branch
+        // because `DEVICE_MODE` is never set to "shared" on those.
+        if (sharedInactive) return
 
         // System launcher / settings are never blocked — always allow them so the user isn't stuck
         if (pkg.startsWith("com.android.launcher") || pkg == "com.android.systemui") return
@@ -196,6 +234,45 @@ class AppBlockerService : AccessibilityService() {
             event.contentDescription?.toString()?.let(parts::add)
         } catch (_: Exception) { /* ignore */ }
         return parts.joinToString(" ")
+    }
+
+    /**
+     * Emits a `KidSafeForegroundApp` device event so [com.kidsafe.modules.AppBlockerModule]'s
+     * JS subscribers (currently `childSyncEngine.ts`) can write the current foreground app to
+     * Firestore for the parent dashboard's live pill.
+     *
+     * We grab the React context through [ReactApplication] (new arch first, legacy fallback).
+     * If the JS engine hasn't booted yet — possible right after a fresh process start — we
+     * silently drop the event; the next `TYPE_WINDOW_STATE_CHANGED` will retry, and the JS
+     * side also asks for the current value on startup via Firestore's snapshot.
+     */
+    private fun emitForegroundApp(pkg: String) {
+        try {
+            val app = applicationContext as? ReactApplication ?: run {
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "fg_emit_drop reason=no_react_application pkg=$pkg")
+                }
+                return
+            }
+            val reactContext = app.reactHost?.currentReactContext
+                ?: @Suppress("DEPRECATION") app.reactNativeHost.reactInstanceManager.currentReactContext
+                ?: run {
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG, "fg_emit_drop reason=no_react_context pkg=$pkg")
+                    }
+                    return
+                }
+            val map = Arguments.createMap().apply {
+                putString("packageName", pkg)
+                putDouble("timestamp", System.currentTimeMillis().toDouble())
+            }
+            reactContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                .emit("KidSafeForegroundApp", map)
+        } catch (e: Exception) {
+            // Never let a pill-emit failure tear down the accessibility service.
+            Log.w(TAG, "emitForegroundApp failed (non-fatal)", e)
+        }
     }
 
     private val mainHandler by lazy { Handler(Looper.getMainLooper()) }

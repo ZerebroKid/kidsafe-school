@@ -12,7 +12,8 @@ import type {AuthStackParamList} from '../../navigation/types';
 type Props = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 
 export function SignupScreen({route, navigation}: Props) {
-  const {role} = route.params;
+  const {role, deviceMode} = route.params;
+  const isSharedParent = role === 'parent' && deviceMode === 'shared';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,7 +30,13 @@ export function SignupScreen({route, navigation}: Props) {
     }
     try {
       setLoading(true);
-      await signUpWithEmail({name: name.trim(), email: email.trim(), password, role});
+      await signUpWithEmail({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        role,
+        deviceMode,
+      });
       // App.tsx routes them to the verify screen or next step
     } catch (e) {
       Alert.alert('Signup failed', (e as Error).message);
@@ -38,14 +45,21 @@ export function SignupScreen({route, navigation}: Props) {
     }
   }
 
+  const title =
+    role === 'child'
+      ? 'Create a child account'
+      : isSharedParent
+        ? 'Set up shared phone mode'
+        : 'Create a parent account';
+  const subtitle =
+    role === 'child'
+      ? "You'll need your parent's 6-digit code in the next step."
+      : isSharedParent
+        ? 'This account belongs to you. The same phone will host one child profile that you can lock down on demand.'
+        : 'This account will see the children you link to it.';
+
   return (
-    <Screen
-      title={role === 'parent' ? 'Create a parent account' : 'Create a child account'}
-      subtitle={
-        role === 'parent'
-          ? 'This account will see the children you link to it.'
-          : "You'll need your parent's 6-digit code in the next step."
-      }>
+    <Screen title={title} subtitle={subtitle}>
       <TextInput
         label="Your name"
         value={name}

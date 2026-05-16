@@ -23,6 +23,7 @@ class KidSafePackage : ReactPackage {
             OemSettingsModule(reactContext),
             PinModule(reactContext),
             SupervisionModule(reactContext),
+            ChildModeModule(reactContext),
         )
 
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> =

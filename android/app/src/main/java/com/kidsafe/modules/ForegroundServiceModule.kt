@@ -40,6 +40,15 @@ class ForegroundServiceModule(reactContext: ReactApplicationContext) :
         promise.resolve(running)
     }
 
+    // Required so JS can subscribe to `KidSafeScreenState` via
+    // `new NativeEventEmitter(ForegroundServiceNative)`. The event is emitted from
+    // KidSafeForegroundService (not this module) but RCTDeviceEventEmitter is a shared bus.
+    @ReactMethod
+    fun addListener(eventName: String) { /* no-op */ }
+
+    @ReactMethod
+    fun removeListeners(count: Int) { /* no-op */ }
+
     companion object {
         const val NAME = "ForegroundService"
     }

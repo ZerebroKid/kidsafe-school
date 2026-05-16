@@ -3,9 +3,11 @@ import firestore, {firebase} from '@react-native-firebase/firestore';
 import type {
   AppEntry,
   ChildDoc,
+  ChildModeState,
   Geofence,
   Geo,
   Schedule,
+  SharedProfile,
   UsageDailyDoc,
   UserDoc,
 } from './types';
@@ -156,6 +158,125 @@ export async function setGeofence(childUid: string, g: Geofence) {
 
 export async function setSchedule(childUid: string, s: Schedule) {
   await paths.child(childUid).set({schedule: s}, {merge: true});
+}
+
+/**
+ * Shared-phone helpers --------------------------------------------------------
+ *
+ * In shared mode, the parent's own Firebase user owns the child profile at
+ * `children/{parentUid}_shared`. The doc id is deterministic so the rules can validate
+ * ownership via the `parentOwns(...)` helper without needing a separate users-collection
+ * lookup. These helpers create the profile, mirror Child Mode state, and tear it down on
+ * mode-switch.
+ */
+
+/** Deterministic shared-profile id for a given parent uid. */
+export function sharedProfileChildUid(parentUid: string): string {
+  return `${parentUid}_shared`;
+}
+
+/**
+ * First-time setup for a shared-phone install. Creates the child profile doc and stamps the
+ * parent's user doc with the shared-profile pointer. Idempotent — re-running on an existing
+ * shared profile just updates the name and bumps `appsLastSyncedAt` heuristics.
+ */
+export async function createSharedChildProfile(
+  parentUid: string,
+  childName: string,
+): Promise<SharedProfile> {
+  const childUid = sharedProfileChildUid(parentUid);
+  const createdAt = Date.now();
+  const profile: SharedProfile = {childUid, childName, createdAt};
+
+  // Create the child doc with mode + parentUid so `parentOwns(...)` is satisfied. Use
+  // `set + merge` so a re-setup doesn't wipe schedule / blocklist / usage data the parent
+  // may have configured already.
+  await paths.child(childUid).set(
+    {
+      mode: 'shared',
+      parentUid,
+      status: 'online',
+      lastSeenAt: firebase.firestore.FieldValue.serverTimestamp(),
+      lockState: {locked: false, until: null},
+    },
+    {merge: true},
+  );
+
+  await paths.user(parentUid).set(
+    {
+      deviceMode: 'shared',
+      sharedProfile: profile,
+    },
+    {merge: true},
+  );
+
+  return profile;
+}
+
+/**
+ * Flip the Child Mode flag on the shared profile. Two callers:
+ *   - "Start Child Mode" CTA → `setChildModeActive(parentUid, true)`
+ *   - "Exit Child Mode" PIN gate → `setChildModeActive(parentUid, false)`
+ *
+ * Pairs with the native `ChildMode.setActive(...)` call in the same code path so Firestore
+ * and the native flag never diverge.
+ */
+export async function setChildModeActive(
+  parentUid: string,
+  active: boolean,
+): Promise<void> {
+  const childUid = sharedProfileChildUid(parentUid);
+  const update: Partial<ChildDoc> = {
+    childMode: active
+      ? {
+          active: true,
+          startedAt: Date.now(),
+          startedByParentUid: parentUid,
+        } as ChildModeState
+      : {
+          active: false,
+          // Keep startedAt + startedByParentUid for the post-session summary; the engine
+          // doesn't care about them when active=false.
+          startedAt: 0,
+          startedByParentUid: parentUid,
+        },
+  };
+  await paths.child(childUid).set(update, {merge: true});
+}
+
+/**
+ * Tear down the shared profile on a mode switch back to two-device. Best-effort: we delete
+ * the apps + usage subcollections first, then the child doc itself, then clear the pointer
+ * on the parent's user doc.
+ */
+export async function deleteSharedChildProfile(parentUid: string): Promise<void> {
+  const childUid = sharedProfileChildUid(parentUid);
+
+  // Batched cleanup of subcollections. Firestore doesn't recursively delete docs from the
+  // client SDK, so we enumerate and chunk-delete. 450 per batch matches the engine's chunk
+  // size, which is the safe limit below Firestore's 500 hard cap.
+  const subcollections = [paths.apps(childUid), paths.events(childUid), paths.usageDaily(childUid)];
+  for (const coll of subcollections) {
+    let snap = await coll.limit(450).get();
+    while (!snap.empty) {
+      const batch = firestore().batch();
+      snap.docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+      snap = await coll.limit(450).get();
+    }
+  }
+
+  await paths.child(childUid).delete().catch(() => {
+    // Doc may already be gone — non-fatal.
+  });
+
+  await paths.user(parentUid).set(
+    {
+      deviceMode: 'two_device',
+      sharedProfile: firebase.firestore.FieldValue.delete(),
+    },
+    {merge: true},
+  );
 }
 
 /**

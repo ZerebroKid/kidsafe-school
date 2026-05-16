@@ -8,16 +8,28 @@ import type {AuthStackParamList} from '../../navigation/types';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'RoleSelector'>;
 
+/**
+ * Three setup paths instead of the old two. The "Parent + shared phone" card is the
+ * single-device-family flow — same `role: 'parent'` underneath but with
+ * `deviceMode: 'shared'` threaded through to `ensureUserDoc` and onward to the engine /
+ * navigator gating.
+ */
 export function RoleSelectorScreen({navigation}: Props) {
   return (
     <Screen
-      title="Who is this device for?"
-      subtitle="Pick Parent if you will monitor your child's device from this phone. Pick Child if this IS your child's phone.">
+      title="How will you use KidSafe?"
+      subtitle="Pick the setup that matches your family. You can change this later from Settings.">
       <RoleCard
         emoji="👨‍👩‍👧"
-        title="I'm a parent"
-        description="Keep an eye on my child from this device"
-        onPress={() => navigation.navigate('Signup', {role: 'parent'})}
+        title="Parent · two phones"
+        description="I have my own phone and my child has their own phone"
+        onPress={() => navigation.navigate('Signup', {role: 'parent', deviceMode: 'two_device'})}
+      />
+      <RoleCard
+        emoji="📱"
+        title="Parent · one shared phone"
+        description="My child uses my phone for study time. Configure here, then hand it over."
+        onPress={() => navigation.navigate('Signup', {role: 'parent', deviceMode: 'shared'})}
       />
       <RoleCard
         emoji="🙋"

@@ -129,6 +129,38 @@ class AppBlockerModule(reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Launches an installed app by package name. Used by the shared-phone "Child Mode" kiosk
+     * which renders the allowlist as tappable tiles. Resolves the launcher activity via
+     * `PackageManager.getLaunchIntentForPackage` so it works with the system home screen's
+     * default launch intent rather than guessing the activity class name.
+     */
+    @ReactMethod
+    fun launchApp(packageName: String, promise: Promise) {
+        try {
+            val intent = reactApplicationContext.packageManager
+                .getLaunchIntentForPackage(packageName)
+            if (intent == null) {
+                promise.reject("E_APP_BLOCKER", "No launch intent for $packageName")
+                return
+            }
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            reactApplicationContext.startActivity(intent)
+            promise.resolve(null)
+        } catch (e: Exception) {
+            promise.reject("E_APP_BLOCKER", e)
+        }
+    }
+
+    // Required so JS can subscribe to `KidSafeForegroundApp` via
+    // `new NativeEventEmitter(AppBlockerNative)`. The event itself is emitted from
+    // AppBlockerService (not this module) but RCTDeviceEventEmitter is a shared bus.
+    @ReactMethod
+    fun addListener(eventName: String) { /* no-op */ }
+
+    @ReactMethod
+    fun removeListeners(count: Int) { /* no-op */ }
+
     private fun isAccessibilityEnabled(context: Context): Boolean {
         // Some OEM skins (Infinix XOS, MIUI) leave stale service entries even when the master
         // accessibility switch is off, so we also consult `ACCESSIBILITY_ENABLED`.

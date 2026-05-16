@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.AppOpsManager
 import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
+import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
@@ -211,6 +212,53 @@ class ScreenTimeModule(reactContext: ReactApplicationContext) :
 
             val out: WritableMap = Arguments.createMap().apply {
                 putArray("days", daysOut)
+            }
+            promise.resolve(out)
+        } catch (e: Exception) {
+            promise.reject("E_SCREENTIME", e)
+        }
+    }
+
+    /**
+     * Returns the most recently foregrounded app package in the last [lookbackMs] window
+     * according to UsageStats events. This is used as a lightweight cross-check for the live
+     * foreground-app pill scorer when accessibility emits an OEM-noisy launcher package.
+     */
+    @ReactMethod
+    fun getRecentForegroundApp(lookbackMs: Int, promise: Promise) {
+        try {
+            if (!hasUsageAccess(reactApplicationContext)) {
+                promise.reject("E_NO_USAGE_ACCESS", "Grant 'Usage access' permission first")
+                return
+            }
+            val usm = reactApplicationContext
+                .getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val now = System.currentTimeMillis()
+            val start = now - lookbackMs.toLong().coerceAtLeast(5_000L)
+            val events = usm.queryEvents(start, now)
+            val event = UsageEvents.Event()
+
+            var latestPkg: String? = null
+            var latestAt = 0L
+            val ownPkg = reactApplicationContext.packageName
+
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event)
+                val isForegroundEvent =
+                    event.eventType == UsageEvents.Event.ACTIVITY_RESUMED ||
+                        event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND
+                if (!isForegroundEvent) continue
+                val pkg = event.packageName ?: continue
+                if (pkg == ownPkg) continue
+                if (event.timeStamp >= latestAt) {
+                    latestAt = event.timeStamp
+                    latestPkg = pkg
+                }
+            }
+
+            val out: WritableMap = Arguments.createMap().apply {
+                putString("packageName", latestPkg)
+                putDouble("updatedAt", latestAt.toDouble())
             }
             promise.resolve(out)
         } catch (e: Exception) {

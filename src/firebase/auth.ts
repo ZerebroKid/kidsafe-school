@@ -3,7 +3,7 @@ import firestore, {firebase} from '@react-native-firebase/firestore';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 import {ENV} from '../config/env';
-import type {Role, UserDoc} from './types';
+import type {DeviceMode, Role, UserDoc} from './types';
 
 GoogleSignin.configure({
   webClientId: ENV.GOOGLE_WEB_CLIENT_ID,
@@ -15,10 +15,16 @@ export interface SignupInput {
   email: string;
   password: string;
   role: Role;
+  /**
+   * Only meaningful for `role === 'parent'`. Picks between the two-device flow (default)
+   * and the shared-phone flow. Threaded through to `ensureUserDoc` so the user doc is
+   * stamped with the right mode at creation time.
+   */
+  deviceMode?: DeviceMode;
 }
 
 export async function signUpWithEmail(input: SignupInput) {
-  const {email, password, name, role} = input;
+  const {email, password, name, role, deviceMode} = input;
   const cred = await auth().createUserWithEmailAndPassword(email, password);
   try {
     await cred.user.updateProfile({displayName: name});
@@ -27,6 +33,7 @@ export async function signUpWithEmail(input: SignupInput) {
       name,
       email,
       photoURL: cred.user.photoURL ?? null,
+      deviceMode: role === 'parent' ? deviceMode : undefined,
     });
     // Kick off the verification email — the UI waits for the user to click the link.
     await cred.user.sendEmailVerification();
@@ -111,6 +118,11 @@ export async function ensureUserDoc(
     fcmToken: partial.fcmToken ?? null,
     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
   };
+  // Stamp deviceMode only when explicitly provided (parent signups). Leaving it absent for
+  // child accounts keeps the type narrow and avoids polluting child docs.
+  if (partial.deviceMode) {
+    doc.deviceMode = partial.deviceMode;
+  }
   await withFirestoreRetry(() => ref.set(doc));
 }
 
