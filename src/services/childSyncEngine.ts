@@ -1027,8 +1027,18 @@ async function crossCheckRecentForegroundFromUsageStats(): Promise<string | null
 async function pushPerAppUsage(childUid: string, days: number) {
   if (!(await ScreenTime.hasUsageAccess())) {return;}
   const {days: data} = await ScreenTime.getPerAppUsage(days);
-  // Each day write is idempotent (set+merge by date doc id), so we don't bother batching:
-  // separate writes parallelise nicely and are tiny.
+  // Diagnostic: dump exactly what native returned before we hand it to Firestore. Pair this
+  // with the `KidSafe.ScreenTime` Log.i on the child phone — they should match 1:1.
+  console.log(
+    '[KidSafe][Usage] push',
+    data.map(d => ({
+      date: d.date,
+      total: d.totalMins,
+      keys: Object.keys(d.perApp),
+    })),
+  );
+  // Each day write is now a full overwrite (no merge) so a missing key drops; see
+  // `setUsageDaily` for why.
   await Promise.all(
     data.map(d => setUsageDaily(childUid, d.date, d.totalMins, d.perApp)),
   );

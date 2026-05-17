@@ -11,6 +11,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
+import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -113,14 +114,17 @@ class ScreenTimeModule(reactContext: ReactApplicationContext) :
             val start = cal.timeInMillis
             val end = System.currentTimeMillis()
 
-            val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, start, end)
-                ?: emptyList()
-            var totalMs = 0L
-            for (s in stats) {
-                // Skip our own app and system UI so the tally matches what parents see
-                if (s.packageName == reactApplicationContext.packageName) continue
-                totalMs += s.totalTimeInForeground
-            }
+            // Event-pairing instead of `queryUsageStats(INTERVAL_DAILY).sum { totalTimeInForeground }`.
+            // The old bucket-sum was off by ~10x on Transsion/XOS because:
+            //   1. INTERVAL_DAILY returns the full bucket totals (not clipped to [start, end])
+            //   2. Multiple records per app per overlapping bucket get summed → double counting
+            //   3. OEM buckets include ambient / split-screen / recents-preview time
+            // Event pairing matches what Digital Wellbeing shows.
+            val perPkgMs = queryForegroundMsPerPackage(usm, start, end)
+            val ownPkg = reactApplicationContext.packageName
+            val totalMs = perPkgMs.entries
+                .filter { (pkg, _) -> !isSystemNoise(pkg, ownPkg) }
+                .sumOf { it.value }
             val minutes = (totalMs / 1000 / 60).toInt()
             KidSafeStore.setScreenTimeUsedMins(reactApplicationContext, minutes)
             KidSafeStore.setScreenTimeDay(reactApplicationContext, today())
@@ -177,25 +181,26 @@ class ScreenTimeModule(reactContext: ReactApplicationContext) :
                 }.timeInMillis.coerceAtMost(now)
                 val dateKey = dateFmt.format(java.util.Date(startMs))
 
-                // Aggregate per-package — UsageStatsManager can return multiple stats records
-                // per package per window (one per app session bucket), so we merge.
-                val perPackageMs = HashMap<String, Long>()
-                val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startMs, endMs)
-                    ?: emptyList()
-                for (s in stats) {
-                    val pkg = s.packageName ?: continue
-                    if (pkg == ownPkg) continue
-                    if (s.totalTimeInForeground <= 0L) continue
-                    perPackageMs[pkg] = (perPackageMs[pkg] ?: 0L) + s.totalTimeInForeground
-                }
+                // Event-pairing produces actual on-screen time per package — matches Digital
+                // Wellbeing. See the long comment in `getTodayUsedMinutes` for why
+                // `queryUsageStats(INTERVAL_DAILY)` inflated numbers by ~10x on XOS/HiOS.
+                val perPackageMs = queryForegroundMsPerPackage(usm, startMs, endMs)
+                    .filterKeys { !isSystemNoise(it, ownPkg) }
 
-                // Convert to minutes, drop sub-minute apps, sort desc, cap.
                 val ranked = perPackageMs
                     .map { (pkg, ms) -> pkg to (ms / 1000 / 60).toInt() }
                     .filter { it.second >= 1 }
                     .sortedByDescending { it.second }
                     .take(cap)
                 val totalMins = ranked.sumOf { it.second }
+
+                // Diagnostic: lets us cross-check what the kernel reports against Digital
+                // Wellbeing. Logged once per day in the requested window — cheap, and printed
+                // only when JS calls getPerAppUsage (startup + every 10 min, not on every poll).
+                Log.i(
+                    TAG,
+                    "perAppUsage day=$dateKey total=${totalMins}m top=${ranked.take(5)}",
+                )
 
                 val perAppMap: WritableMap = Arguments.createMap()
                 for ((pkg, mins) in ranked) {
@@ -326,9 +331,154 @@ class ScreenTimeModule(reactContext: ReactApplicationContext) :
     private fun today(): String =
         SimpleDateFormat("yyyy-DDD", Locale.US).format(java.util.Date())
 
+    /**
+     * Walks `UsageEvents` in `[startMs - LOOKBACK_MS, endMs]` and returns the sum of every
+     * package's actual foreground time clipped to `[startMs, endMs]`.
+     *
+     * Why we don't use `queryUsageStats(INTERVAL_DAILY).sum`:
+     *  - The returned `totalTimeInForeground` is the **whole bucket**, not the slice within
+     *    `[startMs, endMs]`. Querying "midnight → now" for today still returns the full daily
+     *    bucket, and on OEMs that have not yet rolled the bucket (XOS, HiOS, MIUI) it includes
+     *    yesterday's residue.
+     *  - For multi-day windows `queryUsageStats` returns several records per package across
+     *    overlapping buckets; summing them double-counts.
+     *  - OEM aggregates include ambient / split-screen / recents-preview time that real users
+     *    don't perceive as "screen time".
+     *
+     * The pairing algorithm:
+     *  1. Look back `LOOKBACK_MS` before `startMs` so a session that began before the window
+     *     can still be paired with its `MOVE_TO_BACKGROUND` inside the window.
+     *  2. For every package, track an `openSince` timestamp set on `MOVE_TO_FOREGROUND` /
+     *     `ACTIVITY_RESUMED`. On `MOVE_TO_BACKGROUND` / `ACTIVITY_PAUSED` / `ACTIVITY_STOPPED`,
+     *     close the session and add `(pauseTs - openSince)` clipped to `[startMs, endMs]`.
+     *  3. `SCREEN_NON_INTERACTIVE` / `KEYGUARD_SHOWN` / `DEVICE_SHUTDOWN` force-close every
+     *     open session — protects against OEMs that drop the per-activity PAUSED when the
+     *     screen turns off (common on Transsion).
+     *  4. Sessions still open at the end of the loop are closed at `min(endMs, now)`.
+     */
+    private fun queryForegroundMsPerPackage(
+        usm: UsageStatsManager,
+        startMs: Long,
+        endMs: Long,
+    ): Map<String, Long> {
+        val totals = HashMap<String, Long>()
+        val openSince = HashMap<String, Long>()
+        val events = try {
+            usm.queryEvents(startMs - LOOKBACK_MS, endMs)
+        } catch (_: Exception) {
+            return totals
+        }
+        val event = UsageEvents.Event()
+
+        fun closeSession(pkg: String, pauseTs: Long) {
+            val openedAt = openSince.remove(pkg) ?: return
+            val effStart = openedAt.coerceAtLeast(startMs)
+            val effEnd = pauseTs.coerceAtMost(endMs)
+            val delta = (effEnd - effStart).coerceAtLeast(0L)
+            if (delta > 0L) {
+                totals[pkg] = (totals[pkg] ?: 0L) + delta
+            }
+        }
+
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            val pkg = event.packageName ?: continue
+            val ts = event.timeStamp
+            when (event.eventType) {
+                UsageEvents.Event.MOVE_TO_FOREGROUND -> {
+                    // Idempotent: if the same package re-resumes (activity nav within the
+                    // app) we keep the earliest openSince so we don't reset the timer.
+                    if (!openSince.containsKey(pkg)) {
+                        openSince[pkg] = ts
+                    }
+                }
+                UsageEvents.Event.MOVE_TO_BACKGROUND -> closeSession(pkg, ts)
+                else -> {
+                    // Treat lifecycle "off" signals as a forced pause for every open session.
+                    // The event-type constants for these are SDK 28+, so we compare by int
+                    // to avoid a hard ApiRequirement on devices below that level.
+                    val type = event.eventType
+                    val isOffSignal = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && (
+                        type == 16 || // SCREEN_NON_INTERACTIVE
+                        type == 17    // KEYGUARD_SHOWN
+                    )) || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && type == 26) // DEVICE_SHUTDOWN
+                    if (isOffSignal && openSince.isNotEmpty()) {
+                        val snapshot = openSince.keys.toList()
+                        for (openPkg in snapshot) {
+                            closeSession(openPkg, ts)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Window-end fallback: anything still "open" gets clipped to min(endMs, now). For
+        // historical days (endMs < now) this means clipping at endMs. For today it clips at
+        // now so a session that's still in foreground only counts up to "right now".
+        if (openSince.isNotEmpty()) {
+            val cutoff = endMs.coerceAtMost(System.currentTimeMillis())
+            for (pkg in openSince.keys.toList()) {
+                closeSession(pkg, cutoff)
+            }
+        }
+        return totals
+    }
+
+    /**
+     * Returns true for packages that should be excluded from "screen time": our own app, the
+     * SystemUI shell, permission-controller (transient permission dialogs), and every known
+     * launcher / home prefix. Matching is case-insensitive — XOS calls itself
+     * `com.transsion.XOSLauncher` with mixed casing on Infinix.
+     */
+    private fun isSystemNoise(pkg: String, ownPkg: String): Boolean {
+        if (pkg == ownPkg) return true
+        if (pkg in ALWAYS_FILTERED) return true
+        val normalized = pkg.lowercase()
+        return LAUNCHER_PREFIXES.any { normalized == it || normalized.startsWith(it) }
+    }
+
     companion object {
         const val NAME = "ScreenTime"
+        private const val TAG = "KidSafe.ScreenTime"
         private const val ALARM_REQUEST_CODE = 3101
+
+        /**
+         * Look-back applied to every event-window query so sessions that began before
+         * `startMs` can still be paired with their `MOVE_TO_BACKGROUND` inside the window. 24h
+         * is enough for any realistic phone-use session.
+         */
+        private const val LOOKBACK_MS = 24L * 60L * 60L * 1000L
+
+        /** Always excluded from per-app rollups regardless of casing or prefix. */
+        private val ALWAYS_FILTERED = setOf(
+            "com.android.systemui",
+            "android",
+            "com.google.android.permissioncontroller",
+            "com.android.permissioncontroller",
+        )
+
+        /**
+         * Launcher / home prefixes treated as "home screen visit" — not real app usage. Kept
+         * in sync with the same list used by the live-pill resolver
+         * (`KidSafeForegroundService.LAUNCHER_PREFIXES`) and the parent UI
+         * (`CurrentAppPill.LAUNCHER_PREFIXES`). Add new OEM launchers here whenever a launcher
+         * starts appearing in the chart.
+         */
+        private val LAUNCHER_PREFIXES = listOf(
+            "com.android.launcher",
+            "com.google.android.apps.nexuslauncher",
+            "com.sec.android.app.launcher",
+            "com.miui.home",
+            "com.miui.launcher",
+            "com.oppo.launcher",
+            "com.bbk.launcher2",
+            "com.realme.launcher",
+            "com.oneplus.launcher",
+            "net.oneplus.launcher",
+            "com.transsion.xoslauncher",
+            "com.transsion.launcher",
+            "com.infinix.xlauncher",
+        )
 
         fun hasUsageAccess(context: Context): Boolean {
             val ops = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager

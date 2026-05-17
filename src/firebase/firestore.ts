@@ -114,7 +114,23 @@ export function subscribeUsageWeek(
     .where('date', '>=', startKey)
     .orderBy('date')
     .onSnapshot(
-      snap => cb(snap.docs.map(d => d.data() as UsageDailyDoc)),
+      snap => {
+        // Diagnostic: show what the parent actually receives per day. If `keys` here
+        // still contains XOS Launcher / Phone / Dialer after the child has re-uploaded
+        // with the new APK, the deep-merge bug is the cause.
+        console.log(
+          '[KidSafe][Parent][UsageWeek] got',
+          snap.docs.map(d => {
+            const data = d.data() as UsageDailyDoc;
+            return {
+              id: d.id,
+              total: data.totalMins,
+              keys: Object.keys(data.perApp ?? {}),
+            };
+          }),
+        );
+        cb(snap.docs.map(d => d.data() as UsageDailyDoc));
+      },
       err => console.warn('subscribeUsageWeek error', err),
     );
 }
@@ -326,15 +342,27 @@ export async function setUsageDaily(
   totalMins: number,
   perApp: Record<string, number>,
 ) {
-  await paths.usageDaily(childUid).doc(date).set(
-    {
-      date,
-      totalMins,
-      perApp,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    },
-    {merge: true},
+  // Diagnostic: what we're about to commit. Cross-reference with the
+  // `[KidSafe][Usage] push` log above to confirm the writer didn't drop anything.
+  console.log(
+    '[KidSafe][Usage] writing',
+    date,
+    'total=',
+    totalMins,
+    'keys=',
+    Object.keys(perApp),
   );
+  // Full overwrite — NOT `{merge: true}`. Firestore does a *deep* merge for maps, so the
+  // previous (broken) write's `perApp` keys (XOS Launcher, Phone, ...) would survive every
+  // subsequent corrected write. The doc has only four self-contained fields and the
+  // `usageDaily` rule (firestore.rules) already requires hasOnly([date, totalMins, perApp,
+  // updatedAt]), so a clean overwrite is rule-compliant and idempotent.
+  await paths.usageDaily(childUid).doc(date).set({
+    date,
+    totalMins,
+    perApp,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
 }
 
 /**
