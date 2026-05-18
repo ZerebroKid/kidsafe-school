@@ -15,7 +15,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<ParentStackParamList, 'ChildDetails'>;
 
-type Tab = 'apps' | 'usage' | 'schedule' | 'location' | 'pin';
+type Tab = 'apps' | 'schedule' | 'location' | 'usage' | 'pin';
 
 interface TamperEvent {
   id: string;
@@ -59,16 +59,18 @@ export function ChildDetailsScreen({route}: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      {/* Sticky status strip — sits OUTSIDE the ScrollView so the live "Currently using"
+      {/* Sticky status strip — sits OUTSIDE the tab body so the live "Currently using"
           pill stays visible regardless of which tab is selected or how far the user has
-          scrolled. Padding mirrors the inner content gutter so the pill aligns with cards. */}
+          scrolled inside scrollable tabs. */}
       <View style={styles.statusStrip}>
         <CurrentAppPill childUid={childUid} />
       </View>
-      <ScrollView contentContainerStyle={{paddingBottom: spacing.xl}}>
+      {/* `body` is a column: fixed tab bar + flex-fill content. The Location tab needs the
+          flex-fill region — `MapView` with flex:1 does not expand inside an outer ScrollView
+          whose content height is only `minHeight: 360`, which produced the half-empty map. */}
+      <View style={styles.body}>
         <View style={styles.tabbar}>
           <TabButton label="Apps" active={tab === 'apps'} onPress={() => setTab('apps')} />
-          <TabButton label="Usage" active={tab === 'usage'} onPress={() => setTab('usage')} />
           <TabButton
             label="Schedule"
             active={tab === 'schedule'}
@@ -79,27 +81,34 @@ export function ChildDetailsScreen({route}: Props) {
             active={tab === 'location'}
             onPress={() => setTab('location')}
           />
+          <TabButton label="Usage" active={tab === 'usage'} onPress={() => setTab('usage')} />
           <TabButton label="PIN" active={tab === 'pin'} onPress={() => setTab('pin')} />
         </View>
 
-        <View style={{minHeight: 360}}>
-          {/* Tamper panel is Apps-tab-only by design: it talks about "uninstall attempts"
-              which is the same surface the parent reviews when deciding whether to tighten
-              the blocklist or rotate the PIN. The Firestore listener stays mounted at the
-              screen level (see useEffect above) so switching tabs back to Apps shows the
-              latest row immediately with no re-subscribe lag. */}
-          {tab === 'apps' && (
-            <>
-              <TamperPanel events={tamperEvents} />
-              <AppsTab childUid={childUid} />
-            </>
-          )}
-          {tab === 'usage' && <UsageTab childUid={childUid} />}
-          {tab === 'schedule' && <ScheduleTab childUid={childUid} />}
-          {tab === 'location' && <LocationTab childUid={childUid} />}
-          {tab === 'pin' && <PinTab childUid={childUid} childName={childName} />}
-        </View>
-      </ScrollView>
+        {tab === 'location' ? (
+          <LocationTab childUid={childUid} />
+        ) : (
+          <ScrollView
+            style={styles.scrollableTab}
+            contentContainerStyle={styles.scrollableTabContent}
+            keyboardShouldPersistTaps="handled">
+            {/* Tamper panel is Apps-tab-only by design: it talks about "uninstall attempts"
+                which is the same surface the parent reviews when deciding whether to tighten
+                the blocklist or rotate the PIN. The Firestore listener stays mounted at the
+                screen level (see useEffect above) so switching tabs back to Apps shows the
+                latest row immediately with no re-subscribe lag. */}
+            {tab === 'apps' && (
+              <>
+                <TamperPanel events={tamperEvents} />
+                <AppsTab childUid={childUid} />
+              </>
+            )}
+            {tab === 'schedule' && <ScheduleTab childUid={childUid} />}
+            {tab === 'usage' && <UsageTab childUid={childUid} />}
+            {tab === 'pin' && <PinTab childUid={childUid} childName={childName} />}
+          </ScrollView>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -179,6 +188,18 @@ const styles = StyleSheet.create({
   statusStrip: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
+  },
+  /** Column below the status pill — tab bar is fixed; Location fills remainder. */
+  body: {
+    flex: 1,
+  },
+  /** Scrollable region for Apps / Schedule / Usage / PIN only. */
+  scrollableTab: {
+    flex: 1,
+  },
+  scrollableTabContent: {
+    paddingBottom: spacing.xl,
+    flexGrow: 1,
   },
   tabbar: {
     flexDirection: 'row',

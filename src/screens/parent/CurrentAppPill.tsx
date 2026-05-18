@@ -172,11 +172,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.md,
     backgroundColor: colors.surface,
     borderRadius: radius.pill,
-    paddingVertical: 6,
-    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 12,
+    paddingHorizontal: spacing.lg - 4,
     maxWidth: '100%',
   },
   pillMuted: {
@@ -184,14 +184,14 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   icon: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
+    width: 26,
+    height: 26,
+    borderRadius: 6,
   },
   iconFallback: {
     backgroundColor: colors.surfaceAlt,
@@ -200,12 +200,13 @@ const styles = StyleSheet.create({
   },
   iconFallbackText: {
     color: colors.text,
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: '700',
   },
   label: {
     color: colors.text,
-    fontSize: 12,
+    fontSize: 15,
+    lineHeight: 20,
     fontWeight: '600',
   },
   labelMuted: {
@@ -214,11 +215,12 @@ const styles = StyleSheet.create({
   },
   textWrap: {
     flexShrink: 1,
-    gap: 2,
+    gap: 3,
   },
   sublabel: {
     color: colors.textMuted,
-    fontSize: 11,
+    fontSize: 13,
+    lineHeight: 17,
     fontWeight: '500',
     flexShrink: 1,
   },
