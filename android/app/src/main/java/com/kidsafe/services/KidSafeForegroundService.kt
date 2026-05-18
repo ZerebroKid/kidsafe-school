@@ -131,6 +131,15 @@ class KidSafeForegroundService : Service() {
         // start intent after killing us (`START_STICKY` semantics) — without this we'd resume
         // the service shell but stop emitting pill updates.
         restartForegroundTicker()
+        // (Re)attach the native location writer. `LocationWriter.start` is idempotent and
+        // permission-aware — a missing FINE grant produces a clean log line instead of a crash,
+        // and JS calls `ForegroundService.start` again post-onboarding so the writer attaches
+        // the moment permission is granted.
+        try {
+            LocationWriter.start(applicationContext)
+        } catch (e: Exception) {
+            Log.w(TAG, "LocationWriter.start threw (non-fatal)", e)
+        }
         return START_STICKY
     }
 
@@ -149,6 +158,11 @@ class KidSafeForegroundService : Service() {
             }
         }
         screenReceiver = null
+        try {
+            LocationWriter.stop()
+        } catch (e: Exception) {
+            Log.w(TAG, "LocationWriter.stop threw (non-fatal)", e)
+        }
         super.onDestroy()
     }
 
@@ -453,6 +467,28 @@ class KidSafeForegroundService : Service() {
                 context.startForegroundService(intent)
             } else {
                 context.startService(intent)
+            }
+        }
+
+        /**
+         * True when an instance of this service is currently running in the app process. Used
+         * by [com.kidsafe.receivers.LocationToggleReceiver] to gate re-attach (the receiver
+         * mustn't try to start the service itself — Android 8+ blocks background-started FG
+         * services and the engine's AppState recovery owns that responsibility).
+         *
+         * `ActivityManager.getRunningServices` is deprecated for cross-app queries but still
+         * works for the calling app's own services, which is all we need.
+         */
+        fun isAlive(context: Context): Boolean {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
+                ?: return false
+            return try {
+                @Suppress("DEPRECATION")
+                am.getRunningServices(Int.MAX_VALUE).any {
+                    it.service.className == KidSafeForegroundService::class.java.name
+                }
+            } catch (_: Exception) {
+                false
             }
         }
     }

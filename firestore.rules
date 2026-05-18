@@ -50,6 +50,44 @@ service cloud.firestore {
       return ['lockState', 'geofence', 'screenTime', 'schedule', 'pinResetRequest', 'childMode'];
     }
 
+    // Allowed values for `locationDiagnostics.reason`. Keeping this list here (instead of
+    // a wildcard string) so a compromised client can't write arbitrary strings that the
+    // parent UI then renders as user-facing copy. Mirrors `LocationDiagnosticsReason` in
+    // `src/firebase/types.ts`.
+    function allowedLocationDiagReasons() {
+      return [
+        'fine_permission_missing',
+        'background_permission_missing',
+        'system_location_off',
+        'play_services_unavailable',
+        'fg_service_not_running',
+        'first_fix_timeout',
+        'firestore_write_failing'
+      ];
+    }
+
+    // Schema-validate `request.resource.data.locationDiagnostics` if present. We accept
+    // absent (most writes don't touch this field), and we accept a shape with required
+    // (evaluatedAt:number, ok:bool) + optional (reason:enum, hint:string). Anything else is
+    // rejected so a hostile client can't bloat the field.
+    function locationDiagnosticsValid() {
+      return !('locationDiagnostics' in request.resource.data)
+        || (
+          request.resource.data.locationDiagnostics.keys().hasOnly(['evaluatedAt', 'ok', 'reason', 'hint'])
+            && request.resource.data.locationDiagnostics.evaluatedAt is number
+            && request.resource.data.locationDiagnostics.ok is bool
+            && (
+              !('reason' in request.resource.data.locationDiagnostics)
+                || request.resource.data.locationDiagnostics.reason in allowedLocationDiagReasons()
+            )
+            && (
+              !('hint' in request.resource.data.locationDiagnostics)
+                || (request.resource.data.locationDiagnostics.hint is string
+                     && request.resource.data.locationDiagnostics.hint.size() <= 200)
+            )
+        );
+    }
+
     // users -------------------------------------------------------------------
     match /users/{uid} {
       // Anyone signed in can look up a user by pairing code; we need this so a
@@ -73,11 +111,13 @@ service cloud.firestore {
     match /children/{childUid} {
       allow read: if isSelf(childUid) || isParentOf(childUid) || parentOwns(childUid);
 
-      // Child can create/update own doc freely (legacy two-device flow).
-      allow create, update: if isSelf(childUid);
+      // Child can create/update own doc freely (legacy two-device flow). The only
+      // shape-check is on `locationDiagnostics` so a compromised child can't write
+      // arbitrary banner copy into the parent UI.
+      allow create, update: if isSelf(childUid) && locationDiagnosticsValid();
 
-      // Shared-phone profile: parent owns the doc directly.
-      allow create, update, delete: if parentOwns(childUid);
+      // Shared-phone profile: parent owns the doc directly. Same diagnostics shape check.
+      allow create, update, delete: if parentOwns(childUid) && locationDiagnosticsValid();
 
       // Parent can ALSO create the doc if it doesn't exist yet, but only with
       // command fields. This lets a parent set things like `schedule` before

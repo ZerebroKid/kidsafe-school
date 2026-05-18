@@ -67,6 +67,45 @@ export interface Geo {
   updatedAt: number;
 }
 
+/**
+ * Reasons the child's location pipeline can be unhealthy. Drives the plain-English copy
+ * shown on the parent's `LocationTab` banner. Single-word ids keep the Firestore payload
+ * compact and make rule validation trivial (`reason in [...]`).
+ *
+ * Ordered roughly from "kid needs to do something" → "device needs to be restarted" so the
+ * UI can pick the most-actionable reason when multiple flags are simultaneously true.
+ */
+export type LocationDiagnosticsReason =
+  | 'fine_permission_missing'
+  | 'background_permission_missing'
+  | 'system_location_off'
+  | 'play_services_unavailable'
+  | 'fg_service_not_running'
+  | 'first_fix_timeout'
+  | 'firestore_write_failing';
+
+/**
+ * Child-written health record for the location pipeline. Mirrors what's surfaced in the
+ * parent's "Why isn't location updating?" banner. The native `LocationWriter` and the JS
+ * `ensureLocationWatcher` are both writers; throttled to one write per minute on the
+ * child side to avoid a hot-loop.
+ */
+export interface LocationDiagnostics {
+  /** Unix-ms when the child app last evaluated its location pipeline. */
+  evaluatedAt: number;
+  /** True = every check passed and the writer is delivering fixes. */
+  ok: boolean;
+  /** When `ok === false`. Drives the parent banner's copy + CTA. */
+  reason?: LocationDiagnosticsReason;
+  /**
+   * Free-form context for the parent banner. Examples:
+   *   "Realme is killing the background service — ask kid to enable Autostart for KidSafe."
+   *   "System location toggle is OFF — ask kid to tap Settings → Location → On."
+   * Kept short (< 140 chars) so it fits on one line of the banner on small phones.
+   */
+  hint?: string;
+}
+
 export interface Geofence {
   centerLat: number;
   centerLng: number;
@@ -198,6 +237,13 @@ export interface ChildDoc {
    * field was introduced) — parent UI shows a neutral placeholder in that case.
    */
   currentApp?: ChildForegroundApp;
+  /**
+   * Health record for the location pipeline. Written by the child (native `LocationWriter`
+   * and JS `ensureLocationWatcher`) whenever the state transitions (permission granted ↔
+   * revoked, system location toggled, first-fix watchdog fires, Firestore writes fail).
+   * Read by the parent's `LocationTab` to render a "why isn't location updating?" banner.
+   */
+  locationDiagnostics?: LocationDiagnostics;
 }
 
 export interface AppEntry {

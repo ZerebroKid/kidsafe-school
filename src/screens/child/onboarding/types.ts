@@ -67,6 +67,18 @@ export interface InstructionsStep extends StepBase {
    * Default `false` — the step is treated as required-for-Finish.
    */
   optional?: boolean;
+  /**
+   * `true` for hard-block steps where the verification sheet's "Yes" path MUST honest-check
+   * via `check()` before advancing. Default `false` matches the existing
+   * "trust the user, FinalStep is the safety net" behavior used by Accessibility / Usage steps.
+   *
+   * Set on `locationServicesStep` because of the Realme scenario where a kid grants
+   * `ACCESS_FINE_LOCATION` but never flips on the system Location toggle — the FinalStep audit
+   * couldn't catch this until we added a dedicated probe (`Location.isLocationServicesEnabled`),
+   * so we treat the step itself as the authority. Pairs with `unverifiable: false` (default) so
+   * the verification UI still asks "Did you toggle it?", but a dishonest "Yes" is caught.
+   */
+  strict?: boolean;
 }
 
 export interface RuntimeStep extends StepBase {

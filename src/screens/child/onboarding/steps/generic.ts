@@ -7,8 +7,10 @@ import {
   batteryCheck,
   deviceAdminStep,
   finalStep,
+  locationBackgroundExplainStep,
   locationBackgroundStep,
   locationForegroundStep,
+  locationServicesStep,
   notificationsStep,
   overlayCheck,
   pinSetupStep,
@@ -30,6 +32,14 @@ export const genericSteps: Step[] = [
   activityStep,
   locationForegroundStep,
   locationBackgroundStep,
+  // Auto-skips when `ACCESS_BACKGROUND_LOCATION` is already granted (wizard's per-step
+  // `check()` autoadvance); only shown when the kid picked "While using" or denied the
+  // runtime dialog. Stays in the array unconditionally so re-entries work after a
+  // permission revoke.
+  locationBackgroundExplainStep,
+  // Final location gate — closes the Realme "permission granted, GPS toggle off" hole. Auto-
+  // skips when the system Location switch is already on, so happy-path users feel no friction.
+  locationServicesStep,
 
   accessibilityDisclosureStep,
   {

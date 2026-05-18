@@ -139,6 +139,21 @@ export function InstructionStep({
     } catch {
       // fall through
     }
+    // Strict steps refuse to advance until `check()` actually returns true — used by
+    // `locationServicesStep` because a dishonest "Yes" there means the kid never flips on the
+    // system Location toggle and the parent map silently stays empty. Bounce back to Settings
+    // with an explicit alert so the kid knows the wizard isn't moving until they actually do it.
+    if (step.strict) {
+      Alert.alert(
+        "We still can't detect that change",
+        'Please flip the switch in Settings and then come back. KidSafe will check again automatically.',
+        [
+          {text: 'Cancel', style: 'cancel'},
+          {text: 'Open Settings', onPress: handleOpen},
+        ],
+      );
+      return;
+    }
     // For unverifiable steps (no public read-back API like MIUI pop-up) we have to trust the
     // user. For verifiable but optional steps (e.g. battery), we also let them through — the
     // FinalStep's authoritative check will warn if it's still missing.

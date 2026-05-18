@@ -7,8 +7,10 @@ import {
   batteryCheck,
   deviceAdminStep,
   finalStep,
+  locationBackgroundExplainStep,
   locationBackgroundStep,
   locationForegroundStep,
+  locationServicesStep,
   notificationsStep,
   overlayCheck,
   pinSetupStep,
@@ -28,6 +30,12 @@ export const samsungSteps: Step[] = [
   activityStep,
   locationForegroundStep,
   locationBackgroundStep,
+  locationBackgroundExplainStep,
+  // System-wide GPS toggle gate. Auto-skips when already on; on One UI the master toggle
+  // lives at Settings → Location and the kid normally has it enabled, so this is a no-op
+  // for the typical Samsung user — but it catches the edge case (kid manually turned it off
+  // earlier in the day or via the quick-settings tile).
+  locationServicesStep,
 
   accessibilityDisclosureStep,
   {

@@ -38,6 +38,14 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
+    <!--
+      Activity recognition (API 29+). The onboarding wizard requests this so the fused-location
+      provider can downscale polling cadence when the kid is stationary, which saves battery on
+      long sessions. Without the manifest declaration the runtime request silently no-ops and
+      `PermissionsAndroid.check` returns false forever, stalling onboarding on the activity step.
+    -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
     <application
         android:name=".MainApplication"
         android:label="@string/app_name"
@@ -145,6 +153,22 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+          Re-attach LocationWriter when the user toggles the system "Location" switch back on.
+          Implicit broadcast — must be declared `exported="true"` so the framework can deliver
+          it (on Android 14+ exported flag is mandatory for every <receiver>). The receiver
+          itself gates on role=child + foreground-service-alive before doing anything, so
+          there's no security impact from being addressable.
+        -->
+        <receiver
+            android:name=".receivers.LocationToggleReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED" />
             </intent-filter>
         </receiver>
 

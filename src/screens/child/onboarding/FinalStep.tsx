@@ -84,11 +84,18 @@ export function FinalStep({
   // -- Audit ----------------------------------------------------------------------------------
 
   const runAudit = useCallback(async () => {
-    const [access, overlay, usage, fine, battery, deviceAdmin] = await Promise.all([
+    // `gpsOn` is the system-wide Location / GPS master switch (distinct from the per-app
+    // `ACCESS_FINE_LOCATION` permission `fine` reads above). We audit both because Realme/
+    // ColorOS routinely lets the kid grant "Allow all the time" but leaves the master toggle
+    // off — in that state `LocationWriter` cannot acquire a fix and the parent map silently
+    // sits empty. Catching it here gives the kid a one-tap "fix it" jump back to the
+    // dedicated `locationServicesStep`.
+    const [access, overlay, usage, fine, gpsOn, battery, deviceAdmin] = await Promise.all([
       AppBlocker.isAccessibilityServiceEnabled().catch(() => false),
       AppBlocker.canDrawOverlays().catch(() => false),
       ScreenTime.hasUsageAccess().catch(() => false),
       Location.hasLocationPermission().catch(() => false),
+      Location.isLocationServicesEnabled().catch(() => false),
       OemSettings.isIgnoringBatteryOptimizations().catch(() => true),
       DeviceAdmin.isActive().catch(() => false),
     ]);
@@ -126,6 +133,12 @@ export function FinalStep({
         label: 'Location — needed for the live map and safe-zone alerts',
         kind: 'required',
         granted: fine,
+      },
+      {
+        id: 'locationServices',
+        label: 'GPS / Location switch — must be ON so the phone can get a fix',
+        kind: 'required',
+        granted: gpsOn,
       },
       {
         id: 'battery',

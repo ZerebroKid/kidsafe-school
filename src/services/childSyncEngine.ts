@@ -10,7 +10,7 @@ import {
   writeAppEntry,
   writeChildStatus,
   writeGeofenceEvent,
-  writeLocation,
+  writeLocationDiagnostics,
 } from '../firebase/firestore';
 import {
   AppBlocker,
@@ -24,8 +24,12 @@ import {
   Schedule,
   ScreenTime,
 } from '../modules/native';
-import type {AppEntry, ChildDoc, Schedule as ScheduleConfig} from '../firebase/types';
-import {ENV} from '../config/env';
+import type {
+  AppEntry,
+  ChildDoc,
+  LocationDiagnostics,
+  Schedule as ScheduleConfig,
+} from '../firebase/types';
 import {getOrCreateDeviceId} from './deviceId';
 
 /**
@@ -54,13 +58,34 @@ interface EngineOpts {
  */
 
 const unsubs: Array<() => void> = [];
-let locationSub: {remove: () => void} | null = null;
 let geofenceSub: {remove: () => void} | null = null;
 let appStateSub: {remove: () => void} | null = null;
 let foregroundAppSub: {remove: () => void} | null = null;
 let screenStateSub: {remove: () => void} | null = null;
-let lastLocationWriteAt = 0;
 let lastReconcileAt = 0;
+// --- Location-watcher state -----------------------------------------------------------------
+//
+// Authority for the fused-location subscription + Firestore writes lives in the native
+// `LocationWriter` (foreground service). JS no longer subscribes to `KidSafeLocation` events
+// at all — it just nudges the native writer to attach whenever permission state changes
+// AND reconciles the foreground service every AppState `'active'` transition.
+//
+// `nativeLocationWatcherAttached` is a hint for JS-side log noise reduction only — the
+// native writer is idempotent (checks its own `watching` flag), so re-calling
+// `Location.startWatching` is always safe. We DO NOT use this flag to gate
+// `ForegroundService.start` anymore; that decision is driven by `ForegroundService.isRunning`
+// so a OEM-killed service gets restarted on the next AppState active.
+//
+// `lastLocationCheckAt` debounces the AppState `'active'` recovery hook so a kid who flicks
+// the app a dozen times a minute doesn't make us call `hasLocationPermission` every flick.
+//
+// `lastDiagnosticsHash` lets us write to Firestore only when the diagnostics state ACTUALLY
+// changes — without this we'd churn writes on every AppState active (3-minute heartbeat is
+// plenty for the parent banner's freshness expectation).
+let nativeLocationWatcherAttached = false;
+let lastLocationCheckAt = 0;
+let lastDiagnosticsHash: string | null = null;
+let lastDiagnosticsWriteAt = 0;
 let screenTimeTicker: ReturnType<typeof setInterval> | null = null;
 let perAppUsageTicker: ReturnType<typeof setInterval> | null = null;
 let currentAppHeartbeatTicker: ReturnType<typeof setInterval> | null = null;
@@ -209,6 +234,22 @@ const PER_APP_USAGE_INTERVAL_MS = 10 * 60 * 1000;
 const RECONCILE_REFRESH_MS = 5 * 60 * 1000;
 
 /**
+ * Debounce for the AppState-driven `ensureLocationWatcher` re-check. Without this, a child
+ * who flicks the app a dozen times a minute would generate a dozen native bridge round-trips
+ * we don't need. 30s is short enough to feel "responsive" after granting permission in
+ * Settings, long enough to be effectively free during normal use.
+ */
+const ENSURE_LOCATION_DEBOUNCE_MS = 30_000;
+
+/**
+ * Force a `locationDiagnostics` write at least this often, even when the diagnostics state
+ * is unchanged. Lets the parent UI distinguish "child is OK and reporting" from "child
+ * hasn't run the engine in 3 minutes" via the `evaluatedAt` timestamp. 3 minutes also
+ * tracks well with the existing 5-minute `STALE_THRESHOLD_MS` on the parent side.
+ */
+const DIAGNOSTICS_HEARTBEAT_MS = 3 * 60 * 1000;
+
+/**
  * Firestore batches are capped at 500 writes. A handful of phones with bloated OEM bloatware
  * push close to that, and a device-switch reconcile may add a chunk of deletes on top. We
  * commit in 450-op slices to leave a comfortable buffer.
@@ -292,27 +333,28 @@ export async function startChildSyncEngine(childUid: string, opts: EngineOpts = 
   //    at a merged list. Failures are logged but not fatal; we retry on every foreground.
   reconcileInstalledApps(childUid).catch(e => console.warn('reconcileInstalledApps', e));
 
-  // 4. Re-run the reconcile when the app returns to foreground after a quiet stretch.
+  // 4. Re-run the reconcile + re-attempt location watcher whenever the app returns to
+  //    foreground after a quiet stretch. Two recoveries piggyback on the same listener:
+  //      (a) the apps reconcile (was here already), and
+  //      (b) `ensureLocationWatcher` — the actual fix for "permission granted late in
+  //          onboarding, native writer was never asked to attach". The native writer is
+  //          idempotent so re-calling is cheap, and `lastLocationCheckAt` debounces.
   appStateSub = AppState.addEventListener('change', (status: AppStateStatus) => {
     if (status !== 'active') {return;}
-    if (Date.now() - lastReconcileAt < RECONCILE_REFRESH_MS) {return;}
-    reconcileInstalledApps(childUid).catch(e => console.warn('reconcile on foreground', e));
+    if (Date.now() - lastReconcileAt >= RECONCILE_REFRESH_MS) {
+      reconcileInstalledApps(childUid).catch(e => console.warn('reconcile on foreground', e));
+    }
+    ensureLocationWatcher(childUid, 'app_state_active').catch(e =>
+      console.warn('[KidSafe][Location] ensure on app_state_active threw', e),
+    );
   });
 
-  // 5. Start watching location if allowed.
-  try {
-    if (await Location.hasLocationPermission()) {
-      await Location.startWatching();
-      locationSub = Location.subscribe(async loc => {
-        const now = Date.now();
-        if (now - lastLocationWriteAt < ENV.LOCATION_MIN_INTERVAL_MS) {return;}
-        lastLocationWriteAt = now;
-        await writeLocation(childUid, loc);
-      });
-    }
-  } catch (e) {
-    console.warn('location start failed', e);
-  }
+  // 5. Attach the native location watcher (idempotent; native LocationWriter owns the actual
+  //    fused-location subscription + Firestore writes). When permission isn't granted yet
+  //    (typical during onboarding), this no-ops cleanly; the AppState recovery hook above
+  //    re-tries every time the child app returns to foreground, and the onboarding wizard
+  //    nudges explicitly after the user taps "Allow" on `locationForegroundStep`.
+  await ensureLocationWatcher(childUid, 'engine_start');
 
   // 6. Listen to geofence events (raised from the GeofenceModule event emitter).
   geofenceSub = Geofence.subscribe(async t => {
@@ -491,10 +533,21 @@ export function stopChildSyncEngine() {
 
   unsubs.forEach(u => u());
   unsubs.length = 0;
-  if (locationSub) {
-    locationSub.remove();
-    locationSub = null;
+  // Native LocationWriter is detached here too — the foreground service `onDestroy` is a
+  // second-line defence, but engine shutdown should release the fused-location subscription
+  // as eagerly as it releases everything else.
+  try {
+    Location.stopWatching().catch(() => {});
+  } catch {
+    /* native bridge may already be down on hot-reload; ignore */
   }
+  nativeLocationWatcherAttached = false;
+  lastLocationCheckAt = 0;
+  // Reset diagnostics state so the next `startChildSyncEngine` write isn't suppressed by
+  // a stale hash from the previous session. The Firestore doc itself is left as-is — the
+  // parent banner will refresh on the next ensure call (immediate, via `engine_start`).
+  lastDiagnosticsHash = null;
+  lastDiagnosticsWriteAt = 0;
   if (geofenceSub) {
     geofenceSub.remove();
     geofenceSub = null;
@@ -768,6 +821,194 @@ async function pushBlocklistToNative() {
  * gating as `pushBlocklistToNative` — when Child Mode is off in shared mode, we push a
  * disabled schedule so the parent isn't restricted to an allowlist during their own usage.
  */
+/**
+ * Idempotent native-location-watcher attach + always-on FG-service reconciliation. The
+ * native `LocationWriter` owns the actual `FusedLocationProviderClient` subscription +
+ * Firestore writes; JS's job is to:
+ *
+ *   1. Probe `Location.hasLocationPermission` (FINE) and `hasBackgroundLocationPermission`
+ *      so we can build an accurate `locationDiagnostics` payload.
+ *   2. Reconcile `ForegroundService.isRunning` — restart it whenever the OEM has killed it
+ *      between AppState transitions. (Drops the previous `nativeLocationWatcherAttached`
+ *      gate around the FG service, which made post-kill recovery impossible.)
+ *   3. Nudge `Location.startWatching` so the native writer attaches its callback inside the
+ *      reborn FG service.
+ *   4. Write `locationDiagnostics` to Firestore so the parent's `LocationTab` banner can
+ *      explain *why* location is broken (permission denied, system location off, etc.).
+ *
+ * Called from:
+ *   - `engine_start`           → once at boot (usually a no-op pre-onboarding, but cheap).
+ *   - `app_state_active`       → debounced; catches "kid granted in Settings and came back".
+ *   - `onboarding_grant`       → `RuntimePermissionStep.handleAllow` after `locationForeground`
+ *                                resolves GRANTED.
+ *
+ * Debounce: only the `app_state_active` reason is debounced via `ENSURE_LOCATION_DEBOUNCE_MS`.
+ * Everything else runs immediately because the caller has a stronger signal that something
+ * actually changed.
+ */
+export async function ensureLocationWatcher(childUid: string, reason: string): Promise<void> {
+  const now = Date.now();
+  const sinceLast = now - lastLocationCheckAt;
+  if (reason === 'app_state_active' && sinceLast < ENSURE_LOCATION_DEBOUNCE_MS) {
+    return;
+  }
+  lastLocationCheckAt = now;
+
+  // 1. Permission probes. Both fail-closed: if the bridge throws we treat as missing and
+  //    write a diagnostic so the parent banner explains the bridge error.
+  let fineGranted = false;
+  let backgroundGranted = false;
+  try {
+    fineGranted = await Location.hasLocationPermission();
+  } catch (e) {
+    console.warn('[KidSafe][Location] hasLocationPermission threw', e);
+  }
+  try {
+    backgroundGranted = await Location.hasBackgroundLocationPermission();
+  } catch (e) {
+    console.warn('[KidSafe][Location] hasBackgroundLocationPermission threw', e);
+  }
+
+  // 2. FG service health probe. `ForegroundService.isRunning` reads
+  //    `ActivityManager.getRunningServices` filtered on our class name — accurate enough
+  //    on every OEM we've tested. Treat probe failures as "unknown / assume dead" so we
+  //    err on the side of restarting (idempotent in the native module).
+  let fgRunning = false;
+  try {
+    fgRunning = await ForegroundService.isRunning();
+  } catch (e) {
+    console.warn('[KidSafe][Location] ForegroundService.isRunning threw', e);
+  }
+
+  console.log('[KidSafe][Location] ensure', {
+    reason,
+    fineGranted,
+    backgroundGranted,
+    fgRunning,
+    childUid,
+    attached: nativeLocationWatcherAttached,
+  });
+
+  // 3. If FINE is missing, stop the watcher (if it was running) and surface a diagnostic.
+  //    `fg_service_not_running` and `system_location_off` aren't relevant here because the
+  //    writer can't do anything without the permission anyway — the parent should fix this
+  //    first.
+  if (!fineGranted) {
+    if (nativeLocationWatcherAttached) {
+      try {
+        await Location.stopWatching();
+      } catch (e) {
+        console.warn('[KidSafe][Location] stopWatching on permission-revoked failed', e);
+      }
+      nativeLocationWatcherAttached = false;
+    }
+    await maybeWriteDiagnostics(childUid, {
+      evaluatedAt: now,
+      ok: false,
+      reason: 'fine_permission_missing',
+      hint:
+        'Location permission is OFF for KidSafe. Ask your kid to open System Settings → Apps → KidSafe → Permissions → Location and pick "Allow all the time".',
+    });
+    return;
+  }
+
+  // 4. FINE granted. Reconcile FG service first, then nudge the writer. Order matters:
+  //    starting the FG service triggers `onStartCommand` which itself calls
+  //    `LocationWriter.start` — `Location.startWatching` below is a belt-and-braces nudge
+  //    in case the service was already running but the writer was somehow detached.
+  if (!fgRunning) {
+    try {
+      await ForegroundService.start(childUid);
+      console.log('[KidSafe][Location] FG service was dead — restarted', {reason});
+    } catch (e) {
+      console.warn('[KidSafe][Location] ForegroundService.start failed', e);
+      await maybeWriteDiagnostics(childUid, {
+        evaluatedAt: now,
+        ok: false,
+        reason: 'fg_service_not_running',
+        hint:
+          'KidSafe could not start its background service. On Realme / Oppo / Vivo phones this usually means Autostart is off — ask your kid to enable it in System Settings.',
+      });
+      return;
+    }
+  }
+
+  try {
+    await Location.startWatching();
+    nativeLocationWatcherAttached = true;
+    console.log('[KidSafe][Location] watcher attached', {reason});
+  } catch (e) {
+    console.warn('[KidSafe][Location] startWatching failed', e);
+    await maybeWriteDiagnostics(childUid, {
+      evaluatedAt: now,
+      ok: false,
+      reason: 'play_services_unavailable',
+      hint:
+        'KidSafe could not start location tracking on this phone. Try restarting the phone and reopening KidSafe.',
+    });
+    return;
+  }
+
+  // 5. Soft-warn diagnostic — background permission missing isn't fatal because the FG
+  //    service with `foregroundServiceType="location"` keeps location callbacks alive
+  //    while it's running, but it IS the most common cause of "location stops updating
+  //    when phone is locked overnight" on aggressive OEMs.
+  if (!backgroundGranted) {
+    await maybeWriteDiagnostics(childUid, {
+      evaluatedAt: now,
+      ok: false,
+      reason: 'background_permission_missing',
+      hint:
+        '"Allow all the time" is not granted. Location will pause when the phone is locked overnight on Realme / Xiaomi / Vivo phones. Ask your kid to open Settings → Apps → KidSafe → Permissions → Location → "Allow all the time".',
+    });
+    return;
+  }
+
+  // 6. Happy path — flag ok so the parent banner clears. The native `LocationWriter` will
+  //    overwrite this with its own diagnostic (e.g. `first_fix_timeout`) if it can't get
+  //    a fix despite all the JS-level gates passing.
+  await maybeWriteDiagnostics(childUid, {evaluatedAt: now, ok: true});
+}
+
+/**
+ * Throttled Firestore write for `locationDiagnostics`. Only writes when the diagnostic
+ * STATE changes (ok flip, reason flip) or when the heartbeat window elapses. The hash
+ * deliberately excludes `evaluatedAt` so a heartbeat write doesn't immediately re-fire as
+ * a "state changed" write.
+ */
+async function maybeWriteDiagnostics(
+  childUid: string,
+  diag: LocationDiagnostics,
+): Promise<void> {
+  const hash = diagnosticsHash(diag);
+  const now = Date.now();
+  const stateChanged = hash !== lastDiagnosticsHash;
+  const heartbeatDue = now - lastDiagnosticsWriteAt >= DIAGNOSTICS_HEARTBEAT_MS;
+  if (!stateChanged && !heartbeatDue) {
+    return;
+  }
+  try {
+    await writeLocationDiagnostics(childUid, diag);
+    lastDiagnosticsHash = hash;
+    lastDiagnosticsWriteAt = now;
+    console.log('[KidSafe][Location] diagnostics written', {
+      ok: diag.ok,
+      reason: diag.reason,
+      stateChanged,
+      heartbeatDue,
+    });
+  } catch (e) {
+    // Non-fatal: the parent stale banner still works as a fallback signal. We deliberately
+    // DO NOT retry here because retrying could cascade if Firestore is the actual outage.
+    console.warn('[KidSafe][Location] writeLocationDiagnostics failed', e);
+  }
+}
+
+/** Stable string key for the diagnostic state, excluding the heartbeat timestamp. */
+function diagnosticsHash(d: LocationDiagnostics): string {
+  return `${d.ok ? '1' : '0'}|${d.reason ?? ''}|${d.hint ?? ''}`;
+}
+
 async function pushScheduleToNative() {
   const s = isEnforcing() ? cachedSchedule : undefined;
   try {

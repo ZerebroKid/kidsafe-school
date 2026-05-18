@@ -138,7 +138,17 @@ export const ScreenTime = {
     ),
 };
 
-// -------- Location (emits 'KidSafeLocation') --------
+// -------- Location --------
+//
+// Authority for fused-location updates + Firestore writes lives in the native
+// `LocationWriter` (foreground service). The JS layer's job is to:
+//   - probe permissions during onboarding and at engine boot,
+//   - call `startWatching` to nudge the native writer to attach (idempotent),
+//   - read `currentLocation` from Firestore via the regular child-doc subscriber.
+//
+// `subscribe` is retained for backward compat with in-process consumers, but the native
+// module no longer emits `KidSafeLocation` events — listeners simply never fire. New code
+// should subscribe to `children/{childUid}.currentLocation` via the firestore helpers.
 
 export interface LocationUpdate {
   lat: number;
@@ -150,12 +160,32 @@ export interface LocationUpdate {
 export const Location = {
   hasLocationPermission: (): Promise<boolean> =>
     (assert(LocationNative, 'KidSafeLocationModule') as typeof LocationNative).hasLocationPermission(),
+  hasBackgroundLocationPermission: (): Promise<boolean> =>
+    (assert(LocationNative, 'KidSafeLocationModule') as typeof LocationNative).hasBackgroundLocationPermission(),
+  /**
+   * Reads the system-wide Location / GPS master switch — the toggle exposed in quick-settings
+   * panels. Returns `true` only when at least one provider can actually produce fixes. Distinct
+   * from `hasLocationPermission` (which only checks the per-app grant): on Realme/ColorOS we
+   * routinely see permission granted but this returning `false`, which makes the fused-location
+   * subscription a no-op and is the root cause the parent saw "GPS turned off" with the kid
+   * insisting permission was "all the time".
+   *
+   * Backs the onboarding wizard's `locationServicesStep` so the kid cannot finish setup without
+   * flipping GPS on. The native writer's own `system_location_off` diagnostic is the runtime
+   * safety net for the same scenario.
+   */
+  isLocationServicesEnabled: (): Promise<boolean> =>
+    (assert(LocationNative, 'KidSafeLocationModule') as typeof LocationNative).isLocationServicesEnabled(),
   startWatching: (): Promise<boolean> =>
     (assert(LocationNative, 'KidSafeLocationModule') as typeof LocationNative).startWatching(),
   stopWatching: (): Promise<boolean> =>
     (assert(LocationNative, 'KidSafeLocationModule') as typeof LocationNative).stopWatching(),
   getCurrent: (): Promise<LocationUpdate | null> =>
     (assert(LocationNative, 'KidSafeLocationModule') as typeof LocationNative).getCurrent(),
+  /**
+   * Retained for backward compat — the native writer no longer emits these events. Listeners
+   * registered here will simply never fire. Subscribe to Firestore `currentLocation` instead.
+   */
   subscribe: (cb: (loc: LocationUpdate) => void) => {
     const emitter = new NativeEventEmitter(LocationNative);
     return emitter.addListener('KidSafeLocation', cb);
@@ -251,6 +281,14 @@ export const OemSettings = {
     (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).getOem(),
   openAppDetailsSettings: (): Promise<void> =>
     (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).openAppDetailsSettings(),
+  /**
+   * Opens the system-wide Location / GPS toggle page (`Settings.ACTION_LOCATION_SOURCE_SETTINGS`).
+   * Falls back to KidSafe's app-info page on the rare device that strips the action. Paired with
+   * `Location.isLocationServicesEnabled` as the wizard's auto-detect read-back so the step
+   * advances on its own the moment the kid flips the toggle and returns to the app.
+   */
+  openLocationSourceSettings: (): Promise<void> =>
+    (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).openLocationSourceSettings(),
   openAutostartSettings: (): Promise<void> =>
     (assert(OemSettingsNative, 'OemSettings') as typeof OemSettingsNative).openAutostartSettings(),
   openBatteryUnrestricted: (): Promise<void> =>

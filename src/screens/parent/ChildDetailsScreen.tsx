@@ -30,11 +30,14 @@ export function ChildDetailsScreen({route}: Props) {
   const [tamperEvents, setTamperEvents] = useState<TamperEvent[]>([]);
 
   useEffect(() => {
+    // Single most-recent tamper attempt — historical list lives in Firestore for audit, but
+    // the parent UI only surfaces "what just happened" on the Apps tab. Switching from limit(5)
+    // to limit(1) cuts both the on-the-wire payload and the rendered noise.
     const unsub = paths
       .events(childUid)
       .where('type', '==', 'tamper_attempt')
       .orderBy('timestamp', 'desc')
-      .limit(5)
+      .limit(1)
       .onSnapshot(
         snap => {
           setTamperEvents(
@@ -79,10 +82,18 @@ export function ChildDetailsScreen({route}: Props) {
           <TabButton label="PIN" active={tab === 'pin'} onPress={() => setTab('pin')} />
         </View>
 
-        <TamperPanel events={tamperEvents} />
-
         <View style={{minHeight: 360}}>
-          {tab === 'apps' && <AppsTab childUid={childUid} />}
+          {/* Tamper panel is Apps-tab-only by design: it talks about "uninstall attempts"
+              which is the same surface the parent reviews when deciding whether to tighten
+              the blocklist or rotate the PIN. The Firestore listener stays mounted at the
+              screen level (see useEffect above) so switching tabs back to Apps shows the
+              latest row immediately with no re-subscribe lag. */}
+          {tab === 'apps' && (
+            <>
+              <TamperPanel events={tamperEvents} />
+              <AppsTab childUid={childUid} />
+            </>
+          )}
           {tab === 'usage' && <UsageTab childUid={childUid} />}
           {tab === 'schedule' && <ScheduleTab childUid={childUid} />}
           {tab === 'location' && <LocationTab childUid={childUid} />}
@@ -99,7 +110,7 @@ function TamperPanel({events}: {events: TamperEvent[]}) {
   }
   return (
     <View style={styles.tamperCard}>
-      <Text style={styles.tamperTitle}>Recent uninstall attempts</Text>
+      <Text style={styles.tamperTitle}>Latest uninstall attempt</Text>
       {events.map(e => (
         <View key={e.id} style={styles.tamperRow}>
           <View

@@ -6,6 +6,7 @@ import type {
   ChildModeState,
   Geofence,
   Geo,
+  LocationDiagnostics,
   Schedule,
   SharedProfile,
   UsageDailyDoc,
@@ -328,6 +329,23 @@ export async function writeChildStatus(
 
 export async function writeLocation(childUid: string, loc: Geo) {
   await paths.child(childUid).set({currentLocation: loc}, {merge: true});
+}
+
+/**
+ * Child-side: pushes the latest health snapshot for the location pipeline. Called from
+ * `ensureLocationWatcher` in [src/services/childSyncEngine.ts] whenever a check transitions
+ * (granted → revoked, system on → off, FG service alive → dead). The native
+ * `LocationWriter` writes its own diagnostics via the Firestore Android SDK so we don't
+ * round-trip through JS for native-only signals like "first fix never arrived".
+ *
+ * Throttling is the CALLER's responsibility — typically `ensureLocationWatcher` only writes
+ * on state transitions, so writes are naturally rare.
+ */
+export async function writeLocationDiagnostics(
+  childUid: string,
+  diag: LocationDiagnostics,
+): Promise<void> {
+  await paths.child(childUid).set({locationDiagnostics: diag}, {merge: true});
 }
 
 /**

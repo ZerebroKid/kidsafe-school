@@ -7,8 +7,10 @@ import {
   batteryCheck,
   deviceAdminStep,
   finalStep,
+  locationBackgroundExplainStep,
   locationBackgroundStep,
   locationForegroundStep,
+  locationServicesStep,
   notificationsStep,
   overlayCheck,
   pinSetupStep,
@@ -30,6 +32,11 @@ export const xiaomiSteps: Step[] = [
   activityStep,
   locationForegroundStep,
   locationBackgroundStep,
+  locationBackgroundExplainStep,
+  // System-wide GPS toggle gate. MIUI/HyperOS exposes the toggle in the same Settings →
+  // Location page as stock Android, so the universal `Settings.ACTION_LOCATION_SOURCE_SETTINGS`
+  // intent works without an OEM branch.
+  locationServicesStep,
 
   accessibilityDisclosureStep,
   {

@@ -43,6 +43,25 @@ class OemSettingsModule(reactContext: ReactApplicationContext) :
         finish(promise, ok, "openAppDetailsSettings")
     }
 
+    /**
+     * System-wide Location / GPS toggle page (the screen that hosts the top "Use location" switch
+     * exposed in quick-settings). Used by the onboarding wizard's `locationServicesStep` to bounce
+     * the kid one tap away from flipping GPS back on when the master switch is off.
+     *
+     * `Settings.ACTION_LOCATION_SOURCE_SETTINGS` is part of AOSP and exists on every Android
+     * version we support; we still keep `appDetailsIntent()` as a safety net for a hypothetical
+     * stripped-down OEM build that removed it.
+     */
+    @ReactMethod
+    fun openLocationSourceSettings(promise: Promise) {
+        val candidates = listOf(
+            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),
+            appDetailsIntent(),
+        )
+        val ok = tryStart(candidates)
+        finish(promise, ok, "openLocationSourceSettings")
+    }
+
     /** Autostart / "Background autostart" / "Startup manager" — Xiaomi/Oppo/Vivo specific. */
     @ReactMethod
     fun openAutostartSettings(promise: Promise) {

@@ -1,6 +1,8 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {AppState, PermissionsAndroid, StyleSheet, Text, View} from 'react-native';
 
+import {ForegroundService, Location} from '../../../modules/native';
+import {useAuthStore} from '../../../state/authStore';
 import {colors, spacing} from '../../../theme';
 import {Illustration} from './Illustration';
 import {WizardStep} from './WizardStep';
@@ -31,6 +33,10 @@ export function RuntimePermissionStep({
   onComplete,
 }: Props) {
   const [requesting, setRequesting] = useState(false);
+
+  // The signed-in child uid. Used to start the foreground service the moment foreground
+  // (or background) location is granted — see the §2 comment in `handleAllow`.
+  const childUid = useAuthStore(s => s.firebaseUid);
 
   const recheck = useCallback(async () => {
     try {
@@ -69,7 +75,56 @@ export function RuntimePermissionStep({
       } else {
         await PermissionsAndroid.request(step.permission);
       }
-      await recheck();
+      const granted = await recheck();
+      // §2 from the reliable-location plan: start the foreground service the MOMENT either
+      // foreground OR background location is granted. The FG service hosts the native
+      // `LocationWriter`, which is the only thing OEMs (especially ColorOS / Realme) reliably
+      // keep alive long enough to actually deliver fused-location callbacks once the kid
+      // backgrounds the wizard.
+      //
+      // Without this, `Location.startWatching()` registers a callback against the bare app
+      // process, and on aggressive OEMs that callback gets suspended within ~30s of the
+      // wizard leaving the foreground — even though the user already granted location. The
+      // FG service's `foregroundServiceType="location"` is the documented Android contract
+      // that keeps location callbacks alive.
+      //
+      // `ForegroundService.start` is idempotent (`KidSafeForegroundService` uses
+      // `START_STICKY` and `LocationWriter.start` self-checks `watching` flag).
+      // We try BOTH location steps so a kid who completes background after foreground still
+      // re-triggers the writer attach in case the service was killed between steps.
+      if (
+        granted &&
+        (step.id === 'locationForeground' || step.id === 'locationBackground')
+      ) {
+        try {
+          await Location.startWatching();
+          console.log('[KidSafe][Location] post-grant startWatching ok (onboarding)', {
+            stepId: step.id,
+          });
+        } catch (e) {
+          console.warn('[KidSafe][Location] post-grant startWatching failed', e);
+        }
+        if (childUid) {
+          try {
+            await ForegroundService.start(childUid);
+            console.log(
+              '[KidSafe][Location] post-grant ForegroundService.start ok (onboarding)',
+              {stepId: step.id, childUid},
+            );
+          } catch (e) {
+            // Non-fatal: `FinalStep` will retry the start before flipping to Status, and
+            // the engine's AppState recovery hook re-tries on every foreground.
+            console.warn(
+              '[KidSafe][Location] post-grant ForegroundService.start failed (will retry at FinalStep)',
+              e,
+            );
+          }
+        } else {
+          console.warn(
+            '[KidSafe][Location] post-grant ForegroundService.start skipped — no signed-in uid yet',
+          );
+        }
+      }
     } catch (e) {
       console.warn('requestPermission failed', e);
     } finally {
