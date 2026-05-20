@@ -10,9 +10,10 @@ KidSafe is an Android parental-control app built with React Native + Kotlin nati
 For knowledge transfer to a new developer, read in this order:
 
 1. [SETUP.md](./SETUP.md) - one-time Firebase/Google/Maps setup.
-2. [docs/SYSTEM_DESIGN_KT.md](./docs/SYSTEM_DESIGN_KT.md) - full system design, wireframes, flows, runbook.
-3. [docs/RELEASE_CHECKLIST.md](./docs/RELEASE_CHECKLIST.md) - QA + release gates.
-4. [docs/FCM_WAKEUP.md](./docs/FCM_WAKEUP.md) - optional v1.1 wake-up architecture.
+2. [docs/FIRESTORE_SCHEMA_EXPLAINED.md](./docs/FIRESTORE_SCHEMA_EXPLAINED.md) - super-easy Firestore schema, parent/child connection, data-flow examples.
+3. [docs/SYSTEM_DESIGN_KT.md](./docs/SYSTEM_DESIGN_KT.md) - full system design, wireframes, flows, runbook.
+4. [docs/RELEASE_CHECKLIST.md](./docs/RELEASE_CHECKLIST.md) - QA + release gates.
+5. [docs/FCM_WAKEUP.md](./docs/FCM_WAKEUP.md) - optional v1.1 wake-up architecture.
 
 ## Quick Start
 
