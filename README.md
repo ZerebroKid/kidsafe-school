@@ -13,8 +13,9 @@ For knowledge transfer to a new developer, read in this order:
 2. [docs/BEGINNER_APP_FLOW.md](./docs/BEGINNER_APP_FLOW.md) - super-easy full walkthrough with analogy + diagrams (best first KT doc).
 3. [docs/FIRESTORE_SCHEMA_EXPLAINED.md](./docs/FIRESTORE_SCHEMA_EXPLAINED.md) - Firestore schema, parent/child connection, data-flow examples.
 4. [docs/SYSTEM_DESIGN_KT.md](./docs/SYSTEM_DESIGN_KT.md) - full technical system design deep-dive.
-5. [docs/RELEASE_CHECKLIST.md](./docs/RELEASE_CHECKLIST.md) - QA + release gates.
-6. [docs/FCM_WAKEUP.md](./docs/FCM_WAKEUP.md) - optional v1.1 wake-up architecture.
+5. [docs/EDUCATION_AI_ECOSYSTEM_PLAN.md](./docs/EDUCATION_AI_ECOSYSTEM_PLAN.md) - next education/AI ecosystem plan: syllabus, teacher assignments, quizzes, rewards, parent/teacher/principal reports.
+6. [docs/RELEASE_CHECKLIST.md](./docs/RELEASE_CHECKLIST.md) - QA + release gates.
+7. [docs/FCM_WAKEUP.md](./docs/FCM_WAKEUP.md) - optional v1.1 wake-up architecture.
 
 ## Quick Start
 
