@@ -12,6 +12,16 @@ importers:
         specifier: ^5.5.0
         version: 5.9.3
 
+  packages/shared-firebase:
+    dependencies:
+      '@zerebro/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+
   packages/shared-types:
     devDependencies:
       typescript:
