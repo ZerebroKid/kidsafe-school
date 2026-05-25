@@ -1,15 +1,22 @@
 const path = require('path');
 const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
-const {withNativeWind} = require('nativewind/metro');
 
 /**
- * Monorepo-aware Metro configuration for ZKid, with NativeWind (Tailwind for RN).
+ * Monorepo-aware Metro configuration for ZKid.
  *
  * Resolves shared workspace packages (@zerebro/shared-*) from the repo root.
  * Standard pnpm + Metro fix:
  *   - watchFolders includes the workspace root
  *   - nodeModulesPaths includes both project and workspace
  *   - disableHierarchicalLookup avoids hoist confusion
+ *
+ * NativeWind was wired in during P0 but never actually used (zero className=
+ * usage anywhere). Its CSS-Interop runtime was rewriting <Pressable>'s
+ * function-style style prop and stripping our explicit backgroundColor, which
+ * made the Button component render with no visible background. Until we
+ * actually adopt Tailwind classes, the cleanest path is to keep NativeWind
+ * as a dev-time install (so the package + types stay) but remove it from
+ * the Metro pipeline so the runtime is RN-only.
  *
  * @type {import('metro-config').MetroConfig}
  */
@@ -25,7 +32,10 @@ baseConfig.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 baseConfig.resolver.disableHierarchicalLookup = true;
+// Honor the `exports` field in package.json so subpath imports like
+// `@zerebro/shared-firebase/auth` resolve through the conditional-exports
+// map defined in packages/shared-firebase/package.json.
+baseConfig.resolver.unstable_enablePackageExports = true;
+baseConfig.resolver.unstable_conditionNames = ['react-native', 'require', 'default'];
 
-const merged = mergeConfig(baseConfig, {});
-
-module.exports = withNativeWind(merged, {input: './global.css'});
+module.exports = mergeConfig(baseConfig, {});

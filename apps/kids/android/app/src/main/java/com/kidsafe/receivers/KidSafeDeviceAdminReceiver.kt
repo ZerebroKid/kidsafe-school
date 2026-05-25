@@ -8,7 +8,7 @@ import android.util.Log
 import android.widget.Toast
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.kidsafe.R
+import com.kidsafe.kids.R
 import com.kidsafe.security.PinGateActivity
 import com.kidsafe.security.TamperWatcher
 import com.kidsafe.store.KidSafeStore

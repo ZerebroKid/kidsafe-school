@@ -16,7 +16,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.kidsafe.R
+import com.kidsafe.kids.R
 import com.kidsafe.store.KidSafeStore
 
 /**

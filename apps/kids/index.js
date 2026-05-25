@@ -15,7 +15,6 @@
 // so the deprecation tracker sees it during module init.
 globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
-import './global.css';
 import {AppRegistry} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 

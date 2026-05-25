@@ -23,8 +23,8 @@ import androidx.core.app.NotificationCompat
 import com.facebook.react.ReactApplication
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.kidsafe.MainActivity
-import com.kidsafe.R
+import com.kidsafe.kids.MainActivity
+import com.kidsafe.kids.R
 import com.kidsafe.modules.ScreenTimeModule
 import com.kidsafe.security.AccessibilityWatchdog
 import com.kidsafe.store.KidSafeStore

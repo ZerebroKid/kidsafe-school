@@ -4,7 +4,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  View,
   ViewStyle,
 } from 'react-native';
 
@@ -21,6 +20,15 @@ interface Props {
   style?: ViewStyle;
 }
 
+/**
+ * Button uses a STATIC style array (not the function form `style={({pressed}) => [...]}`)
+ * because some style-pipeline middlewares (NativeWind's CSS-Interop being the prime
+ * suspect we just hit) intercept the function variant and drop the explicit
+ * `backgroundColor`, which made the button render invisible (dark text on dark bg).
+ *
+ * Pressed feedback now comes from Android's native ripple + the opacity styles set
+ * on disabled / loading state, which is plenty for the UX we need.
+ */
 export function Button({title, onPress, variant = 'primary', disabled, loading, style}: Props) {
   const bg =
     variant === 'primary'
@@ -36,22 +44,23 @@ export function Button({title, onPress, variant = 'primary', disabled, loading, 
       : variant === 'ghost'
       ? colors.primary
       : colors.text;
+  const isInactive = disabled || loading;
   return (
     <Pressable
       onPress={onPress}
-      disabled={disabled || loading}
-      style={({pressed}) => [
+      disabled={isInactive}
+      android_ripple={{color: 'rgba(255,255,255,0.18)'}}
+      style={[
         styles.base,
-        {backgroundColor: bg, opacity: disabled ? 0.4 : pressed ? 0.85 : 1},
+        {backgroundColor: bg},
         variant === 'ghost' && styles.ghost,
+        isInactive && styles.inactive,
         style,
       ]}>
       {loading ? (
         <ActivityIndicator color={fg} />
       ) : (
-        <View>
-          <Text style={[styles.label, {color: fg}]}>{title}</Text>
-        </View>
+        <Text style={[styles.label, {color: fg}]}>{title}</Text>
       )}
     </Pressable>
   );
@@ -59,6 +68,8 @@ export function Button({title, onPress, variant = 'primary', disabled, loading, 
 
 const styles = StyleSheet.create({
   base: {
+    width: '100%',
+    minHeight: 48,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: radius.md,
@@ -68,9 +79,14 @@ const styles = StyleSheet.create({
   ghost: {
     borderWidth: 1,
     borderColor: colors.primary,
+    backgroundColor: 'transparent',
+  },
+  inactive: {
+    opacity: 0.4,
   },
   label: {
     fontSize: 16,
     fontWeight: '600',
   },
 });
+

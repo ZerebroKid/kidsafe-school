@@ -1,6 +1,10 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+// Reads google-services.json and emits the resources Firebase auto-init looks for at
+// app startup. Without this plugin, FirebaseApp.initialize() silently no-ops and any
+// firebase.* call throws "No Firebase App '[DEFAULT]' has been created".
+apply plugin: "com.google.gms.google-services"
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -82,6 +86,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     signingConfigs {
         debug {
@@ -103,11 +108,38 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+
+    packagingOptions {
+        pickFirst '**/libc++_shared.so'
+    }
+}
+
+// Pin androidx.core to the last compileSdk=35-compatible release. A transitive Firebase /
+// Play-Services dep otherwise pulls in 1.17.0 which requires compileSdk=36 + AGP 8.9.
+configurations.all {
+    resolutionStrategy {
+        force "androidx.core:core:1.15.0"
+        force "androidx.core:core-ktx:1.15.0"
+    }
 }
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.ext.kotlinVersion}"
+
+    // Firebase BoM keeps all Firebase libs version-aligned.
+    implementation platform("com.google.firebase:firebase-bom:33.7.0")
+    implementation "com.google.firebase:firebase-auth"
+    implementation "com.google.firebase:firebase-firestore"
+    implementation "com.google.firebase:firebase-messaging"
+
+    // Google Sign-In for the parent "Continue with Google" flow.
+    implementation "com.google.android.gms:play-services-auth:${rootProject.ext.googlePlayServicesAuthVersion}"
+
+    // AndroidX (pinned to 1.15.x — last compileSdk=35-compatible line).
+    implementation "androidx.core:core-ktx:1.15.0"
+    implementation "androidx.appcompat:appcompat:1.7.0"
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
