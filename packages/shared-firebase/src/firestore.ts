@@ -340,12 +340,22 @@ export async function writeLocation(childUid: string, loc: Geo) {
  *
  * Throttling is the CALLER's responsibility — typically `ensureLocationWatcher` only writes
  * on state transitions, so writes are naturally rare.
+ *
+ * We use `mergeFields: ['locationDiagnostics']` (NOT `merge: true`) so the top-level
+ * `locationDiagnostics` map is REPLACED wholesale instead of deep-merged. Without this, a
+ * previously-written `reason: 'fine_permission_missing'` would linger across the next
+ * ok-only heartbeat write (where the diag is just `{evaluatedAt, ok: true}` and `reason`
+ * is intentionally absent), producing the misleading
+ * `{ ok: true, reason: 'fine_permission_missing' }` snapshot the parent UI was logging.
+ * Other top-level child-doc fields (`currentLocation`, `status`, ...) are untouched.
  */
 export async function writeLocationDiagnostics(
   childUid: string,
   diag: LocationDiagnostics,
 ): Promise<void> {
-  await paths.child(childUid).set({locationDiagnostics: diag}, {merge: true});
+  await paths
+    .child(childUid)
+    .set({locationDiagnostics: diag}, {mergeFields: ['locationDiagnostics']});
 }
 
 /**

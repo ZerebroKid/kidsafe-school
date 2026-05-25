@@ -666,10 +666,16 @@ object LocationWriter {
             hint?.let { put("hint", it) }
         }
         try {
+            // `SetOptions.mergeFields("locationDiagnostics")` REPLACES the top-level
+            // `locationDiagnostics` map wholesale instead of deep-merging into it. Without this,
+            // a `writeDiagnostic(ok=true, reason=null, hint=null)` (line 618 above) would leave
+            // any prior `reason: "fine_permission_missing"` in place because the payload here
+            // only contains keys for non-null fields. Matches the JS-side fix in
+            // packages/shared-firebase/src/firestore.ts `writeLocationDiagnostics`.
             FirebaseFirestore.getInstance()
                 .collection("children")
                 .document(childUid)
-                .set(mapOf("locationDiagnostics" to payload), SetOptions.merge())
+                .set(mapOf("locationDiagnostics" to payload), SetOptions.mergeFields("locationDiagnostics"))
                 .addOnSuccessListener {
                     Log.i(TAG, "diagnostic written ok=$ok reason=${reason ?: "-"}")
                 }
