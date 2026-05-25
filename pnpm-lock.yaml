@@ -15,6 +15,43 @@ importers:
         specifier: ^5.5.0
         version: 5.9.3
 
+  apps/admin-web:
+    dependencies:
+      '@zerebro/shared-firebase':
+        specifier: workspace:*
+        version: link:../../packages/shared-firebase
+      '@zerebro/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      next:
+        specifier: 16.2.6
+        version: 16.2.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react:
+        specifier: 19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: 19.2.4
+        version: 19.2.4(react@19.2.4)
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4
+        version: 4.3.0
+      '@types/node':
+        specifier: ^20
+        version: 20.19.41
+      '@types/react':
+        specifier: ^19
+        version: 19.2.15
+      '@types/react-dom':
+        specifier: ^19
+        version: 19.2.3(@types/react@19.2.15)
+      tailwindcss:
+        specifier: ^4
+        version: 4.3.0
+      typescript:
+        specifier: ^5
+        version: 5.5.4
+
   apps/guardian:
     dependencies:
       '@react-native-async-storage/async-storage':
@@ -6691,12 +6728,12 @@ snapshots:
 
   '@types/react-native-vector-icons@6.4.18':
     dependencies:
-      '@types/react': 18.3.29
+      '@types/react': 19.2.15
       '@types/react-native': 0.70.19
 
   '@types/react-native@0.70.19':
     dependencies:
-      '@types/react': 18.3.29
+      '@types/react': 19.2.15
 
   '@types/react-test-renderer@18.3.1':
     dependencies:

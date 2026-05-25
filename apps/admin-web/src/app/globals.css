@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/*
+ * Brand tokens shared across all four Zerebro products. Must stay in lockstep with
+ * apps/principal-web/src/app/globals.css and apps/{kids,guardian}/src/theme.ts.
+ * If you change a value here, change it in those three other files too.
+ */
+@theme {
+  --color-bg: #0b1220;
+  --color-surface: #111a2c;
+  --color-surface-alt: #1c2942;
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-primary: #22d3ee;
+  --color-primary-text: #04141a;
+  --color-danger: #f87171;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
