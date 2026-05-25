@@ -27,33 +27,21 @@ service cloud.firestore {
         && userDoc(childUid).data.parentUid == myUid();
     }
 
-    // True for shared-phone profiles: the doc id is `${parentUid}_shared` AND, when the
-    // doc already exists, its `parentUid` field matches the writer. This is what lets a
-    // single Firebase user (the parent) act as the author/owner of their own child profile
-    // without spinning up a second auth user just to host the data.
-    //
-    // On CREATE, `resource` is null but `request.resource` carries the about-to-be-written
-    // doc — we check the incoming parentUid there. On UPDATE / READ / DELETE we cross-check
-    // the stored parentUid so a hostile party can't squat on someone else's child id.
-    function parentOwns(childId) {
-      return isSignedIn()
-        && childId == myUid() + '_shared'
-        && (
-          resource == null
-            ? request.resource.data.parentUid == myUid()
-            : resource.data.parentUid == myUid()
-        );
-    }
+    // NOTE — Phase 1.6.2: the v1 `parentOwns(...)` helper + every `_shared`
+    // doc-id branch was removed alongside the rest of shared mode. ZConnect
+    // now never writes child profiles directly; the linked-child relationship
+    // is the only path that grants a parent write access to `children/{uid}`.
 
     // Fields the parent is allowed to edit on the child's main doc.
+    // `childMode` is intentionally NOT in this list anymore (shared-mode-only).
     function parentEditableFields() {
-      return ['lockState', 'geofence', 'screenTime', 'schedule', 'pinResetRequest', 'childMode'];
+      return ['lockState', 'geofence', 'screenTime', 'schedule', 'pinResetRequest'];
     }
 
     // Allowed values for `locationDiagnostics.reason`. Keeping this list here (instead of
     // a wildcard string) so a compromised client can't write arbitrary strings that the
     // parent UI then renders as user-facing copy. Mirrors `LocationDiagnosticsReason` in
-    // `src/firebase/types.ts`.
+    // @zerebro/shared-types.
     function allowedLocationDiagReasons() {
       return [
         'fine_permission_missing',
@@ -109,15 +97,13 @@ service cloud.firestore {
     // children/{childUid} -----------------------------------------------------
     // Main doc: status, lockState, currentLocation, geofence, screenTime...
     match /children/{childUid} {
-      allow read: if isSelf(childUid) || isParentOf(childUid) || parentOwns(childUid);
+      allow read: if isSelf(childUid) || isParentOf(childUid);
 
-      // Child can create/update own doc freely (legacy two-device flow). The only
-      // shape-check is on `locationDiagnostics` so a compromised child can't write
-      // arbitrary banner copy into the parent UI.
+      // Child can create/update own doc freely (two-device flow -- the only
+      // flow that exists post-P1.6). The only shape-check is on
+      // `locationDiagnostics` so a compromised child can't write arbitrary
+      // banner copy into the parent UI.
       allow create, update: if isSelf(childUid) && locationDiagnosticsValid();
-
-      // Shared-phone profile: parent owns the doc directly. Same diagnostics shape check.
-      allow create, update, delete: if parentOwns(childUid) && locationDiagnosticsValid();
 
       // Parent can ALSO create the doc if it doesn't exist yet, but only with
       // command fields. This lets a parent set things like `schedule` before
@@ -136,13 +122,10 @@ service cloud.firestore {
 
       // apps subcollection ------------------------------------------------
       match /apps/{packageName} {
-        allow read: if isSelf(childUid) || isParentOf(childUid) || parentOwns(childUid);
+        allow read: if isSelf(childUid) || isParentOf(childUid);
 
         // Child writes app list entries from PackageReceiver.
         allow create, update, delete: if isSelf(childUid);
-
-        // Shared-phone profile: parent owns the apps directly.
-        allow create, update, delete: if parentOwns(childUid);
 
         // Parent can flip `isBlocked` only.
         allow update: if isParentOf(childUid)
@@ -152,8 +135,8 @@ service cloud.firestore {
 
       // events subcollection (append-only, read by parent) ----------------
       match /events/{eventId} {
-        allow read: if isSelf(childUid) || isParentOf(childUid) || parentOwns(childUid);
-        allow create: if isSelf(childUid) || parentOwns(childUid);
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+        allow create: if isSelf(childUid);
         allow update, delete: if false;
       }
 
@@ -161,7 +144,7 @@ service cloud.firestore {
       // One doc per child-local-day, id = `YYYY-MM-DD`. Powers the parent's
       // App Usage screen (7-day chart + per-app list).
       match /usageDaily/{day} {
-        allow read: if isSelf(childUid) || isParentOf(childUid) || parentOwns(childUid);
+        allow read: if isSelf(childUid) || isParentOf(childUid);
 
         // Child writes its own usage breakdown. We pin the schema so a
         // misbehaving client can't bloat the doc with extras.
@@ -170,15 +153,9 @@ service cloud.firestore {
                ['date', 'totalMins', 'perApp', 'updatedAt']
              );
 
-        // Shared-phone profile: parent owns the usage data directly, same shape.
-        allow create, update: if parentOwns(childUid)
-          && request.resource.data.keys().hasOnly(
-               ['date', 'totalMins', 'perApp', 'updatedAt']
-             );
-
         // Day docs are append-mostly; only the child can clear them (e.g.
         // when the user signs out and re-pairs).
-        allow delete: if isSelf(childUid) || parentOwns(childUid);
+        allow delete: if isSelf(childUid);
       }
     }
   }
