@@ -28,7 +28,7 @@ Subsequent deploys are automatic on every push to the configured branch.
 Add the six `NEXT_PUBLIC_FIREBASE_*` keys from
 [`.env.example`](.env.example) to **Project Settings -> Environment
 Variables** for all three environments. Both Admin and Campus point at
-the SAME Firebase project, so the values are identical.
+the SAME Firebase project, so the values are identical
 
 ## 3. Production domain
 
