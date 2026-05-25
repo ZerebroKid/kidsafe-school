@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.guardian"
+    namespace "com.kidsafe.guardian"
     defaultConfig {
-        applicationId "com.guardian"
+        applicationId "com.kidsafe.guardian"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -1,4 +1,4 @@
-package com.guardian
+package com.kidsafe.guardian
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

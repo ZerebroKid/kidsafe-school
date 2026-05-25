@@ -1,4 +1,4 @@
-package com.guardian
+package com.kidsafe.guardian
 
 import android.app.Application
 import com.facebook.react.PackageList
