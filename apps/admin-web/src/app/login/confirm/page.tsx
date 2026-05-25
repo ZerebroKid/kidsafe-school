@@ -59,7 +59,10 @@ export default function AdminOtpConfirmPage() {
         );
         sessionStorage.removeItem(SESSION_KEYS.verificationId);
         sessionStorage.removeItem(SESSION_KEYS.phone);
-        router.replace('/dashboard');
+        // Admin has no /dashboard route -- its sidebar starts at /schools
+        // (see (dashboard)/layout.tsx NAV). Campus does have /dashboard;
+        // the two confirm pages intentionally diverge here.
+        router.replace('/schools');
       } catch (err) {
         const errCode = (err as {code?: string} | null)?.code ?? '';
         setError(humaniseConfirmError(errCode, err));
