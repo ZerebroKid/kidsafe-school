@@ -565,6 +565,131 @@ ZKid reads topic doc directly when child opens an assignment — **no `aiLessonG
 
 ---
 
+## 8.4 Feature Interaction Map
+
+This section answers: **"when X happens, what else fires?"**
+
+Use it together with the function inventory (§9) to understand any code path end-to-end.
+
+### 8.4.1 Setup chain (one-time per school)
+
+```mermaid
+sequenceDiagram
+  participant Admin as Zerebro Admin
+  participant Principal as Zerebro Campus
+  participant Teacher as ZConnect (teacher mode)
+  participant Parent as ZConnect (parent mode)
+  participant Child as ZKid
+  participant FN as Cloud Functions
+  participant FS as Firestore
+
+  Admin->>FS: create schools/{schoolId}
+  Admin-->>Principal: share invite code
+  Principal->>FN: claimSchool(inviteCode)
+  FN->>FS: schools/{id}.principalUid = caller
+  Principal->>FS: create classes/{classId} + subjects (with curriculumId)
+  Principal->>FN: rotateTeacherCode()
+  FN->>FS: schools/{id}.teacherCode = NEW
+  Principal-->>Teacher: share teacher code
+  Teacher->>FN: requestTeacherJoin(code, displayName)
+  FN->>FS: teachers/{teacherId}.status = "pending"
+  Principal->>FN: approveTeacher(teacherId)
+  FN->>FS: teachers/{teacherId}.status = "active"
+  FN->>FS: users/{teacherUid}.roles += "teacher"
+  Parent->>FS: pair child (existing v1 flow)
+  Child->>FN: joinSchool(schoolCode, grade, section)
+  FN->>FS: children/{uid}.classId = ...
+  FN->>FS: classes/{classId}.studentChildUids += childUid
+```
+
+**Side effects:**
+- `users/{teacherUid}.roles += "teacher"` → ZConnect role switcher reflects new role on next snapshot
+- `classes/{classId}.studentChildUids[]` → principal class roster updates
+- `children/{uid}.classId` → ZKid Study Mission listener starts filtering by this classId
+
+### 8.4.2 Daily learning loop
+
+```mermaid
+sequenceDiagram
+  participant Teacher as ZConnect (teacher)
+  participant FN as Cloud Functions
+  participant FS as Firestore
+  participant Child as ZKid
+  participant Parent as ZConnect (parent)
+
+  Teacher->>FN: assignTopic(classId, subjectId, chapterId, topicId)
+  FN->>FS: studyAssignments/{id} created
+  Note over FS: Snapshot fires
+  FS-->>Child: ZKid Study Mission shows new card
+  FS-->>Teacher: Teacher home updates assignments list
+
+  Child->>FS: read curriculum/.../topics/{topicId}
+  Note over Child: renders explanation + examples + video + brainstorming + quiz
+
+  Child->>FN: submitQuizAttempt(assignmentId, answers)
+  FN->>FS: read topic.quiz to validate
+  FN->>FS: quizAttempts/{id} written with server score
+  Note over FS: Trigger fires
+  FS->>FN: onQuizAttemptWrite (trigger)
+  FN->>FS: pick eligible rewardCatalog entry
+  FN->>FS: rewardUnlocks/{id} written
+
+  FS-->>Child: ZKid reward screen
+  FS-->>Parent: Parent Study tab shows score + reward
+  FS-->>Teacher: Teacher class report updates
+```
+
+**Side effects:**
+- Creating one `studyAssignments` doc updates 2 UIs (ZKid + teacher).
+- Creating one `quizAttempts` doc triggers reward creation AND updates 3 UIs (ZKid, parent, teacher).
+- All updates are real-time via Firestore snapshots — no polling.
+
+### 8.4.3 Nightly aggregation (principal dashboards)
+
+```mermaid
+sequenceDiagram
+  participant Cron as Cloud Scheduler
+  participant FN as aggregateClassReports
+  participant FS as Firestore
+  participant Principal as Zerebro Campus
+
+  Cron->>FN: trigger at 02:00 IST
+  FN->>FS: query quizAttempts (last 24h, group by classId)
+  FN->>FS: classReports/{classId}/daily/{date} written
+  FN->>FS: mark topics weak if class avg < 60%
+  Principal->>FS: dashboard reads pre-computed classReports
+  FS-->>Principal: fast load (< 1s)
+```
+
+**Why pre-compute?** Live aggregation of thousands of `quizAttempts` on every dashboard load would be slow and expensive. Cron writes summaries once a night → dashboards read tiny `classReports` docs.
+
+### 8.4.4 Cross-feature interaction matrix
+
+What writing to one collection affects elsewhere:
+
+| Write | Triggers / Affects |
+|---|---|
+| `studyAssignments/{id}` (create) | ZKid Study Mission (snapshot); teacher home list (snapshot) |
+| `quizAttempts/{id}` (create) | `onQuizAttemptWrite` trigger → `rewardUnlocks/{id}`; parent Study tab; teacher class report; nightly `aggregateClassReports` |
+| `rewardUnlocks/{id}` (create) | ZKid reward screen; parent Study tab (reward chip) |
+| `users/{uid}.roles += 'teacher'` | ZConnect role switcher appears on next render |
+| `children/{uid}.classId` set | ZKid Study Mission listener registers correct class filter; class roster updates for teacher + principal |
+| `schools/{id}.teacherCode` rotated | Old code becomes invalid for `requestTeacherJoin` |
+| `curriculum/.../topics/{id}` written by import | Becomes assignable in teacher's "Assign Topic" picker (status filter: `published`) |
+| `rewardCatalog/{id}` created | Eligible for `onQuizAttemptWrite` reward picker on next quiz pass |
+
+### 8.4.5 What does NOT trigger anything
+
+For clarity:
+
+| Write | No side effect |
+|---|---|
+| `children/{uid}.currentLocation` | Parent map updates, but no education feature reads this |
+| `apps/{pkg}.isBlocked` | KidSafe enforcement only; not part of education chain |
+| `usageDaily/*` | Parent screen-time UI only |
+| Pure principal CRUD on `classes/*` (renaming etc.) | Subscribed UIs update; no callable/trigger fires |
+
+This separation keeps the education stack independent of the KidSafe-core stack — either can break without taking down the other.
 
 ---
 
@@ -573,24 +698,29 @@ ZKid reads topic doc directly when child opens an assignment — **no `aiLessonG
 ```text
 apps/functions/src/
   callable/
-    claimSchool.ts                 # principal claims school via invite
-    rotateTeacherCode.ts
-    requestTeacherJoin.ts
-    approveTeacher.ts
-    generatePairingCode.ts         # parent -> child pairing
-    assignTopic.ts                 # teacher marks topic for class
-    submitQuizAttempt.ts           # server-validated scoring + reward unlock
+    claimSchool.ts                 # principal claims school via invite code
+    rotateTeacherCode.ts           # principal rotates teacher join code
+    requestTeacherJoin.ts          # teacher submits code -> pending status
+    approveTeacher.ts              # principal approves -> roles += teacher
+    joinSchool.ts                  # child enters school code + grade + section
+    generatePairingCode.ts         # parent -> child pairing (existing v1)
+    assignTopic.ts                 # teacher assigns topic to class
+    submitQuizAttempt.ts           # server-validated scoring (reads quiz[])
+    ping.ts                        # health check (Phase 4.1.1)
 
   crons/
     aggregateClassReports.ts       # nightly: precompute principal dashboards
+    oneTimeMigration_v1_to_v2.ts   # Phase 3 one-shot
 
   content/
-    importCurriculum.ts            # admin-only bulk import (or CLI script)
-    syllabusFetchAdapter.ts        # optional: topic metadata only, not lesson content
+    importCurriculum.ts            # admin-only bulk import (CLI script)
+    syllabusFetchAdapter.ts        # optional: topic metadata only
 
   triggers/
-    onQuizAttemptWrite.ts          # update class aggregate, fire reward
+    onQuizAttemptWrite.ts          # pick eligible reward, write rewardUnlocks/*
 ```
+
+Each function's caller, reads, writes, and trigger conditions are documented in V2_BUILD_PHASES.md Phase 4 micro-tasks.
 
 ---
 
