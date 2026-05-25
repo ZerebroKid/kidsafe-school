@@ -1,7 +1,7 @@
 import messaging from '@react-native-firebase/messaging';
 import {PermissionsAndroid, Platform} from 'react-native';
 
-import {paths} from './firestore';
+import {paths} from '@zerebro/shared-firebase/firestore';
 
 /**
  * Requests notification permission (Android 13+) and saves the device's FCM token to Firestore.

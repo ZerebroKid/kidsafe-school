@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {ActivityIndicator, Alert, Pressable, StyleSheet, Text, View} from 'react-native';
 
 import {colors, radius, spacing} from '../../theme';
-import {requestPinReset} from '../../firebase/firestore';
+import {requestPinReset} from '@zerebro/shared-firebase/firestore';
 
 interface Props {
   childUid: string;

@@ -5,8 +5,8 @@ import {Button} from '../../components/Button';
 import {Screen} from '../../components/Screen';
 import {colors, radius, spacing} from '../../theme';
 import {useAuthStore} from '../../state/authStore';
-import {subscribeChildDoc} from '../../firebase/firestore';
-import {signOut} from '../../firebase/auth';
+import {subscribeChildDoc} from '@zerebro/shared-firebase/firestore';
+import {signOut} from '@zerebro/shared-firebase/auth';
 import type {ChildDoc} from '@zerebro/shared-types';
 
 export function StatusScreen() {

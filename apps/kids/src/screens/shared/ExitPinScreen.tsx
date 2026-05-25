@@ -13,7 +13,7 @@ import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Button} from '../../components/Button';
 import {ChildMode, Pin} from '../../modules/native';
 import {colors, radius, spacing} from '../../theme';
-import {setChildModeActive, sharedProfileChildUid} from '../../firebase/firestore';
+import {setChildModeActive, sharedProfileChildUid} from '@zerebro/shared-firebase/firestore';
 import {useAuthStore} from '../../state/authStore';
 import type {ChildModeStackParamList} from '../../navigation/types';
 

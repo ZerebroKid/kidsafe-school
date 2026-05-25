@@ -5,10 +5,10 @@ import {Button} from '../../components/Button';
 import {Screen} from '../../components/Screen';
 import {colors, radius, spacing} from '../../theme';
 import {useAuthStore} from '../../state/authStore';
-import {getUserDoc, signOut} from '../../firebase/auth';
+import {getUserDoc, signOut} from '@zerebro/shared-firebase/auth';
 import {generatePairingCode} from '../../firebase/pairing';
 import {ChildMode} from '../../modules/native';
-import {deleteSharedChildProfile} from '../../firebase/firestore';
+import {deleteSharedChildProfile} from '@zerebro/shared-firebase/firestore';
 import {ENV} from '../../config/env';
 
 /**

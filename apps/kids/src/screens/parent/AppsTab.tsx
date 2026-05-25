@@ -6,7 +6,7 @@ import {
   setAppBlocked,
   subscribeChildApps,
   subscribeChildDoc,
-} from '../../firebase/firestore';
+} from '@zerebro/shared-firebase/firestore';
 import type {AppEntry, ChildDoc} from '@zerebro/shared-types';
 
 /**

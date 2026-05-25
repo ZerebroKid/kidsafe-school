@@ -1,6 +1,6 @@
 import {Alert} from 'react-native';
 
-import {paths, subscribeLinkedChildren} from '../firebase/firestore';
+import {paths, subscribeLinkedChildren} from '@zerebro/shared-firebase/firestore';
 import type {ChildDoc} from '@zerebro/shared-types';
 
 /**

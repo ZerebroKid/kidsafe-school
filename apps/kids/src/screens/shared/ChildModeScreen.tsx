@@ -18,7 +18,7 @@ import {
   sharedProfileChildUid,
   subscribeChildApps,
   subscribeChildDoc,
-} from '../../firebase/firestore';
+} from '@zerebro/shared-firebase/firestore';
 import {useAuthStore} from '../../state/authStore';
 import type {AppEntry, ChildDoc} from '@zerebro/shared-types';
 import type {ChildModeStackParamList} from '../../navigation/types';

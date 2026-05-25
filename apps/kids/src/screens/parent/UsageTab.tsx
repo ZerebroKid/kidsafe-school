@@ -6,7 +6,7 @@ import {
   formatDateKey,
   subscribeChildApps,
   subscribeUsageWeek,
-} from '../../firebase/firestore';
+} from '@zerebro/shared-firebase/firestore';
 import type {AppEntry, UsageDailyDoc} from '@zerebro/shared-types';
 import {UsageBarChart, type ChartDay} from './UsageBarChart';
 

@@ -6,7 +6,7 @@ import {Screen} from '../../components/Screen';
 import {TextInput} from '../../components/TextInput';
 import {colors, spacing} from '../../theme';
 import {linkChildToParent} from '../../firebase/pairing';
-import {getUserDoc} from '../../firebase/auth';
+import {getUserDoc} from '@zerebro/shared-firebase/auth';
 import {useAuthStore} from '../../state/authStore';
 
 /**

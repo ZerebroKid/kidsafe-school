@@ -12,7 +12,7 @@ import {
 
 import {firebase} from '@react-native-firebase/firestore';
 
-import {paths} from '../../../firebase/firestore';
+import {paths} from '@zerebro/shared-firebase/firestore';
 import {
   AppBlocker,
   DeviceAdmin,

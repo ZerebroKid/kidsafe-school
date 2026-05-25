@@ -5,7 +5,7 @@ import {Button} from '../../components/Button';
 import {Screen} from '../../components/Screen';
 import {TextInput} from '../../components/TextInput';
 import {colors, radius, spacing} from '../../theme';
-import {createSharedChildProfile} from '../../firebase/firestore';
+import {createSharedChildProfile} from '@zerebro/shared-firebase/firestore';
 import {ChildMode} from '../../modules/native';
 import {useAuthStore} from '../../state/authStore';
 

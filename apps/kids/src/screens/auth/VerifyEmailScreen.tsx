@@ -4,7 +4,7 @@ import {Alert, StyleSheet, Text} from 'react-native';
 import {Button} from '../../components/Button';
 import {Screen} from '../../components/Screen';
 import {colors, spacing} from '../../theme';
-import {reloadCurrentUser, signOut} from '../../firebase/auth';
+import {reloadCurrentUser, signOut} from '@zerebro/shared-firebase/auth';
 import {useAuthStore} from '../../state/authStore';
 
 export function VerifyEmailScreen() {

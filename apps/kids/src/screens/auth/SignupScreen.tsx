@@ -6,7 +6,7 @@ import {Button} from '../../components/Button';
 import {Screen} from '../../components/Screen';
 import {TextInput} from '../../components/TextInput';
 import {colors, spacing} from '../../theme';
-import {signUpWithEmail} from '../../firebase/auth';
+import {signUpWithEmail} from '@zerebro/shared-firebase/auth';
 import type {AuthStackParamList} from '../../navigation/types';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Signup'>;

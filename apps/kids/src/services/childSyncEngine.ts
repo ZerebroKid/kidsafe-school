@@ -11,7 +11,7 @@ import {
   writeChildStatus,
   writeGeofenceEvent,
   writeLocationDiagnostics,
-} from '../firebase/firestore';
+} from '@zerebro/shared-firebase/firestore';
 import {
   AppBlocker,
   ChildMode,

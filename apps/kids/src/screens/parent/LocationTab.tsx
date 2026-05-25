@@ -3,7 +3,7 @@ import {Pressable, Share, StyleSheet, Text, View} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 
 import {colors, radius, spacing} from '../../theme';
-import {subscribeChildDoc} from '../../firebase/firestore';
+import {subscribeChildDoc} from '@zerebro/shared-firebase/firestore';
 import type {
   ChildDoc,
   LocationDiagnostics,

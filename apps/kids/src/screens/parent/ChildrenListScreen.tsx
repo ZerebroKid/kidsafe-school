@@ -13,7 +13,7 @@ import {
   sharedProfileChildUid,
   subscribeChildDoc,
   subscribeLinkedChildren,
-} from '../../firebase/firestore';
+} from '@zerebro/shared-firebase/firestore';
 import {useAuthStore} from '../../state/authStore';
 import type {ChildDoc, UserDoc} from '@zerebro/shared-types';
 import type {ParentStackParamList} from '../../navigation/types';

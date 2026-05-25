@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 import {colors, radius, spacing} from '../../theme';
-import {setSchedule, subscribeChildApps, subscribeChildDoc} from '../../firebase/firestore';
+import {setSchedule, subscribeChildApps, subscribeChildDoc} from '@zerebro/shared-firebase/firestore';
 import type {AppEntry, ChildDoc, Schedule} from '@zerebro/shared-types';
 
 interface Props {

@@ -21,10 +21,17 @@ import messaging from '@react-native-firebase/messaging';
 
 import App from './src/App';
 import {name as appName} from './app.json';
+import {ENV} from './src/config/env';
+import {initGoogleSignIn} from '@zerebro/shared-firebase/auth';
 import {
   handleGeofenceTransitionTask,
   handlePackageSyncTask,
 } from './src/services/childSyncEngine';
+
+// Configure Google Sign-In with the ZKid OAuth web client id before any auth flow
+// runs. shared-firebase deliberately stays ENV-agnostic so each app injects its
+// own credentials here at startup.
+initGoogleSignIn(ENV.GOOGLE_WEB_CLIENT_ID);
 
 // FCM background handler — runs even if the app is killed. Child uses this to react to
 // parent commands pushed via FCM data messages (the parent app writes Firestore; a

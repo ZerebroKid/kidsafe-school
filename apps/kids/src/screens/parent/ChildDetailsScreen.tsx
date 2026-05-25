@@ -4,7 +4,7 @@ import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 import {colors, radius, spacing} from '../../theme';
 import type {ParentStackParamList} from '../../navigation/types';
-import {paths} from '../../firebase/firestore';
+import {paths} from '@zerebro/shared-firebase/firestore';
 import {AppsTab} from './AppsTab';
 import {CurrentAppPill} from './CurrentAppPill';
 import {LocationTab} from './LocationTab';
