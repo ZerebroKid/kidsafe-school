@@ -95,3 +95,5 @@ export function getFirestoreInstance(): Firestore {
 function camelToEnv(key: string): string {
   return key.replace(/([A-Z])/g, '_$1').toUpperCase();
 }
+
+export * from './web-phone';
