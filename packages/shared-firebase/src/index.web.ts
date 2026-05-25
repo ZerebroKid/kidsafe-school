@@ -33,17 +33,22 @@ export interface ZerebroWebFirebaseConfig {
  * build time. Throws a precise error listing the missing keys so a fresh
  * checkout that forgot `.env.local` fails fast at boot instead of producing a
  * confusing "invalid-api-key" toast on the OTP screen.
+ *
+ * IMPORTANT — Next.js / Turbopack only substitutes `NEXT_PUBLIC_*` at build
+ * time when the code reads them via a DIRECT member-expression literal like
+ * `process.env.NEXT_PUBLIC_FIREBASE_API_KEY`. Assigning `process.env` to a
+ * local variable, destructuring, or any other indirection defeats the static
+ * analysis and leaves the values undefined in the browser bundle. The repeated
+ * literals below are deliberate -- do not "DRY" them up.
  */
 export function readFirebaseConfigFromEnv(): ZerebroWebFirebaseConfig {
-  const env: Record<string, string | undefined> =
-    typeof process !== 'undefined' && process.env ? process.env : {};
   const config = {
-    apiKey: env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    authDomain: env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    projectId: env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    appId: env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    messagingSenderId: env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    storageBucket: env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   };
   const missing = Object.entries(config)
     .filter(([, v]) => !v)
