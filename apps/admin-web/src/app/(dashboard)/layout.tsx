@@ -5,6 +5,7 @@ import {usePathname, useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
 import {onAuthStateChanged} from 'firebase/auth';
 import {getAuthInstance} from '@zerebro/shared-firebase';
+import {LogoutButton} from '@/components/LogoutButton';
 
 /*
  * Auth-guarded shell for the internal Zerebro Admin console. Mirrors
@@ -95,7 +96,7 @@ function AdminSidebar() {
         })}
       </nav>
       <div id="admin-sidebar-footer" className="border-t border-border p-3">
-        {/* P2.3.3 mounts the LogoutButton here. */}
+        <LogoutButton />
       </div>
     </aside>
   );
