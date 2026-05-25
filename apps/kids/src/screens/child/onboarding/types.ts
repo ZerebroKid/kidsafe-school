@@ -79,6 +79,19 @@ export interface InstructionsStep extends StepBase {
    * the verification UI still asks "Did you toggle it?", but a dishonest "Yes" is caught.
    */
   strict?: boolean;
+  /**
+   * `true` opts the step out of every silent auto-advance path: neither the wizard-level
+   * "this step's check already returns true" skip (`OnboardingWizard.tsx`) nor the in-step
+   * mount + AppState rechecks (`InstructionStep.tsx`) will move past it. The only way forward
+   * is a user-tapped "Yes, I activated it" on the verification sheet, which is then
+   * honest-checked exactly like `strict: true`.
+   *
+   * Set on `deviceAdminStep` because the v1 behaviour — auto-advance the moment
+   * `DeviceAdmin.isActive()` returns true — let a kid breeze past the screen without anyone
+   * confirming protection was actually on, which combined with TamperWatcher gaps allowed
+   * silent uninstalls. The Skip path stays available via FinalStep's parent-PIN escape hatch.
+   */
+  requireExplicitConfirm?: boolean;
 }
 
 export interface RuntimeStep extends StepBase {

@@ -214,6 +214,14 @@ export const pinSetupStep: Step = {
  * Marked `optional: true` so the wizard can advance even if the user truly cannot grant it on
  * a stripped-down OEM build — the FinalStep audit still surfaces a "Recommended — tap to fix"
  * row and warns the user before they tap Finish.
+ *
+ * Also marked `requireExplicitConfirm: true`: the wizard's silent auto-advance paths
+ * (mount-time recheck + AppState return) are bypassed for this step. The kid MUST tap
+ * "Yes, I activated it" on the verification sheet, and that "Yes" is then honest-checked
+ * via `DeviceAdmin.isActive()` before the wizard moves on. Combined with the TamperWatcher
+ * fixes this closes the v1 hole where the screen silently skipped before anyone confirmed
+ * uninstall protection was on. The documented escape path remains FinalStep's parent-PIN
+ * "Skip uninstall protection" modal.
  */
 export const deviceAdminStep: Step = {
   kind: 'instructions',
@@ -243,6 +251,7 @@ export const deviceAdminStep: Step = {
   },
   check: () => DeviceAdmin.isActive().catch(() => false),
   optional: true,
+  requireExplicitConfirm: true,
 };
 
 // -- Final step --------------------------------------------------------------

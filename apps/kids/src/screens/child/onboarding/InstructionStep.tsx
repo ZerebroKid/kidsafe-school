@@ -61,9 +61,11 @@ export function InstructionStep({
 
   useEffect(() => {
     // Auto-advance if the permission is already granted from a previous attempt (e.g. the wizard
-    // is being resumed from a kill-and-relaunch).
+    // is being resumed from a kill-and-relaunch). `requireExplicitConfirm` opts out — that
+    // class of step (device admin) must always be acknowledged by a user tap before we trust it.
+    if (step.requireExplicitConfirm) {return;}
     recheck();
-  }, [recheck]);
+  }, [recheck, step.requireExplicitConfirm]);
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', async state => {
@@ -72,11 +74,18 @@ export function InstructionStep({
       returningFromSettings.current = false;
       // Tiny delay — some OEMs (Xiaomi) take a moment to flush the secure-setting write.
       await new Promise(r => setTimeout(r, 400));
+      // `requireExplicitConfirm` skips the silent advance and always shows the verification
+      // sheet so the user must tap "Yes". A dishonest "Yes" is caught by the honest-check in
+      // handleVerifyYes (same path as `strict: true`).
+      if (step.requireExplicitConfirm) {
+        setShowVerify(true);
+        return;
+      }
       const granted = await recheck();
       if (!granted) {setShowVerify(true);}
     });
     return () => sub.remove();
-  }, [recheck]);
+  }, [recheck, step.requireExplicitConfirm]);
 
   async function handleOpen() {
     setOpening(true);
@@ -141,9 +150,10 @@ export function InstructionStep({
     }
     // Strict steps refuse to advance until `check()` actually returns true — used by
     // `locationServicesStep` because a dishonest "Yes" there means the kid never flips on the
-    // system Location toggle and the parent map silently stays empty. Bounce back to Settings
-    // with an explicit alert so the kid knows the wizard isn't moving until they actually do it.
-    if (step.strict) {
+    // system Location toggle and the parent map silently stays empty. `requireExplicitConfirm`
+    // gets the same treatment so device-admin protection can't be claimed without actually
+    // being on; the FinalStep parent-PIN escape hatch remains the documented skip path.
+    if (step.strict || step.requireExplicitConfirm) {
       Alert.alert(
         "We still can't detect that change",
         'Please flip the switch in Settings and then come back. KidSafe will check again automatically.',

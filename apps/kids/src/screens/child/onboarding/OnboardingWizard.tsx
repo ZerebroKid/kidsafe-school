@@ -94,6 +94,10 @@ export function OnboardingWizard({childUidOverride}: OnboardingWizardProps = {})
     if (step.kind === 'illustration' && !step.check) {return;}
     if (step.kind === 'disclosure') {return;} // disclosure must always be shown explicitly
     if (step.kind === 'final') {return;}
+    // Steps opted into explicit-confirm (currently only deviceAdminStep) must never silently
+    // skip even when their check() happens to already return true — the kid has to tap
+    // "Yes, I activated it" on the verification sheet, see InstructionStep.tsx.
+    if (step.kind === 'instructions' && step.requireExplicitConfirm) {return;}
 
     let cancelled = false;
     (async () => {
