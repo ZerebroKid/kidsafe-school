@@ -512,56 +512,81 @@ Same as P1.1.4 but for guardian.
 
 **Acceptance:** Parent map + Apps/Schedule/Location/Usage/PIN tabs functional.
 
-### Group P1.5 — Split native modules
+### Group P1.5 — Native side migration
 
-Each native module becomes its own Gradle library that **only ZKid** consumes.
+The original plan here was to split the v1 Kotlin code into 5 separate Gradle
+libraries under `android-modules/` (one per concern: location-writer,
+app-blocker, screen-time, pin, device-admin). After surveying the v1 code (13
+modules + 6 receivers + 3 security files + 4 services + KidSafeStore =
+~25 files / ~3k lines) and weighing build-system risk against payoff, we
+**deferred the library split** and replaced it with a single-module migration:
 
-#### P1.5.1 — Skeleton Gradle library template (3h)
+#### P1.5.1 — Move v1 Kotlin wholesale into `apps/kids/android/` ✅ (done)
 
-**What you build:** Template for one android-module that the next 4 tickets reuse.
+**What was built:** Full v1 native side migrated as a single Android
+application module living entirely inside `apps/kids/android/app/`. ZConnect
+keeps zero native modules.
 
-**Files touched:**
-- `android-modules/_template/build.gradle`
-- `android-modules/_template/src/main/AndroidManifest.xml`
+**Files touched (history-preserving `git mv`):**
+- `android/app/src/main/java/com/kidsafe/{blocker, modules, receivers, security, services, store}/`
+  → `apps/kids/android/app/src/main/java/com/kidsafe/{...}/`
+- `android/app/src/main/res/{layout, xml}/` → `apps/kids/android/app/src/main/res/{...}/`
 
-**Acceptance:** A copy-paste of `_template` builds as an empty AAR.
+**Files touched (manual merge):**
+- `apps/kids/android/app/src/main/res/values/strings.xml` — kept ZKid app_name,
+  pulled the v1 device-admin / accessibility / notification / blocker / PIN
+  strings in re-branded as ZKid
+- `apps/kids/android/app/src/main/AndroidManifest.xml` — v1 manifest verbatim,
+  but every class outside the `com.kidsafe.kids` namespace is referenced by
+  fully-qualified package name (`com.kidsafe.blocker.BlockedAppActivity`, etc.)
+- `apps/kids/android/build.gradle` — Kotlin 2.0.21, googlePlayServices versions,
+  `com.google.gms:google-services` classpath, `allprojects` resolution strategy
+  forcing kotlin-stdlib alignment
+- `apps/kids/android/app/build.gradle` — `apply plugin: "com.google.gms.google-services"`,
+  Firebase BoM + Auth/Firestore/Messaging, Play Services Location + Auth,
+  Kotlin coroutines, AndroidX (core-ktx, work-runtime, constraintlayout,
+  appcompat) pinned to compileSdk=35-compatible versions, `multiDexEnabled`,
+  `packagingOptions { pickFirst '**/libc++_shared.so' }`
+- `apps/kids/android/app/google-services.json` — copied from v1 (gitignored)
+- `apps/kids/android/app/src/main/java/com/kidsafe/kids/MainApplication.kt` —
+  imports + registers `KidSafePackage()` from `com.kidsafe.modules`
 
-#### P1.5.2 — `android-modules/location-writer/` (4h)
+**Why we kept v1 package names (`com.kidsafe.*` instead of renaming to
+`com.kidsafe.kids.*`):** bulk-renaming would churn ~25 source files for no
+functional gain and risks breaking any persisted SharedPreferences keys /
+file paths that bake in the v1 package string. The applicationId switch
+(`com.kidsafe` → `com.kidsafe.kids`) already separates the APK identity --
+the Java package names are an implementation detail.
 
-**Files touched:**
-- LocationWriter.kt
-- LocationToggleReceiver.kt
-- KidSafeForegroundService.kt (location bits)
-- `android-modules/location-writer/build.gradle`
+**Acceptance (must verify locally on a device):**
+- `pnpm --filter @zerebro/zkid android` produces a debug APK named ZKid that
+  installs alongside any leftover v1 install (`com.kidsafe`)
+- The 12 v1 native modules (`AppBlocker`, `ChildMode`, `DeviceAdmin`,
+  `ForegroundService`, `Geofence`, `InstalledApps`, `KidSafeLocationModule`,
+  `OemSettings`, `Pin`, `Schedule`, `ScreenTime`, `Supervision`) all show up
+  in `NativeModules` from JS
+- `pnpm --filter @zerebro/zconnect android` still builds without linking any
+  native modules
+- Firebase initializes successfully -- requires registering `com.kidsafe.kids`
+  (and `com.kidsafe.guardian`) in the Firebase console and replacing the
+  copied `google-services.json` files
 
-**Interacts with:**
-- ZKid → registers this module via Gradle.
-- ZConnect → does **not** register (smaller APK).
-- Writes to `children/{uid}.currentLocation` and `.locationDiagnostics`.
+#### Deferred: 5-library Gradle split (was P1.5.1–1.5.6 in the original plan)
 
-**Acceptance:** Builds standalone; ZKid debug APK still tracks location.
+The library split is still desirable -- it gives faster incremental builds
+and lets ZConnect drop ~30% of APK size by never compiling native modules
+it doesn't link. It just doesn't have to happen now. When picked back up:
 
-#### P1.5.3 — `android-modules/app-blocker/` (3h)
+| Module                          | Owns                                                                 |
+|---------------------------------|----------------------------------------------------------------------|
+| `android-modules/location-writer` | `LocationWriter`, `LocationToggleReceiver`, `KidSafeForegroundService` |
+| `android-modules/app-blocker`     | `AppBlockerService`, `BlockedAppActivity`, `AppBlockerModule`          |
+| `android-modules/screen-time`     | `ScreenTimeModule`, `ScreenTimeReceiver`                               |
+| `android-modules/pin`             | `PinModule`, `PinGateActivity`, `KidSafeStore`                         |
+| `android-modules/device-admin`    | `DeviceAdminModule`, `KidSafeDeviceAdminReceiver`                      |
 
-App accessibility service.
-
-**Acceptance:** Blocked apps overlay still works on ZKid.
-
-#### P1.5.4 — `android-modules/screen-time/` (3h)
-
-UsageStats writer.
-
-#### P1.5.5 — `android-modules/pin/` + `device-admin/` (3h)
-
-#### P1.5.6 — Wire ZKid Gradle to all 5 modules (3h)
-
-**Files touched:**
-- `apps/kids/android/settings.gradle` — `include ':android-modules:location-writer'` etc.
-- `apps/kids/android/app/build.gradle` — `implementation project(':android-modules:location-writer')`
-
-**Acceptance:**
-- ZKid release APK builds and behaves identical to v1 child mode.
-- ZConnect release APK is ~40% smaller (no heavy native modules).
+See `apps/kids/android/README.md` for the authoritative file-to-library
+mapping when this is revisited.
 
 ### Group P1.6 — Drop shared mode
 

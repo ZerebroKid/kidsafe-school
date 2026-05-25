@@ -5,7 +5,11 @@ buildscript {
         compileSdkVersion = 35
         targetSdkVersion = 34
         ndkVersion = "26.1.10909125"
-        kotlinVersion = "1.9.24"
+        // Bumped from 1.9.24 → 2.0.21 so we can consume Firebase SDKs (auth 23.2+) that are
+        // now compiled with Kotlin 2.x metadata. AGP 8.6 + RN 0.76 both support Kotlin 2.0.
+        kotlinVersion = "2.0.21"
+        googlePlayServicesLocationVersion = "21.3.0"
+        googlePlayServicesAuthVersion = "21.2.0"
     }
     repositories {
         google()
@@ -14,7 +18,22 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("com.google.gms:google-services:4.4.2")
+    }
+}
+
+// Force all modules (including RN libs that declare no version) to use our Kotlin stdlib,
+// otherwise RN's gradle plugin drags in Kotlin 1.9.x and the Firebase Kotlin 2.x metadata fails to link.
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            force "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.ext.kotlinVersion}"
+            force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${rootProject.ext.kotlinVersion}"
+            force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${rootProject.ext.kotlinVersion}"
+            force "org.jetbrains.kotlin:kotlin-stdlib-common:${rootProject.ext.kotlinVersion}"
+            force "org.jetbrains.kotlin:kotlin-reflect:${rootProject.ext.kotlinVersion}"
+        }
     }
 }
 
