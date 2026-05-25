@@ -1,4 +1,4 @@
 {
   "extends": "@react-native/typescript-config/tsconfig.json",
-  "include": ["src", "App.tsx", "index.js", "nativewind-env.d.ts"]
+  "include": ["src", "index.js", "nativewind-env.d.ts"]
 }
