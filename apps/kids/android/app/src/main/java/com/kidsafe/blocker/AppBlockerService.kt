@@ -2,6 +2,7 @@ package com.kidsafe.blocker
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -10,7 +11,9 @@ import android.view.accessibility.AccessibilityEvent
 import com.facebook.react.ReactApplication
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.kidsafe.BuildConfig
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.kidsafe.kids.BuildConfig
 import com.kidsafe.security.PinGateActivity
 import com.kidsafe.security.TamperWatcher
 import com.kidsafe.store.KidSafeStore
@@ -176,12 +179,22 @@ class AppBlockerService : AccessibilityService() {
                 event,
                 root,
                 packageName,
-                getString(com.kidsafe.R.string.app_name),
+                getString(com.kidsafe.kids.R.string.app_name),
                 fallback,
             )
             if (kind != null) {
                 Log.i(TAG, "Tamper screen detected (kind=$kind, pkg=$pkg, cls=$cls) — launching PinGate")
-                startActivity(PinGateActivity.intent(ctx, kind, pkg, cls))
+                logDetectionToFirestore(ctx, kind, pkg, cls)
+                try {
+                    startActivity(PinGateActivity.intent(ctx, kind, pkg, cls))
+                } catch (e: Exception) {
+                    Log.w(
+                        TAG,
+                        "Failed to launch PinGateActivity for kind=$kind pkg=$pkg — background-start restricted? " +
+                            "Firestore tamper_attempt(detected) was still written so the parent dashboard sees it.",
+                        e,
+                    )
+                }
                 true
             } else if (root == null && retry && shouldRetry(pkg, fallback)) {
                 // Tree wasn't ready yet but the event looks suspicious. Try once more after a
@@ -210,7 +223,7 @@ class AppBlockerService : AccessibilityService() {
      * both cheap to check and avoid retrying for every random window transition.
      */
     private fun shouldRetry(pkg: String, fallback: String): Boolean {
-        val ourLabel = getString(com.kidsafe.R.string.app_name)
+        val ourLabel = getString(com.kidsafe.kids.R.string.app_name)
         if (fallback.contains(ourLabel, ignoreCase = true)) return true
         return pkg == "com.android.settings" ||
             pkg == "com.miui.securitycenter" ||
@@ -272,6 +285,45 @@ class AppBlockerService : AccessibilityService() {
         } catch (e: Exception) {
             // Never let a pill-emit failure tear down the accessibility service.
             Log.w(TAG, "emitForegroundApp failed (non-fatal)", e)
+        }
+    }
+
+    /**
+     * Best-effort write of a `tamper_attempt` doc with `phase = "detected"` to
+     * `children/{childUid}/events`. Fired the moment TamperWatcher matches, BEFORE we try to
+     * launch PinGateActivity — so even on OEMs where the background activity start is denied
+     * (Redmi MIUI without "Background pop-up", certain Vivo FuntouchOS builds) the parent still
+     * sees the attempt on the dashboard. Same `type` as PinGate's own write so the existing
+     * `where('type', '==', 'tamper_attempt')` listener picks both up; the `phase` field
+     * distinguishes detection-only from a real PIN attempt.
+     */
+    private fun logDetectionToFirestore(
+        ctx: Context,
+        kind: TamperWatcher.TamperKind,
+        pkg: String,
+        cls: String?,
+    ) {
+        val childUid = KidSafeStore.getChildUid(ctx) ?: return
+        try {
+            FirebaseFirestore.getInstance()
+                .collection("children")
+                .document(childUid)
+                .collection("events")
+                .add(
+                    mapOf(
+                        "type" to "tamper_attempt",
+                        "phase" to "detected",
+                        "kind" to kind.telemetryName,
+                        "success" to false,
+                        "sourcePkg" to pkg,
+                        "sourceClass" to (cls ?: ""),
+                        "timestamp" to System.currentTimeMillis(),
+                        "createdAt" to FieldValue.serverTimestamp(),
+                    ),
+                )
+        } catch (_: Exception) {
+            // Best-effort. If Firestore is offline / signed out, the gate still tries to launch
+            // and the local PIN check still runs — telemetry is the only thing missed here.
         }
     }
 
