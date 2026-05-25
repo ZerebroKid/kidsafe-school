@@ -28,11 +28,25 @@ It supersedes the early planning notes in [EDUCATION_AI_ECOSYSTEM_PLAN.md](./EDU
 | 4 | Child phone is optional; pairing code stays | locked |
 | 5 | Payment & subscriptions (Razorpay, plans, webhooks) | **deferred** — after end-to-end product is built |
 | 6 | Topic assignment requires explicit "Mark as taught" by teacher | locked |
-| 7 | App split: Guardian (parent+teacher), Kids (child), Principal web, Admin web | locked |
+| 7 | App split: **ZConnect** (parent+teacher), **ZKid** (student), **Zerebro Campus** (school web), **Zerebro Admin** (admin web) | locked |
 | 8 | Drop "shared mode" (single phone family) in v2 — two-device only | locked |
 | 9 | A single user can have multiple roles via `roles: []` array (parent + teacher common) | locked |
 | 10 | Repo: **monorepo from day 1** (pnpm + Turborepo) | locked |
-| 11 | App names: **Guardian** (parent+teacher) and **Kids** (child) | locked |
+| 11 | **Product names (home screen / user-facing):** ZConnect, ZKid, Zerebro Campus, Zerebro Admin | locked |
+| 12 | **Domains:** `admin.zerebrokid.com`, `campus.zerebrokid.com` (base: `zerebrokid.com`) | locked |
+
+### Product naming map
+
+User-facing names vs monorepo code folders (folders stay stable for engineering; labels change for users):
+
+| User-facing name | Who uses it | Platform | Home screen / URL | Code folder |
+|---|---|---|---|---|
+| **Zerebro Admin** | Internal team | Web | `admin.zerebrokid.com` | `apps/admin-web/` |
+| **Zerebro Campus** | School principals | Web | `campus.zerebrokid.com` | `apps/principal-web/` |
+| **ZConnect** | Parents + teachers | Android | App name on phone: **ZConnect** | `apps/guardian/` |
+| **ZKid** | Students | Android | App name on phone: **ZKid** | `apps/kids/` |
+
+Staging (suggested): `admin-staging.zerebrokid.com`, `campus-staging.zerebrokid.com`.
 
 ---
 
@@ -40,34 +54,34 @@ It supersedes the early planning notes in [EDUCATION_AI_ECOSYSTEM_PLAN.md](./EDU
 
 ```mermaid
 flowchart LR
-  AdminWeb["Admin Web (Next.js)"]
-  PrincipalWeb["Principal Web (Next.js)"]
-  Guardian["Guardian Android (parent + teacher)"]
-  Kids["Kids Android (child only)"]
+  AdminWeb["Zerebro Admin"]
+  CampusWeb["Zerebro Campus"]
+  ZConnect["ZConnect (parent + teacher)"]
+  ZKid["ZKid (student)"]
   Functions["Cloud Functions"]
 
   AdminWeb --> Firestore[(Firestore)]
-  PrincipalWeb --> Firestore
-  Guardian --> Firestore
-  Kids --> Firestore
+  CampusWeb --> Firestore
+  ZConnect --> Firestore
+  ZKid --> Firestore
   Functions --> Firestore
-  Guardian --> Functions
-  Kids --> Functions
-  PrincipalWeb --> Functions
+  ZConnect --> Functions
+  ZKid --> Functions
+  CampusWeb --> Functions
 ```
 
-| App | Platform | Users | Primary Job |
+| Product | Platform | Users | Primary Job |
 |---|---|---|---|
-| Admin Web | Next.js | Internal team | Create schools, moderate rewards, manage syllabus sources |
-| Principal Web | Next.js | School principals | Generate teacher codes, approve teachers, view coverage |
-| Guardian | React Native (Android) | Parents + teachers | Parent: monitor + control child. Teacher: assign topics, view class report |
-| Kids | React Native (Android) | Children only | Onboarding + enforcement + study mission + quiz + reward |
+| Zerebro Admin | Next.js | Internal team | Create schools, moderate rewards, manage syllabus sources |
+| Zerebro Campus | Next.js | School principals | Generate teacher codes, approve teachers, view coverage |
+| ZConnect | React Native (Android) | Parents + teachers | Parent: monitor + control child. Teacher: assign topics, view class report |
+| ZKid | React Native (Android) | Students | Onboarding + enforcement + study mission + quiz + reward |
 
 Why this split:
 
-- **Kids app isolated** — parent UI is not even bundled, child can't snoop or reverse-engineer.
-- **Guardian combined** — many teachers are also parents; one install for both roles.
-- **Web for Principal/Admin** — table-heavy, filter-heavy UIs are simpler on the web.
+- **ZKid isolated** — parent UI is not even bundled, student can't snoop or reverse-engineer.
+- **ZConnect combined** — many teachers are also parents; one install for both roles.
+- **Zerebro Campus + Admin on web** — table-heavy, filter-heavy UIs are simpler on the web.
 
 ---
 
@@ -94,7 +108,7 @@ Allowed role strings:
 admin | principal | teacher | parent | child
 ```
 
-On app open, the Guardian app uses `roles`:
+On app open, **ZConnect** uses `roles`:
 
 - 1 role → straight into that home screen.
 - 2+ roles → show a **role switcher** at the top of the home screen, default to `primaryRole` (or last-used).
@@ -109,7 +123,7 @@ On app open, the Guardian app uses `roles`:
 
 Important rules:
 
-- A `child` role is **only** valid in the Kids app. Guardian app refuses to load child UI even if `roles` includes `child` (defense-in-depth).
+- A `child` role is **only** valid in **ZKid**. ZConnect refuses to load student UI even if `roles` includes `child` (defense-in-depth).
 - A user can be promoted to `teacher` only via principal approval (teacher code flow, see §6).
 
 ---
@@ -133,26 +147,26 @@ Important rules:
 ```text
 kidsafe/
   apps/
-    guardian/                # Guardian Android (parent + teacher)
+    guardian/                # ZConnect (parent + teacher) — Android home screen name: ZConnect
       android/
       src/
       index.tsx
       metro.config.js
       package.json
 
-    kids/                    # Kids Android (child only)
+    kids/                    # ZKid (student) — Android home screen name: ZKid
       android/
       src/
       index.tsx
       metro.config.js
       package.json
 
-    principal-web/           # Next.js 14 App Router
+    principal-web/           # Zerebro Campus — campus.zerebrokid.com
       app/
       components/
       package.json
 
-    admin-web/               # Next.js 14 App Router
+    admin-web/               # Zerebro Admin — admin.zerebrokid.com
       app/
       components/
       package.json
@@ -267,7 +281,7 @@ This combo is the standard fix for the Metro + workspace symlink issue.
 
 ### 4.4 Native Module Ownership
 
-| Native module | Guardian | Kids |
+| Native module | ZConnect | ZKid |
 |---|---|---|
 | AppBlocker accessibility | no | yes |
 | ScreenTime / UsageStats | no | yes |
@@ -278,7 +292,7 @@ This combo is the standard fix for the Metro + workspace symlink issue.
 | Firebase Messaging | yes | yes |
 | Maps | yes | no |
 
-The Kids APK keeps all the heavy native modules; Guardian stays lean. This is a meaningful UX win — parents don't get scared by long permission lists.
+The ZKid APK keeps all the heavy native modules; ZConnect stays lean. This is a meaningful UX win — parents don't get scared by long permission lists.
 
 ### 4.5 Migration From The Existing Single APK
 
@@ -291,21 +305,21 @@ flowchart LR
 ```
 
 - Same Firebase project, same Firestore data.
-- Existing parent users install Guardian; existing child users install Kids.
-- We ship a final v1 update with a hard upgrade screen: "Please install Guardian/Kids — old app is sunset on YYYY-MM-DD".
+- Existing parent users install ZConnect; existing child users install ZKid.
+- We ship a final v1 update with a hard upgrade screen: "Please install ZConnect/ZKid — old app is sunset on YYYY-MM-DD".
 
 ---
 
 ## 5) Web Apps In The Monorepo
 
-Both web apps are **Next.js 14 (App Router)**:
+**Zerebro Campus** and **Zerebro Admin** are Next.js 14 (App Router) web apps:
 
 - **server actions + route handlers** for callable-style server logic
 - **`shared-firebase`** package for both client SDK and admin SDK use
 - **Tailwind CSS** for all web UI (utility classes in each app — no separate shared UI package)
 - Hosted on **Firebase Hosting** or **Vercel** (decision pending; Vercel recommended for App Router maturity)
 
-`apps/principal-web/` route map:
+`apps/principal-web/` (Zerebro Campus) route map:
 
 ```text
 /                            -> login (phone OTP)
@@ -317,7 +331,7 @@ Both web apps are **Next.js 14 (App Router)**:
 /syllabus                    -> review fetched topics for whole school
 ```
 
-`apps/admin-web/` route map:
+`apps/admin-web/` (Zerebro Admin) route map:
 
 ```text
 /                            -> SSO/email + OTP gated
@@ -332,12 +346,12 @@ Both web apps are **Next.js 14 (App Router)**:
 
 ## 6) Onboarding Flows Per App
 
-### 6.1 Principal Web
+### 6.1 Principal — Zerebro Campus
 
 ```mermaid
 sequenceDiagram
   participant P as Principal
-  participant W as Principal Web
+  participant W as Zerebro Campus
   participant FN as Functions
   participant FS as Firestore
   participant A as Admin
@@ -352,15 +366,15 @@ sequenceDiagram
   FN->>FS: store schools/{id}.teacherCode
 ```
 
-### 6.2 Teacher (Inside Guardian App)
+### 6.2 Teacher (Inside ZConnect)
 
 ```mermaid
 sequenceDiagram
   participant T as Teacher
-  participant G as Guardian App
+  participant G as ZConnect
   participant FN as Functions
   participant FS as Firestore
-  participant P as Principal Web
+  participant P as Zerebro Campus
 
   T->>G: login phone OTP
   T->>G: pick "I am a teacher"
@@ -372,15 +386,15 @@ sequenceDiagram
   FS-->>G: teacher home unlocked
 ```
 
-### 6.3 Parent (Inside Guardian App)
+### 6.3 Parent (Inside ZConnect)
 
 Unchanged from KidSafe v1: phone OTP → set up child via pairing code.
 
-### 6.4 Child (Kids App)
+### 6.4 Student (ZKid)
 
 ```mermaid
 sequenceDiagram
-  participant K as Kids App
+  participant K as ZKid
   participant FN as Functions
   participant FS as Firestore
 
@@ -547,7 +561,7 @@ Classes/subjects link to a curriculum:
 }
 ```
 
-Kids app reads topic doc directly when child opens an assignment — **no `aiLessonGenerator` callable**.
+ZKid reads topic doc directly when child opens an assignment — **no `aiLessonGenerator` callable**.
 
 ---
 
@@ -594,7 +608,7 @@ When payments ship later: expired subscriptions block new assignments/quizzes bu
 
 - Firebase project (same Auth, same Firestore).
 - Existing `users`, `children`, `apps`, `events`, `usageDaily` collections.
-- All Kotlin native modules (move into `android-modules/` as packages, only Kids app consumes).
+- All Kotlin native modules (move into `android-modules/` as packages, only ZKid consumes).
 - Existing onboarding wizard, location pipeline, schedule, app-blocker.
 
 ### 11.2 What Splits
@@ -609,8 +623,8 @@ When payments ship later: expired subscriptions block new assignments/quizzes bu
 
 ### 11.3 What's New
 
-- `apps/principal-web/`
-- `apps/admin-web/`
+- `apps/principal-web/` (Zerebro Campus)
+- `apps/admin-web/` (Zerebro Admin)
 - `apps/functions/` (currently no functions exist)
 - `packages/shared-*`
 - `roles[]` array on `users` doc (migration script needed)
@@ -677,9 +691,9 @@ gantt
 
 - Cloud Functions scaffold (education callables only — no AI lesson gen)
 - Schools / classes / subjects / topics schema
-- Teacher onboarding inside Guardian
+- Teacher onboarding inside ZConnect
 - Teacher assign topic
-- Kids app: Study Mission screen
+- ZKid: Study Mission screen
 - Curated JSON import (Class 8 Science first) + topic learn screen
 - Quiz attempt + reward unlock
 - Parent + teacher report views
@@ -721,8 +735,8 @@ gantt
 | Wrong curated quiz answer | Content team QA + import validator + spot-check before `published` status |
 | Unsafe reward link | Strict allowlist in `rewardCatalog`, admin moderation only |
 | Multi-role user confusion | Single role switcher UI, `primaryRole` default, audit logging on switch |
-| Cross-app data leak | Firestore rules strictly check role + school binding; Kids app refuses parent-shaped reads |
-| Child app reverse-engineered | Kids APK doesn't bundle parent UI; secrets are server-side only |
+| Cross-app data leak | Firestore rules strictly check role + school binding; ZKid refuses parent-shaped reads |
+| Child app reverse-engineered | ZKid APK doesn't bundle parent UI; secrets are server-side only |
 
 ---
 
@@ -746,16 +760,17 @@ flowchart TD
   Admin["Admin"] -->|creates| School["School"]
   School --> Principal["Principal"]
   Principal --> TeacherCode["Teacher Code"]
-  TeacherCode --> Teacher["Teacher (Guardian app)"]
+  TeacherCode --> Teacher["Teacher (ZConnect)"]
   Teacher -->|assigns topic| Class["Class 8A"]
-  Class --> Child["Child (Kids app)"]
+  Class --> Student["Student (ZKid)"]
+  ContentTeam["Content team"] -->|curates JSON| Curriculum
   Admin -->|imports JSON| Curriculum["Curriculum (curated topics)"]
   Curriculum --> Lesson["Topic lesson"]
   Child -->|reads curated lesson| Lesson
   Lesson --> Quiz["Quiz"]
   Quiz --> Reward["Reward"]
   Quiz --> Reports["Reports"]
-  Reports --> Parent["Parent (Guardian app)"]
+  Reports --> Parent["Parent (ZConnect)"]
   Reports --> Teacher
   Reports --> Principal
 ```

@@ -13,7 +13,7 @@ Each chunk = **1 to 5 days of work**, has clear deliverables and acceptance crit
 
 ```mermaid
 gantt
-  title KidSafe v2 Phased Delivery
+  title Zerebro v2 Phased Delivery
   dateFormat YYYY-MM-DD
   axisFormat %b %d
 
@@ -58,8 +58,8 @@ gantt
 Lock these decisions before any coding starts. Block here until done.
 
 - [ ] **PF-1** Lock open decisions from `EDUCATION_AI_TECH_SPEC.md §14` (web host, code rotation, tablet mode, iOS).
-- [ ] **PF-2** Register domains: `kidsafe.app` (or chosen), `principal.kidsafe.app`, `admin.kidsafe.app`.
-- [ ] **PF-3** Decide branding for Guardian + Kids icons, splash, color palette (can be same as v1 initially).
+- [ ] **PF-2** Register domains: `zerebrokid.com`, `admin.zerebrokid.com`, `campus.zerebrokid.com` (+ staging subdomains).
+- [ ] **PF-3** App icons + splash for **ZConnect**, **ZKid**, **Zerebro Campus**, **Zerebro Admin** (can reuse v1 palette initially).
 - [ ] **PF-4** Finalize curated JSON format with content team; receive first bundle (e.g. Class 8 Science — all chapters/topics with explanation, examples, videos, brainstorming, quiz).
 - [ ] **PF-5** Set up issue tracker board (Linear/Jira) with this doc's chunk IDs as ticket labels.
 
@@ -135,7 +135,7 @@ Mobile and web apps use **Tailwind** (NativeWind on RN, Tailwind CSS on Next.js)
 - [ ] `pnpm dlx react-native@latest init kids` inside `apps/`
 - [ ] Apply monorepo Metro config (workspace watchFolders, hoisted nodeModulesPaths, disableHierarchicalLookup)
 - [ ] Set `applicationId = com.kidsafe.kids`
-- [ ] App name "KidSafe Kids", colors/icon placeholder
+- [ ] Android launcher name **ZKid**, colors/icon placeholder
 - [ ] NativeWind (Tailwind for RN) configured
 
 **Acceptance**: `pnpm --filter kids android` builds and launches an empty RN app.
@@ -145,7 +145,7 @@ Mobile and web apps use **Tailwind** (NativeWind on RN, Tailwind CSS on Next.js)
 Same as P1.1 but:
 
 - [ ] Set `applicationId = com.kidsafe.guardian`
-- [ ] App name "KidSafe Guardian"
+- [ ] Android launcher name **ZConnect**
 - [ ] NativeWind (Tailwind for RN) configured
 
 **Acceptance**: Both apps build and launch side by side on one device.
@@ -160,7 +160,7 @@ Move from v1:
 - [ ] `src/modules/native.ts` → child-only natives stay in `apps/kids/`
 - [ ] Update import paths
 
-**Acceptance**: Kids app launches v1 onboarding wizard; child can pair with parent (using v1 Guardian APK still installed elsewhere).
+**Acceptance**: ZKid launches v1 onboarding wizard; child can pair with parent (using v1 parent APK still installed elsewhere).
 
 ### P1.4 — Extract parent-side code into `apps/guardian/src/` (2 days)
 
@@ -170,7 +170,7 @@ Move:
 - [ ] `src/navigation/ParentNavigator.tsx` → `apps/guardian/src/navigation/`
 - [ ] Map view, child details, tabs
 
-**Acceptance**: Guardian app shows parent dashboard for existing v1 children.
+**Acceptance**: ZConnect shows parent dashboard for existing v1 children.
 
 ### P1.5 — Split Android native modules into Gradle packages (2 days)
 
@@ -183,11 +183,11 @@ Move Kotlin source from `android/app/src/main/java/com/kidsafe/*`:
 - [ ] `android-modules/device-admin/`
 - [ ] Each is its own Gradle module with `apply plugin: 'com.android.library'`
 - [ ] `apps/kids/android/settings.gradle` references all 5
-- [ ] `apps/guardian/android/settings.gradle` references none (Guardian doesn't need them)
+- [ ] `apps/guardian/android/settings.gradle` references none (ZConnect doesn't need them)
 
 **Acceptance**:
-- Kids release APK builds and behaves identical to v1 child mode
-- Guardian release APK builds without native modules, ~40% smaller
+- ZKid release APK builds and behaves identical to v1 child mode
+- ZConnect release APK builds without native modules, ~40% smaller
 
 ### P1.6 — Drop shared mode (1 day)
 
@@ -220,7 +220,7 @@ Move Kotlin source from `android/app/src/main/java/com/kidsafe/*`:
 
 ## Phase 2 — Web Apps Scaffolding (1 week, parallel with P1)
 
-**Goal**: Empty `principal-web` and `admin-web` deployed to staging with login.
+**Goal**: Empty **Zerebro Campus** and **Zerebro Admin** deployed to staging to staging with login.
 
 ### P2.1 — Next.js 14 scaffolding (1 day)
 
@@ -250,7 +250,7 @@ Move Kotlin source from `android/app/src/main/java/com/kidsafe/*`:
 ### P2.4 — Staging deployment (1 day)
 
 - [ ] Deploy `principal-web` and `admin-web` to Vercel (or Firebase Hosting if chosen)
-- [ ] Domains: `principal-staging.kidsafe.app`, `admin-staging.kidsafe.app`
+- [ ] Domains: `campus-staging.zerebrokid.com`, `admin-staging.zerebrokid.com`
 - [ ] Env vars: Firebase config via Vercel project settings
 
 **Acceptance**: Both apps reachable from public staging URLs.
@@ -267,7 +267,7 @@ Move Kotlin source from `android/app/src/main/java/com/kidsafe/*`:
 
 ## Phase 3 — Auth + Roles + Multi-Role (1 week)
 
-**Goal**: User doc has `roles[]`, role-switcher UI works in Guardian, all callable functions enforce role.
+**Goal**: User doc has `roles[]`, role-switcher UI works in ZConnect, all callable functions enforce role.
 
 ### P3.1 — User doc migration (1 day)
 
@@ -282,15 +282,15 @@ Move Kotlin source from `android/app/src/main/java/com/kidsafe/*`:
 
 - [ ] Update `UserDoc` type in `shared-types`
 - [ ] Update `auth.ts` in `shared-firebase` to fetch + return `roles[]`
-- [ ] Update Guardian + Kids + web reads to use new shape
+- [ ] Update ZConnect + ZKid + web reads to use new shape
 - [ ] Backwards-compat read fallback for un-migrated users
 
 **Acceptance**: Apps compile and read new user shape.
 
-### P3.3 — Role switcher UI in Guardian (1 day)
+### P3.3 — Role switcher UI in ZConnect (1 day)
 
-- [ ] Component `RoleSwitcher` in Guardian app (styled with NativeWind)
-- [ ] Top bar of Guardian home: pill switcher when `roles.length > 1`
+- [ ] Component `RoleSwitcher` in ZConnect (styled with NativeWind)
+- [ ] Top bar of ZConnect home: pill switcher when `roles.length > 1`
 - [ ] Persists selection to `users/{uid}.primaryRole`
 - [ ] Wires into parent or teacher home screen
 
@@ -303,7 +303,7 @@ Add to `firestore/rules`:
 - [ ] `isParent()`, `isTeacher()`, `isPrincipal()`, `isAdmin()` helpers
 - [ ] `belongsToSchool(schoolId)` helper
 - [ ] Gate `studyAssignments`, `quizAttempts`, `schools/*` accordingly
-- [ ] Defense-in-depth: Kids app cannot read `studyAssignments` for classes outside the child's class
+- [ ] Defense-in-depth: ZKid cannot read `studyAssignments` for classes outside the child's class
 
 **Acceptance**: Rules unit tests pass; tests cover at least 10 deny + 10 allow cases.
 
@@ -311,7 +311,7 @@ Add to `firestore/rules`:
 
 ```text
 - users have roles[] in production schema
-- role switcher live in Guardian
+- role switcher live in ZConnect
 - rules enforce role for every collection
 - migration script run on staging successfully
 ```
@@ -346,15 +346,15 @@ Add to `firestore/rules`:
 ### P4.3 — Teacher onboarding flow (2 days)
 
 - [ ] Principal-web: "Generate teacher code" button → writes `schools/{id}.teacherCode`
-- [ ] Guardian app: "I am a teacher" path → enter code → `requestTeacherJoin` callable creates `teachers/{id}` status `pending`
+- [ ] ZConnect: "I am a teacher" path → enter code → `requestTeacherJoin` callable creates `teachers/{id}` status `pending`
 - [ ] Principal-web: `/teachers` lists pending → approve/reject → `approveTeacher` callable adds `roles += "teacher"`
-- [ ] Guardian app: teacher home unlocks after approval
+- [ ] ZConnect: teacher home unlocks after approval
 
 **Acceptance**: New teacher signs up, principal approves, teacher home opens.
 
 ### P4.4 — Child onboarding pulls school+class (1 day)
 
-- [ ] Kids app: after pairing code, ask for school code + grade + section
+- [ ] ZKid: after pairing code, ask for school code + grade + section
 - [ ] Validate against `schools/*` and `classes/*`
 - [ ] Write `children/{uid}.classId`
 
@@ -362,13 +362,13 @@ Add to `firestore/rules`:
 
 ### P4.5 — Teacher: assign topic UI (2 days)
 
-- [ ] Guardian app (teacher mode): list classes → pick subject → pick topic → "Assign Today"
+- [ ] ZConnect (teacher mode): list classes → pick subject → pick topic → "Assign Today"
 - [ ] `assignTopic` callable writes `studyAssignments/{id}`
 - [ ] Mark topic status `assigned`
 
 **Acceptance**: Teacher sees assignment immediately after creation.
 
-### P4.6 — Kids app: Study Mission screen (2 days)
+### P4.6 — ZKid: Study Mission screen (2 days)
 
 - [ ] New screen during study window: list today's `studyAssignments`
 - [ ] Each card shows topic name, status, **"Start Learning"**, **"Take Quiz"**, reward placeholder
@@ -398,7 +398,7 @@ Each topic JSON includes:
 
 ### P4.8 — Topic learn screen (2 days)
 
-- [ ] Kids app: fetch `curriculum/.../topics/{topicId}` for assigned topic
+- [ ] ZKid: fetch `curriculum/.../topics/{topicId}` for assigned topic
 - [ ] Render sections in order: explanation → examples → intro video (safe webview/YouTube)
 - [ ] **Brainstorming section**: expandable cards with question, answer, video link
 - [ ] "I'm ready for the quiz" → goes to quiz screen
@@ -407,7 +407,7 @@ Each topic JSON includes:
 
 ### P4.9 — Quiz UI + scoring (2 days)
 
-- [ ] Kids app: MCQ screen, one Q at a time — questions loaded from same topic doc (`quiz[]`)
+- [ ] ZKid: MCQ screen, one Q at a time — questions loaded from same topic doc (`quiz[]`)
 - [ ] Submit → `submitQuizAttempt` callable
 - [ ] Server validates answers against **curated quiz in Firestore** (not client-sent answers only), computes score, writes `quizAttempts/{id}`
 
@@ -417,20 +417,20 @@ Each topic JSON includes:
 
 - [ ] Admin-web: CRUD `rewardCatalog/*` with moderation flag
 - [ ] On quiz pass: `onQuizAttemptWrite` trigger picks an approved reward matching subject + age, writes `rewardUnlocks/{id}`
-- [ ] Kids app: shows unlocked reward (external link opens in safe webview)
+- [ ] ZKid: shows unlocked reward (external link opens in safe webview)
 
 **Acceptance**: Pass quiz → reward shows; fail quiz → "Try again tomorrow".
 
 ### P4.11 — Parent report tab (1 day)
 
-- [ ] Guardian app (parent mode): new "Study" tab in child details
+- [ ] ZConnect (parent mode): new "Study" tab in child details
 - [ ] Lists today's assignments + scores + rewards
 
 **Acceptance**: Parent sees same data the child sees.
 
 ### P4.12 — Teacher class report (2 days)
 
-- [ ] Guardian app (teacher mode): per-class summary: avg score, attempted/not attempted, weak topics
+- [ ] ZConnect (teacher mode): per-class summary: avg score, attempted/not attempted, weak topics
 - [ ] Pull from `quizAttempts` filtered by `classId`
 
 **Acceptance**: Teacher sees class summary updated within seconds of attempts.
@@ -439,7 +439,7 @@ Each topic JSON includes:
 
 ```text
 - full loop: teacher assigns -> child reads curated lesson -> quiz -> reward -> parent + teacher see
-- Class 8 Science curriculum imported and visible in Kids app
+- Class 8 Science curriculum imported and visible in ZKid
 - quiz scored server-side against curated quiz[] in topic doc
 - no AI lesson generation in this phase
 - no payment/subscription code in this phase
@@ -522,7 +522,7 @@ Each topic JSON includes:
 
 ### P6.2 — Real-device QA matrix (2 days)
 
-- [ ] Test Guardian + Kids on: Realme, Xiaomi, Samsung, OPPO, Vivo, Pixel
+- [ ] Test ZConnect + ZKid on: Realme, Xiaomi, Samsung, OPPO, Vivo, Pixel
 - [ ] Each OEM gets a checklist: onboarding, location, app blocking, study mission, quiz, reward
 - [ ] Fix top 5 bugs
 
@@ -547,7 +547,7 @@ Each topic JSON includes:
 
 ### P6.5 — Public launch (1 day)
 
-- [ ] Publish Guardian + Kids to Play Store internal track
+- [ ] Publish ZConnect + ZKid to Play Store internal track
 - [ ] Promote to closed beta → open beta → production
 - [ ] Principal/admin web hit production domains
 - [ ] v1 sunset banner ships in last v1 build

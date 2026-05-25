@@ -14,7 +14,7 @@ For knowledge transfer to a new developer, read in this order:
 3. [docs/FIRESTORE_SCHEMA_EXPLAINED.md](./docs/FIRESTORE_SCHEMA_EXPLAINED.md) - Firestore schema, parent/child connection, data-flow examples.
 4. [docs/SYSTEM_DESIGN_KT.md](./docs/SYSTEM_DESIGN_KT.md) - full technical system design deep-dive.
 5. [docs/EDUCATION_AI_ECOSYSTEM_PLAN.md](./docs/EDUCATION_AI_ECOSYSTEM_PLAN.md) - product narrative + early plan for the education/AI ecosystem (syllabus, quizzes, rewards, reports).
-6. [docs/EDUCATION_AI_TECH_SPEC.md](./docs/EDUCATION_AI_TECH_SPEC.md) - **locked v2 tech spec**: 4-app split, monorepo, curated curriculum JSON (no AI lesson gen in MVP), phased roadmap.
+6. [docs/EDUCATION_AI_TECH_SPEC.md](./docs/EDUCATION_AI_TECH_SPEC.md) - **locked v2 tech spec**: ZConnect + ZKid + Zerebro Campus + Zerebro Admin, monorepo, curated curriculum JSON, phased roadmap.
 7. [docs/V2_BUILD_PHASES.md](./docs/V2_BUILD_PHASES.md) - **v2 execution plan**: tech spec sliced into small doable chunks (P0.1 ... P7.6) with acceptance criteria, durations, ticket template, critical path.
 8. [docs/RELEASE_CHECKLIST.md](./docs/RELEASE_CHECKLIST.md) - QA + release gates.
 9. [docs/FCM_WAKEUP.md](./docs/FCM_WAKEUP.md) - optional v1.1 wake-up architecture.
