@@ -3,7 +3,7 @@ import {Image, StyleSheet, Text, View} from 'react-native';
 
 import {colors, radius, spacing} from '../../theme';
 import {subscribeChildApps, subscribeChildDoc} from '../../firebase/firestore';
-import type {AppEntry, ChildDoc, ChildForegroundApp} from '../../firebase/types';
+import type {AppEntry, ChildDoc, ChildForegroundApp} from '@zerebro/shared-types';
 
 /**
  * Live "what is my child using right now" pill, rendered above the tabs on

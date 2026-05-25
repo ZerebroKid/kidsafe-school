@@ -1,4 +1,4 @@
-import type {DeviceMode, Role} from '../firebase/types';
+import type {DeviceMode, Role} from '@zerebro/shared-types';
 
 export type AuthStackParamList = {
   RoleSelector: undefined;

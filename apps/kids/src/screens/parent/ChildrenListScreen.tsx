@@ -15,7 +15,7 @@ import {
   subscribeLinkedChildren,
 } from '../../firebase/firestore';
 import {useAuthStore} from '../../state/authStore';
-import type {ChildDoc, UserDoc} from '../../firebase/types';
+import type {ChildDoc, UserDoc} from '@zerebro/shared-types';
 import type {ParentStackParamList} from '../../navigation/types';
 
 type ChildRow = UserDoc & {uid: string; doc: ChildDoc | null};

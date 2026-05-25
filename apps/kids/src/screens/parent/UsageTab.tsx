@@ -7,7 +7,7 @@ import {
   subscribeChildApps,
   subscribeUsageWeek,
 } from '../../firebase/firestore';
-import type {AppEntry, UsageDailyDoc} from '../../firebase/types';
+import type {AppEntry, UsageDailyDoc} from '@zerebro/shared-types';
 import {UsageBarChart, type ChartDay} from './UsageBarChart';
 
 interface Props {

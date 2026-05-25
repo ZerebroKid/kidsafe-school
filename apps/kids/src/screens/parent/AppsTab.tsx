@@ -7,7 +7,7 @@ import {
   subscribeChildApps,
   subscribeChildDoc,
 } from '../../firebase/firestore';
-import type {AppEntry, ChildDoc} from '../../firebase/types';
+import type {AppEntry, ChildDoc} from '@zerebro/shared-types';
 
 /**
  * Apps list rendered inline inside `ChildDetailsScreen`'s outer `ScrollView`.

@@ -3,7 +3,7 @@ import firestore, {firebase} from '@react-native-firebase/firestore';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 import {ENV} from '../config/env';
-import type {DeviceMode, Role, UserDoc} from './types';
+import type {DeviceMode, Role, UserDoc} from '@zerebro/shared-types';
 
 GoogleSignin.configure({
   webClientId: ENV.GOOGLE_WEB_CLIENT_ID,

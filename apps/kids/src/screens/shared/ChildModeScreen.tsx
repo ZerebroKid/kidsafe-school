@@ -20,7 +20,7 @@ import {
   subscribeChildDoc,
 } from '../../firebase/firestore';
 import {useAuthStore} from '../../state/authStore';
-import type {AppEntry, ChildDoc} from '../../firebase/types';
+import type {AppEntry, ChildDoc} from '@zerebro/shared-types';
 import type {ChildModeStackParamList} from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<ChildModeStackParamList, 'ChildMode'>;

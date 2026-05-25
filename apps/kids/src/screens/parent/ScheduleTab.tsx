@@ -14,7 +14,7 @@ import {
 
 import {colors, radius, spacing} from '../../theme';
 import {setSchedule, subscribeChildApps, subscribeChildDoc} from '../../firebase/firestore';
-import type {AppEntry, ChildDoc, Schedule} from '../../firebase/types';
+import type {AppEntry, ChildDoc, Schedule} from '@zerebro/shared-types';
 
 interface Props {
   childUid: string;

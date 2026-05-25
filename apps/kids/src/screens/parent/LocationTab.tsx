@@ -8,7 +8,7 @@ import type {
   ChildDoc,
   LocationDiagnostics,
   LocationDiagnosticsReason,
-} from '../../firebase/types';
+} from '@zerebro/shared-types';
 
 /**
  * Anything older than this means the child phone hasn't pushed a fix in a while. We render

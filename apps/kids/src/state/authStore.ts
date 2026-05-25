@@ -1,6 +1,6 @@
 import {create} from 'zustand';
 
-import type {UserDoc} from '../firebase/types';
+import type {UserDoc} from '@zerebro/shared-types';
 
 interface AuthState {
   firebaseUid: string | null;

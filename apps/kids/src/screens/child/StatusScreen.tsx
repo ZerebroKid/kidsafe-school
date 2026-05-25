@@ -7,7 +7,7 @@ import {colors, radius, spacing} from '../../theme';
 import {useAuthStore} from '../../state/authStore';
 import {subscribeChildDoc} from '../../firebase/firestore';
 import {signOut} from '../../firebase/auth';
-import type {ChildDoc} from '../../firebase/types';
+import type {ChildDoc} from '@zerebro/shared-types';
 
 export function StatusScreen() {
   const uid = useAuthStore(s => s.firebaseUid);

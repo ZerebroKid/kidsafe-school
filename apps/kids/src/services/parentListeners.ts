@@ -1,7 +1,7 @@
 import {Alert} from 'react-native';
 
 import {paths, subscribeLinkedChildren} from '../firebase/firestore';
-import type {ChildDoc} from '../firebase/types';
+import type {ChildDoc} from '@zerebro/shared-types';
 
 /**
  * Parent-side listeners. Surfaces an in-app alert when any linked child exits their geofence.

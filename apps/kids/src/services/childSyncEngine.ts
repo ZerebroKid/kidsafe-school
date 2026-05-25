@@ -29,7 +29,7 @@ import type {
   ChildDoc,
   LocationDiagnostics,
   Schedule as ScheduleConfig,
-} from '../firebase/types';
+} from '@zerebro/shared-types';
 import {getOrCreateDeviceId} from './deviceId';
 
 /**

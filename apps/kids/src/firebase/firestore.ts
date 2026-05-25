@@ -11,7 +11,7 @@ import type {
   SharedProfile,
   UsageDailyDoc,
   UserDoc,
-} from './types';
+} from '@zerebro/shared-types';
 
 /**
  * Paths helpers keep collection names in one place — change here, update nowhere else.
