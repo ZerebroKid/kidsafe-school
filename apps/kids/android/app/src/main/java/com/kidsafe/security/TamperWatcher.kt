@@ -119,11 +119,14 @@ object TamperWatcher {
             pkg == "com.google.android.settings.intelligence"
         ) {
             // App info / Force stop / Uninstall / Storage→Clear data — these stable viewIds are
-            // what every AOSP-derived Settings ROM uses for the dangerous buttons.
+            // what every AOSP-derived Settings ROM uses for the dangerous buttons. We accept
+            // EITHER the visible app label OR the package-name string in the tree (targetIsUs):
+            // Samsung / Realme / certain MIUI builds render the app-info page with just an icon
+            // + `com.kidsafe.kids` and never expose the literal "ZKid" string.
             if (rootHasAnyResourceId(
                     root,
                     listOf("uninstall_button", "force_stop_button", "clear_storage_button"),
-                ) && labelInTree
+                ) && targetIsUs
             ) {
                 return TamperKind.APP_INFO
             }
