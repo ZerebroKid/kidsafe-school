@@ -14,12 +14,11 @@
     "@zerebro/shared-firebase": "workspace:*",
     "@zerebro/shared-types": "workspace:*",
     "@zerebro/shared-utils": "workspace:*",
-    "nativewind": "^4.2.4",
+    "nativewind": "4.1.23",
     "react": "18.3.1",
     "react-native": "0.76.5",
     "react-native-reanimated": "3.16.7",
-    "react-native-safe-area-context": "5.0.0",
-    "react-native-worklets": "^0.8.3"
+    "react-native-safe-area-context": "5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
