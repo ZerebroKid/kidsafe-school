@@ -1,16 +1,12 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Pressable, ScrollView, StyleSheet, Switch, Text, View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
-import {Button} from '../../components/Button';
 import {Screen} from '../../components/Screen';
 import {colors, radius, spacing} from '../../theme';
-import {ChildMode} from '../../modules/native';
 import {
-  setChildModeActive as fsSetChildModeActive,
   setLock,
-  sharedProfileChildUid,
   subscribeChildDoc,
   subscribeLinkedChildren,
 } from '@zerebro/shared-firebase/firestore';
@@ -20,20 +16,19 @@ import type {ParentStackParamList} from '../../navigation/types';
 
 type ChildRow = UserDoc & {uid: string; doc: ChildDoc | null};
 
+/**
+ * Two-device parent dashboard home -- linked children list with per-child
+ * lock toggle. The v1 shared-mode "Start Child Mode" card + `sharedRow`
+ * synthesis was deleted in P1.6.1.
+ */
 export function ChildrenListScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<ParentStackParamList>>();
   const parentUid = useAuthStore(s => s.firebaseUid);
-  const userDoc = useAuthStore(s => s.userDoc);
-  const sharedProfile = userDoc?.sharedProfile;
-  const isShared = userDoc?.deviceMode === 'shared';
 
   const [rows, setRows] = useState<ChildRow[]>([]);
-  const [sharedDoc, setSharedDoc] = useState<ChildDoc | null>(null);
-  const [starting, setStarting] = useState(false);
 
-  // Two-device linked children — unchanged.
   useEffect(() => {
-    if (!parentUid || isShared) {return;}
+    if (!parentUid) {return;}
     const subs: Array<() => void> = [];
     const unsub = subscribeLinkedChildren(parentUid, list => {
       setRows(list.map(u => ({...u, doc: null})));
@@ -50,127 +45,42 @@ export function ChildrenListScreen() {
       unsub();
       subs.forEach(u => u());
     };
-  }, [parentUid, isShared]);
-
-  // Shared-profile doc — only subscribed when shared mode is on. The "child" here is the
-  // parent's own profile at `children/{parentUid}_shared`.
-  useEffect(() => {
-    if (!isShared || !sharedProfile?.childUid) {return;}
-    return subscribeChildDoc(sharedProfile.childUid, setSharedDoc);
-  }, [isShared, sharedProfile?.childUid]);
-
-  const sharedRow = useMemo<ChildRow | null>(() => {
-    if (!isShared || !sharedProfile || !parentUid) {return null;}
-    // Synthesize a "UserDoc" for display only — the shared profile has no users-collection
-    // entry, since the parent's own auth user owns the data via the `parentOwns(...)` rule.
-    return {
-      uid: sharedProfile.childUid,
-      role: 'child',
-      name: sharedProfile.childName,
-      email: '',
-      createdAt: sharedProfile.createdAt,
-      doc: sharedDoc,
-    };
-  }, [isShared, sharedProfile, sharedDoc, parentUid]);
+  }, [parentUid]);
 
   async function toggleLock(row: ChildRow, value: boolean) {
     await setLock(row.uid, value);
   }
 
-  async function startChildMode() {
-    if (!parentUid) {return;}
-    const childUid = sharedProfile?.childUid ?? sharedProfileChildUid(parentUid);
-    try {
-      setStarting(true);
-      // Flip native FIRST so the very next accessibility event enforces blocking.
-      // Firestore mirror is best-effort for cross-instance visibility.
-      await ChildMode.setActive(true, childUid);
-      try {
-        await fsSetChildModeActive(parentUid, true);
-      } catch (e) {
-        console.warn('Firestore childMode mirror failed', e);
-      }
-      // RootNavigator's `useChildModeActive()` will pick up the native flag on its next
-      // poll (\u22642s) and swap us into the kiosk. No manual navigation needed.
-    } catch (e) {
-      Alert.alert('Could not start Child Mode', (e as Error).message);
-    } finally {
-      setStarting(false);
-    }
-  }
-
   return (
     <Screen
-      title={isShared ? 'Shared phone setup' : 'Your children'}
-      subtitle={
-        isShared
-          ? "Hand the phone to your child once you start Child Mode. Only the apps you've allowed will be usable until you exit."
-          : 'Tap a child for detailed controls.'
-      }>
+      title="Your children"
+      subtitle="Tap a child for detailed controls.">
       <ScrollView contentContainerStyle={{gap: spacing.md, paddingBottom: spacing.xl}}>
-        {sharedRow ? (
-          <View style={styles.sharedSection}>
-            <Pressable
-              onPress={() =>
-                navigation.navigate('ChildDetails', {
-                  childUid: sharedRow.uid,
-                  childName: sharedRow.name,
-                })
-              }
-              style={({pressed}) => [styles.card, pressed && {opacity: 0.85}]}>
-              <View style={{flex: 1}}>
-                <Text style={styles.name}>{sharedRow.name}</Text>
-                <Text style={styles.meta}>
-                  Shared phone profile{'  \u00b7  '}
-                  {sharedDoc?.lockState?.locked ? 'Locked' : 'Unlocked'}
-                </Text>
-              </View>
-              <Switch
-                value={sharedDoc?.lockState?.locked ?? false}
-                onValueChange={v => toggleLock(sharedRow, v)}
-                trackColor={{true: colors.primary, false: colors.surfaceAlt}}
-                thumbColor={colors.text}
-              />
-            </Pressable>
-            <Button
-              title={starting ? 'Starting\u2026' : '\u25b6  Start Child Mode'}
-              onPress={startChildMode}
-              loading={starting}
+        {rows.length === 0 ? <EmptyState /> : null}
+
+        {rows.map(item => (
+          <Pressable
+            key={item.uid}
+            onPress={() =>
+              navigation.navigate('ChildDetails', {childUid: item.uid, childName: item.name})
+            }
+            style={({pressed}) => [styles.card, pressed && {opacity: 0.85}]}>
+            <View style={{flex: 1}}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.meta}>
+                {item.doc?.status === 'online' ? '\u25cf Online' : '\u25cb Offline'}
+                {'  \u00b7  '}
+                {item.doc?.lockState?.locked ? 'Locked' : 'Unlocked'}
+              </Text>
+            </View>
+            <Switch
+              value={item.doc?.lockState?.locked ?? false}
+              onValueChange={v => toggleLock(item, v)}
+              trackColor={{true: colors.primary, false: colors.surfaceAlt}}
+              thumbColor={colors.text}
             />
-            <Text style={styles.startHint}>
-              Child Mode locks the phone to your allowed apps. Exit any time by entering your
-              parent PIN.
-            </Text>
-          </View>
-        ) : null}
-
-        {!isShared && rows.length === 0 ? <EmptyState /> : null}
-
-        {!isShared
-          ? rows.map(item => (
-              <Pressable
-                key={item.uid}
-                onPress={() =>
-                  navigation.navigate('ChildDetails', {childUid: item.uid, childName: item.name})
-                }
-                style={({pressed}) => [styles.card, pressed && {opacity: 0.85}]}>
-                <View style={{flex: 1}}>
-                  <Text style={styles.name}>{item.name}</Text>
-                  <Text style={styles.meta}>
-                    {item.doc?.status === 'online' ? '\u25cf Online' : '\u25cb Offline'}
-                    {'  \u00b7  '}
-                    {item.doc?.lockState?.locked ? 'Locked' : 'Unlocked'}
-                  </Text>
-                </View>
-                <Switch
-                  value={item.doc?.lockState?.locked ?? false}
-                  onValueChange={v => toggleLock(item, v)}
-                  trackColor={{true: colors.primary, false: colors.surfaceAlt}}
-                  thumbColor={colors.text}
-                />
-              </Pressable>
-            ))
-          : null}
+          </Pressable>
+        ))}
       </ScrollView>
     </Screen>
   );
@@ -190,14 +100,6 @@ function EmptyState() {
 }
 
 const styles = StyleSheet.create({
-  sharedSection: {
-    gap: spacing.sm,
-    padding: spacing.md,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.lg,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.warning,
-  },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -215,11 +117,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 13,
     marginTop: 4,
-  },
-  startHint: {
-    color: colors.textMuted,
-    fontSize: 12,
-    lineHeight: 17,
   },
   empty: {
     flex: 1,

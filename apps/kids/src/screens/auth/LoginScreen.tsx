@@ -79,7 +79,7 @@ export function LoginScreen({navigation}: Props) {
 
       <View style={styles.footer}>
         <Text style={{color: colors.textMuted}}>New here? </Text>
-        <Pressable onPress={() => navigation.navigate('RoleSelector')}>
+        <Pressable onPress={() => navigation.navigate('Signup', {role: 'child'})}>
           <Text style={styles.linkStrong}>Create an account</Text>
         </Pressable>
       </View>

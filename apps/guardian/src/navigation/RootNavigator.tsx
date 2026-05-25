@@ -5,12 +5,10 @@ import {NavigationContainer, DarkTheme} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 
 import {AuthNavigator} from './AuthNavigator';
-import {ChildModeNavigator} from './ChildModeNavigator';
 import {ParentNavigator} from './ParentNavigator';
 import {getUserDoc, signOut} from '@zerebro/shared-firebase/auth';
 import {paths} from '@zerebro/shared-firebase/firestore';
 import {useAuthStore} from '../state/authStore';
-import {useChildModeActive} from '../hooks/useChildModeActive';
 import {colors} from '../theme';
 import {VerifyEmailScreen} from '../screens/auth/VerifyEmailScreen';
 
@@ -33,9 +31,12 @@ const navTheme = {
  * Branches:
  *   - no auth                       -> AuthNavigator (parent login / signup)
  *   - signed in, email not verified -> VerifyEmailScreen
- *   - signed in, shared-mode kiosk  -> ChildModeNavigator (legacy, deleted in P1.6)
  *   - signed in, role=parent        -> ParentNavigator (dashboard)
  *   - signed in, role=child         -> WrongAppScreen (ask to use ZKid)
+ *
+ * The v1 shared-mode kiosk gate (`ChildModeNavigator`, `useChildModeActive`,
+ * `isSharedKiosk`) was deleted in P1.6.1. ZConnect is now a pure two-device
+ * parent dashboard.
  */
 export function RootNavigator() {
   const {firebaseUid, userDoc, emailVerified, bootstrapped} = useAuthStore();
@@ -43,7 +44,6 @@ export function RootNavigator() {
   const setUserDoc = useAuthStore(s => s.setUserDoc);
   const setBootstrapped = useAuthStore(s => s.setBootstrapped);
   const [userDocLoading, setUserDocLoading] = useState(false);
-  const childModeActive = useChildModeActive();
 
   useEffect(() => {
     const unsubAuth = auth().onAuthStateChanged(user => {
@@ -89,14 +89,6 @@ export function RootNavigator() {
     );
   }
 
-  // Shared-phone kiosk gate. Deleted in P1.6 but kept here through P1.4 so v1's
-  // shared-mode parents keep working during the migration window.
-  const isSharedKiosk =
-    !!firebaseUid &&
-    emailVerified &&
-    userDoc?.deviceMode === 'shared' &&
-    childModeActive === true;
-
   return (
     <NavigationContainer theme={navTheme}>
       {!firebaseUid ? (
@@ -105,8 +97,6 @@ export function RootNavigator() {
         <VerifyEmailScreen />
       ) : !userDoc ? (
         <AuthNavigator />
-      ) : isSharedKiosk ? (
-        <ChildModeNavigator />
       ) : userDoc.role === 'parent' ? (
         <ParentNavigator />
       ) : (
