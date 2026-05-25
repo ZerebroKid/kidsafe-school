@@ -1,14 +1,15 @@
 const path = require('path');
 const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const {withNativeWind} = require('nativewind/metro');
 
 /**
- * Monorepo-aware Metro configuration for ZKid.
+ * Monorepo-aware Metro configuration for ZKid, with NativeWind (Tailwind for RN).
  *
- * Resolves shared workspace packages (@zerebro/shared-*) from the repo root
- * while keeping React Native and other native deps hoisted via pnpm's
- * shamefully-hoist=true layout (see .npmrc).
- *
- * Standard fix for the Metro + pnpm workspace symlink issue.
+ * Resolves shared workspace packages (@zerebro/shared-*) from the repo root.
+ * Standard pnpm + Metro fix:
+ *   - watchFolders includes the workspace root
+ *   - nodeModulesPaths includes both project and workspace
+ *   - disableHierarchicalLookup avoids hoist confusion
  *
  * @type {import('metro-config').MetroConfig}
  */
@@ -25,4 +26,6 @@ baseConfig.resolver.nodeModulesPaths = [
 ];
 baseConfig.resolver.disableHierarchicalLookup = true;
 
-module.exports = mergeConfig(baseConfig, {});
+const merged = mergeConfig(baseConfig, {});
+
+module.exports = withNativeWind(merged, {input: './global.css'});
