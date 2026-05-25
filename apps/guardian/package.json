@@ -11,11 +11,15 @@
     "test": "jest"
   },
   "dependencies": {
+    "@zerebro/shared-firebase": "workspace:*",
+    "@zerebro/shared-types": "workspace:*",
+    "@zerebro/shared-utils": "workspace:*",
+    "nativewind": "^4.2.4",
     "react": "18.3.1",
     "react-native": "0.76.5",
-    "@zerebro/shared-types": "workspace:*",
-    "@zerebro/shared-firebase": "workspace:*",
-    "@zerebro/shared-utils": "workspace:*"
+    "react-native-reanimated": "3.16.7",
+    "react-native-safe-area-context": "5.0.0",
+    "react-native-worklets": "^0.8.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -32,6 +36,7 @@
     "jest": "^29.6.3",
     "prettier": "2.8.8",
     "react-test-renderer": "18.3.1",
+    "tailwindcss": "^3.4.17",
     "typescript": "5.5.4"
   },
   "engines": {

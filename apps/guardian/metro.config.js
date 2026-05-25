@@ -1,10 +1,12 @@
 const path = require('path');
 const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
+const {withNativeWind} = require('nativewind/metro');
 
 /**
- * Monorepo-aware Metro configuration for ZConnect.
+ * Monorepo-aware Metro configuration for ZConnect, with NativeWind.
  *
- * Same shape as apps/kids/metro.config.js. NativeWind wrapping is added in P1.2.3.
+ * Mirrors apps/kids/metro.config.js shape so both RN apps share identical
+ * resolution behaviour.
  *
  * @type {import('metro-config').MetroConfig}
  */
@@ -21,4 +23,6 @@ baseConfig.resolver.nodeModulesPaths = [
 ];
 baseConfig.resolver.disableHierarchicalLookup = true;
 
-module.exports = mergeConfig(baseConfig, {});
+const merged = mergeConfig(baseConfig, {});
+
+module.exports = withNativeWind(merged, {input: './global.css'});
