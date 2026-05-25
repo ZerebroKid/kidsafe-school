@@ -1,0 +1,187 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers -----------------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myUid() {
+      return request.auth.uid;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && myUid() == uid;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+
+    // True if the signed-in user is the linked parent of `childUid`.
+    function isParentOf(childUid) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(childUid))
+        && userDoc(childUid).data.parentUid == myUid();
+    }
+
+    // NOTE — Phase 1.6.2: the v1 `parentOwns(...)` helper + every `_shared`
+    // doc-id branch was removed alongside the rest of shared mode. ZConnect
+    // now never writes child profiles directly; the linked-child relationship
+    // is the only path that grants a parent write access to `children/{uid}`.
+
+    // Fields the parent is allowed to edit on the child's main doc.
+    // `childMode` is intentionally NOT in this list anymore (shared-mode-only).
+    function parentEditableFields() {
+      return ['lockState', 'geofence', 'screenTime', 'schedule', 'pinResetRequest'];
+    }
+
+    // Allowed values for `locationDiagnostics.reason`. Keeping this list here (instead of
+    // a wildcard string) so a compromised client can't write arbitrary strings that the
+    // parent UI then renders as user-facing copy. Mirrors `LocationDiagnosticsReason` in
+    // @zerebro/shared-types.
+    function allowedLocationDiagReasons() {
+      return [
+        'fine_permission_missing',
+        'background_permission_missing',
+        'system_location_off',
+        'play_services_unavailable',
+        'fg_service_not_running',
+        'first_fix_timeout',
+        'firestore_write_failing'
+      ];
+    }
+
+    // Schema-validate `request.resource.data.locationDiagnostics` if present. We accept
+    // absent (most writes don't touch this field), and we accept a shape with required
+    // (evaluatedAt:number, ok:bool) + optional (reason:enum, hint:string). Anything else is
+    // rejected so a hostile client can't bloat the field.
+    function locationDiagnosticsValid() {
+      return !('locationDiagnostics' in request.resource.data)
+        || (
+          request.resource.data.locationDiagnostics.keys().hasOnly(['evaluatedAt', 'ok', 'reason', 'hint'])
+            && request.resource.data.locationDiagnostics.evaluatedAt is number
+            && request.resource.data.locationDiagnostics.ok is bool
+            && (
+              !('reason' in request.resource.data.locationDiagnostics)
+                || request.resource.data.locationDiagnostics.reason in allowedLocationDiagReasons()
+            )
+            && (
+              !('hint' in request.resource.data.locationDiagnostics)
+                || (request.resource.data.locationDiagnostics.hint is string
+                     && request.resource.data.locationDiagnostics.hint.size() <= 200)
+            )
+        );
+    }
+
+    // users -------------------------------------------------------------------
+    match /users/{uid} {
+      // Anyone signed in can look up a user by pairing code; we need this so a
+      // child can resolve a parent's 6-digit code to a uid. The returned doc
+      // only exposes public fields that are safe to read.
+      allow read: if isSignedIn();
+
+      // A user can only create / update their own doc. Two shapes are accepted
+      // for `create` during the v1 -> v2 cutover so ZKid/ZConnect (which still
+      // write the v1 shape via @react-native-firebase) and the new Zerebro
+      // Campus/Admin webs (which write the v2 shape via the JS SDK) can both
+      // self-onboard without forking the rule.
+      //
+      //   v1 (legacy, retire after Phase 3 role-switcher):
+      //     {role: 'parent'|'child', email: string, createdAt: ts, ...}
+      //
+      //   v2 (web phone-OTP onboarding, P2.2.3):
+      //     {roles: string[], phone|email: string, createdAt: ts}
+      //
+      // The hasOnly cap on the v2 branch keeps a hostile client from stuffing
+      // arbitrary keys into the create payload; the role-switcher in Phase 3
+      // will widen it deliberately as new fields land (displayName, etc).
+      allow create: if isSelf(uid) && (
+        (
+          request.resource.data.role in ['parent', 'child']
+            && request.resource.data.keys().hasAll(['role', 'email', 'createdAt'])
+        )
+        || (
+          request.resource.data.roles is list
+            && request.resource.data.keys().hasAll(['roles', 'createdAt'])
+            && request.resource.data.keys().hasOnly(['roles', 'phone', 'email', 'createdAt'])
+            && (
+              ('phone' in request.resource.data && request.resource.data.phone is string)
+                || ('email' in request.resource.data && request.resource.data.email is string)
+            )
+        )
+      );
+
+      allow update: if isSelf(uid);
+
+      allow delete: if isSelf(uid);
+    }
+
+    // children/{childUid} -----------------------------------------------------
+    // Main doc: status, lockState, currentLocation, geofence, screenTime...
+    match /children/{childUid} {
+      allow read: if isSelf(childUid) || isParentOf(childUid);
+
+      // Child can create/update own doc freely (two-device flow -- the only
+      // flow that exists post-P1.6). The only shape-check is on
+      // `locationDiagnostics` so a compromised child can't write arbitrary
+      // banner copy into the parent UI.
+      allow create, update: if isSelf(childUid) && locationDiagnosticsValid();
+
+      // Parent can ALSO create the doc if it doesn't exist yet, but only with
+      // command fields. This lets a parent set things like `schedule` before
+      // the child has finished onboarding (when set+merge implicitly creates
+      // the doc).
+      allow create: if isParentOf(childUid)
+        && request.resource.data.keys().hasOnly(parentEditableFields());
+
+      // Parent can update ONLY the command fields. We enforce this by checking
+      // that the diff between old and new only touches allowed keys.
+      allow update: if isParentOf(childUid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(parentEditableFields());
+
+      allow delete: if isSelf(childUid);
+
+      // apps subcollection ------------------------------------------------
+      match /apps/{packageName} {
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+
+        // Child writes app list entries from PackageReceiver.
+        allow create, update, delete: if isSelf(childUid);
+
+        // Parent can flip `isBlocked` only.
+        allow update: if isParentOf(childUid)
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['isBlocked']);
+      }
+
+      // events subcollection (append-only, read by parent) ----------------
+      match /events/{eventId} {
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+        allow create: if isSelf(childUid);
+        allow update, delete: if false;
+      }
+
+      // usageDaily subcollection -----------------------------------------
+      // One doc per child-local-day, id = `YYYY-MM-DD`. Powers the parent's
+      // App Usage screen (7-day chart + per-app list).
+      match /usageDaily/{day} {
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+
+        // Child writes its own usage breakdown. We pin the schema so a
+        // misbehaving client can't bloat the doc with extras.
+        allow create, update: if isSelf(childUid)
+          && request.resource.data.keys().hasOnly(
+               ['date', 'totalMins', 'perApp', 'updatedAt']
+             );
+
+        // Day docs are append-mostly; only the child can clear them (e.g.
+        // when the user signs out and re-pairs).
+        allow delete: if isSelf(childUid);
+      }
+    }
+  }
+}

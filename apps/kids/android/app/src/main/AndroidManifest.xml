@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ZKid AndroidManifest.
+
+  Namespace is com.kidsafe.kids so .MainActivity / .MainApplication resolve
+  to the kids' Kotlin sources under com/kidsafe/kids/. The native modules
+  ported from v1 still live in their original com.kidsafe.{blocker, modules,
+  receivers, security, services, store} packages; they are referenced with
+  fully-qualified names below to skip the namespace-relative resolution.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Core -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Notifications (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Boot + Foreground service -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!--
+      Battery: required so we can fire ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS directly at our
+      package. Without this permission Android silently rejects the intent on most OEMs, which is
+      what was causing the "tap Open Settings, nothing happens" bug on Redmi / Vivo phones.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- Screen-time + App blocking -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
+    <!-- Location -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <!--
+      Activity recognition (API 29+). The onboarding wizard requests this so the fused-location
+      provider can downscale polling cadence when the kid is stationary, which saves battery on
+      long sessions. Without the manifest declaration the runtime request silently no-ops and
+      `PermissionsAndroid.check` returns false forever, stalling onboarding on the activity step.
+    -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+    <application
+        android:name=".MainApplication"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:allowBackup="false"
+        android:theme="@style/AppTheme"
+        android:supportsRtl="true">
+
+        <!-- TODO: replace with the kids' own Maps API key (Firebase console). -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCwjRl8d1pOxMFsYAv3vcK3s8NfAHAaO0Q" />
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Full-screen overlay shown when a blocked app is opened -->
+        <activity
+            android:name="com.kidsafe.blocker.BlockedAppActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:theme="@style/AppTheme" />
+
+        <!-- Parent PIN gate shown when the child opens a tamper-relevant Settings screen -->
+        <activity
+            android:name="com.kidsafe.security.PinGateActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:showOnLockScreen="true"
+            android:theme="@style/AppTheme" />
+
+        <!-- Keeps monitoring alive while child app runs -->
+        <service
+            android:name="com.kidsafe.services.KidSafeForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="location|dataSync" />
+
+        <!-- Headless JS task service used by PackageReceiver to sync install/uninstall events
+             to Firestore even when the RN app is not currently running. -->
+        <service
+            android:name="com.kidsafe.services.PackageSyncHeadlessTaskService"
+            android:exported="false" />
+
+        <!-- Headless JS bridge for geofence enter/exit transitions. -->
+        <service
+            android:name="com.kidsafe.receivers.GeofenceHeadlessTaskService"
+            android:exported="false" />
+
+        <!-- Broadcast receiver that Google Play Services fires on geofence transitions. -->
+        <receiver
+            android:name="com.kidsafe.receivers.GeofenceTransitionReceiver"
+            android:exported="false" />
+
+        <!-- Detects child opening a blocked app and triggers the overlay -->
+        <service
+            android:name="com.kidsafe.blocker.AppBlockerService"
+            android:exported="false"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/app_blocker_accessibility_service" />
+        </service>
+
+        <!-- Device admin for remote lock + uninstall protection -->
+        <receiver
+            android:name="com.kidsafe.receivers.KidSafeDeviceAdminReceiver"
+            android:exported="true"
+            android:label="@string/device_admin_label"
+            android:description="@string/device_admin_description"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin_policies" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Restart foreground service on boot -->
+        <receiver
+            android:name="com.kidsafe.receivers.BootReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+          Re-attach LocationWriter when the user toggles the system "Location" switch back on.
+          Implicit broadcast — must be declared `exported="true"` so the framework can deliver
+          it (on Android 14+ exported flag is mandatory for every <receiver>). The receiver
+          itself gates on role=child + foreground-service-alive before doing anything, so
+          there's no security impact from being addressable.
+        -->
+        <receiver
+            android:name="com.kidsafe.receivers.LocationToggleReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Track install/uninstall on the child device -->
+        <receiver
+            android:name="com.kidsafe.receivers.PackageReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Daily screen-time alarm -->
+        <receiver
+            android:name="com.kidsafe.receivers.ScreenTimeReceiver"
+            android:exported="false" />
+    </application>
+</manifest>

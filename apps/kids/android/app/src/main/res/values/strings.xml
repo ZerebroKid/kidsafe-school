@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">ZKid</string>
+
+    <!-- Device admin -->
+    <string name="device_admin_label">ZKid Parental Control</string>
+    <string name="device_admin_description">Allows ZKid to lock the device remotely, enforce screen-time limits, and prevent uninstallation without parental permission.</string>
+    <string name="device_admin_enabled">ZKid device admin activated</string>
+    <string name="device_admin_disabled">ZKid device admin deactivated</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_service_label">ZKid App Blocker</string>
+    <string name="accessibility_service_description">ZKid uses the accessibility service only to detect when a blocked app is opened so it can show a parental-control screen. No screen content is recorded or transmitted.</string>
+
+    <!-- Foreground service notification -->
+    <string name="notification_channel_name">ZKid Monitoring</string>
+    <string name="notification_channel_description">Ongoing notification shown while parental controls are active.</string>
+    <string name="notification_title">ZKid is active</string>
+    <string name="notification_text">Parental controls are running.</string>
+
+    <!-- Blocked overlay -->
+    <string name="blocked_title">This app is blocked</string>
+    <string name="blocked_subtitle">Your parent has blocked this app with ZKid.</string>
+    <string name="blocked_button">Go back</string>
+
+    <!-- PIN gate (uninstall protection) -->
+    <string name="pin_gate_title">Parent PIN required to %1$s</string>
+    <string name="pin_gate_subtitle">Enter the parent PIN to continue, or go back home.</string>
+    <string name="pin_gate_hint">PIN</string>
+    <string name="pin_gate_submit">Unlock</string>
+    <string name="pin_gate_cancel">Cancel and go home</string>
+    <string name="pin_gate_branding">Managed by ZKid</string>
+    <string name="pin_gate_wrong">Wrong PIN. Try again.</string>
+    <string name="pin_gate_too_short">PIN must be at least 4 digits.</string>
+    <string name="pin_gate_locked_out">Too many wrong attempts. Try again in %1$d s.</string>
+</resources>

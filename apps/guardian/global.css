@@ -1,0 +1,16 @@
+/*
+ * NativeWind v4 stylesheet.
+ *
+ * `@tailwind base` (Preflight) is intentionally OMITTED here. On the React Native
+ * target NativeWind injects Preflight's `* { background-color: transparent }` -style
+ * resets into the runtime stylesheet, which strips backgrounds from <Pressable>
+ * components that pass `style` as a function (e.g. `style={({pressed}) => [...]}`).
+ * The first symptom was the Login/Signup buttons rendering as invisible (dark text
+ * on dark background) because their cyan `backgroundColor` was being clobbered.
+ *
+ * We keep `components` + `utilities` so that any future `className=` usage still
+ * works. When something actually relies on a Preflight rule, re-introduce only
+ * the specific rule via @layer base instead of the full sweep.
+ */
+@tailwind components;
+@tailwind utilities;

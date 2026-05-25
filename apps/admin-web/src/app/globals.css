@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/*
+ * Tailwind v4 only scans this app's own source by default. The shared brand-token
+ * table lives in @zerebro/shared-types and is the only place that mentions bg-bg,
+ * bg-surface, etc. as literal strings, so without @source those utilities never
+ * get generated and the swatch grid renders as transparent boxes.
+ */
+@source "../../../../packages/shared-types/src/**/*.{ts,tsx}";
+
+/*
+ * Brand tokens shared across all four Zerebro products. Mirrored verbatim in
+ *   - apps/principal-web/src/app/globals.css
+ *   - apps/kids/src/theme.ts  (RN constants object)
+ *   - apps/guardian/src/theme.ts  (RN constants object)
+ * If you change a value here, change it in those three other files too.
+ * Class names follow Tailwind v4 derivation: --color-foo-bar -> bg-foo-bar.
+ */
+@theme {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-alt: #334155;
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-primary: #38bdf8;
+  --color-primary-text: #0f172a;
+  --color-danger: #f87171;
+  --color-success: #4ade80;
+  --color-warning: #facc15;
+  --color-border: #334155;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

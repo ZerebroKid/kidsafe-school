@@ -1,0 +1,44 @@
+{
+  "name": "@zerebro/shared-firebase",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Firebase Auth + Firestore helpers shared by React Native (ZKid, ZConnect) and the upcoming Next.js webs (Zerebro Campus, Zerebro Admin). The native implementation is the v1 @react-native-firebase wrapper; web impls land alongside the web apps.",
+  "main": "./src/index.native.ts",
+  "types": "./src/index.native.ts",
+  "exports": {
+    ".": {
+      "react-native": "./src/index.native.ts",
+      "browser": "./src/index.web.ts",
+      "default": "./src/index.web.ts"
+    },
+    "./auth": "./src/auth.ts",
+    "./firestore": "./src/firestore.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@zerebro/shared-types": "workspace:*"
+  },
+  "peerDependencies": {
+    "@react-native-firebase/auth": "^21.0.0",
+    "@react-native-firebase/firestore": "^21.0.0",
+    "@react-native-google-signin/google-signin": "^13.0.0",
+    "firebase": "^12.0.0",
+    "react-native": ">=0.76.0"
+  },
+  "peerDependenciesMeta": {
+    "@react-native-firebase/auth": {"optional": true},
+    "@react-native-firebase/firestore": {"optional": true},
+    "@react-native-google-signin/google-signin": {"optional": true},
+    "firebase": {"optional": true},
+    "react-native": {"optional": true}
+  },
+  "devDependencies": {
+    "@react-native-firebase/auth": "^21.6.1",
+    "@react-native-firebase/firestore": "^21.6.1",
+    "@react-native-google-signin/google-signin": "^13.1.0",
+    "typescript": "^5.5.0"
+  }
+}
