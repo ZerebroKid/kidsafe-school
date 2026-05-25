@@ -83,11 +83,36 @@ service cloud.firestore {
       // only exposes public fields that are safe to read.
       allow read: if isSignedIn();
 
-      // A user can only create / update their own doc. Role and parentUid are
-      // set at creation; parentUid may also be set by the child during pairing.
-      allow create: if isSelf(uid)
-        && request.resource.data.role in ['parent', 'child']
-        && request.resource.data.keys().hasAll(['role', 'email', 'createdAt']);
+      // A user can only create / update their own doc. Two shapes are accepted
+      // for `create` during the v1 -> v2 cutover so ZKid/ZConnect (which still
+      // write the v1 shape via @react-native-firebase) and the new Zerebro
+      // Campus/Admin webs (which write the v2 shape via the JS SDK) can both
+      // self-onboard without forking the rule.
+      //
+      //   v1 (legacy, retire after Phase 3 role-switcher):
+      //     {role: 'parent'|'child', email: string, createdAt: ts, ...}
+      //
+      //   v2 (web phone-OTP onboarding, P2.2.3):
+      //     {roles: string[], phone|email: string, createdAt: ts}
+      //
+      // The hasOnly cap on the v2 branch keeps a hostile client from stuffing
+      // arbitrary keys into the create payload; the role-switcher in Phase 3
+      // will widen it deliberately as new fields land (displayName, etc).
+      allow create: if isSelf(uid) && (
+        (
+          request.resource.data.role in ['parent', 'child']
+            && request.resource.data.keys().hasAll(['role', 'email', 'createdAt'])
+        )
+        || (
+          request.resource.data.roles is list
+            && request.resource.data.keys().hasAll(['roles', 'createdAt'])
+            && request.resource.data.keys().hasOnly(['roles', 'phone', 'email', 'createdAt'])
+            && (
+              ('phone' in request.resource.data && request.resource.data.phone is string)
+                || ('email' in request.resource.data && request.resource.data.email is string)
+            )
+        )
+      );
 
       allow update: if isSelf(uid);
 
