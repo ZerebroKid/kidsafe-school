@@ -92,9 +92,14 @@ object TamperWatcher {
         //       icon-only Redmi dialogs that show neither the label nor the package, the real
         //       defense is the device-admin layer (FinalStep prompts the parent to enable it).
         if (isPackageInstaller(pkg)) {
+            // `ok_button` is a stable AOSP viewId on the package installer's confirm dialog.
+            // Combined with `isPackageInstaller(pkg) && targetIsUs` it only fires when the
+            // installer is about ZKid, so it's a safe extra signal for icon-only OEM dialogs
+            // that don't expose the "Uninstall this app" string.
             val isUninstallFlow =
                 cls.contains("Uninstall", ignoreCase = true) ||
-                    rootHasAnyText(root, listOf("Uninstall this app", "uninstall this app"))
+                    rootHasAnyText(root, listOf("Uninstall this app", "uninstall this app")) ||
+                    rootHasAnyResourceId(root, listOf("ok_button"))
             if (isUninstallFlow && targetIsUs) return TamperKind.APP_INFO
 
             // "Can't uninstall — device admin" warning dialog. Triggered when long-press
@@ -114,10 +119,7 @@ object TamperWatcher {
         // Match on tree contents, not activity class. Most rules require the app label to be
         // visible in the tree (so we don't gate the *list* page where many apps are shown — only
         // KidSafe's individual detail page, which is the one with the dangerous toggle).
-        if (pkg == "com.android.settings" ||
-            pkg == "com.miui.securitycenter" ||
-            pkg == "com.google.android.settings.intelligence"
-        ) {
+        if (isSettingsPackage(pkg)) {
             // App info / Force stop / Uninstall / Storage→Clear data — these stable viewIds are
             // what every AOSP-derived Settings ROM uses for the dangerous buttons. We accept
             // EITHER the visible app label OR the package-name string in the tree (targetIsUs):
@@ -270,6 +272,28 @@ object TamperWatcher {
         pkg == "com.android.packageinstaller" ||
             pkg == "com.google.android.packageinstaller" ||
             pkg.endsWith(".packageinstaller")
+
+    /**
+     * The Settings activity host. AOSP is `com.android.settings`; every major OEM ships its own
+     * branded variant that hosts the same dangerous toggles (App info → Uninstall, Device admin,
+     * Accessibility detail). Missing any of these means the child can navigate to ZKid's app-info
+     * page on that ROM without the PIN gate firing.
+     */
+    private fun isSettingsPackage(pkg: String): Boolean =
+        pkg == "com.android.settings" ||
+            pkg == "com.google.android.settings.intelligence" ||
+            pkg == "com.miui.securitycenter" ||
+            pkg == "com.samsung.android.settings" ||
+            pkg == "com.samsung.android.lool" ||
+            pkg == "com.coloros.safecenter" ||
+            pkg == "com.oppo.safe" ||
+            pkg == "com.oplus.safecenter" ||
+            pkg == "com.oplus.appcontroldispatcher" ||
+            pkg == "com.vivo.permissionmanager" ||
+            pkg == "com.vivo.safecenter" ||
+            pkg == "com.iqoo.secure" ||
+            pkg == "com.transsion.security" ||
+            pkg == "com.transsion.phonemanager"
 
     // -- Helpers -----------------------------------------------------------------------------
 
