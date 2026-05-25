@@ -82,7 +82,7 @@ Why separate?
 
 | Role | What they do |
 |---|---|
-| Child | Reads AI explanation, attempts quiz, unlocks reward |
+| Child | Reads curated lesson, attempts quiz, unlocks reward |
 | Parent | Sees quiz marks, completion, reward unlocked |
 | Teacher | Reviews topics, assigns topics, checks class performance |
 | Principal | Sees syllabus coverage by class/subject/teacher |
@@ -124,7 +124,7 @@ stateDiagram-v2
 | Topic: Types of Forces                         |
 | Status: Not started                            |
 |                                                |
-| [Learn with AI]                                |
+| [Learn]                                |
 | [Start Quiz]                                   |
 |                                                |
 | Reward locked                                  |
@@ -236,7 +236,8 @@ Backend/cloud ownership later:
 ```text
 functions/
   syllabusFetchers/
-  aiLessonGenerator/
+  content/
+    importCurriculum/
   rewardModeration/
   reportingAggregates/
 ```
@@ -347,26 +348,36 @@ Why class-level?
 - Child-specific progress is stored separately.
 - Principal can calculate class coverage easily.
 
-## 8.7 Lesson Generation Cache
+## 8.7 Curated Topic Content (Uploaded JSON — Not AI-Generated)
 
-`lessonGenerations/{lessonId}`
+Content is prepared offline by the content team and bulk-imported into Firestore. **No runtime AI generation** for lessons in MVP.
+
+Path: `curriculum/{curriculumId}/chapters/{chapterId}/topics/{topicId}`
+
+Example: `curriculum/cbse_8_science/chapters/force_pressure/topics/types_of_forces`
 
 ```json
 {
-  "topicId": "types_of_forces",
-  "classId": "class_8A",
+  "curriculumId": "cbse_8_science",
   "grade": 8,
-  "language": "en",
-  "promptVersion": "v1",
-  "status": "ready",
-  "explanation": {
-    "short": "Force means push or pull.",
-    "examples": [
-      "Pushing a door",
-      "Magnet pulling iron"
-    ],
-    "realLifeAnalogy": "Like you push a shopping cart to move it."
-  },
+  "subject": "science",
+  "chapterNo": 11,
+  "chapterName": "Force and Pressure",
+  "topicId": "types_of_forces",
+  "topicName": "Types of Forces",
+  "explanation": "Force is a push or pull that can change the speed, direction, or shape of an object.",
+  "examples": [
+    "Pushing a door open",
+    "Magnet pulling an iron nail"
+  ],
+  "videoUrl": "https://youtube.com/watch?v=approved_intro",
+  "brainstorming": [
+    {
+      "question": "How does a solid turn into a liquid?",
+      "answer": "When heat is added, particles move faster and break free from fixed positions — this is melting.",
+      "videoUrl": "https://youtube.com/watch?v=approved_brainstorm"
+    }
+  ],
   "quiz": [
     {
       "questionId": "q1",
@@ -377,14 +388,21 @@ Why class-level?
       "explanation": "Force means push or pull."
     }
   ],
-  "moderation": {
-    "status": "approved",
-    "checkedAt": 1779050200000
-  }
+  "status": "published",
+  "curatedBy": "content_team",
+  "publishedAt": 1779050000000
 }
 ```
 
-Important: AI result should be structured JSON, not random free text.
+Per topic, the content team provides:
+
+1. **Explanation** — main lesson text
+2. **Examples** — real-life examples array
+3. **videoUrl** — intro/explanation YouTube link
+4. **brainstorming[]** — question + answer + video for concepts students commonly miss
+5. **quiz[]** — MCQs with correct answers (prepared with the topic)
+
+Important: only `status: "published"` topics can be assigned by teachers. Import script validates JSON schema before write.
 
 ## 8.8 Quiz Attempts
 
@@ -592,7 +610,8 @@ Cloud/functions later:
 ```text
 functions/
   syllabusFetchers/
-  aiLessonGenerator/
+  content/
+    importCurriculum/
   rewardModeration/
   reportingAggregates/
 ```
@@ -606,7 +625,7 @@ functions/
 - define Firestore schema
 - teacher can assign topic
 - child sees topic
-- AI explanation + MCQ quiz
+- child sees curated topic lesson + MCQ quiz
 - parent/teacher see score
 - reward unlock from approved catalog
 
@@ -656,7 +675,7 @@ When a developer starts implementation, give them this order:
 2. Create topic/assignment schema.
 3. Build teacher assignment UI with mocked topics.
 4. Build child Study Mission UI.
-5. Add AI lesson generation service with cached response.
+5. Wire curated topic content from Firestore (import script + topic learn screen).
 6. Add quiz attempt write.
 7. Add parent/teacher score visibility.
 8. Add approved reward catalog + unlock.

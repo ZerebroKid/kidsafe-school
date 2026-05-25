@@ -30,16 +30,13 @@ gantt
   Auth + roles + multi-role     :p3, after p1, 5d
 
   section Phase 4
-  Payment plumbing              :p4, after p3, 12d
+  Education MVP                 :p4, after p3, 18d
 
   section Phase 5
-  Education MVP                 :p5, after p4, 18d
+  Syllabus + principal dash     :p5, after p4, 12d
 
   section Phase 6
-  Syllabus + principal dash     :p6, after p5, 12d
-
-  section Phase 7
-  Pilot + polish + launch       :p7, after p6, 10d
+  Pilot + polish + launch       :p6, after p5, 10d
 ```
 
 | Phase | Duration | Devs needed | Critical path? |
@@ -48,12 +45,11 @@ gantt
 | Phase 1 — Code Migration | 2 weeks | 1-2 | yes |
 | Phase 2 — Web Apps Scaffolding | 1 week | 1 | parallel with P1 |
 | Phase 3 — Auth + Multi-Role | 1 week | 1 | yes |
-| Phase 4 — Payment Plumbing | 2-3 weeks | 1-2 | yes |
-| Phase 5 — Education MVP | 3-4 weeks | 2 | yes |
-| Phase 6 — Syllabus + Dashboards | 2-3 weeks | 1-2 | yes |
-| Phase 7 — Pilot + Launch | 2 weeks | all hands | yes |
+| Phase 4 — Education MVP | 3-4 weeks | 2 | yes |
+| Phase 5 — Syllabus + Dashboards | 2-3 weeks | 1-2 | yes |
+| Phase 6 — Pilot + Launch | 2 weeks | all hands | yes |
 
-**Total**: ~14-16 weeks with 1-2 developers.
+**Total**: ~10-12 weeks with 1-2 developers (payment/subscriptions deferred to post-MVP).
 
 ---
 
@@ -61,20 +57,19 @@ gantt
 
 Lock these decisions before any coding starts. Block here until done.
 
-- [ ] **PF-1** Lock the 8 open decisions from `EDUCATION_AI_TECH_SPEC.md §14` (web host, grace period, min students, billing cadence, AI provider, code rotation, tablet mode, iOS).
-- [ ] **PF-2** Create Razorpay business account, get test + live API keys, configure webhook URL placeholder.
-- [ ] **PF-3** Register domains: `kidsafe.app` (or chosen), `principal.kidsafe.app`, `admin.kidsafe.app`.
-- [ ] **PF-4** Decide branding for Guardian + Kids icons, splash, color palette (can be same as v1 initially).
-- [ ] **PF-5** Pick AI provider account (OpenAI/Gemini), get API keys, set monthly spend cap.
-- [ ] **PF-6** Set up issue tracker board (Linear/Jira) with this doc's chunk IDs as ticket labels.
+- [ ] **PF-1** Lock open decisions from `EDUCATION_AI_TECH_SPEC.md §14` (web host, code rotation, tablet mode, iOS).
+- [ ] **PF-2** Register domains: `kidsafe.app` (or chosen), `principal.kidsafe.app`, `admin.kidsafe.app`.
+- [ ] **PF-3** Decide branding for Guardian + Kids icons, splash, color palette (can be same as v1 initially).
+- [ ] **PF-4** Finalize curated JSON format with content team; receive first bundle (e.g. Class 8 Science — all chapters/topics with explanation, examples, videos, brainstorming, quiz).
+- [ ] **PF-5** Set up issue tracker board (Linear/Jira) with this doc's chunk IDs as ticket labels.
 
-**Definition of done**: All 6 items checked, keys and decisions written into a private `infra/secrets.md` (not committed).
+**Definition of done**: All 5 items checked; curated JSON sample stored in a private team folder (not committed if large).
 
 ---
 
 ## Phase 0 — Monorepo Bootstrap (1 week)
 
-**Goal**: Empty monorepo skeleton with CI green. No app code yet.
+**Goal**: Empty monorepo skeleton. No app code yet. (CI/GitHub Actions deferred — build the apps first.)
 
 ### P0.1 — Repo skeleton & pnpm workspaces (1 day)
 
@@ -88,37 +83,28 @@ Lock these decisions before any coding starts. Block here until done.
 
 ### P0.2 — Turborepo + base TS config (1 day)
 
-- [ ] Install Turborepo, add `turbo.json` (build / lint / typecheck / test pipelines)
+- [ ] Install Turborepo, add `turbo.json` (build / typecheck / test pipelines)
 - [ ] Add `tsconfig.base.json` with strict settings
-- [ ] Add `.eslintrc.cjs` at root, `.prettierrc`
-- [ ] Add `husky` + `lint-staged`
 
-**Acceptance**: `pnpm turbo run lint` runs (no targets yet, exits 0).
+**Acceptance**: `pnpm turbo run typecheck` runs (no targets yet, exits 0).
+
+> ESLint, Prettier, Husky, and lint-staged are deferred to a later phase — not part of Phase 0.
 
 ### P0.3 — Shared packages skeleton (1 day)
 
 Create empty package shells for:
 
-- [ ] `packages/shared-types/` (Firestore types, payment types stubs)
+- [ ] `packages/shared-types/` (Firestore types, education types stubs)
 - [ ] `packages/shared-firebase/` (auth + firestore helpers stubs)
 - [ ] `packages/shared-utils/`
 - [ ] `packages/shared-ui-mobile/`
 - [ ] `packages/shared-ui-web/`
-- [ ] `packages/shared-payments/`
 
 Each has its own `package.json`, `tsconfig.json` extending base, and an `src/index.ts` that exports `{}`.
 
 **Acceptance**: `pnpm -r build` succeeds; type references resolve across packages.
 
-### P0.4 — CI pipeline (1 day)
-
-- [ ] Add `.github/workflows/ci.yml`
-- [ ] Steps: install → `pnpm -r typecheck` → `pnpm -r lint` → `pnpm -r test`
-- [ ] PR template referencing this doc
-
-**Acceptance**: PR to `v2/main` runs CI green.
-
-### P0.5 — Firebase Emulator wiring (1 day)
+### P0.4 — Firebase Emulator wiring (1 day)
 
 - [ ] Add `firestore/rules` (copied from v1)
 - [ ] Add `firestore/indexes.json`
@@ -131,11 +117,12 @@ Each has its own `package.json`, `tsconfig.json` extending base, and an `src/ind
 
 ```text
 - monorepo installs cleanly
-- CI green
 - emulator boots
 - all packages typecheck
 - merged to v2/main
 ```
+
+> CI pipeline (`.github/workflows/ci.yml`), PR template, and automated checks are deferred to a later phase.
 
 ---
 
@@ -251,8 +238,8 @@ Move Kotlin source from `android/app/src/main/java/com/kidsafe/*`:
 
 ### P2.3 — Empty dashboards + nav shell (1 day)
 
-- [ ] Principal: `/dashboard`, `/teachers`, `/billing`, `/syllabus` placeholders
-- [ ] Admin: `/schools`, `/syllabus-sources`, `/rewards`, `/billing`, `/users`, `/audit` placeholders
+- [ ] Principal: `/dashboard`, `/teachers`, `/syllabus` placeholders
+- [ ] Admin: `/schools`, `/syllabus-sources`, `/rewards`, `/users`, `/audit` placeholders
 - [ ] Sidebar nav from `shared-ui-web`
 - [ ] Logout button
 
@@ -329,140 +316,32 @@ Add to `firestore/rules`:
 
 ---
 
-## Phase 4 — Payment Plumbing (2-3 weeks)
+## Phase 4 — Education MVP (3-4 weeks)
 
-**Goal**: A school can subscribe via Principal web; a parent can subscribe via Guardian app. Webhook is signed, idempotent, reconciled.
+**Goal**: Teacher assigns a topic → child sees it → reads curated lesson → takes quiz → unlocks reward → parent + teacher see the score.
 
-### P4.1 — Plan catalog + types (1 day)
+> **No AI-generated lesson content in MVP.** All topic material (explanation, examples, videos, brainstorming, quiz) is **pre-curated JSON** uploaded to Firestore by the content team.
 
-- [ ] `packages/shared-types/src/payments.ts` — Subscription, Invoice, PaymentEvent types
-- [ ] `packages/shared-payments/src/plans.ts` — PLANS const (3 plans)
-- [ ] Unit tests for amount math (per-student, GST)
+> Payment/subscriptions are **deferred to post-MVP**. No Razorpay, billing UI, or subscription gating in this phase.
 
-**Acceptance**: Plan amount calculations verified by tests.
-
-### P4.2 — Functions scaffold (1 day)
+### P4.1 — Cloud Functions scaffold (1 day)
 
 - [ ] `apps/functions/` — initialize with TS + Firebase Functions v2
-- [ ] Add `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` to Secret Manager
 - [ ] Add `firebase deploy --only functions` script
+- [ ] Deploy empty callable `ping` to staging
 
-**Acceptance**: Empty callable `ping` deployed to staging.
+**Acceptance**: Callable `ping` returns `{ ok: true }` from staging.
 
-### P4.3 — `createOrder` callable (B2B one-time) (1 day)
+### P4.2 — Schools + curriculum schema (2 days)
 
-- [ ] Validate planId + studentCount server-side
-- [ ] Compute amount + GST
-- [ ] Call Razorpay `orders.create`
-- [ ] Return `{ orderId, keyId, amountPaise, currency }`
-
-**Acceptance**: From Principal web, calling this returns a valid Razorpay order.
-
-### P4.4 — `createSubscription` callable (B2C recurring) (1 day)
-
-- [ ] Validate planId + childUid
-- [ ] Call Razorpay `subscriptions.create` with plan, total_count
-- [ ] Return `{ subscriptionId, shortUrl, keyId }`
-
-**Acceptance**: From Guardian app, calling this returns valid Razorpay subscription.
-
-### P4.5 — Razorpay webhook handler (2 days)
-
-- [ ] HTTPS function `/razorpayWebhook` (raw body, no JSON parser)
-- [ ] Verify `X-Razorpay-Signature` with HMAC-SHA256 (constant-time compare)
-- [ ] Idempotency via `paymentEvents/{eventId}` doc transaction
-- [ ] Handle 12 event types listed in tech spec §7.6
-- [ ] Always return 200 unless signature invalid
-
-**Acceptance**:
-- Manual webhook tests via `razorpay --signature ...` pass
-- Replay of same event = no double-write
-- Bad signature returns 400
-
-### P4.6 — Subscription state writes (1 day)
-
-- [ ] On `payment.captured` / `subscription.charged`: upsert `subscriptions/{id}`, write `invoices/{id}`, update `schools/{id}.subscription` denormalized
-- [ ] On `subscription.halted`: flip status, start 7-day grace
-- [ ] On `subscription.cancelled`: flip status, keep access until `currentPeriodEnd`
-
-**Acceptance**: Full state machine validated with mocked webhook payloads.
-
-### P4.7 — Principal web checkout page (2 days)
-
-- [ ] `/billing/checkout/:planId` — student count input, plan summary, "Proceed to Pay" button
-- [ ] Calls `createOrder`, opens Razorpay Checkout overlay
-- [ ] Success → redirect `/billing` showing "Pending confirmation"
-- [ ] Subscribe to `schools/{id}` → flip to "Active" when webhook lands
-
-**Acceptance**: End-to-end test in Razorpay test mode results in active subscription.
-
-### P4.8 — Guardian app parent checkout (2 days)
-
-- [ ] Settings → Premium → "Subscribe ₹99/month/child"
-- [ ] Wire `react-native-razorpay`
-- [ ] Call `createSubscription`, open native Razorpay sheet
-- [ ] Subscribe to `subscriptions/{id}` → toast "Premium active" when webhook lands
-
-**Acceptance**: Test-mode parent checkout activates premium.
-
-### P4.9 — `cancelSubscription` callable + UI (1 day)
-
-- [ ] Cancel at period end via Razorpay API
-- [ ] Show "Cancels on DD MMM" banner
-- [ ] Admin can also cancel any subscription from `admin-web/billing`
-
-**Acceptance**: Cancel from both Guardian and Principal works, status reflects in Firestore.
-
-### P4.10 — Daily reconciler cron (1 day)
-
-- [ ] Cloud Scheduler → `subscriptionReconciler` function
-- [ ] Compare local state vs Razorpay for every active subscription with `currentPeriodEnd < now + 24h`
-- [ ] Slack/email alert on drift > 1h
-
-**Acceptance**: Manually break local state, reconciler restores it.
-
-### P4.11 — `educationReadOnlyEnforcer` cron (0.5 day)
-
-- [ ] Hourly: flip `schools/{id}.subscription.educationReadOnly = true` if `currentPeriodEnd < now`
-
-**Acceptance**: Manually expire a sub, within 1h the flag flips.
-
-### P4.12 — Payment rules (0.5 day)
-
-- [ ] `subscriptions/*` — server-only writes, owner-read
-- [ ] `paymentEvents/*` — server-only read+write
-- [ ] `invoices/*` — server-only writes, owner-read
-
-**Acceptance**: Rules tests pass.
-
-### Phase 4 DoD
-
-```text
-- school can subscribe via Principal web (test mode)
-- parent can subscribe via Guardian app (test mode)
-- webhook is signed + idempotent + handles 12 event types
-- daily reconciler catches drift
-- educationReadOnly flag flips on expiry
-- all payment writes happen server-side only
-- production Razorpay keys swapped in after pilot
-```
-
----
-
-## Phase 5 — Education MVP (3-4 weeks)
-
-**Goal**: Teacher assigns a topic → child sees it → reads AI explanation → takes quiz → unlocks reward → parent + teacher see the score.
-
-### P5.1 — Schools / classes / subjects / chapters / topics schema (2 days)
-
-- [ ] Add types to `shared-types/education.ts`
+- [ ] Add types to `shared-types/education.ts` (schools, classes, subjects, **curriculum**, chapters, topics)
 - [ ] Admin-web: CRUD UI for `schools/*`
-- [ ] Principal-web: CRUD UI for `classes/*` and `subjects/*`
+- [ ] Principal-web: CRUD UI for `classes/*` and `subjects/*` (each subject links to a `curriculumId`, e.g. `cbse_8_science`)
 - [ ] Seed script with 1 sample school + 2 classes
 
-**Acceptance**: Admin can create a school; Principal can create classes inside it.
+**Acceptance**: Admin can create a school; Principal can create classes with curriculum linked.
 
-### P5.2 — Teacher onboarding flow (2 days)
+### P4.3 — Teacher onboarding flow (2 days)
 
 - [ ] Principal-web: "Generate teacher code" button → writes `schools/{id}.teacherCode`
 - [ ] Guardian app: "I am a teacher" path → enter code → `requestTeacherJoin` callable creates `teachers/{id}` status `pending`
@@ -471,7 +350,7 @@ Add to `firestore/rules`:
 
 **Acceptance**: New teacher signs up, principal approves, teacher home opens.
 
-### P5.3 — Child onboarding pulls school+class (1 day)
+### P4.4 — Child onboarding pulls school+class (1 day)
 
 - [ ] Kids app: after pairing code, ask for school code + grade + section
 - [ ] Validate against `schools/*` and `classes/*`
@@ -479,7 +358,7 @@ Add to `firestore/rules`:
 
 **Acceptance**: Child completes onboarding, classId visible to teacher.
 
-### P5.4 — Teacher: assign topic UI (2 days)
+### P4.5 — Teacher: assign topic UI (2 days)
 
 - [ ] Guardian app (teacher mode): list classes → pick subject → pick topic → "Assign Today"
 - [ ] `assignTopic` callable writes `studyAssignments/{id}`
@@ -487,39 +366,52 @@ Add to `firestore/rules`:
 
 **Acceptance**: Teacher sees assignment immediately after creation.
 
-### P5.5 — Kids app: Study Mission screen (2 days)
+### P4.6 — Kids app: Study Mission screen (2 days)
 
 - [ ] New screen during study window: list today's `studyAssignments`
-- [ ] Each card shows topic name, status, "Learn with AI", "Start Quiz", reward placeholder
+- [ ] Each card shows topic name, status, **"Start Learning"**, **"Take Quiz"**, reward placeholder
 
 **Acceptance**: Child sees assigned topic the next time they unlock during study window.
 
-### P5.6 — AI lesson generator (3 days)
+### P4.7 — Curated content schema + import pipeline (2 days)
 
-- [ ] `aiLessonGenerator` callable: input `topicId, classId, grade, language`
-- [ ] If `lessonGenerations/{lessonId}` cached, return it
-- [ ] Else call OpenAI/Gemini with structured prompt → parse JSON → write cache → return
-- [ ] Hard cap monthly spend with check at function start
+Content team already has JSON per grade/subject/chapter/topic. We **upload it**, not generate it.
 
-**Acceptance**: First call generates, second call hits cache; structured JSON validated.
+Each topic JSON includes:
 
-### P5.7 — AI explanation screen (1 day)
+1. **Explanation** (text)
+2. **Examples** (array)
+3. **YouTube video link** (topic intro)
+4. **Brainstorming** — question + answer + YouTube link (common gaps students miss, e.g. "how solid turns to liquid")
+5. **Quiz** — MCQs with correct answers (already prepared with the topic)
 
-- [ ] Kids app: render lesson short + examples + analogy
-- [ ] "I understood, start quiz" → goes to quiz screen
+- [ ] Define `TopicContent` type in `shared-types/education.ts` (see tech spec §8.3)
+- [ ] Firestore path: `curriculum/{curriculumId}/chapters/{chapterId}/topics/{topicId}`
+- [ ] JSON schema validator (reject bad imports before write)
+- [ ] Admin script `scripts/import-curriculum.ts` — reads folder/JSON bundle, bulk-writes chapters + topics
+- [ ] Admin-web: preview imported topics (read-only list + JSON viewer) — optional but helpful for QA
+- [ ] Import first real bundle: **Class 8 Science** (all chapters/topics from content team)
 
-**Acceptance**: Child reads lesson, taps continue.
+**Acceptance**: Running import script loads Class 8 Science into Firestore; each topic doc has explanation, examples, video, brainstorming[], quiz[].
 
-### P5.8 — Quiz UI + scoring (2 days)
+### P4.8 — Topic learn screen (2 days)
 
-- [ ] Kids app: MCQ screen, one Q at a time
+- [ ] Kids app: fetch `curriculum/.../topics/{topicId}` for assigned topic
+- [ ] Render sections in order: explanation → examples → intro video (safe webview/YouTube)
+- [ ] **Brainstorming section**: expandable cards with question, answer, video link
+- [ ] "I'm ready for the quiz" → goes to quiz screen
+
+**Acceptance**: Child reads full curated lesson for a real Class 8 Science topic; all 5 content types visible.
+
+### P4.9 — Quiz UI + scoring (2 days)
+
+- [ ] Kids app: MCQ screen, one Q at a time — questions loaded from same topic doc (`quiz[]`)
 - [ ] Submit → `submitQuizAttempt` callable
-- [ ] Server validates answers, computes score, writes `quizAttempts/{id}`
-- [ ] If subscription is read-only, refuse with typed error
+- [ ] Server validates answers against **curated quiz in Firestore** (not client-sent answers only), computes score, writes `quizAttempts/{id}`
 
-**Acceptance**: Quiz submission produces a `quizAttempts` doc with server-authoritative score.
+**Acceptance**: Quiz submission produces a `quizAttempts` doc with server-authoritative score matched to curated quiz.
 
-### P5.9 — Reward catalog + unlock (2 days)
+### P4.10 — Reward catalog + unlock (2 days)
 
 - [ ] Admin-web: CRUD `rewardCatalog/*` with moderation flag
 - [ ] On quiz pass: `onQuizAttemptWrite` trigger picks an approved reward matching subject + age, writes `rewardUnlocks/{id}`
@@ -527,69 +419,60 @@ Add to `firestore/rules`:
 
 **Acceptance**: Pass quiz → reward shows; fail quiz → "Try again tomorrow".
 
-### P5.10 — Parent report tab (1 day)
+### P4.11 — Parent report tab (1 day)
 
 - [ ] Guardian app (parent mode): new "Study" tab in child details
 - [ ] Lists today's assignments + scores + rewards
 
 **Acceptance**: Parent sees same data the child sees.
 
-### P5.11 — Teacher class report (2 days)
+### P4.12 — Teacher class report (2 days)
 
 - [ ] Guardian app (teacher mode): per-class summary: avg score, attempted/not attempted, weak topics
 - [ ] Pull from `quizAttempts` filtered by `classId`
 
 **Acceptance**: Teacher sees class summary updated within seconds of attempts.
 
-### P5.12 — Read-only enforcement in education writes (1 day)
-
-- [ ] `assignTopic`, `submitQuizAttempt`, `aiLessonGenerator` all read `schools/{id}.subscription.educationReadOnly`
-- [ ] If `true`, reject writes with `subscription_expired` error
-- [ ] UI shows banner + CTA
-
-**Acceptance**: Expire a school's sub manually, teacher and child can't write; existing data still readable.
-
-### Phase 5 DoD
+### Phase 4 DoD
 
 ```text
-- full loop: teacher assigns -> child learns -> quiz -> reward -> parent + teacher see
-- read-only mode works when sub expired
-- AI generator caches and respects spend cap
-- everything tested end-to-end on staging with a real device pair
+- full loop: teacher assigns -> child reads curated lesson -> quiz -> reward -> parent + teacher see
+- Class 8 Science curriculum imported and visible in Kids app
+- quiz scored server-side against curated quiz[] in topic doc
+- no AI lesson generation in this phase
+- no payment/subscription code in this phase
 ```
 
 ---
 
-## Phase 6 — Syllabus Adapters + Principal Dashboards (2-3 weeks)
+## Phase 5 — Principal Dashboards + Optional Syllabus Tools (2-3 weeks)
 
-**Goal**: Topics auto-populate from online sources; principal can see school-wide coverage.
+**Goal**: Principal sees school-wide coverage; optional tools to expand curated content beyond initial JSON import.
 
-### P6.1 — Syllabus source adapter interface (1 day)
+> **MVP content source = curated JSON import (P4.7).** Online NCERT fetch (P5.1–P5.2) is optional — only if you want to auto-discover topic *names* before content team fills them in.
 
-- [ ] `apps/functions/src/ai/syllabusFetchAdapter.ts` with `fetchClassTopics(grade, board): Topic[]`
-- [ ] Stub for NCERT + CBSE
+### P5.1 — Syllabus source adapter interface (1 day, optional)
 
-**Acceptance**: Interface compiles, stub returns hardcoded sample.
+- [ ] `apps/functions/src/content/syllabusFetchAdapter.ts` with `fetchClassTopics(grade, board): TopicMetadata[]`
+- [ ] Stub for NCERT + CBSE — metadata only (topic names), **not** lesson content
 
-### P6.2 — NCERT adapter (3 days)
+**Acceptance**: Interface compiles, stub returns hardcoded topic name list.
+
+### P5.2 — NCERT adapter (3 days, optional / defer)
 
 - [ ] Implement HTML scrape or API call (depending on availability)
-- [ ] Map output to internal schema
-- [ ] Write to `chapters/*` and `topics/*` with status `fetched`
-- [ ] Schedule weekly cron to refresh
+- [ ] Map output to chapter/topic **metadata** only (content team still uploads full JSON via import script)
+- [ ] Schedule weekly cron to refresh topic name list
 
-**Acceptance**: Running the adapter populates real Class 8 Science topics.
+**Acceptance**: Adapter populates topic skeleton; curated import still required for explanation/quiz/video.
 
-### P6.3 — Teacher review UI (2 days)
+### P5.3 — Teacher review UI (2 days)
 
-- [ ] Principal-web: `/syllabus` shows fetched topics filtered by class
-- [ ] Bulk approve / individual edit
-- [ ] Status moves `fetched → reviewed → approved`
-- [ ] Also exposed in Guardian teacher mode for per-subject quick review
+- [ ] Principal-web: `/syllabus` shows curriculum topics for linked `curriculumId`
+- [ ] Flag topics missing curated content (`status: metadata_only` vs `published`)
+- [ ] Teacher can see which topics are ready to assign vs pending content upload
 
-**Acceptance**: Teacher can approve a fetched topic before children see it.
-
-### P6.4 — Principal coverage dashboard (3 days)
+### P5.4 — Principal coverage dashboard (3 days)
 
 - [ ] Principal-web: `/dashboard` shows class coverage cards
 - [ ] Aggregates: approved topics, assigned topics, completed-by-70%-students topics
@@ -597,45 +480,45 @@ Add to `firestore/rules`:
 
 **Acceptance**: Dashboard loads in <1s using precomputed aggregates.
 
-### P6.5 — Principal teacher activity view (1 day)
+### P5.5 — Principal teacher activity view (1 day)
 
 - [ ] `/teachers` shows last-assignment-date per teacher, total assigned this month
 
 **Acceptance**: Principal can spot inactive teachers.
 
-### P6.6 — Weak topic detection (2 days)
+### P5.6 — Weak topic detection (2 days)
 
 - [ ] Cron looks at quizAttempts, marks topics where class avg < 60% as `weak`
 - [ ] Teacher dashboard shows "Re-teach: X, Y, Z"
 
 **Acceptance**: Weak topics surface for a test class with mock low scores.
 
-### Phase 6 DoD
+### Phase 5 DoD
 
 ```text
-- NCERT topics auto-fetched weekly
-- teacher review flow live
 - principal dashboards show real aggregates
+- curriculum topics with `published` status visible in syllabus view
 - weak topics surface for re-teaching
+- (optional) NCERT metadata adapter if built
 ```
 
 ---
 
-## Phase 7 — Pilot + Polish + Launch (2 weeks)
+## Phase 6 — Pilot + Polish + Launch (2 weeks)
 
-**Goal**: One real pilot school running on production with real payment.
+**Goal**: One real pilot school running on production (no payment required for pilot).
 
-### P7.1 — Pilot school onboarding (2 days)
+### P6.1 — Pilot school onboarding (2 days)
 
 - [ ] Sign up one partner school
 - [ ] Admin creates school in production
-- [ ] Principal logs in, subscribes (real Razorpay charge)
+- [ ] Principal logs in and sets up school + classes
 - [ ] Principal adds 2 classes, generates teacher code
 - [ ] 2 teachers + 10 parents + 10 children onboarded
 
 **Acceptance**: All entities live in production Firestore.
 
-### P7.2 — Real-device QA matrix (2 days)
+### P6.2 — Real-device QA matrix (2 days)
 
 - [ ] Test Guardian + Kids on: Realme, Xiaomi, Samsung, OPPO, Vivo, Pixel
 - [ ] Each OEM gets a checklist: onboarding, location, app blocking, study mission, quiz, reward
@@ -643,15 +526,15 @@ Add to `firestore/rules`:
 
 **Acceptance**: Matrix sheet 100% green except known low-priority items.
 
-### P7.3 — Crash + analytics wiring (1 day)
+### P6.3 — Crash + analytics wiring (1 day)
 
 - [ ] Crashlytics on all 4 apps
-- [ ] Firebase Analytics events: onboarding_complete, quiz_submitted, reward_unlocked, subscription_active
+- [ ] Firebase Analytics events: onboarding_complete, quiz_submitted, reward_unlocked
 - [ ] Sentry on functions
 
 **Acceptance**: Dashboards show events from pilot users.
 
-### P7.4 — Documentation refresh (1 day)
+### P6.4 — Documentation refresh (1 day)
 
 - [ ] Update `BEGINNER_APP_FLOW.md` with v2 split
 - [ ] Update `FIRESTORE_SCHEMA_EXPLAINED.md` with new collections
@@ -660,7 +543,7 @@ Add to `firestore/rules`:
 
 **Acceptance**: New dev can read docs and run all 4 apps locally without help.
 
-### P7.5 — Public launch (1 day)
+### P6.5 — Public launch (1 day)
 
 - [ ] Publish Guardian + Kids to Play Store internal track
 - [ ] Promote to closed beta → open beta → production
@@ -669,7 +552,7 @@ Add to `firestore/rules`:
 
 **Acceptance**: Apps live on Play Store production; v1 users see upgrade prompt.
 
-### P7.6 — Buffer / hotfix week (3 days)
+### P6.6 — Buffer / hotfix week (3 days)
 
 - [ ] Reserved for whatever breaks
 - [ ] Pilot feedback ingestion
@@ -677,10 +560,10 @@ Add to `firestore/rules`:
 
 **Acceptance**: No blocker bugs open; retro scheduled.
 
-### Phase 7 DoD
+### Phase 6 DoD
 
 ```text
-- 1 paying school live in production
+- 1 pilot school live in production
 - crash-free rate > 99%
 - 4 apps published / deployed
 - retro held
@@ -697,18 +580,17 @@ flowchart LR
   P0 --> P2[Phase 2: Web scaffolding]
   P1 --> P3[Phase 3: Auth + Roles]
   P2 --> P3
-  P3 --> P4[Phase 4: Payments]
-  P4 --> P5[Phase 5: Education MVP]
-  P5 --> P6[Phase 6: Syllabus + Dashboards]
-  P6 --> P7[Phase 7: Pilot + Launch]
+  P3 --> P4[Phase 4: Education MVP]
+  P4 --> P5[Phase 5: Syllabus + Dashboards]
+  P5 --> P6[Phase 6: Pilot + Launch]
 ```
 
-**Critical path** = P0 → P1 → P3 → P4 → P5 → P6 → P7.
+**Critical path** = P0 → P1 → P3 → P4 → P5 → P6.
 
 **Parallelizable**:
 - P2 (web scaffolding) can run alongside P1.
-- P5.6 (AI generator) can be built before P5.5 (Study Mission UI) if we mock the UI side first.
-- P6.2 (NCERT adapter) can start in parallel with P5 if a second dev is free.
+- P4.8 (Topic learn screen) can be built before P4.6 (Study Mission UI) if we mock assignments with hardcoded topicId.
+- P5.2 (NCERT adapter) is **deferred** — curated JSON import replaces online fetch for MVP.
 
 ---
 
@@ -719,10 +601,9 @@ flowchart LR
 | P0 | pnpm + Metro path edge cases | +1 day |
 | P1 | Native module Gradle migration | +2 days |
 | P3 | Firestore rules complexity | +1 day |
-| P4 | Razorpay webhook edge cases | +3 days |
-| P5 | AI generator output quality | +3 days |
-| P6 | NCERT scrape brittleness | +3 days |
-| P7 | Real-device OEM bugs | +3 days |
+| P4 | Curated JSON import errors / schema drift | +2 days |
+| P5 | NCERT scrape brittleness | +3 days |
+| P6 | Real-device OEM bugs | +3 days |
 
 Add ~10% schedule buffer overall.
 
@@ -733,29 +614,27 @@ Add ~10% schedule buffer overall.
 For each chunk, use this template in Linear/Jira:
 
 ```text
-ID: P4.5
-Title: Razorpay webhook handler
-Phase: Phase 4 — Payment Plumbing
+ID: P4.7
+Title: Curated content import pipeline
+Phase: Phase 4 — Education MVP
 Owner: <dev>
 Estimate: 2 days
 Depends on: P4.2
 
 Scope:
-- HTTPS function /razorpayWebhook, raw body
-- Verify X-Razorpay-Signature (HMAC SHA256, constant-time)
-- Idempotency: paymentEvents/{eventId} doc transaction
-- Handle 12 event types from tech spec §7.6
-- Always return 200 unless signature invalid
+- TopicContent type in shared-types (explanation, examples, video, brainstorming[], quiz[])
+- Firestore path curriculum/{curriculumId}/chapters/{chapterId}/topics/{topicId}
+- JSON schema validator + scripts/import-curriculum.ts
+- Bulk import Class 8 Science bundle from content team
 
 Acceptance:
-- Manual webhook test with valid sig: 200 + Firestore write
-- Replay same event: 200, no double-write
-- Bad sig: 400
-- Unit tests cover 12 event types
+- Import script loads all Class 8 Science topics
+- Each topic doc passes schema validation
+- Admin can preview topics in admin-web (optional)
 
 References:
-- docs/EDUCATION_AI_TECH_SPEC.md §7.5-§7.6
-- razorpay.com/docs/api/webhooks
+- docs/EDUCATION_AI_TECH_SPEC.md §8.3
+- docs/EDUCATION_AI_ECOSYSTEM_PLAN.md §8.7
 ```
 
 ---
@@ -764,20 +643,19 @@ References:
 
 | Phase | Done when |
 |---|---|
-| P0 | CI green on empty monorepo |
+| P0 | Monorepo installs, packages typecheck, emulator boots |
 | P1 | v1 feature parity on split APKs |
 | P2 | Web apps live on staging |
 | P3 | `users.roles[]` shipped + rules enforce |
-| P4 | Test-mode payment succeeds end to end |
-| P5 | Full education loop works on staging |
-| P6 | Principal dashboard shows real coverage |
-| P7 | 1 paying school live, retro done |
+| P4 | Full education loop works on staging |
+| P5 | Principal dashboard shows real coverage |
+| P6 | 1 pilot school live, retro done |
 
 ---
 
 ## 6) What To Do Right Now (Today)
 
-1. Open Pre-Flight checklist (§1) and lock the 8 open decisions.
+1. Open Pre-Flight checklist (§1) and lock the open decisions.
 2. Create branch `v2/monorepo-bootstrap`.
 3. Start ticket **P0.1**.
 4. Schedule kickoff meeting; share this doc + tech spec.
