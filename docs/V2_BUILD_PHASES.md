@@ -97,10 +97,10 @@ Create empty package shells for:
 - [ ] `packages/shared-types/` (Firestore types, education types stubs)
 - [ ] `packages/shared-firebase/` (auth + firestore helpers stubs)
 - [ ] `packages/shared-utils/`
-- [ ] `packages/shared-ui-mobile/`
-- [ ] `packages/shared-ui-web/`
 
 Each has its own `package.json`, `tsconfig.json` extending base, and an `src/index.ts` that exports `{}`.
+
+Mobile and web apps use **Tailwind** (NativeWind on RN, Tailwind CSS on Next.js) for UI — no `shared-ui-mobile` or `shared-ui-web` packages.
 
 **Acceptance**: `pnpm -r build` succeeds; type references resolve across packages.
 
@@ -136,6 +136,7 @@ Each has its own `package.json`, `tsconfig.json` extending base, and an `src/ind
 - [ ] Apply monorepo Metro config (workspace watchFolders, hoisted nodeModulesPaths, disableHierarchicalLookup)
 - [ ] Set `applicationId = com.kidsafe.kids`
 - [ ] App name "KidSafe Kids", colors/icon placeholder
+- [ ] NativeWind (Tailwind for RN) configured
 
 **Acceptance**: `pnpm --filter kids android` builds and launches an empty RN app.
 
@@ -145,6 +146,7 @@ Same as P1.1 but:
 
 - [ ] Set `applicationId = com.kidsafe.guardian`
 - [ ] App name "KidSafe Guardian"
+- [ ] NativeWind (Tailwind for RN) configured
 
 **Acceptance**: Both apps build and launch side by side on one device.
 
@@ -232,7 +234,7 @@ Move Kotlin source from `android/app/src/main/java/com/kidsafe/*`:
 - [ ] Add `firebase` client SDK via `shared-firebase`
 - [ ] Implement `/login` page with reCAPTCHA + phone OTP
 - [ ] Redirect to `/dashboard` on success
-- [ ] Same code for both apps (component lives in `shared-ui-web`)
+- [ ] Same login flow for both apps (Tailwind-styled pages in each app)
 
 **Acceptance**: User can log in with phone OTP on both apps; `users/{uid}` doc auto-created.
 
@@ -240,7 +242,7 @@ Move Kotlin source from `android/app/src/main/java/com/kidsafe/*`:
 
 - [ ] Principal: `/dashboard`, `/teachers`, `/syllabus` placeholders
 - [ ] Admin: `/schools`, `/syllabus-sources`, `/rewards`, `/users`, `/audit` placeholders
-- [ ] Sidebar nav from `shared-ui-web`
+- [ ] Sidebar nav with Tailwind in each web app
 - [ ] Logout button
 
 **Acceptance**: Full nav clickable, all pages render "Coming soon".
@@ -287,7 +289,7 @@ Move Kotlin source from `android/app/src/main/java/com/kidsafe/*`:
 
 ### P3.3 — Role switcher UI in Guardian (1 day)
 
-- [ ] Component `RoleSwitcher` in `shared-ui-mobile`
+- [ ] Component `RoleSwitcher` in Guardian app (styled with NativeWind)
 - [ ] Top bar of Guardian home: pill switcher when `roles.length > 1`
 - [ ] Persists selection to `users/{uid}.primaryRole`
 - [ ] Wires into parent or teacher home screen

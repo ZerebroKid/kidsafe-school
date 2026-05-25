@@ -122,6 +122,9 @@ Important rules:
 - **Turborepo** — cached, parallel builds across packages.
 - **TypeScript project references** — type-safe shared packages.
 - **Firebase Emulator Suite** — local Firestore + Functions for dev.
+- **Tailwind CSS** — all UI styling (no custom `shared-ui-*` component packages):
+  - **Web** (`admin-web`, `principal-web`): Tailwind CSS via Next.js
+  - **Mobile** (`guardian`, `kids`): [NativeWind](https://www.nativewind.dev/) (Tailwind for React Native)
 
 > ESLint, Prettier, Husky, and lint-staged are **deferred to a later phase** — not in the initial monorepo bootstrap.
 
@@ -173,17 +176,6 @@ kidsafe/
       src/firestore.ts
       src/index.web.ts
       src/index.native.ts
-      package.json
-
-    shared-ui-mobile/        # buttons, theme, components used in guardian+kids
-      src/Button.tsx
-      src/colors.ts
-      package.json
-
-    shared-ui-web/           # web-only components shared by admin+principal
-      src/Button.tsx
-      src/Card.tsx
-      src/DataTable.tsx
       package.json
 
     shared-utils/            # date, formatters, validators (platform-agnostic)
@@ -310,7 +302,7 @@ Both web apps are **Next.js 14 (App Router)**:
 
 - **server actions + route handlers** for callable-style server logic
 - **`shared-firebase`** package for both client SDK and admin SDK use
-- **Tailwind CSS** + shadcn-style primitives from `shared-ui-web`
+- **Tailwind CSS** for all web UI (utility classes in each app — no separate shared UI package)
 - Hosted on **Firebase Hosting** or **Vercel** (decision pending; Vercel recommended for App Router maturity)
 
 `apps/principal-web/` route map:
@@ -679,7 +671,7 @@ gantt
 - `apps/admin-web/` + `apps/principal-web/` boot
 - Firebase Phone Auth on web
 - Empty dashboards
-- Tailwind + `shared-ui-web`
+- Tailwind CSS on web apps; NativeWind on mobile apps
 
 ### Phase 2 — Education MVP (3-4 weeks)
 
