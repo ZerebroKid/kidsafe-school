@@ -95,6 +95,11 @@ google-services.json
 .env.local
 .firebase/
 firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Firebase Emulator local data (gitignored — every dev has their own)
+.emulator-data/
 
 # Distributable APKs produced by `react-native bundle` + assembleDebug.
 # Don't commit large binaries; share via Drive/App Distribution instead.

@@ -8,6 +8,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "dev": "turbo run dev",
+    "dev:emulator": "bash scripts/dev-emulator.sh",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules .turbo apps/*/.turbo packages/*/.turbo"
   },
   "engines": {
