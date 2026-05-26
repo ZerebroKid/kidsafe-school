@@ -10,10 +10,12 @@ import {TeacherNavigator} from './TeacherNavigator';
 import {
   getUserDoc,
   normaliseUserDoc,
+  setPrimaryRole,
   signOut,
 } from '@zerebro/shared-firebase/auth';
 import {paths} from '@zerebro/shared-firebase/firestore';
 import {RoleSwitcher} from '../components/RoleSwitcher';
+import {RoleOnboardingGate} from '../screens/auth/RoleOnboardingGate';
 import {useAuthStore} from '../state/authStore';
 import {colors} from '../theme';
 import {VerifyEmailScreen} from '../screens/auth/VerifyEmailScreen';
@@ -98,6 +100,23 @@ export function RootNavigator() {
     return sub;
   }, [firebaseUid, setUserDoc]);
 
+  // P3.3.3: single-role users should never see the RoleSwitcher, and their
+  // primaryRole should match the only role they hold (the migration script
+  // already does this server-side; this is the runtime safety net for
+  // any doc that slipped through). When `roles.length === 1` and the
+  // persisted primaryRole DOESN'T match, repair it. Side effect fires at
+  // most once per snapshot; the onSnapshot listener re-renders us with the
+  // updated primaryRole and the if-guard turns into a no-op afterwards.
+  useEffect(() => {
+    if (!firebaseUid || !userDoc) return;
+    if (userDoc.roles.length !== 1) return;
+    const only = userDoc.roles[0];
+    if (!only || userDoc.primaryRole === only) return;
+    setPrimaryRole(firebaseUid, only).catch(err =>
+      console.warn('repair primaryRole failed', err),
+    );
+  }, [firebaseUid, userDoc]);
+
   if (!bootstrapped || (firebaseUid && userDocLoading && !userDoc)) {
     return (
       <View style={styles.splash}>
@@ -123,6 +142,13 @@ export function RootNavigator() {
             <VerifyEmailScreen />
           ) : !userDoc ? (
             <AuthNavigator />
+          ) : userDoc.roles.length === 0 ? (
+            // P3.3.3: phone-OTP signups land here with roles: [] until a
+            // server-side role grant runs (Phase 4 admin invite flow).
+            // Block them with a polite "ask your admin" screen instead of
+            // mis-routing to ParentNavigator on a doc that doesn't actually
+            // hold the parent role.
+            <RoleOnboardingGate />
           ) : userDoc.roles.includes('child') ? (
             // Defence-in-depth: even if a user somehow holds BOTH `child` and
             // `parent`, ZConnect must never render ZKid surfaces. The kid app
@@ -133,6 +159,10 @@ export function RootNavigator() {
           ) : userDoc.primaryRole === 'teacher' ? (
             <TeacherNavigator />
           ) : (
+            // Single-role principal / admin who somehow signed in to ZConnect
+            // (these live in the web apps). The repair effect above will set
+            // primaryRole to match roles[0] if it's stale, but the right home
+            // for them is still the web app.
             <WrongAppForRole />
           )}
         </View>
