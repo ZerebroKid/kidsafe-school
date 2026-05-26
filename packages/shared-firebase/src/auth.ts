@@ -104,21 +104,34 @@ export async function reloadCurrentUser() {
   return auth().currentUser;
 }
 
+interface EnsureUserDocInput {
+  role: Role;
+  name: string;
+  email: string;
+  photoURL?: string | null;
+  fcmToken?: string | null;
+  deviceMode?: DeviceMode;
+}
+
 /**
  * Creates the Firestore user doc if it doesn't already exist. Called by every signup path.
  * Retries transient `unavailable` / `deadline-exceeded` errors before giving up so flaky
  * networks don't wipe the signup flow.
+ *
+ * Phase 3.2.2: writes BOTH shapes -- the v2 `roles: [role]` + `primaryRole: role` AND the
+ * legacy `role: role` -- so fresh installs land already-migrated AND the v1 create rule
+ * branch (`firestore/rules`) still accepts the write while the v1 branch is in place.
+ * The legacy field drops after Phase 4 widens the create rule to v2-only.
  */
-export async function ensureUserDoc(
-  uid: string,
-  partial: Partial<UserDoc> & Pick<UserDoc, 'role' | 'name' | 'email'>,
-) {
+export async function ensureUserDoc(uid: string, partial: EnsureUserDocInput) {
   const ref = firestore().collection('users').doc(uid);
   const snap = await withFirestoreRetry(() => ref.get());
   if (snap.exists) {
     return;
   }
   const doc: UserDoc = {
+    roles: [partial.role],
+    primaryRole: partial.role,
     role: partial.role,
     name: partial.name,
     email: partial.email,
@@ -134,11 +147,68 @@ export async function ensureUserDoc(
   await withFirestoreRetry(() => ref.set(doc));
 }
 
-export async function getUserDoc(uid: string) {
+/**
+ * Read `users/{uid}` and normalise v1 docs (legacy `role: string`) to the v2 shape
+ * (`roles: [role]`, `primaryRole: role`) IN MEMORY. The on-disk doc is not rewritten by
+ * this read -- the one-time migration script handles persistence. Callers can rely on
+ * `doc.roles` and `doc.primaryRole` always being present on a returned doc, regardless
+ * of whether the cutover has reached this user yet.
+ */
+export async function getUserDoc(uid: string): Promise<UserDoc | null> {
   const snap = await withFirestoreRetry(() =>
     firestore().collection('users').doc(uid).get(),
   );
-  return snap.exists ? (snap.data() as UserDoc) : null;
+  if (!snap.exists) return null;
+  return normaliseUserDoc(snap.data() as Partial<UserDoc>);
+}
+
+/**
+ * v1 -> v2 normaliser. Pure function so call sites can also use it on Firestore
+ * `onSnapshot` payloads (e.g. ZConnect's RootNavigator subscription).
+ */
+export function normaliseUserDoc(raw: Partial<UserDoc>): UserDoc {
+  const roles =
+    Array.isArray(raw.roles) && raw.roles.length > 0
+      ? raw.roles
+      : raw.role
+        ? [raw.role]
+        : [];
+  const primaryRole: Role = raw.primaryRole ?? roles[0] ?? 'parent';
+  // Cast: roles[0] above guarantees `parent` fallback when both fields are missing,
+  // matching the migration script's "default to parent" branch for orphan docs.
+  const normalised: UserDoc = {
+    ...raw,
+    roles: roles.length > 0 ? roles : ['parent'],
+    primaryRole,
+    createdAt: raw.createdAt ?? 0,
+  };
+  return normalised;
+}
+
+/** Whether the (normalised) user doc holds a given role. */
+export function hasRole(doc: UserDoc | null | undefined, role: Role): boolean {
+  return !!doc && Array.isArray(doc.roles) && doc.roles.includes(role);
+}
+
+/**
+ * Persist a new `primaryRole` on the user's own doc. Used by ZConnect's RoleSwitcher.
+ * Throws if `role` isn't already in the user's `roles[]` -- we never let the client
+ * pick a primary that they don't actually hold (defence-in-depth against a buggy UI
+ * mutating arbitrary state).
+ */
+export async function setPrimaryRole(uid: string, role: Role): Promise<void> {
+  const ref = firestore().collection('users').doc(uid);
+  const snap = await withFirestoreRetry(() => ref.get());
+  if (!snap.exists) {
+    throw new Error(`setPrimaryRole: users/${uid} missing`);
+  }
+  const data = normaliseUserDoc(snap.data() as Partial<UserDoc>);
+  if (!data.roles.includes(role)) {
+    throw new Error(
+      `setPrimaryRole: '${role}' not in roles [${data.roles.join(', ')}] for ${uid}`,
+    );
+  }
+  await withFirestoreRetry(() => ref.update({primaryRole: role}));
 }
 
 // --- internals ---------------------------------------------------------------
