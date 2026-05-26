@@ -32,9 +32,17 @@ if [ ! -d "$EMULATOR_DATA_DIR" ]; then
   echo "Created $EMULATOR_DATA_DIR (first run)"
 fi
 
-# Build --only list dynamically based on what's configured in firebase.json.
+# Build --only list dynamically based on what's actually deployable.
+# Functions emulator is added as soon as there's at least one callable / trigger
+# source file. Pre-P4.1.1 this directory didn't exist, so the emulator booted
+# auth+firestore only. P4.1.1 added the first callable (ping); from here on the
+# functions emulator joins the lineup automatically.
 ONLY="auth,firestore"
-if grep -q '"functions"' apps/functions/package.json 2>/dev/null; then
+if ls apps/functions/src/callable/*.ts apps/functions/src/triggers/*.ts apps/functions/src/crons/*.ts >/dev/null 2>&1; then
+  # Ensure the JS build is fresh before the emulator scans dist/index.js --
+  # firebase-tools won't auto-build TypeScript for us.
+  echo "[dev-emulator] callables/triggers detected -> building functions before emulator boot"
+  pnpm --filter @zerebro/functions build
   ONLY="$ONLY,functions"
 fi
 
