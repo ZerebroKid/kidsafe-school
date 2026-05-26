@@ -1,0 +1,28 @@
+{
+  "name": "@zerebro/functions",
+  "version": "2.0.0-alpha.0",
+  "private": true,
+  "description": "Firebase Cloud Functions for the Zerebro stack. Hosts admin-side scripts (one-time user migration in Phase 3) and the Phase 4 education callables (assignTopic, approveTeacher, submitQuizAttempt, ...).",
+  "main": "dist/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "serve": "pnpm build && firebase emulators:start --only functions",
+    "shell": "pnpm build && firebase functions:shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "migrate": "pnpm build && node dist/scripts/oneTimeMigration_v1_to_v2.js"
+  },
+  "dependencies": {
+    "@zerebro/shared-types": "workspace:*",
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.5.0"
+  }
+}
