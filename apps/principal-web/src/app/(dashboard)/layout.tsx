@@ -4,26 +4,53 @@ import Link from 'next/link';
 import {usePathname, useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
 import {onAuthStateChanged} from 'firebase/auth';
-import {getAuthInstance} from '@zerebro/shared-firebase';
+import {
+  collectionGroup,
+  getDocs,
+  limit,
+  query,
+  where,
+} from 'firebase/firestore';
+import {
+  getAuthInstance,
+  getCurrentUserDoc,
+  getFirestoreInstance,
+  hasRole,
+} from '@zerebro/shared-firebase';
 import {LogoutButton} from '@/components/LogoutButton';
 
 /*
- * Auth-guarded shell for everything Campus shows once a principal is signed
- * in. The (dashboard) parens make this a route group -- it shapes the URL
- * tree without adding a /dashboard segment to the path -- so /dashboard,
- * /teachers and /syllabus all share one layout file.
+ * Auth + role-guarded shell for everything Campus shows once a verified
+ * principal is signed in (P4.2.5).
  *
- * Guard pattern: render a tiny splash until onAuthStateChanged fires once,
- * then either bounce unauthed visitors to /login or unveil the sidebar.
- * No SSR cookie session yet (Phase 3 layers App Hosting cookies in); a
- * page hard-refresh re-runs the guard against the in-memory user.
+ * Routing decision (runs once per signed-in user):
+ *   1. Not signed in            -> /login
+ *   2. roles[] includes 'principal'
+ *                               -> render the dashboard
+ *   3. else, find own pending claim via collectionGroup('principals')
+ *      where userId == myUid limit 1:
+ *      - pending found          -> /onboarding/pending?schoolId&principalId
+ *      - rejected only          -> /onboarding (let them try again)
+ *      - none                   -> /onboarding
+ *
+ * Why `getDoc` + `getDocs` rather than two onSnapshot listeners: we only
+ * need to make the routing decision on auth/route transitions, not on
+ * every Firestore tick. The pending screen itself uses onSnapshot to react
+ * to approval; this layout just gets the user there.
  */
 
 const NAV = [
   {href: '/dashboard', label: 'Dashboard'},
+  {href: '/classes', label: 'Classes'},
   {href: '/teachers', label: 'Teachers'},
   {href: '/syllabus', label: 'Syllabus'},
 ] as const;
+
+type GuardState =
+  | {kind: 'loading'}
+  | {kind: 'signedOut'}
+  | {kind: 'allowed'}
+  | {kind: 'redirected'};
 
 export default function CampusDashboardLayout({
   children,
@@ -31,33 +58,73 @@ export default function CampusDashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [authChecked, setAuthChecked] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
+  const [state, setState] = useState<GuardState>({kind: 'loading'});
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(getAuthInstance(), user => {
+    let cancelled = false;
+    const unsub = onAuthStateChanged(getAuthInstance(), async user => {
+      if (cancelled) return;
       if (!user) {
+        setState({kind: 'signedOut'});
         router.replace('/login');
-        setSignedIn(false);
-      } else {
-        setSignedIn(true);
+        return;
       }
-      setAuthChecked(true);
+      try {
+        const userDoc = await getCurrentUserDoc(user.uid);
+        if (cancelled) return;
+        if (hasRole(userDoc, 'principal')) {
+          setState({kind: 'allowed'});
+          return;
+        }
+        // No principal role -- look for a claim to decide which onboarding
+        // screen to show.
+        const claims = await getDocs(
+          query(
+            collectionGroup(getFirestoreInstance(), 'principals'),
+            where('userId', '==', user.uid),
+            limit(1),
+          ),
+        );
+        if (cancelled) return;
+        const claim = claims.docs[0];
+        if (claim && claim.data().status === 'pending') {
+          const schoolId = claim.ref.parent.parent?.id;
+          const principalId = claim.id;
+          if (schoolId) {
+            setState({kind: 'redirected'});
+            router.replace(
+              `/onboarding/pending?schoolId=${encodeURIComponent(schoolId)}&principalId=${encodeURIComponent(principalId)}`,
+            );
+            return;
+          }
+        }
+        setState({kind: 'redirected'});
+        router.replace('/onboarding');
+      } catch {
+        // If the role probe fails (e.g. rules transient), send them to
+        // onboarding instead of dead-ending in the dashboard.
+        if (!cancelled) {
+          setState({kind: 'redirected'});
+          router.replace('/onboarding');
+        }
+      }
     });
-    return unsub;
+    return () => {
+      cancelled = true;
+      unsub();
+    };
   }, [router]);
 
-  if (!authChecked) {
+  if (state.kind === 'loading') {
     return (
       <main className="flex flex-1 items-center justify-center">
         <p className="text-sm text-text-muted">Loading…</p>
       </main>
     );
   }
-
-  if (!signedIn) {
-    // Effective no-op while the router.replace above takes effect -- avoids
-    // a flicker of dashboard chrome to an unauthed visitor.
+  if (state.kind !== 'allowed') {
+    // signedOut + redirected: the router.replace above is in flight; render
+    // nothing to avoid a flash of dashboard chrome.
     return null;
   }
 

@@ -57,9 +57,6 @@ importers:
 
   apps/functions:
     dependencies:
-      '@zerebro/shared-types':
-        specifier: workspace:*
-        version: link:../../packages/shared-types
       firebase-admin:
         specifier: ^12.7.0
         version: 12.7.0
@@ -7709,9 +7706,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.5': {}
 

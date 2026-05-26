@@ -310,12 +310,37 @@ service cloud.firestore {
     // schools/{schoolId}
     //   Created by admin web (Zerebro Admin) directly. Principal can read
     //   their own school doc to render the dashboard header.
+    //
+    //   Pending-principal read branch (P4.2.5): a user who has filed a
+    //   claimSchool request but is not yet approved still needs to read the
+    //   school doc to render the "Waiting for verification" header. We grant
+    //   read access if there is a principals/{myUid} doc under this school
+    //   -- by construction claimSchool stamps the principalId == caller.uid
+    //   so a stranger cannot manufacture this match without first calling
+    //   claimSchool with the correct inviteCode.
     match /schools/{schoolId} {
-      allow read: if isAdmin() || belongsToSchool(schoolId);
+      allow read: if isAdmin()
+        || belongsToSchool(schoolId)
+        || (isSignedIn()
+            && exists(/databases/$(database)/documents/schools/$(schoolId)/principals/$(myUid())));
       allow create, update: if isAdmin();
       // Schools are never deleted from the client; an admin would archive
       // (status: 'archived') instead via an update.
       allow delete: if false;
+
+      // principals subcollection (P4.2)
+      //   `claimSchool`, `approvePrincipal`, and `rejectPrincipal` callables
+      //   write here via Admin SDK; clients only READ. A user can see their
+      //   own pending/active/rejected claim (so the principal-web pending
+      //   screen can onSnapshot-flip on approval). Admins see every claim
+      //   in the school; the cross-school admin list uses the collection-
+      //   group rule below this block.
+      match /principals/{principalId} {
+        allow read: if isAdmin()
+          || belongsToSchool(schoolId)
+          || (isSignedIn() && resource.data.userId == myUid());
+        allow create, update, delete: if false;
+      }
 
       // classes subcollection
       //   Principal of the school CRUDs classes; teachers assigned to a class
@@ -352,6 +377,23 @@ service cloud.firestore {
           || (isSignedIn() && resource.data.userId == myUid());
         allow create, update, delete: if false;
       }
+    }
+
+    // Cross-school collection-group read for `principals/*` (P4.2.7).
+    //   Admin web lists every pending principal claim across all schools via
+    //   `collectionGroup('principals').where('status','==','pending')`. That
+    //   query is evaluated against THIS rule, not the per-school rule above.
+    //   We keep the same read predicates as the per-school rule:
+    //     - admin sees all
+    //     - any signed-in user sees their own claim (so a principal-web
+    //       collectionGroup query to "find my pending claim" works without
+    //       knowing the schoolId)
+    //   Writes are NEVER allowed at any depth -- only Admin SDK callables
+    //   may mutate `principals/*` docs.
+    match /{path=**}/principals/{principalId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == myUid());
+      allow write: if false;
     }
 
     // studyAssignments/{id}

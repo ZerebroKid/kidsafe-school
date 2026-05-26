@@ -7,6 +7,22 @@
         {"fieldPath": "type", "order": "ASCENDING"},
         {"fieldPath": "timestamp", "order": "DESCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "principals",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "requestedAt", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "principals",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "userId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

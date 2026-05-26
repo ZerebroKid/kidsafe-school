@@ -34,6 +34,21 @@ import {setGlobalOptions} from 'firebase-functions/v2/options';
 setGlobalOptions({
   region: 'asia-south1',
   maxInstances: 10,
+  // Cloud Functions Gen 2 deploys a Cloud Run service per function. By
+  // default the service has NO `allUsers` invoker binding, so any callable
+  // hit by the Firebase Web SDK gets a 403 from the Cloud Run frontend
+  // BEFORE the function code (or the v2 onCall envelope) ever runs. Setting
+  // `invoker: 'public'` here makes `firebase deploy` add the binding for
+  // every function in this barrel. Auth is still enforced INSIDE each
+  // callable via `requireAuth()` / `requireRole()`; this only opens the
+  // network door so the SDK can reach the function in the first place.
+  invoker: 'public',
 });
 
 export {ping} from './callable/ping';
+
+// P4.2 -- principal onboarding
+export {claimSchool} from './callable/claimSchool';
+export {rotateInviteCode} from './callable/rotateInviteCode';
+export {approvePrincipal} from './callable/approvePrincipal';
+export {rejectPrincipal} from './callable/rejectPrincipal';

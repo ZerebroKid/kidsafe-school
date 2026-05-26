@@ -20,6 +20,7 @@ import {LogoutButton} from '@/components/LogoutButton';
 
 const NAV = [
   {href: '/schools', label: 'Schools'},
+  {href: '/principals', label: 'Principals'},
   {href: '/syllabus-sources', label: 'Syllabus sources'},
   {href: '/rewards', label: 'Rewards'},
   {href: '/users', label: 'Users'},

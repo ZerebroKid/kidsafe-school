@@ -9,6 +9,8 @@
     "test": "turbo run test",
     "dev": "turbo run dev",
     "dev:emulator": "bash scripts/dev-emulator.sh",
+    "seed:staging": "pnpm --filter @zerebro/functions seed:staging",
+    "grant-role": "pnpm --filter @zerebro/functions grant-role",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules .turbo apps/*/.turbo packages/*/.turbo"
   },
   "engines": {

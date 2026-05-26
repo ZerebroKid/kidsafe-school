@@ -14,9 +14,10 @@
  */
 
 import {type FirebaseApp, getApps, initializeApp} from 'firebase/app';
-import {type Auth, getAuth} from 'firebase/auth';
+import {type Auth, connectAuthEmulator, getAuth} from 'firebase/auth';
 import {
   type Firestore,
+  connectFirestoreEmulator,
   doc,
   getDoc,
   getFirestore,
@@ -77,6 +78,19 @@ let appSingleton: FirebaseApp | null = null;
 let authSingleton: Auth | null = null;
 let firestoreSingleton: Firestore | null = null;
 
+// Emulator-connect guards. `connectXxxEmulator()` THROWS if invoked twice on
+// the same SDK instance, and Next.js Fast-Refresh / RSC double-renders can
+// re-enter these getters even after the singletons are cached (the singleton
+// caches survive HMR but the connect side-effect is per-instance). We mirror
+// the same booleans used by `./callable.web.ts` for the Functions emulator.
+let authEmulatorConnected = false;
+let firestoreEmulatorConnected = false;
+
+// Default emulator hosts -- must match scripts/dev-emulator.sh + firebase.json.
+const AUTH_EMULATOR_URL = 'http://127.0.0.1:9099';
+const FIRESTORE_EMULATOR_HOST = '127.0.0.1';
+const FIRESTORE_EMULATOR_PORT = 8080;
+
 export function initFirebase(
   configOverride?: ZerebroWebFirebaseConfig,
 ): FirebaseApp {
@@ -98,17 +112,54 @@ export function initFirebase(
 export function getAuthInstance(): Auth {
   if (authSingleton) return authSingleton;
   authSingleton = getAuth(initFirebase());
+  // Route to the local Auth emulator (9099) when the opt-in env flag is set
+  // AND we're in the browser. Gated on `isBrowser()` so SSR / RSC builds
+  // never try to talk to localhost from a Vercel edge worker.
+  if (
+    !authEmulatorConnected &&
+    process.env.NEXT_PUBLIC_USE_EMULATOR === 'true' &&
+    isBrowser()
+  ) {
+    connectAuthEmulator(authSingleton, AUTH_EMULATOR_URL, {
+      disableWarnings: true,
+    });
+    authEmulatorConnected = true;
+  }
   return authSingleton;
 }
 
 export function getFirestoreInstance(): Firestore {
   if (firestoreSingleton) return firestoreSingleton;
   firestoreSingleton = getFirestore(initFirebase());
+  if (
+    !firestoreEmulatorConnected &&
+    process.env.NEXT_PUBLIC_USE_EMULATOR === 'true' &&
+    isBrowser()
+  ) {
+    connectFirestoreEmulator(
+      firestoreSingleton,
+      FIRESTORE_EMULATOR_HOST,
+      FIRESTORE_EMULATOR_PORT,
+    );
+    firestoreEmulatorConnected = true;
+  }
   return firestoreSingleton;
 }
 
 function camelToEnv(key: string): string {
   return key.replace(/([A-Z])/g, '_$1').toUpperCase();
+}
+
+/**
+ * Browser-only guard. Duplicated (not imported) from `./callable.web.ts` to
+ * keep this file's import graph linear -- it's a 5-LOC helper, not worth a
+ * cross-file dependency for symmetry's sake.
+ */
+function isBrowser(): boolean {
+  return (
+    typeof globalThis !== 'undefined' &&
+    typeof (globalThis as {document?: unknown}).document !== 'undefined'
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -174,32 +225,50 @@ export async function setPrimaryRole(uid: string, role: Role): Promise<void> {
 
 /**
  * Idempotent web-side user doc upsert used by the OTP confirm pages
- * (Campus + Admin). Writes the v2 shape directly -- no `role:` legacy alias
- * because the web apps were born after Phase 2 and don't need the v1 create
- * rule branch.
+ * (Campus + Admin). Writes the v2 shape on first signin and is a no-op-ish
+ * `phone` refresh on re-signins.
  *
  * `defaultRole` is what the app expects this signup to be (Campus passes
  * `'principal'`, Admin passes `'admin'`). The actual GRANT of that role
- * still happens server-side (Phase 4 `approveTeacher` / future admin
- * invite flows); on first OTP confirm we just stamp it as `primaryRole`
- * with an empty `roles[]` so the dashboard layout's guard can flag the
- * user as "awaiting role assignment" via `hasRole(...) === false`.
+ * still happens server-side (Phase 4 `approvePrincipal`, `grant-role` CLI,
+ * future admin-invite flows); on first OTP confirm we stamp it as
+ * `primaryRole` with an empty `roles[]` so the dashboard layout's guard can
+ * flag the user as "awaiting role assignment" via `hasRole(...) === false`.
+ *
+ * Why we DON'T just `setDoc(..., {merge: true})` blindly:
+ *   The Firestore update rule (`!('roles' in ... affectedKeys())`) blocks any
+ *   self-write that overwrites `roles`. A blind `setDoc({roles: []}, merge)`
+ *   on a doc that already has e.g. `roles: ['admin']` flips it back to `[]`
+ *   on the wire and the rule rejects with `permission-denied`. Result:
+ *   every subsequent OTP signin after the first role grant breaks with
+ *   "Sign-in succeeded but the server rejected the profile write."
+ *
+ *   The split below ensures:
+ *     - first signin (doc missing)  -> create with the v2 shape (passes the
+ *                                      create rule's v2 branch)
+ *     - re-signin (doc exists)      -> only touch `phone`, leaving `roles`
+ *                                      and `primaryRole` exactly as the
+ *                                      admin / approve flow set them
  */
 export async function upsertWebUserDoc(
   uid: string,
   data: {phone: string; defaultRole: Role},
 ): Promise<void> {
   const ref = doc(getFirestoreInstance(), 'users', uid);
-  await setDoc(
-    ref,
-    {
-      phone: data.phone,
-      roles: [],
-      primaryRole: data.defaultRole,
-      createdAt: serverTimestamp(),
-    },
-    {merge: true},
-  );
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    const existing = snap.data() as Partial<UserDoc> | undefined;
+    if (existing?.phone === data.phone) return;
+    await updateDoc(ref, {phone: data.phone});
+    return;
+  }
+  await setDoc(ref, {
+    phone: data.phone,
+    roles: [],
+    primaryRole: data.defaultRole,
+    createdAt: serverTimestamp(),
+  });
 }
 
 export * from './web-phone';
+export {callFn} from './callable.web';

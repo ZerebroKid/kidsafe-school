@@ -30,7 +30,7 @@
 import {cert, initializeApp, applicationDefault} from 'firebase-admin/app';
 import {getFirestore, FieldValue, type Firestore} from 'firebase-admin/firestore';
 
-import type {Role} from '@zerebro/shared-types';
+import type {Role} from '../lib/sharedTypes';
 
 type Target = 'emulator' | 'prod';
 
