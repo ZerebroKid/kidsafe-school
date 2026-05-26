@@ -3,7 +3,7 @@
 import {useEffect, useState} from 'react';
 import {onAuthStateChanged} from 'firebase/auth';
 import {
-  collection,
+  collectionGroup,
   getDocs,
   limit,
   query,
@@ -13,15 +13,34 @@ import {getAuthInstance, getFirestoreInstance} from '@zerebro/shared-firebase';
 
 /*
  * Reverse-lookup helper: given the signed-in principal's uid, find the
- * school they are stamped onto (schools where principalUid == myUid).
+ * school they were approved onto.
  *
- * Returns {loading, schoolId, error}. Components render a loading state
- * until `loading=false`, then handle `schoolId=null` as "no school
- * assigned" (shouldn't happen post-P4.2.6 -- if it does, the (dashboard)
- * guard would have redirected away).
+ * We resolve via the `principals` collection-GROUP (not a query against
+ * `schools` filtered by `principalUid`). This is intentional and matters:
  *
- * Firestore auto-creates the equality-only index for `schools.principalUid`,
- * so no firestore/indexes.json entry is required.
+ *   1. The cross-school rule at firestore/rules `/{path=**}/principals/{principalId}`
+ *      allows ANY signed-in user to read their OWN principal doc
+ *      (`resource.data.userId == myUid`). There is no `isPrincipal()`
+ *      indirection, so it works the instant after `approvePrincipal`
+ *      flips status to 'active' -- before the cached `users/{uid}` doc
+ *      necessarily reflects the new `roles[]`.
+ *
+ *   2. The same pattern is already used by the (dashboard) layout guard
+ *      to decide where to send a freshly-signed-in user; sharing it here
+ *      means "if you can see the dashboard, you can see your schoolId".
+ *
+ *   3. The previous schools-collection query (where principalUid == myUid)
+ *      depended on rules calling `belongsToSchool(schoolId)`, which itself
+ *      issues TWO `get()` lookups during rule evaluation per matched doc.
+ *      That double-get racing with role-propagation produced the silent
+ *      empty result the user hit on /classes immediately post-approval.
+ *
+ * `schoolId` is derived from `claim.ref.parent.parent.id`
+ *   = `schools/{schoolId}/principals/{principalId}` -> `schools/{schoolId}`.
+ *
+ * The composite index `principals: userId+status` is already deployed
+ * (see firestore/indexes.json from the P4.2 chunk), so the AND filter
+ * below does not need a fresh index build.
  */
 
 export interface OwnSchool {
@@ -46,23 +65,18 @@ export function useOwnSchool(): OwnSchool {
         return;
       }
       try {
-        const snap = await getDocs(
+        const claims = await getDocs(
           query(
-            collection(getFirestoreInstance(), 'schools'),
-            where('principalUid', '==', user.uid),
+            collectionGroup(getFirestoreInstance(), 'principals'),
+            where('userId', '==', user.uid),
+            where('status', '==', 'active'),
             limit(1),
           ),
         );
         if (cancelled) return;
-        if (snap.empty) {
-          setState({loading: false, schoolId: null, error: null});
-        } else {
-          setState({
-            loading: false,
-            schoolId: snap.docs[0]?.id ?? null,
-            error: null,
-          });
-        }
+        const claim = claims.docs[0];
+        const schoolId = claim?.ref.parent.parent?.id ?? null;
+        setState({loading: false, schoolId, error: null});
       } catch (err) {
         if (!cancelled) {
           setState({

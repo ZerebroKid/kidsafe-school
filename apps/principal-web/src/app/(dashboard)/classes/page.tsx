@@ -65,6 +65,19 @@ export default function ClassesPage() {
   }, [own.schoolId]);
 
   if (own.loading) return <p className="text-sm text-text-muted">Loading…</p>;
+  if (own.error) {
+    return (
+      <div
+        role="alert"
+        className="rounded-2xl border border-danger/40 bg-danger/10 p-8 text-center"
+      >
+        <p className="text-sm font-medium text-danger">
+          Could not load your school
+        </p>
+        <p className="mt-2 font-mono text-xs text-danger/80">{own.error}</p>
+      </div>
+    );
+  }
   if (!own.schoolId) {
     return (
       <div className="rounded-2xl border border-border bg-surface p-8 text-center">
