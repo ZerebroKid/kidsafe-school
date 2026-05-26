@@ -49,10 +49,47 @@ export interface SharedProfile {
   createdAt: number;
 }
 
+/**
+ * v2 user doc. Every user has an array of roles + a primary role that drives navigation.
+ *
+ * Migration story (Phase 3):
+ *  - `roles: Role[]` and `primaryRole: Role` are REQUIRED on every fresh write. The Phase 3
+ *    one-time script (`apps/functions/src/scripts/oneTimeMigration_v1_to_v2.ts`) backfills
+ *    them for existing v1 docs and stamps `migratedAt`.
+ *  - `role` (single, v1) stays as an OPTIONAL legacy alias that signup paths still write so
+ *    a fresh checkout pointing at a not-yet-deployed rule set still satisfies the v1 create
+ *    shape in `firestore/rules`. Reads MUST go through `getUserDoc` in `@zerebro/shared-firebase`
+ *    which normalises v1 docs to v2 in-memory. Removable once Phase 4 ships and we widen
+ *    the create rule to require the v2 shape only.
+ *  - `name` and `email` stay optional because phone-OTP signups (web Campus/Admin from
+ *    Phase 2.2.3) never collect them.
+ *
+ * Role-escalation defence: clients are NEVER allowed to mutate `roles` directly (locked in
+ * `firestore/rules` Phase 3.4.2). Only Admin SDK from Cloud Functions can append (e.g. the
+ * Phase 4 `approveTeacher` callable adds 'teacher'). `primaryRole` IS self-writable so the
+ * ZConnect role switcher works without a round-trip to a Function.
+ */
 export interface UserDoc {
-  role: Role;
-  name: string;
-  email: string;
+  /** Every role the user holds. Append-only from the client's perspective. */
+  roles: Role[];
+  /** Drives navigation in ZConnect. Self-writable so RoleSwitcher can flip it instantly. */
+  primaryRole: Role;
+  /** Phone E.164 -- set on web phone-OTP signups (P2.2.3). Optional because email signups don't collect it. */
+  phone?: string;
+  /** Display name -- collected by email signups, may be missing on OTP signups until profile completion. */
+  displayName?: string;
+  /** Unix-ms when the migration script stamped this doc. Absent on docs that were born v2. */
+  migratedAt?: FirestoreFieldValueLike;
+  /**
+   * Legacy v1 single-role field. Still written by ZKid/ZConnect's `ensureUserDoc` for
+   * back-compat with the v1 create rule branch; reads must normalise via `getUserDoc`.
+   * @deprecated Drops after Phase 4 lands and the v1 create rule branch is removed.
+   */
+  role?: Role;
+  /** @deprecated -- v1 field; kept optional for back-compat. */
+  name?: string;
+  /** @deprecated -- v1 field; kept optional for back-compat. */
+  email?: string;
   photoURL?: string | null;
   fcmToken?: string | null;
   createdAt: FirestoreFieldValueLike;
@@ -293,22 +330,8 @@ export interface UsageDailyDoc {
   updatedAt: FirestoreFieldValueLike;
 }
 
-// ---------------------------------------------------------------------------
-// v2 forward-compat aliases.
-//
-// `UserDocStub` is the v2 (multi-role) shape -- Phase 3.2.1 will swap UserDoc
-// itself to this shape. Until then we expose it as a separate name so the
-// shared-firebase auth helpers (`getCurrentUser`, `hasRole`) and the upcoming
-// Zerebro Campus / Admin webs can typecheck against the future schema without
-// breaking v1 callers that still expect single-`role` UserDocs.
-// ---------------------------------------------------------------------------
-
-export interface UserDocStub {
-  uid: string;
-  phone?: string;
-  email?: string;
-  roles: Role[];
-  primaryRole: Role;
-  displayName?: string;
-  createdAt: FirestoreTimestampMs;
-}
+// `UserDocStub` was the Phase 2 forward-compat alias for the v2 shape. As of
+// Phase 3.2.1 `UserDoc` itself IS the v2 shape (roles[] + primaryRole) so the
+// alias is gone -- import `UserDoc` directly. If a TS error points at this
+// file complaining about a missing `UserDocStub` symbol, the fix is to swap
+// the import to `UserDoc`.
