@@ -1,5 +1,52 @@
 rules_version = '2';
 
+// =============================================================================
+// MANUAL SMOKE CHECKLIST (P3.4.3) -- run in Firebase Console > Firestore >
+// Rules Playground after every meaningful edit to this file. Phase 2 shipped
+// without an automated harness; until that's worth investing in (likely
+// Phase 6 pre-launch), this is the source of truth for "did I just break
+// auth on a deploy?".
+//
+// For each row: open Rules Playground -> set the location, payload, and
+// "Authenticated" with the specified custom-claim shape (e.g. the playground
+// lets you simulate sign-in as a particular uid; you'll also need to seed a
+// matching users/{uid} doc with the right roles[] in the emulator first).
+//
+// ---- ALLOW cases (must pass) -----------------------------------------------
+//  1. parent reads own child doc                       READ  /children/CHILD_A         as PARENT_A
+//  2. child writes own doc with valid locationDiagnostics
+//                                                      UPDATE /children/CHILD_A       as CHILD_A (set locationDiagnostics ok=true)
+//  3. parent updates allowed child fields              UPDATE /children/CHILD_A       as PARENT_A (lockState.locked=true)
+//  4. principal reads own school                       READ  /schools/SCHOOL_A         as PRINCIPAL_A
+//  5. teacher reads own class                          READ  /schools/SCHOOL_A/classes/CLASS_A
+//                                                                                      as TEACHER_A (teacherIds includes TEACHER_A)
+//  6. child reads its own class                        READ  /schools/SCHOOL_A/classes/CLASS_A
+//                                                                                      as CHILD_A (children/CHILD_A.classId.classId = CLASS_A)
+//  7. admin creates curriculum topic                   CREATE /curriculum/CUR_A/chapters/CH_A/topics/T_A
+//                                                                                      as ADMIN_A
+//  8. signed-in user reads approved reward             READ  /rewardCatalog/R_A (moderationStatus='approved') as any signed-in user
+//  9. user flips own primaryRole (must hold the role)  UPDATE /users/U_A               as U_A  (set primaryRole='teacher' when roles=['parent','teacher'])
+// 10. user creates own v2 user doc on first OTP        CREATE /users/U_A               as U_A  ({roles:[],primaryRole:'principal',phone,createdAt})
+//
+// ---- DENY cases (must fail) ------------------------------------------------
+// 11. unauthenticated reads /users/{anything}          READ  /users/U_A               as <signed out>     -- deny
+// 12. user adds 'admin' to own roles[]                 UPDATE /users/U_A               as U_A  (diff includes roles)  -- deny
+// 13. user sets primaryRole to a role they don't hold  UPDATE /users/U_A               as U_A  (primaryRole='admin' when roles=['parent']) -- deny
+// 14. child writes another child's doc                 UPDATE /children/CHILD_B       as CHILD_A  -- deny
+// 15. parent edits non-command field on child doc      UPDATE /children/CHILD_A       as PARENT_A (currentLocation modify) -- deny
+// 16. teacher reads other teacher's class              READ  /schools/SCHOOL_A/classes/CLASS_B
+//                                                                                      as TEACHER_A (NOT in teacherIds) -- deny
+// 17. random user writes studyAssignments              CREATE /studyAssignments/X     as any client -- deny  (server-only)
+// 18. random user writes quizAttempts                  CREATE /quizAttempts/X         as any client -- deny  (server-only)
+// 19. signed-in user reads pending/draft reward        READ  /rewardCatalog/R_PEND (moderationStatus='pending') as any signed-in -- deny
+// 20. parent of one school principal reads another school
+//                                                      READ  /schools/SCHOOL_B         as PRINCIPAL_A (principalUid != PRINCIPAL_A) -- deny
+//
+// If any row breaks: revert the deploy and dig in. Don't merge rules-only
+// changes through the production deploy path without working this list.
+// =============================================================================
+
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
