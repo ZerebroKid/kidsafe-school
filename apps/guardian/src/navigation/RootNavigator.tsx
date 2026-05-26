@@ -6,7 +6,11 @@ import auth from '@react-native-firebase/auth';
 
 import {AuthNavigator} from './AuthNavigator';
 import {ParentNavigator} from './ParentNavigator';
-import {getUserDoc, signOut} from '@zerebro/shared-firebase/auth';
+import {
+  getUserDoc,
+  normaliseUserDoc,
+  signOut,
+} from '@zerebro/shared-firebase/auth';
 import {paths} from '@zerebro/shared-firebase/firestore';
 import {useAuthStore} from '../state/authStore';
 import {colors} from '../theme';
@@ -29,10 +33,17 @@ const navTheme = {
  * ZConnect root navigator.
  *
  * Branches:
- *   - no auth                       -> AuthNavigator (parent login / signup)
- *   - signed in, email not verified -> VerifyEmailScreen
- *   - signed in, role=parent        -> ParentNavigator (dashboard)
- *   - signed in, role=child         -> WrongAppScreen (ask to use ZKid)
+ *   - no auth                              -> AuthNavigator (parent login / signup)
+ *   - signed in, email not verified        -> VerifyEmailScreen
+ *   - signed in, primaryRole=parent        -> ParentNavigator (dashboard)
+ *   - signed in, primaryRole=teacher       -> stub screen (Phase 4 teacher mode lands here)
+ *   - signed in, roles includes 'child'    -> WrongAppScreen (defence-in-depth)
+ *   - signed in, primaryRole=other         -> WrongAppScreen
+ *
+ * P3.2.3: snapshot data goes through `normaliseUserDoc` so the rest of the app
+ * sees `{roles[], primaryRole}` even for un-migrated v1 docs (where only `role`
+ * exists). P3.3 will wire the RoleSwitcher above this navigator for users with
+ * `roles.length >= 2`.
  *
  * The v1 shared-mode kiosk gate (`ChildModeNavigator`, `useChildModeActive`,
  * `isSharedKiosk`) was deleted in P1.6.1. ZConnect is now a pure two-device
@@ -66,7 +77,10 @@ export function RootNavigator() {
     const sub = paths.user(firebaseUid).onSnapshot(
       async snap => {
         if (snap.exists) {
-          setUserDoc(snap.data() as any);
+          // Funnel raw Firestore data through normaliseUserDoc so the auth
+          // store + every consumer of `userDoc` sees the v2 shape. Drops
+          // the `as any` cast that lived here pre-P3.
+          setUserDoc(normaliseUserDoc(snap.data() ?? {}));
         } else {
           const doc = await getUserDoc(firebaseUid);
           setUserDoc(doc);
@@ -97,7 +111,12 @@ export function RootNavigator() {
         <VerifyEmailScreen />
       ) : !userDoc ? (
         <AuthNavigator />
-      ) : userDoc.role === 'parent' ? (
+      ) : userDoc.roles.includes('child') ? (
+        // Defence-in-depth: even if a user somehow holds BOTH `child` and
+        // `parent`, ZConnect must never render ZKid surfaces. The kid app
+        // and the parent app are physically separate installs by design.
+        <WrongAppForRole />
+      ) : userDoc.primaryRole === 'parent' ? (
         <ParentNavigator />
       ) : (
         <WrongAppForRole />

@@ -23,10 +23,14 @@ import {colors} from './theme';
  */
 export default function App() {
   const uid = useAuthStore(s => s.firebaseUid);
-  const role = useAuthStore(s => s.userDoc?.role);
+  // P3.2.3: read primaryRole; the RootNavigator's snapshot listener normalises
+  // v1 docs into the v2 shape so this is safe to read even pre-migration.
+  // We intentionally gate parentListeners on primaryRole (not "roles includes
+  // parent") -- a teacher-mode user shouldn't be pulling parent listeners.
+  const primaryRole = useAuthStore(s => s.userDoc?.primaryRole);
 
   useEffect(() => {
-    if (!uid || role !== 'parent') {
+    if (!uid || primaryRole !== 'parent') {
       return;
     }
     registerForPush(uid);
@@ -36,7 +40,7 @@ export default function App() {
       unsub();
       stopParentListeners();
     };
-  }, [uid, role]);
+  }, [uid, primaryRole]);
 
   return (
     <GestureHandlerRootView style={{flex: 1, backgroundColor: colors.bg}}>

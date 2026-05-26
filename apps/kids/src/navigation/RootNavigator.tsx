@@ -6,7 +6,11 @@ import auth from '@react-native-firebase/auth';
 
 import {AuthNavigator} from './AuthNavigator';
 import {ChildNavigator} from './ChildNavigator';
-import {getUserDoc, signOut} from '@zerebro/shared-firebase/auth';
+import {
+  getUserDoc,
+  normaliseUserDoc,
+  signOut,
+} from '@zerebro/shared-firebase/auth';
 import {paths} from '@zerebro/shared-firebase/firestore';
 import {useAuthStore} from '../state/authStore';
 import {colors} from '../theme';
@@ -29,10 +33,14 @@ const navTheme = {
  * ZKid root navigator.
  *
  * Branches:
- *   - no auth                       -> AuthNavigator (login / signup as child)
- *   - signed in, email not verified -> VerifyEmailScreen
- *   - signed in, role=child         -> ChildNavigator (onboarding / status)
- *   - signed in, role=parent        -> WrongAppScreen (ask to use ZConnect)
+ *   - no auth                              -> AuthNavigator (login / signup as child)
+ *   - signed in, email not verified        -> VerifyEmailScreen
+ *   - signed in, primaryRole=child         -> ChildNavigator (onboarding / status)
+ *   - signed in, primaryRole=other         -> WrongAppScreen (ask to use ZConnect)
+ *
+ * P3.2.3: the snapshot listener feeds raw Firestore data through `normaliseUserDoc`
+ * so the rest of the app sees the v2 shape (roles[] + primaryRole) even for
+ * un-migrated v1 docs in the wild.
  *
  * Phase 1.6 removes the shared-mode kiosk flow that v1 hosted here, and
  * Phase 4 wires the student-side (`ZKid Study Mission`) tabs.
@@ -65,7 +73,10 @@ export function RootNavigator() {
     const sub = paths.user(firebaseUid).onSnapshot(
       async snap => {
         if (snap.exists) {
-          setUserDoc(snap.data() as any);
+          // Funnel raw Firestore data through normaliseUserDoc so a v1 doc
+          // (legacy `role:'child'`) is observed as `{roles:['child'], primaryRole:'child'}`
+          // by the rest of ZKid. Drops the `as any` cast that lived here pre-P3.
+          setUserDoc(normaliseUserDoc(snap.data() ?? {}));
         } else {
           const doc = await getUserDoc(firebaseUid);
           setUserDoc(doc);
@@ -96,7 +107,7 @@ export function RootNavigator() {
         <VerifyEmailScreen />
       ) : !userDoc ? (
         <AuthNavigator />
-      ) : userDoc.role === 'child' ? (
+      ) : userDoc.primaryRole === 'child' ? (
         <ChildNavigator />
       ) : (
         <WrongAppForRole />

@@ -58,15 +58,20 @@ export function ChildrenListScreen() {
       <ScrollView contentContainerStyle={{gap: spacing.md, paddingBottom: spacing.xl}}>
         {rows.length === 0 ? <EmptyState /> : null}
 
-        {rows.map(item => (
+        {rows.map(item => {
+          // P3.2.1 demoted UserDoc.name to optional (phone-OTP signups don't
+          // collect it). Fall back to "(unnamed)" so the navigate param + UI
+          // both have a real string -- the prop is required at the route side.
+          const displayName = item.name ?? item.displayName ?? '(unnamed)';
+          return (
           <Pressable
             key={item.uid}
             onPress={() =>
-              navigation.navigate('ChildDetails', {childUid: item.uid, childName: item.name})
+              navigation.navigate('ChildDetails', {childUid: item.uid, childName: displayName})
             }
             style={({pressed}) => [styles.card, pressed && {opacity: 0.85}]}>
             <View style={{flex: 1}}>
-              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.name}>{displayName}</Text>
               <Text style={styles.meta}>
                 {item.doc?.status === 'online' ? '\u25cf Online' : '\u25cb Offline'}
                 {'  \u00b7  '}
@@ -80,7 +85,8 @@ export function ChildrenListScreen() {
               thumbColor={colors.text}
             />
           </Pressable>
-        ))}
+          );
+        })}
       </ScrollView>
     </Screen>
   );
