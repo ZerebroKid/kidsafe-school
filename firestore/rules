@@ -27,6 +27,37 @@ service cloud.firestore {
         && userDoc(childUid).data.parentUid == myUid();
     }
 
+    // ---- Role helpers (P3.4.1) -------------------------------------------
+    // Read the v2 `roles[]` from the caller's user doc, tolerating un-migrated
+    // v1 docs that only have `role: string`. Returns [] when neither field is
+    // present so callers don't crash on a missing-doc evaluation path.
+    function rolesOfSelf() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(myUid()))
+        ? (
+            userDoc(myUid()).data.keys().hasAll(['roles'])
+              ? userDoc(myUid()).data.roles
+              : (userDoc(myUid()).data.keys().hasAll(['role']) ? [userDoc(myUid()).data.role] : [])
+          )
+        : [];
+    }
+    function hasRole(role)   { return role in rolesOfSelf(); }
+    function isAdmin()       { return hasRole('admin'); }
+    function isPrincipal()   { return hasRole('principal'); }
+    function isTeacher()     { return hasRole('teacher'); }
+    function isParent()      { return hasRole('parent'); }
+    // True if caller is the linked parent of `childUid`. Alias of isParentOf
+    // kept for symmetry with the rest of the role family + readability at
+    // call sites that read better as `isOwnChild(...)`.
+    function isOwnChild(childUid) { return isParentOf(childUid); }
+    // True if caller is a principal stamped onto `schools/{schoolId}` as
+    // `principalUid`. Read via get() rather than a userDoc field so a
+    // principal can't escalate by hand-editing their own user doc.
+    function belongsToSchool(schoolId) {
+      return isPrincipal()
+        && exists(/databases/$(database)/documents/schools/$(schoolId))
+        && get(/databases/$(database)/documents/schools/$(schoolId)).data.principalUid == myUid();
+    }
+
     // NOTE — Phase 1.6.2: the v1 `parentOwns(...)` helper + every `_shared`
     // doc-id branch was removed alongside the rest of shared mode. ZConnect
     // now never writes child profiles directly; the linked-child relationship
