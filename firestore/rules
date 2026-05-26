@@ -135,9 +135,16 @@ service cloud.firestore {
             && request.resource.data.keys().hasAll(['role', 'email', 'createdAt'])
         )
         || (
+          // v2 web/RN shape. Allows the new ZKid/ZConnect ensureUserDoc
+          // (which writes BOTH shapes -- v2 roles[] + v1 role legacy alias)
+          // AND the pure-v2 web OTP confirm path. Field whitelist is permissive
+          // enough to cover everything ensureUserDoc emits today.
           request.resource.data.roles is list
             && request.resource.data.keys().hasAll(['roles', 'createdAt'])
-            && request.resource.data.keys().hasOnly(['roles', 'phone', 'email', 'createdAt'])
+            && request.resource.data.keys().hasOnly([
+                 'roles', 'primaryRole', 'role', 'phone', 'email', 'name',
+                 'displayName', 'photoURL', 'fcmToken', 'deviceMode', 'createdAt'
+               ])
             && (
               ('phone' in request.resource.data && request.resource.data.phone is string)
                 || ('email' in request.resource.data && request.resource.data.email is string)
@@ -145,7 +152,24 @@ service cloud.firestore {
         )
       );
 
-      allow update: if isSelf(uid);
+      // P3.4.2 -- role-escalation defence.
+      // Two-mode update: a self-write may NEVER touch `roles`. `primaryRole`
+      // IS self-writable so the ZConnect RoleSwitcher works, but it must
+      // already be in the user's persisted roles[] (defence-in-depth -- the
+      // shared-firebase helper checks too, but rules win).
+      // Granting / revoking roles happens exclusively from server-side code
+      // (Cloud Functions with the Admin SDK) -- Phase 4's approveTeacher
+      // callable, future admin-invite flows, etc. Admin SDK writes bypass
+      // these rules entirely.
+      allow update: if isSelf(uid)
+        && !('roles' in request.resource.data.diff(resource.data).affectedKeys())
+        && (
+          !('primaryRole' in request.resource.data.diff(resource.data).affectedKeys())
+            || (
+              request.resource.data.primaryRole is string
+                && request.resource.data.primaryRole in resource.data.roles
+            )
+        );
 
       allow delete: if isSelf(uid);
     }
@@ -212,6 +236,161 @@ service cloud.firestore {
         // Day docs are append-mostly; only the child can clear them (e.g.
         // when the user signs out and re-pairs).
         allow delete: if isSelf(childUid);
+      }
+    }
+
+    // =====================================================================
+    // EDUCATION collections (P3.4.2)
+    //
+    // These collections don't exist yet -- Phase 4 creates them. Rules land
+    // now so the moment Phase 4 starts writing, the schema is locked. Every
+    // sensitive write path goes through a Cloud Function (Admin SDK) which
+    // bypasses these rules; rules govern only direct-from-client reads +
+    // a handful of carefully-scoped client writes.
+    // =====================================================================
+
+    // schools/{schoolId}
+    //   Created by admin web (Zerebro Admin) directly. Principal can read
+    //   their own school doc to render the dashboard header.
+    match /schools/{schoolId} {
+      allow read: if isAdmin() || belongsToSchool(schoolId);
+      allow create, update: if isAdmin();
+      // Schools are never deleted from the client; an admin would archive
+      // (status: 'archived') instead via an update.
+      allow delete: if false;
+
+      // classes subcollection
+      //   Principal of the school CRUDs classes; teachers assigned to a class
+      //   and children rostered to one need read access for assignments + UI.
+      match /classes/{classId} {
+        allow read: if isAdmin()
+          || belongsToSchool(schoolId)
+          || (isTeacher() && myUid() in resource.data.teacherIds)
+          // Child reads its own class doc to resolve `subjects` for the
+          // study mission UI. The child's classId is stamped on
+          // children/{ownUid}.classId by P4.4.2's joinSchool callable.
+          || (isSignedIn() && exists(/databases/$(database)/documents/children/$(myUid()))
+              && get(/databases/$(database)/documents/children/$(myUid())).data.classId.classId == classId);
+        allow create, update, delete: if isAdmin() || belongsToSchool(schoolId);
+
+        // subjects subcollection -- same access rules as the parent class.
+        match /subjects/{subjectId} {
+          allow read: if isAdmin()
+            || belongsToSchool(schoolId)
+            || (isTeacher() && myUid() in resource.data.teacherIds)
+            || (isSignedIn() && exists(/databases/$(database)/documents/children/$(myUid()))
+                && get(/databases/$(database)/documents/children/$(myUid())).data.classId.classId == classId);
+          allow create, update, delete: if isAdmin() || belongsToSchool(schoolId);
+        }
+      }
+
+      // teachers subcollection
+      //   `requestTeacherJoin` and `approveTeacher` callables write here via
+      //   Admin SDK; clients only READ. A teacher can see their own pending /
+      //   active record; the principal sees the full roster.
+      match /teachers/{teacherId} {
+        allow read: if isAdmin()
+          || belongsToSchool(schoolId)
+          || (isSignedIn() && resource.data.userId == myUid());
+        allow create, update, delete: if false;
+      }
+    }
+
+    // studyAssignments/{id}
+    //   Written exclusively by the `assignTopic` callable (Admin SDK).
+    //   Reads: assigned teacher, kids in the class, parents of those kids,
+    //   the principal of the school.
+    match /studyAssignments/{id} {
+      allow read: if isAdmin()
+        || (isTeacher() && resource.data.assignedByTeacherUid == myUid())
+        || (isSignedIn() && exists(/databases/$(database)/documents/children/$(myUid()))
+            && get(/databases/$(database)/documents/children/$(myUid())).data.classId.classId == resource.data.classId)
+        // Parent path: read assignments for any of the parent's linked children.
+        // We can't cheaply enumerate linked children from inside a rule, so the
+        // parent UI passes the child's classId via a where() clause and the
+        // rule below checks that the parent owns the child whose classId
+        // matches. The Parent's app code resolves `classId -> childUid` via
+        // its own children query before issuing the assignment query.
+        || (isParent() && isOwnChild(resource.data.childUid));
+      allow create, update, delete: if false;
+    }
+
+    // quizAttempts/{id}
+    //   Written exclusively by `submitQuizAttempt` callable (Admin SDK).
+    //   Reads: the child who took the quiz, their parent, the assigned
+    //   teacher, the principal of the school.
+    match /quizAttempts/{id} {
+      allow read: if isAdmin()
+        || isSelf(resource.data.childUid)
+        || (isParent() && isOwnChild(resource.data.childUid))
+        || (isTeacher() && resource.data.assignedByTeacherUid == myUid())
+        || belongsToSchool(resource.data.schoolId);
+      allow create, update, delete: if false;
+    }
+
+    // curriculum/{curriculumId}/chapters/{chapterId}/topics/{topicId}
+    //   Imported by `scripts/import-curriculum.ts` (Admin SDK). Any signed-in
+    //   user can read published topics (kids read in the learn screen,
+    //   teachers read in the assign-topic picker, principals read in QA).
+    //   We don't filter on `status == 'published'` at the rule level because
+    //   the import script publishes atomically.
+    match /curriculum/{curriculumId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+
+      match /chapters/{chapterId} {
+        allow read: if isSignedIn();
+        allow create, update, delete: if isAdmin();
+
+        match /topics/{topicId} {
+          allow read: if isSignedIn();
+          allow create, update, delete: if isAdmin();
+        }
+      }
+    }
+
+    // rewardCatalog/{id}
+    //   Admin curates; the reward-picker trigger reads via Admin SDK so
+    //   clients only need read access to render "what could I unlock?"
+    //   previews. We gate visibility on moderationStatus so unapproved
+    //   drafts don't leak to a kid's preview UI.
+    match /rewardCatalog/{id} {
+      allow read: if isSignedIn() && resource.data.moderationStatus == 'approved';
+      allow create, update, delete: if isAdmin();
+    }
+
+    // rewardUnlocks/{id}
+    //   Written exclusively by `onQuizAttemptWrite` trigger (Admin SDK).
+    //   The child sees their own unlocks, the parent sees their linked
+    //   child's unlocks.
+    match /rewardUnlocks/{id} {
+      allow read: if isAdmin()
+        || isSelf(resource.data.childUid)
+        || (isParent() && isOwnChild(resource.data.childUid));
+      allow create, update, delete: if false;
+    }
+
+    // classReports/{classId}/daily/{date}
+    //   Written exclusively by the nightly `aggregateClassReports` cron
+    //   (Admin SDK). Principal of the school + teachers of the class read.
+    match /classReports/{classId} {
+      // Top-level doc is currently unused -- the schema is `classId/daily/{date}`.
+      // We allow read so a principal's UI can list child dates with a simple
+      // collectionGroup-style query if we ever add one.
+      allow read: if isAdmin()
+        || (isPrincipal() && resource.data.schoolId != null
+            && belongsToSchool(resource.data.schoolId))
+        || (isTeacher() && resource.data.teacherIds != null
+            && myUid() in resource.data.teacherIds);
+      allow create, update, delete: if false;
+
+      match /daily/{date} {
+        allow read: if isAdmin()
+          || (isPrincipal() && resource.data.schoolId != null
+              && belongsToSchool(resource.data.schoolId))
+          || (isTeacher() && resource.data.teacherIds != null
+              && myUid() in resource.data.teacherIds);
+        allow create, update, delete: if false;
       }
     }
   }
