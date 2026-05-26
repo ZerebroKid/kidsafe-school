@@ -6,12 +6,14 @@ import auth from '@react-native-firebase/auth';
 
 import {AuthNavigator} from './AuthNavigator';
 import {ParentNavigator} from './ParentNavigator';
+import {TeacherNavigator} from './TeacherNavigator';
 import {
   getUserDoc,
   normaliseUserDoc,
   signOut,
 } from '@zerebro/shared-firebase/auth';
 import {paths} from '@zerebro/shared-firebase/firestore';
+import {RoleSwitcher} from '../components/RoleSwitcher';
 import {useAuthStore} from '../state/authStore';
 import {colors} from '../theme';
 import {VerifyEmailScreen} from '../screens/auth/VerifyEmailScreen';
@@ -36,14 +38,15 @@ const navTheme = {
  *   - no auth                              -> AuthNavigator (parent login / signup)
  *   - signed in, email not verified        -> VerifyEmailScreen
  *   - signed in, primaryRole=parent        -> ParentNavigator (dashboard)
- *   - signed in, primaryRole=teacher       -> stub screen (Phase 4 teacher mode lands here)
+ *   - signed in, primaryRole=teacher       -> TeacherNavigator (Phase 4 stub for now)
  *   - signed in, roles includes 'child'    -> WrongAppScreen (defence-in-depth)
  *   - signed in, primaryRole=other         -> WrongAppScreen
  *
- * P3.2.3: snapshot data goes through `normaliseUserDoc` so the rest of the app
- * sees `{roles[], primaryRole}` even for un-migrated v1 docs (where only `role`
- * exists). P3.3 will wire the RoleSwitcher above this navigator for users with
- * `roles.length >= 2`.
+ * P3.3.2 wires the `<RoleSwitcher />` ABOVE the navigator stack (inside the
+ * NavigationContainer's children) so a user with multi-role can flip between
+ * parent + teacher modes without losing navigation context. The switcher
+ * itself returns null when `roles.length < 2`, so single-role users see zero
+ * UI overhead.
  *
  * The v1 shared-mode kiosk gate (`ChildModeNavigator`, `useChildModeActive`,
  * `isSharedKiosk`) was deleted in P1.6.1. ZConnect is now a pure two-device
@@ -105,22 +108,35 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer theme={navTheme}>
-      {!firebaseUid ? (
-        <AuthNavigator />
-      ) : !emailVerified ? (
-        <VerifyEmailScreen />
-      ) : !userDoc ? (
-        <AuthNavigator />
-      ) : userDoc.roles.includes('child') ? (
-        // Defence-in-depth: even if a user somehow holds BOTH `child` and
-        // `parent`, ZConnect must never render ZKid surfaces. The kid app
-        // and the parent app are physically separate installs by design.
-        <WrongAppForRole />
-      ) : userDoc.primaryRole === 'parent' ? (
-        <ParentNavigator />
-      ) : (
-        <WrongAppForRole />
-      )}
+      <View style={styles.rootContainer}>
+        {/* Mounted ONLY when the user is signed in + has multi-role; the
+         * component itself returns null otherwise, so this is a safe always-on
+         * mount. Sits above whichever role navigator is active so flipping
+         * roles re-renders just the navigator below. */}
+        {firebaseUid && emailVerified && userDoc && userDoc.roles.length >= 2 ? (
+          <RoleSwitcher />
+        ) : null}
+        <View style={{flex: 1}}>
+          {!firebaseUid ? (
+            <AuthNavigator />
+          ) : !emailVerified ? (
+            <VerifyEmailScreen />
+          ) : !userDoc ? (
+            <AuthNavigator />
+          ) : userDoc.roles.includes('child') ? (
+            // Defence-in-depth: even if a user somehow holds BOTH `child` and
+            // `parent`, ZConnect must never render ZKid surfaces. The kid app
+            // and the parent app are physically separate installs by design.
+            <WrongAppForRole />
+          ) : userDoc.primaryRole === 'parent' ? (
+            <ParentNavigator />
+          ) : userDoc.primaryRole === 'teacher' ? (
+            <TeacherNavigator />
+          ) : (
+            <WrongAppForRole />
+          )}
+        </View>
+      </View>
     </NavigationContainer>
   );
 }
@@ -146,6 +162,10 @@ function WrongAppForRole() {
 }
 
 const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
   splash: {
     flex: 1,
     backgroundColor: colors.bg,
