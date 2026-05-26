@@ -3,16 +3,18 @@
 import {useRouter} from 'next/navigation';
 import {useCallback, useEffect, useState} from 'react';
 import {PhoneAuthProvider, signInWithCredential} from 'firebase/auth';
-import {doc, serverTimestamp, setDoc} from 'firebase/firestore';
-import {getAuthInstance, getFirestoreInstance} from '@zerebro/shared-firebase';
+import {getAuthInstance, upsertWebUserDoc} from '@zerebro/shared-firebase';
 
 /*
  * OTP confirm screen for Zerebro Admin. Same flow as the Campus counterpart:
  * rebuild a PhoneAuthCredential from sessionStorage, sign in, upsert the
- * users/{uid} doc in the v2 shape (roles + phone + createdAt) so the next
- * route can authorise via roles[]. Both apps point at the same Firestore
- * project; the per-app sessionStorage namespace lets a user be signed in to
- * both at the same time without one clobbering the other's verificationId.
+ * users/{uid} doc in the v2 shape via `upsertWebUserDoc` (defaultRole='admin').
+ * Both apps point at the same Firestore project; the per-app sessionStorage
+ * namespace lets a user be signed in to both at the same time without one
+ * clobbering the other's verificationId.
+ *
+ * Empty `roles[]` until an existing admin grants the role -- the dashboard
+ * layout's guard uses `hasRole('admin', userDoc)` to decide visibility.
  */
 
 const SESSION_KEYS = {
@@ -52,11 +54,10 @@ export default function AdminOtpConfirmPage() {
       try {
         const credential = PhoneAuthProvider.credential(verificationId, code);
         const userCred = await signInWithCredential(getAuthInstance(), credential);
-        await setDoc(
-          doc(getFirestoreInstance(), 'users', userCred.user.uid),
-          {phone, roles: [], createdAt: serverTimestamp()},
-          {merge: true},
-        );
+        await upsertWebUserDoc(userCred.user.uid, {
+          phone,
+          defaultRole: 'admin',
+        });
         sessionStorage.removeItem(SESSION_KEYS.verificationId);
         sessionStorage.removeItem(SESSION_KEYS.phone);
         // Admin has no /dashboard route -- its sidebar starts at /schools

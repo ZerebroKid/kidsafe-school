@@ -66,10 +66,10 @@ gantt
 | Phase 1 — Code Migration | 18 | 10–14 | 1–2 | yes |
 | Phase 2 — Web Apps Scaffolding | 11 | 5–7 | 1 | parallel with P1 |
 | Phase 3 — Auth + Multi-Role | 11 | 5–7 | 1 | yes |
-| Phase 4 — Education MVP | 38 | 20–25 | 2 | yes |
+| Phase 4 — Education MVP | 45 | 20–25 | 2 | yes |
 | Phase 5 — Dashboards + Reports | 14 | 10–14 | 1–2 | yes |
 | Phase 6 — Pilot + Launch | 14 | 10–14 | all hands | yes |
-| **Total** | **~116 tickets** | **~70–90 days** | 1–2 | — |
+| **Total** | **~123 tickets** | **~70–90 days** | 1–2 | — |
 
 That's roughly **10–13 calendar weeks** at 1.5 devs.
 
@@ -82,16 +82,17 @@ Before diving into tickets, here's how the **major features** chain together onc
 ```mermaid
 flowchart TD
   subgraph SetupFlow ["Setup (one-time per school)"]
-    Admin["Admin creates School + invite"] --> Principal
-    Principal["Principal claims School"] --> Class["Principal creates Class + Subject"]
+    Admin["Admin creates School + inviteCode (Zerebro Admin)"] -->|manual share: SMS/WhatsApp/in-person| Principal
+    Principal["Principal first-signup in Campus: enter inviteCode ONCE -> admin verifies -> roles += 'principal'"] --> Class["Principal creates Class + Subject"]
     Class --> CurriculumLink["Subject -> curriculumId link"]
     ContentTeam["Content team curates JSON"] --> ImportScript["Import script writes curriculum/*"]
     ImportScript --> Topics["topics published"]
-    Principal --> TeacherCode["Generate teacher code"]
-    TeacherCode --> Teacher["Teacher signs up + principal approves"]
-    Parent["Parent signs up + pairs"] --> ChildLink
-    Child["Child completes ZKid onboarding"] --> SchoolCode["enters school+grade+section"]
-    SchoolCode --> ChildLink["children/{uid}.classId set"]
+    Principal --> TeacherCode["Generate teacher code (Zerebro Campus)"]
+    TeacherCode -->|manual share: WhatsApp/SMS/in-person| Teacher["Teacher first-signup in ZConnect: enter code ONCE -> principal approves -> roles += 'teacher'"]
+    Principal -->|re-share SAME school inviteCode manually| Parent["Parent first-signup in ZConnect: enter school code ONCE -> joinSchoolAsParent -> roles += 'parent' (NO approval)"]
+    Parent -->|re-share SAME school inviteCode + grade + section manually| Child["Child first-signup in ZKid: enter school code + grade + section ONCE -> joinSchool -> roles += 'child' + class link (NO approval)"]
+    Parent --> ChildLink
+    Child --> ChildLink["children/{uid}.classId set + users/{childUid}.roles = ['child']"]
   end
 
   subgraph DailyFlow ["Daily learning loop"]
@@ -119,9 +120,11 @@ flowchart TD
 | Collection | Written by | Read by |
 |---|---|---|
 | `users/{uid}` | All apps on signup; Functions on role grant | All apps |
-| `schools/{id}` | Admin web; Functions (claim/teacher approve) | Principal, ZConnect, ZKid |
+| `schools/{id}` | Admin web (create + rotate inviteCode); Functions (`approvePrincipal` sets `principalUid`) | Principal, ZConnect, ZKid |
+| `schools/{id}/principals/{principalId}` | Functions (`claimSchool`, `approvePrincipal`, `rejectPrincipal`) | Admin, principal-web |
 | `schools/{id}/classes/{classId}` | Principal web | ZConnect, ZKid, Functions |
 | `schools/{id}/teachers/{teacherId}` | Functions (`requestTeacherJoin`, `approveTeacher`) | Principal, ZConnect |
+| `schools/{id}/parents/{parentId}` | Functions (`joinSchoolAsParent`) | Principal, ZConnect parent UI |
 | `children/{uid}` | ZKid on onboarding; native services | ZConnect parent UI, Functions |
 | `curriculum/{cId}/chapters/.../topics/{tId}` | Import script (admin only) | ZKid, ZConnect, Principal |
 | `studyAssignments/{id}` | Function `assignTopic` (teacher only) | ZKid, ZConnect, Functions |
@@ -136,10 +139,11 @@ flowchart TD
 ZKid  (child role):
   WRITE  children/{ownUid}.currentLocation, locationDiagnostics
   WRITE  events/{ownUid}/*
-  CALL   submitQuizAttempt
+  CALL   joinSchool (first-signup, one-time), submitQuizAttempt
   READ   own assignment + curriculum + reward
 
 ZConnect (parent role):
+  CALL   joinSchoolAsParent (first-signup, one-time)
   READ   children where parentUid == self
   WRITE  apps, schedule on linked child
   READ   quizAttempts, rewardUnlocks for linked child
@@ -155,7 +159,8 @@ Zerebro Campus (principal role):
   READ   classReports + all class quizAttempts in own school
 
 Zerebro Admin (admin role):
-  CRUD   schools, curriculum (via import), rewardCatalog
+  CRUD   schools (incl. inviteCode), curriculum (via import), rewardCatalog
+  CALL   approvePrincipal, rejectPrincipal, rotateInviteCode
   READ   everything
 ```
 
@@ -876,13 +881,13 @@ flowchart TD
 
 **Goal:** Teacher assigns a topic → child reads curated lesson → takes quiz → reward unlocks → parent + teacher see the score.
 
-This is the **biggest phase**. Broken into 7 groups, 38 micro-tasks.
+This is the **biggest phase**. Broken into 7 groups, 45 micro-tasks.
 
 ```mermaid
 flowchart TD
-  P41[Group 4.1 Functions scaffold] --> P42[Group 4.2 Schools + curriculum schema]
+  P41[Group 4.1 Functions scaffold] --> P42[Group 4.2 Schools + curriculum schema + principal onboarding]
   P42 --> P43[Group 4.3 Teacher onboarding]
-  P42 --> P44[Group 4.4 Child + school link]
+  P42 --> P44[Group 4.4 Parent + child school link]
   P43 --> P45[Group 4.5 Assign topic]
   P44 --> P45
   P42 --> P46[Group 4.6 Curated content import]
@@ -911,19 +916,22 @@ flowchart TD
 
 **Acceptance:** Empty secret can be set and read.
 
-### Group P4.2 — Schools + curriculum schema
+### Group P4.2 — Schools + curriculum schema + principal onboarding
 
-#### P4.2.1 — Types: school / class / subject (3h)
+> Principal onboarding lives in this group because it's part of school setup (school exists → principal claims it → principal creates classes). Teacher onboarding is the next group, since it requires an active principal.
+
+#### P4.2.1 — Types: school / class / subject / principal (3h)
 
 **Files touched:**
 - `packages/shared-types/src/education.ts`:
-  - `SchoolDoc` — `name`, `city`, `principalUid`, `teacherCode`
+  - `SchoolDoc` — `name`, `city`, `principalUid` (nullable until verified), `inviteCode`, `inviteCodeRotatedAt`, `teacherCode`
+  - `PrincipalDoc` (subcollection `schools/{id}/principals/{principalId}`) — `userId`, `displayName`, `phone`, `status: 'pending' | 'active' | 'rejected'`, `requestedAt`, `approvedByUid?`, `approvedAt?`, `rejectedReason?`
   - `ClassDoc` — `grade`, `section`, `className`, `academicYear`, `teacherIds[]`, `studentChildUids[]`
   - `SubjectDoc` — `name`, `code`, `curriculumId`, `teacherIds[]`
 
 **Interacts with:** All apps + functions import these.
 
-**Acceptance:** Types compile in all 4 apps.
+**Acceptance:** Types compile in all 4 apps. `SchoolDoc.principalUid` is typed as `string | null` so newly-created schools (pre-claim) typecheck.
 
 #### P4.2.2 — Types: curriculum / chapter / topic (3h)
 
@@ -938,20 +946,113 @@ flowchart TD
 
 **Acceptance:** Types compile.
 
-#### P4.2.3 — Admin-web: create school UI (4h)
+#### P4.2.3 — Admin-web: create school UI + auto-generate inviteCode (4h)
+
+**What you build:** Admin can create a school. The form auto-generates an 8-char `inviteCode` server-side and displays it in the success view, with a copy-to-clipboard button + an explicit reminder to **share it manually** with the principal (SMS / WhatsApp / in-person — no automated send).
 
 **Files touched:**
 - `apps/admin-web/app/schools/page.tsx` — list
-- `apps/admin-web/app/schools/new/page.tsx` — form
-- Server action writes `schools/{id}`
+- `apps/admin-web/app/schools/new/page.tsx` — form (name, city, principal phone hint — phone is optional metadata, NOT used for auto-SMS)
+- `apps/admin-web/app/schools/[id]/page.tsx` — detail view with current `inviteCode` + "Copy" + "Rotate" buttons
+- Server action writes `schools/{id}` with `inviteCode = generateInviteCode()` and `principalUid: null`
 
-**Firestore paths:** `schools/{id}` write
+**Firestore paths:** `schools/{id}` write (also stores `inviteCode`)
 
-**Interacts with:** Phase 4.3 (principal claim flow) uses this school doc.
+**Interacts with:** P4.2.4 (claimSchool) reads `schools` by `inviteCode`.
 
-**Acceptance:** Admin can create a school + see it in list.
+**Acceptance:**
+- Admin creates a school → sees the `inviteCode` in the success page with a Copy button.
+- UI text explicitly says "share this code manually with the principal — we don't auto-send".
+- Detail page shows current code; "Rotate" button calls `rotateInviteCode` (P4.2.4) and replaces the displayed code.
+- Schools list shows status (`pending principal` / `active`).
 
-#### P4.2.4 — Principal-web: create class + subject UI (4h)
+#### P4.2.4 — `claimSchool` + `rotateInviteCode` callables (4h)
+
+**What you build:** Two callables that drive the principal-onboarding state machine.
+
+**Files touched:**
+- `apps/functions/src/callable/claimSchool.ts`
+  - Input: `{ inviteCode: string, displayName: string }`.
+  - Reads `schools` collection where `inviteCode == input.inviteCode` (1 result expected). Rejects with `invalid-argument` if not found.
+  - Rejects with `failed-precondition` if `schools/{id}.principalUid` is already set (school has an active principal).
+  - Idempotent: if the caller already has a `pending` principal doc for this school, returns the existing record instead of writing a duplicate.
+  - Writes `schools/{schoolId}/principals/{principalId}` with `userId: caller.uid`, `phone: caller.phone`, `status: 'pending'`, `requestedAt`.
+- `apps/functions/src/callable/rotateInviteCode.ts`
+  - Admin-only. Generates a fresh `inviteCode`, writes `schools/{id}.inviteCode` + `inviteCodeRotatedAt`.
+  - Pending principal claims keyed by `userId` are NOT invalidated (the approval flow operates on the pending doc, not on the code).
+
+**Firestore paths:**
+- Read: `schools` query where `inviteCode == X`
+- Write: `schools/{id}/principals/{principalId}`, `schools/{id}.inviteCode`
+
+**Acceptance:**
+- Wrong code → `invalid-argument` with a clean message; no Firestore write.
+- Valid code on a school with no active principal → creates pending record; second call from same caller returns the existing record (no duplicate).
+- Valid code on a school WITH active principal → `failed-precondition` ("school already has an active principal — ask admin to rotate the code").
+- Admin rotates code → old code stops working immediately; old pending requests survive and can still be approved.
+
+#### P4.2.5 — Principal-web: claim-school flow + pending screen (4h)
+
+**What you build:** First-time-only onboarding flow on Zerebro Campus that gates the dashboard until the principal is verified.
+
+**Files touched:**
+- `apps/principal-web/app/onboarding/page.tsx` — new claim screen: school code + display name form, calls `claimSchool`.
+- `apps/principal-web/app/onboarding/pending/page.tsx` — "Waiting for admin verification" view that subscribes via `onSnapshot` to `schools/{schoolId}/principals/{principalId}` and auto-redirects to `/dashboard` the moment `status` flips to `'active'`.
+- `apps/principal-web/app/(dashboard)/layout.tsx` — route guard:
+  - If `users/{uid}.roles` includes `'principal'` → render dashboard (normal session).
+  - Else if pending principal record exists → redirect to `/onboarding/pending`.
+  - Else → redirect to `/onboarding`.
+
+**Visibility rule (sticky role):**
+- The onboarding screens MUST NOT mount when `roles[]` already includes `'principal'`. Once verified, the user goes straight to the dashboard on every login.
+
+**Depends on:** P4.2.4
+**Unlocks:** P4.2.6
+
+**Acceptance:**
+- Fresh principal: OTP → `/onboarding` → submit code → `/onboarding/pending` ("Waiting for admin verification").
+- Admin approves on Admin web → pending page auto-flips to `/dashboard` within ~2 seconds (no manual refresh).
+- **Sign out + sign back in after approval:** lands DIRECTLY on `/dashboard` with no code prompt. This is the canonical proof that the role is sticky on the phone number.
+- Wrong code → inline error on the form, no redirect.
+
+#### P4.2.6 — `approvePrincipal` + `rejectPrincipal` callables (3h)
+
+**Files touched:**
+- `apps/functions/src/callable/approvePrincipal.ts`
+  - Input: `{ schoolId: string, principalId: string }`.
+  - Admin-only (caller must have `roles` includes `'admin'`).
+  - Reads `schools/{schoolId}/principals/{principalId}`; rejects with `failed-precondition` if status is not `'pending'` or if `schools/{schoolId}.principalUid` is already set.
+  - In a single Firestore transaction:
+    - `principals/{principalId}.status = 'active'`, `approvedByUid = caller.uid`, `approvedAt = now`.
+    - `schools/{schoolId}.principalUid = principals/{principalId}.userId` (denormalized pointer for fast lookups).
+    - `users/{principalUid}.roles` array-union `'principal'`; if `primaryRole` is empty or not in `roles[]`, set it to `'principal'`.
+- `apps/functions/src/callable/rejectPrincipal.ts`
+  - Sets `principals/{principalId}.status = 'rejected'`, `rejectedReason`. Does NOT touch `users/{uid}.roles`.
+
+**Firestore paths:**
+- Write: `principals/{principalId}`, `schools/{id}.principalUid`, `users/{uid}.roles` (array-union)
+
+**Interacts with:** Principal-web pending screen (P4.2.5) snapshot-flip.
+
+**Acceptance:**
+- Non-admin caller → `permission-denied`.
+- Approve twice → second call → `failed-precondition` ("school already has an active principal").
+- Approve when target `users/{uid}` doc no longer exists → `failed-precondition`.
+- Successful approval: `users/{principalUid}.roles` contains `'principal'`, `schools/{id}.principalUid` is set, pending screen flips.
+- Reject → status becomes `'rejected'`, principal sees the onboarding gate again on next login and can request a fresh code from the admin.
+
+#### P4.2.7 — Admin-web: approve / reject principals page (3h)
+
+**Files touched:**
+- `apps/admin-web/app/principals/page.tsx` — list pending principal claims across all schools.
+- `apps/admin-web/app/principals/[id]/page.tsx` — detail view: school name, principal phone + displayName, requested time. "Approve" / "Reject (with reason)" buttons calling P4.2.6 callables.
+
+**Acceptance:**
+- Pending principal appears in the list within seconds of `claimSchool` being called.
+- Approve removes from "pending" list, surfaces in "active" list (filtered).
+- Reject removes from pending; the principal's `users/{uid}.roles` is untouched and they can re-claim with a fresh code.
+
+#### P4.2.8 — Principal-web: create class + subject UI (4h)
 
 **Files touched:**
 - `apps/principal-web/app/classes/page.tsx` — list classes for own school
@@ -962,18 +1063,59 @@ flowchart TD
 - `schools/{schoolId}/classes/{classId}` write
 - `schools/{schoolId}/classes/{classId}/subjects/{subjectId}` write
 
+**Depends on:** P4.2.6 (principal must be verified before creating classes — rules enforce this)
 **Interacts with:** Teacher (P4.3) gets assigned to classes; child onboarding (P4.4) joins a class.
 
 **Acceptance:** Principal creates 2 classes + 3 subjects per class.
 
-#### P4.2.5 — Seed script (sample school + classes) (2h)
+#### P4.2.9 — Seed script (sample school + verified principal + classes) (2h)
 
 **Files touched:**
-- `scripts/seed-staging.ts` — creates `Demo School`, Class 8A, Class 8B, Science + Maths
+- `scripts/seed-staging.ts` — creates `Demo School`, auto-approves a "Demo Principal" test user (skips the claim+approve UI by writing directly via Admin SDK), Class 8A, Class 8B, Science + Maths
 
-**Acceptance:** Running on emulator populates staging.
+**Acceptance:** Running on emulator populates staging with a fully-onboarded principal + classes, so other Phase 4 tasks (teacher onboarding, assign topic) have working fixtures without needing the manual claim flow.
 
 ### Group P4.3 — Teacher onboarding
+
+**Full flow (locked):**
+
+1. **Principal generates the code** inside Zerebro Campus (`rotateTeacherCode` callable, P4.3.1 / P4.3.2). The code is stored at `schools/{id}.teacherCode`.
+2. **Principal shares the code MANUALLY** with the teacher — WhatsApp, SMS, in person, whatever the principal prefers. **There is no automated SMS callable on our side**; Firebase Phone Auth is the only place we send OTPs. Keeping the hand-off manual lets the principal vet the recipient and avoids extra SMS provider plumbing.
+3. **Teacher signs up in ZConnect for the first time.** OTP login creates `users/{uid}` with `roles: []`. The signup screen (P4.3.0) asks "Are you a parent or a teacher?" — picking "teacher" routes to the teacher-code screen (P4.3.4), which calls `requestTeacherJoin` (P4.3.3).
+4. **Pending state.** `schools/{schoolId}/teachers/{teacherId}` is written with `status: 'pending'`, `userId: caller.uid`. ZConnect shows "Waiting for principal approval" while it listens on this doc.
+5. **Principal approves** (P4.3.5 UI → `approveTeacher` callable, P4.3.6). The callable writes `teachers/{teacherId}.status = 'active'` AND APPENDS `'teacher'` to `users/{teacherUid}.roles[]` (append, not replace — important for parent-teachers).
+6. **ZConnect auto-routes.** The teacher's onSnapshot listener picks up the new `roles[]`, the runtime repair effect snaps `primaryRole` to `'teacher'` (if single-role), and TeacherNavigator mounts. **No sign-out required.**
+7. **Every later login is plain OTP — NO code prompt.** The teacher's phone number is permanently bound to `roles: ['teacher']`. On future logins, `users/{uid}` resolves with `roles[]` already populated, so the role-intent picker (P4.3.0) and the teacher-code screen (P4.3.4) are both skipped — ZConnect routes straight to teacher home.
+
+**Why "manual" + "one-time"?**
+- **Manual** avoids a backend SMS provider beyond Firebase Phone Auth, and gives the principal full control over who gets a code.
+- **One-time** because `roles[]` is server-side state on the `users/{uid}` doc; once `'teacher'` is in the array, the teacher's phone is permanently a teacher account. Re-prompting for a code on every login would be both unnecessary and bad UX.
+
+**Edge cases (encoded in callables / UI):**
+- Code rotated between signup and approval → pending request is keyed by `teachers/{teacherId}.userId`, not by the code. Approval still works against the doc.
+- Principal rejects the request → `teachers/{teacherId}.status = 'rejected'`, `users/{uid}.roles` stays `[]`, ZConnect shows the onboarding gate again so the teacher can request a fresh code.
+- Existing parent gets approved as teacher → `approveTeacher` does an array-union, ending with `roles: ['parent', 'teacher']`. RoleSwitcher (P3.3) appears on next render.
+
+#### P4.3.0 — ZConnect: role-intent picker on first signup (3h)
+
+**What you build:** Replace ZConnect's hard-coded `role: 'parent'` signup with a first-screen intent picker shown only when the user has no role yet.
+
+**Files touched:**
+- `apps/guardian/src/navigation/AuthNavigator.tsx` — drop `initialParams={{role: 'parent'}}` hard-code; route to a new `RoleIntentScreen` for OTP-fresh users
+- `apps/guardian/src/screens/auth/RoleIntentScreen.tsx` — two big buttons: "I'm a parent" / "I'm a teacher"
+- `apps/guardian/src/screens/auth/RoleOnboardingGate.tsx` — becomes intent-aware: shows the intent picker if `roles: []` AND no intent stored yet
+
+**Firestore paths:**
+- No writes from this screen alone. Parent path calls existing parent signup flow; teacher path opens P4.3.4's code screen.
+
+**Depends on:** P3.3.3 (onboarding gate exists)
+**Unlocks:** P4.3.4
+
+**Acceptance:**
+- Fresh OTP login with `users/{uid}.roles = []` shows the picker.
+- Tap "parent" → existing parent signup path (or just stamps `primaryRole: 'parent'` as a hint until they pair a child).
+- Tap "teacher" → opens P4.3.4 teacher code screen.
+- A signed-in user whose `roles[]` already contains `parent` or `teacher` **never** sees this screen.
 
 #### P4.3.1 — `rotateTeacherCode` callable (3h)
 
@@ -986,93 +1128,185 @@ flowchart TD
 - Reads: caller must be principal of the school
 - Writes: `schools/{id}.teacherCode`, `teacherCodeRotatedAt`
 
-**Acceptance:** Returns new code; non-principal call rejected.
+**Acceptance:** Returns new code; non-principal call rejected. Rotation does NOT cancel pending `teachers/*.status = 'pending'` requests (those are keyed by `userId`, not by the code itself).
 
 #### P4.3.2 — Principal-web: teacher code button (3h)
 
 **Files touched:**
-- `apps/principal-web/app/teachers/code/page.tsx` — shows current code + "Rotate" button
+- `apps/principal-web/app/teachers/code/page.tsx` — shows current code + "Rotate" button + copy-to-clipboard helper so the principal can paste it straight into WhatsApp / SMS
 - Calls `rotateTeacherCode`
 
-**Acceptance:** Click rotate → new code displayed.
+**Acceptance:** Click rotate → new code displayed; copy button puts the code on the clipboard. UI text reminds the principal to share the code manually (not auto-sent).
 
 #### P4.3.3 — `requestTeacherJoin` callable (3h)
 
 **Files touched:**
 - `apps/functions/src/callable/requestTeacherJoin.ts` — input `{ teacherCode, displayName }`
 - Looks up school by `teacherCode`
-- Writes `schools/{schoolId}/teachers/{teacherId}` with `status: 'pending'`, `userId: caller.uid`
+- Writes `schools/{schoolId}/teachers/{teacherId}` with `status: 'pending'`, `userId: caller.uid`, `requestedAt`
 
 **Firestore paths:**
 - Read: `schools/*` query where `teacherCode == X`
 - Write: `schools/{id}/teachers/{teacherId}`
 
-**Acceptance:** Wrong code rejected; valid code creates pending record.
+**Acceptance:** Wrong code rejected with `invalid-argument`; valid code creates pending record. Same caller submitting twice produces ONE pending record (idempotent on `userId`).
 
-#### P4.3.4 — ZConnect: "I am a teacher" entry (3h)
+#### P4.3.4 — ZConnect: teacher-code entry + pending screen (3h)
+
+**What you build:** First-time-only teacher-code entry screen reached from P4.3.0's intent picker, plus the "waiting for approval" view.
 
 **Files touched:**
-- `apps/guardian/src/screens/teacher/JoinScreen.tsx`
-- Form: teacher code + display name
-- Calls `requestTeacherJoin`
-- Polls own pending status
+- `apps/guardian/src/screens/teacher/JoinScreen.tsx` — single form: teacher code + display name; submits via `requestTeacherJoin`
+- After submit, the same screen swaps to a "Waiting for principal approval" status that subscribes to `schools/{schoolId}/teachers/{teacherId}` so it can flip the moment the principal approves (no manual refresh)
 
-**Acceptance:** Pending state shows "Waiting for principal approval".
+**Visibility rule:**
+- Reachable ONLY when `roles: []` AND user picked "teacher" intent.
+- If `roles[]` already contains `'teacher'`, this screen MUST NOT mount — the user goes straight to TeacherNavigator. The route guard in `RootNavigator` handles this; the screen itself shouldn't be reachable from the regular navigator stack.
+
+**Depends on:** P4.3.0, P4.3.3
+**Unlocks:** P4.3.6 (the approve callable is what flips this screen)
+
+**Acceptance:**
+- First-time teacher: enters code, submits, sees "Waiting…" message.
+- When principal approves on the web, the screen auto-transitions to TeacherNavigator within ~2 seconds via the snapshot listener.
+- **Re-test sign-out / sign-in after approval:** the teacher's next OTP login skips this screen entirely and lands on TeacherNavigator directly. No code is asked for, ever again.
 
 #### P4.3.5 — Principal-web: approve/reject teachers (3h)
 
 **Files touched:**
-- `apps/principal-web/app/teachers/page.tsx` — list `status: 'pending'`
-- Approve button calls `approveTeacher`
+- `apps/principal-web/app/teachers/page.tsx` — list `status: 'pending'` for the principal's school
+- Approve / Reject buttons. Approve calls `approveTeacher`; Reject calls `rejectTeacher` (sets `status: 'rejected'`).
+
+**Acceptance:** Approving a pending teacher removes them from the "pending" list and adds them to the "active" list within 1 second.
 
 #### P4.3.6 — `approveTeacher` callable (3h)
 
 **Files touched:**
 - `apps/functions/src/callable/approveTeacher.ts`
-- Updates `schools/{id}/teachers/{teacherId}.status = 'active'`
-- Adds `'teacher'` to `users/{teacherUid}.roles`
+- Updates `schools/{id}/teachers/{teacherId}.status = 'active'`, sets `approvedByUid`, `joinedAt`
+- **Array-union** `'teacher'` into `users/{teacherUid}.roles` (`FieldValue.arrayUnion('teacher')` — never overwrite, so parent-teachers keep their parent role)
+- If `users/{teacherUid}.primaryRole` is empty OR not in the resulting `roles[]`, set it to `'teacher'`
 
 **Firestore paths:**
-- Write: `users/{uid}.roles += 'teacher'`
-- Write: teacher doc status
+- Write: `users/{uid}.roles` (array-union), optionally `primaryRole`
+- Write: teacher doc status fields
 
 **Interacts with:** Triggers ZConnect role switcher to show teacher mode (P3.3).
 
-**Acceptance:** After approval, teacher's ZConnect home unlocks teacher tab.
+**Acceptance:**
+- After approval, teacher's ZConnect ParentNavigator (if applicable) and "Waiting for approval" screen both flip to TeacherNavigator within ~2 seconds.
+- Existing `roles: ['parent']` becomes `roles: ['parent', 'teacher']`; RoleSwitcher pill appears on next render.
+- **Sign out + sign back in on the teacher's phone → lands DIRECTLY on TeacherNavigator with no code prompt and no waiting screen.** This is the canonical proof that the role is sticky on the phone number.
+- Approving a teacher whose `users/{uid}` doc has been deleted between request and approval returns `failed-precondition` instead of silently creating a doc.
 
-### Group P4.4 — Child + school link
+### Group P4.4 — Parent + child school link
 
-#### P4.4.1 — ZKid: school code + grade + section step (4h)
+> **Design intent (locked):** Both parent and child join their school by submitting the **same school `inviteCode`** the principal received from the admin (§6.1 of the tech spec). The principal re-shares this code manually with each parent; the parent re-shares it with their child(ren). **There is no approval gate** for parent or child — if the code is valid, the role is granted by the callable in the same transaction that links them to the school. Both codes are **one-time at first signup**; future logins are plain OTP with no code prompt.
+
+#### P4.4.1 — ZConnect: parent school-code entry (first-signup only) (3h)
+
+**What you build:** New onboarding screen on ZConnect for the "parent" branch of the role-intent picker (P4.3.0). Mounted ONLY when `users/{uid}.roles` does not yet include `'parent'`.
 
 **Files touched:**
-- `apps/kids/src/screens/child/onboarding/SchoolStep.tsx` — new step after pairing
-- Inputs: school code, grade, section
-- Calls `joinSchool` callable
+- `apps/guardian/src/screens/parent/JoinSchoolScreen.tsx` — single form: school code + display name; submits via `joinSchoolAsParent`.
+- `apps/guardian/src/navigation/RootNavigator.tsx` — route guard: if user picked "parent" intent AND `roles[]` is empty, mount `JoinSchoolScreen`; once `roles` includes `'parent'`, go straight to `ParentNavigator`.
 
-**Acceptance:** Step shown after pairing; cannot skip.
+**Visibility rule (sticky role):**
+- This screen MUST NOT mount when `roles[]` already includes `'parent'`. Future logins skip it entirely.
 
-#### P4.4.2 — `joinSchool` callable (3h)
+**Depends on:** P4.3.0 (role-intent picker), P4.4.2 (callable)
+**Unlocks:** P4.4.5 (class roster view will list these parents)
+
+**Acceptance:**
+- First-time parent: pick "I'm a parent" → see school code screen → submit valid code → land on ParentNavigator within ~1 second.
+- Wrong code → inline error, no redirect, no Firestore write.
+- **Sign out + sign back in:** lands DIRECTLY on ParentNavigator with no code prompt. Canonical proof the role is sticky on the phone number.
+- Parent who already has `roles: ['parent']` and tries to deep-link this screen → router redirects to ParentNavigator.
+
+#### P4.4.2 — `joinSchoolAsParent` callable (3h)
+
+**What you build:** Callable that validates the school `inviteCode` and immediately grants `roles: ['parent']`. No pending state, no approval flow.
+
+**Files touched:**
+- `apps/functions/src/callable/joinSchoolAsParent.ts`
+  - Input: `{ inviteCode: string, displayName: string }`.
+  - Reads `schools` where `inviteCode == input.inviteCode`. Rejects with `invalid-argument` if not found.
+  - Rejects with `failed-precondition` if the school has no active principal yet (`schools/{id}.principalUid == null`) — a school that isn't fully set up can't accept parents.
+  - In a single transaction:
+    - Writes `schools/{schoolId}/parents/{parentId}` with `userId: caller.uid`, `phone: caller.phone`, `displayName`, `joinedAt`.
+    - `users/{caller.uid}.roles` array-union `'parent'`.
+    - `users/{caller.uid}.schoolIds` array-union `schoolId`.
+    - Sets `primaryRole: 'parent'` if it was empty / not in `roles[]`.
+  - Idempotent: if caller already has `roles` containing `'parent'` AND `schoolIds` containing `schoolId`, returns success without writing anything.
+
+**Firestore paths:**
+- Read: `schools` query where `inviteCode == X`
+- Write: `schools/{id}/parents/{parentId}`, `users/{uid}.roles`, `users/{uid}.schoolIds`
+
+**Acceptance:**
+- Wrong code → `invalid-argument`, no writes.
+- Valid code on a school without a principal yet → `failed-precondition`.
+- Valid code, first call → role + schoolId + parent doc written; client snapshot fires within ~2 seconds.
+- Valid code, second call from same caller → no-op success (idempotent).
+- Parent joining a SECOND school later → schoolId array-unions, `roles[]` already has `'parent'` so no change there.
+
+#### P4.4.3 — ZKid: school code + grade + section step (first-signup only) (4h)
+
+**What you build:** Extend the existing ZKid onboarding wizard to add a "school link" step after pairing-with-parent. Mounted ONLY when `users/{uid}.roles` does not yet include `'child'`.
+
+**Files touched:**
+- `apps/kids/src/screens/child/onboarding/SchoolStep.tsx` — new step after pairing; form: school code + grade + section; submits via `joinSchool`.
+- `apps/kids/src/navigation/RootNavigator.tsx` — route guard: if `users/{uid}.roles` lacks `'child'` and child is paired but not yet school-linked, mount this step. Once `roles` includes `'child'`, skip.
+
+**Visibility rule (sticky role):**
+- This screen MUST NOT mount when `roles[]` already includes `'child'`. Future logins skip it entirely.
+
+**Depends on:** P4.4.4 (callable)
+
+**Acceptance:**
+- First-time child after pairing → sees school step → submits valid code + grade + section → lands on ZKid home within ~2 seconds.
+- Wrong code → inline error, can retry.
+- Class not yet created at school → friendly error "ask your school to add Class {grade}{section}", child can retry once principal creates it.
+- **Sign out + sign back in:** lands DIRECTLY on ZKid home — no pairing prompt, no school step, no code.
+
+#### P4.4.4 — `joinSchool` callable (3h)
+
+**What you build:** Callable that validates code + grade + section, links the child to the class roster, AND grants `roles: ['child']` in a single transaction.
 
 **Files touched:**
 - `apps/functions/src/callable/joinSchool.ts`
-- Validates school exists, finds class by grade+section
-- Writes `children/{childUid}.classId = {schoolId, classId}`
-- Adds `childUid` to `classes/{classId}.studentChildUids[]`
+  - Input: `{ inviteCode: string, grade: number, section: string }`.
+  - Reads `schools` where `inviteCode == input.inviteCode`. Rejects with `invalid-argument` if not found.
+  - Reads `schools/{schoolId}/classes` where `grade == input.grade AND section == input.section`. Rejects with `failed-precondition` if not found.
+  - Rejects with `failed-precondition` if `children/{caller.uid}` doesn't exist (caller hasn't paired with a parent yet).
+  - In a single transaction:
+    - Writes `children/{caller.uid}.classId = { schoolId, classId }`.
+    - Array-unions `caller.uid` into `schools/{schoolId}/classes/{classId}.studentChildUids[]`.
+    - `users/{caller.uid}.roles` array-union `'child'`.
+    - `users/{caller.uid}.schoolIds` array-union `schoolId`.
+    - Sets `primaryRole: 'child'` if it was empty / not in `roles[]`.
+  - Idempotent: if child already has `roles` containing `'child'` AND `classId` set to the same school+class, returns success without writing.
 
 **Firestore paths:**
-- Read: `schools/{id}/classes/*` query
-- Write: `children/{uid}.classId`, `classes/*.studentChildUids[]`
+- Read: `schools` (by inviteCode), `schools/{id}/classes` (by grade+section)
+- Write: `children/{uid}.classId`, `classes/*.studentChildUids[]`, `users/{uid}.roles`, `users/{uid}.schoolIds`
 
-**Interacts with:** Teacher (P4.3) can now see this child in class.
+**Interacts with:** Teacher (P4.3) sees this child in class roster; principal (P4.4.5) sees them in class detail.
 
-**Acceptance:** Class roster updates with child name.
+**Acceptance:**
+- Wrong code → `invalid-argument`.
+- Valid code, missing class → `failed-precondition` with a friendly message.
+- Unpaired child → `failed-precondition`.
+- Successful join → all 4 writes happen atomically; class roster shows child name within seconds.
+- Second call from same child (same school + class) → idempotent no-op success.
 
-#### P4.4.3 — Principal-web: class roster view (3h)
+#### P4.4.5 — Principal-web: class roster + parent roster view (3h)
 
 **Files touched:**
-- `apps/principal-web/app/classes/[id]/page.tsx` — show child list
+- `apps/principal-web/app/classes/[id]/page.tsx` — show child list (existing scope) + add a "Parents linked to this class" section that joins `children.parentUid` → `users` for display names + phones.
+- `apps/principal-web/app/parents/page.tsx` — list all parents in this principal's school via `schools/{schoolId}/parents/*`.
 
-**Acceptance:** Principal sees 1 child after onboarding completes.
+**Acceptance:** Principal sees 1 child + 1 parent after one parent+child completes onboarding. Updates within ~2 seconds of each `joinSchool*` call.
 
 ### Group P4.5 — Assign topic
 
@@ -1584,7 +1818,7 @@ Phase: Phase 4 — Education MVP
 Group: P4.5 — Assign topic
 Owner: <dev>
 Estimate: 4h
-Depends on: P4.2.4, P4.3.6, P3.4.2
+Depends on: P4.2.8, P4.3.6, P3.4.2
 
 Scope:
 - Function `assignTopic` in apps/functions/src/callable/

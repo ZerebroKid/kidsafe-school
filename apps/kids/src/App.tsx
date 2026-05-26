@@ -22,10 +22,13 @@ import {colors} from './theme';
  */
 export default function App() {
   const uid = useAuthStore(s => s.firebaseUid);
-  const role = useAuthStore(s => s.userDoc?.role);
+  // P3.2.3: read primaryRole instead of v1 `role`. The auth store sets the
+  // normalised UserDoc (via getUserDoc / normaliseUserDoc) so primaryRole is
+  // always populated even for un-migrated docs.
+  const primaryRole = useAuthStore(s => s.userDoc?.primaryRole);
 
   useEffect(() => {
-    if (!uid || role !== 'child') {
+    if (!uid || primaryRole !== 'child') {
       return;
     }
     registerForPush(uid);
@@ -35,7 +38,7 @@ export default function App() {
       unsub();
       stopChildSyncEngine();
     };
-  }, [uid, role]);
+  }, [uid, primaryRole]);
 
   return (
     <GestureHandlerRootView style={{flex: 1, backgroundColor: colors.bg}}>

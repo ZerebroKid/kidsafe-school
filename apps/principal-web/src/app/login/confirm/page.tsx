@@ -3,8 +3,7 @@
 import {useRouter} from 'next/navigation';
 import {useCallback, useEffect, useState} from 'react';
 import {PhoneAuthProvider, signInWithCredential} from 'firebase/auth';
-import {doc, serverTimestamp, setDoc} from 'firebase/firestore';
-import {getAuthInstance, getFirestoreInstance} from '@zerebro/shared-firebase';
+import {getAuthInstance, upsertWebUserDoc} from '@zerebro/shared-firebase';
 
 /*
  * OTP confirm screen for Zerebro Campus. The send screen (page.tsx in this
@@ -12,10 +11,15 @@ import {getAuthInstance, getFirestoreInstance} from '@zerebro/shared-firebase';
  * reconstruct a PhoneAuthCredential here because ConfirmationResult itself
  * is non-serialisable and would not survive a route change.
  *
- * On a successful sign-in we upsert `users/{uid}` with the v2 shape
- * (roles: [], phone, createdAt) -- Firestore security rules support both
- * the v1 (role + email) and v2 (roles + phone|email) shapes side-by-side
- * during the transition; phase 3 retires the v1 branch.
+ * On a successful sign-in we upsert `users/{uid}` via the shared
+ * `upsertWebUserDoc` helper which writes the v2 shape:
+ *   {phone, roles: [], primaryRole: 'principal', createdAt}
+ *
+ * Empty `roles[]` is intentional: a fresh phone-OTP signup is just an
+ * unverified phone number until an admin grants the principal role
+ * (P4.3 invite flow). The dashboard layout's guard reads `hasRole(...)`
+ * to decide whether to show the principal UI or an "awaiting approval"
+ * placeholder.
  */
 
 const SESSION_KEYS = {
@@ -55,11 +59,10 @@ export default function CampusOtpConfirmPage() {
       try {
         const credential = PhoneAuthProvider.credential(verificationId, code);
         const userCred = await signInWithCredential(getAuthInstance(), credential);
-        await setDoc(
-          doc(getFirestoreInstance(), 'users', userCred.user.uid),
-          {phone, roles: [], createdAt: serverTimestamp()},
-          {merge: true},
-        );
+        await upsertWebUserDoc(userCred.user.uid, {
+          phone,
+          defaultRole: 'principal',
+        });
         sessionStorage.removeItem(SESSION_KEYS.verificationId);
         sessionStorage.removeItem(SESSION_KEYS.phone);
         router.replace('/dashboard');
