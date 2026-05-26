@@ -90,6 +90,8 @@ function printHelp(): void {
   );
 }
 
+const DEFAULT_PROJECT_ID = 'kidsafe-e5eac';
+
 function initAdmin(flags: Flags): Firestore {
   if (flags.target === 'emulator') {
     // Admin SDK auto-detects FIRESTORE_EMULATOR_HOST; default it for convenience
@@ -97,9 +99,9 @@ function initAdmin(flags: Flags): Firestore {
     if (!process.env.FIRESTORE_EMULATOR_HOST) {
       process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
     }
-    initializeApp({projectId: flags.project ?? 'kidsafe-e5eac'});
+    initializeApp({projectId: flags.project ?? DEFAULT_PROJECT_ID});
     console.log(
-      `[init] emulator @ ${process.env.FIRESTORE_EMULATOR_HOST} project=${flags.project ?? 'kidsafe-e5eac'}`,
+      `[init] emulator @ ${process.env.FIRESTORE_EMULATOR_HOST} project=${flags.project ?? DEFAULT_PROJECT_ID}`,
     );
   } else {
     // prod: prefer GOOGLE_APPLICATION_CREDENTIALS service-account JSON if set,
@@ -111,19 +113,68 @@ function initAdmin(flags: Flags): Firestore {
       const serviceAccount = JSON.parse(fs.readFileSync(credPath, 'utf8'));
       initializeApp({
         credential: cert(serviceAccount),
-        projectId: flags.project ?? serviceAccount.project_id,
+        projectId: flags.project ?? serviceAccount.project_id ?? DEFAULT_PROJECT_ID,
       });
       console.log(
-        `[init] prod via service account ${credPath} project=${flags.project ?? serviceAccount.project_id}`,
+        `[init] prod via service account ${credPath} project=${flags.project ?? serviceAccount.project_id ?? DEFAULT_PROJECT_ID}`,
       );
     } else {
-      initializeApp({credential: applicationDefault(), projectId: flags.project});
-      console.log(
-        `[init] prod via application-default-credentials project=${flags.project ?? '(from ADC)'}`,
-      );
+      // ADC path: prefer the explicit --project flag, then GCLOUD/GOOGLE_CLOUD_PROJECT
+      // env vars, and finally hard-default to the only project in .firebaserc so the
+      // user gets a credentials error instead of a confusing 'no project id' one.
+      const projectId =
+        flags.project ??
+        process.env.GOOGLE_CLOUD_PROJECT ??
+        process.env.GCLOUD_PROJECT ??
+        DEFAULT_PROJECT_ID;
+      preflightAdcCredentials();
+      initializeApp({credential: applicationDefault(), projectId});
+      console.log(`[init] prod via application-default-credentials project=${projectId}`);
     }
   }
   return getFirestore();
+}
+
+/**
+ * Fail fast with an actionable message if neither GOOGLE_APPLICATION_CREDENTIALS
+ * nor a working ADC file exists. The Admin SDK's own error ('Unable to detect a
+ * Project Id') hides the real cause (no credentials) and confuses users.
+ */
+function preflightAdcCredentials(): void {
+  const fs = require('fs') as typeof import('fs');
+  const path = require('path') as typeof import('path');
+  const adcPath = path.join(
+    process.env.HOME ?? '',
+    '.config',
+    'gcloud',
+    'application_default_credentials.json',
+  );
+  if (fs.existsSync(adcPath)) return;
+  // No service-account JSON either (we already know GOOGLE_APPLICATION_CREDENTIALS is unset).
+  console.error(
+    [
+      '',
+      '[fatal] No prod credentials found.',
+      '',
+      'Pick ONE of the following before re-running with --target=prod:',
+      '',
+      '  A) Service account JSON (recommended, no system install):',
+      '     1. Firebase Console -> Project settings -> Service accounts ->',
+      `        Generate new private key for ${DEFAULT_PROJECT_ID}.`,
+      '     2. Save the file outside the repo, e.g. ~/.zerebro/kidsafe-admin.json',
+      '     3. Export:',
+      '          export GOOGLE_APPLICATION_CREDENTIALS=~/.zerebro/kidsafe-admin.json',
+      '',
+      '  B) gcloud Application Default Credentials:',
+      '     sudo snap install google-cloud-cli   # Ubuntu',
+      '     gcloud auth application-default login',
+      `     gcloud config set project ${DEFAULT_PROJECT_ID}`,
+      '',
+      'See apps/functions/README.md (P3.1.3 -> Production pass) for full notes.',
+      '',
+    ].join('\n'),
+  );
+  process.exit(1);
 }
 
 function isKnownRole(v: unknown): v is Role {
