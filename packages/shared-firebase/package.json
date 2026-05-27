@@ -12,7 +12,12 @@
       "default": "./src/index.web.ts"
     },
     "./auth": "./src/auth.ts",
-    "./firestore": "./src/firestore.ts"
+    "./firestore": "./src/firestore.ts",
+    "./callable": {
+      "react-native": "./src/callable.native.ts",
+      "browser": "./src/callable.web.ts",
+      "default": "./src/callable.web.ts"
+    }
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -24,6 +29,7 @@
   "peerDependencies": {
     "@react-native-firebase/auth": "^21.0.0",
     "@react-native-firebase/firestore": "^21.0.0",
+    "@react-native-firebase/functions": "^21.0.0",
     "@react-native-google-signin/google-signin": "^13.0.0",
     "firebase": "^12.0.0",
     "react-native": ">=0.76.0"
@@ -31,6 +37,7 @@
   "peerDependenciesMeta": {
     "@react-native-firebase/auth": {"optional": true},
     "@react-native-firebase/firestore": {"optional": true},
+    "@react-native-firebase/functions": {"optional": true},
     "@react-native-google-signin/google-signin": {"optional": true},
     "firebase": {"optional": true},
     "react-native": {"optional": true}
@@ -38,6 +45,7 @@
   "devDependencies": {
     "@react-native-firebase/auth": "^21.6.1",
     "@react-native-firebase/firestore": "^21.6.1",
+    "@react-native-firebase/functions": "^21.6.1",
     "@react-native-google-signin/google-signin": "^13.1.0",
     "typescript": "^5.5.0"
   }

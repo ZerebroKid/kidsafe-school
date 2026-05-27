@@ -23,6 +23,22 @@
         {"fieldPath": "userId", "order": "ASCENDING"},
         {"fieldPath": "status", "order": "ASCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "teachers",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "userId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "teachers",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "requestedAt", "order": "ASCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

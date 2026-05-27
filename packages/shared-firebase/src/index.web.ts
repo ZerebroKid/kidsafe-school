@@ -181,19 +181,22 @@ export async function getCurrentUserDoc(uid: string): Promise<UserDoc | null> {
 /**
  * v1 -> v2 normaliser. Pure function, shared between web reads and the OTP
  * confirm pages so they can fix orphan docs on first read.
+ *
+ * P4.3 -- preserve roles=[] end-to-end. See the matching comment in
+ * packages/shared-firebase/src/auth.ts. The previous `['parent']` fallback
+ * silently denied the role-intent picker to web users with empty roles
+ * (e.g. a fresh Campus phone-OTP signup before the principal claim is
+ * filed). primaryRole keeps a 'parent' placeholder because the type is
+ * non-optional; gates upstream check `roles.length === 0` before reading it.
  */
 export function normaliseUserDoc(raw: Partial<UserDoc>): UserDoc {
   const rolesIn = Array.isArray(raw.roles) ? raw.roles : [];
-  const roles =
-    rolesIn.length > 0
-      ? rolesIn
-      : raw.role
-        ? [raw.role]
-        : ([] as Role[]);
+  const roles: Role[] =
+    rolesIn.length > 0 ? rolesIn : raw.role ? [raw.role] : ([] as Role[]);
   const primaryRole: Role = raw.primaryRole ?? roles[0] ?? 'parent';
   return {
     ...raw,
-    roles: roles.length > 0 ? roles : ['parent'],
+    roles,
     primaryRole,
     createdAt: raw.createdAt ?? 0,
   };

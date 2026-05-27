@@ -85,6 +85,9 @@ importers:
       '@react-native-firebase/firestore':
         specifier: ^21.6.1
         version: 21.14.0(@react-native-firebase/app@21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1))(react@18.3.1))
+      '@react-native-firebase/functions':
+        specifier: ^21.6.1
+        version: 21.14.0(@react-native-firebase/app@21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1))(react@18.3.1))
       '@react-native-firebase/messaging':
         specifier: ^21.6.1
         version: 21.14.0(@react-native-firebase/app@21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1))(react@18.3.1))
@@ -402,6 +405,9 @@ importers:
         specifier: ^21.6.1
         version: 21.14.0(@react-native-firebase/app@21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4))(react@19.2.4))
       '@react-native-firebase/firestore':
+        specifier: ^21.6.1
+        version: 21.14.0(@react-native-firebase/app@21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4))(react@19.2.4))
+      '@react-native-firebase/functions':
         specifier: ^21.6.1
         version: 21.14.0(@react-native-firebase/app@21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4))(react@19.2.4))
       '@react-native-google-signin/google-signin':
@@ -2032,6 +2038,11 @@ packages:
 
   '@react-native-firebase/firestore@21.14.0':
     resolution: {integrity: sha512-nk8i4le8uQeydRo1JymUCUOWprVK8FUlgtjG0ZG3ne7qt7NvmzgoK59KGwP+G5e8th2wWgACDHmvRrQK6ctXlA==}
+    peerDependencies:
+      '@react-native-firebase/app': 21.14.0
+
+  '@react-native-firebase/functions@21.14.0':
+    resolution: {integrity: sha512-7GGyYfMmsDL+GCdiMPG6duZnV5+Prm372C+N5/RRL6qCn1ZBM2agw9DBIw2L/0Vs1nxFSDGqSCBWqCaBPUlGiQ==}
     peerDependencies:
       '@react-native-firebase/app': 21.14.0
 
@@ -7544,6 +7555,14 @@ snapshots:
     dependencies:
       '@react-native-firebase/app': 21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4))(react@19.2.4)
 
+  '@react-native-firebase/functions@21.14.0(@react-native-firebase/app@21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1))(react@18.3.1))':
+    dependencies:
+      '@react-native-firebase/app': 21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1))(react@18.3.1)
+
+  '@react-native-firebase/functions@21.14.0(@react-native-firebase/app@21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4))(react@19.2.4))':
+    dependencies:
+      '@react-native-firebase/app': 21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@19.2.4))(react@19.2.4)
+
   '@react-native-firebase/messaging@21.14.0(@react-native-firebase/app@21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1))(react@18.3.1))':
     dependencies:
       '@react-native-firebase/app': 21.14.0(@react-native-async-storage/async-storage@2.2.0(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1)))(react-native@0.76.5(@babel/core@7.29.7)(@babel/preset-env@7.29.7(@babel/core@7.29.7))(@react-native-community/cli-server-api@15.0.1)(@types/react@18.3.29)(react@18.3.1))(react@18.3.1)
@@ -7706,7 +7725,9 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.5': {}
 

@@ -27,11 +27,22 @@ const DEMO_ADMIN_PHONE = '+919999900001';
 const DEMO_ADMIN_NAME = 'Demo Admin';
 const DEMO_PRINCIPAL_PHONE = '+919999900002';
 const DEMO_PRINCIPAL_NAME = 'Demo Principal';
+// P4.3 -- third demo user is a TEACHER whose join request is already pending.
+// roles=[] on the user doc so ZConnect's RoleOnboardingGate routes them to
+// the intent picker on first sign-in; the pending teacher subcollection doc
+// then drives the "Waiting for principal approval" screen via the
+// collectionGroup('teachers') listener.
+const DEMO_TEACHER_PHONE = '+919999900003';
+const DEMO_TEACHER_NAME = 'Demo Teacher';
 
 const DEMO_SCHOOL_ID = 'demo_school_001';
 const DEMO_SCHOOL_NAME = 'Demo Public School';
 const DEMO_SCHOOL_CITY = 'Mumbai';
 const DEMO_INVITE_CODE = 'DEMO2026';
+// teacherCode mirrors the shape rotateTeacherCode would emit (6-char,
+// A-Z+2-9 minus ambiguous chars). Hard-coded for predictable manual demos
+// -- a real principal would rotate this to randomise it before sharing.
+const DEMO_TEACHER_CODE = 'TEACH7';
 
 const CLASSES: Array<{
   id: string;
@@ -77,6 +88,12 @@ async function main(): Promise<void> {
     DEMO_PRINCIPAL_NAME,
     flags.apply,
   );
+  const teacherUid = await ensureUser(
+    auth,
+    DEMO_TEACHER_PHONE,
+    DEMO_TEACHER_NAME,
+    flags.apply,
+  );
 
   await ensureUserDoc(db, adminUid, DEMO_ADMIN_PHONE, 'admin', flags.apply);
   await ensureUserDoc(
@@ -86,6 +103,12 @@ async function main(): Promise<void> {
     'principal',
     flags.apply,
   );
+  // Demo teacher: roles=[] is the whole point -- ZConnect treats this user as
+  // an unroled phone-OTP signup so the role-intent picker is reachable. We
+  // therefore use a separate helper that ARRAY-UNIONS into an empty roles[]
+  // (preserving any role a previous seed run granted in case the operator
+  // also approved them).
+  await ensureUnroledUserDoc(db, teacherUid, DEMO_TEACHER_PHONE, flags.apply);
 
   const schoolRef = db.collection('schools').doc(DEMO_SCHOOL_ID);
   const schoolSnap = await schoolRef.get();
@@ -96,19 +119,54 @@ async function main(): Promise<void> {
         name: DEMO_SCHOOL_NAME,
         city: DEMO_SCHOOL_CITY,
         inviteCode: DEMO_INVITE_CODE,
+        teacherCode: DEMO_TEACHER_CODE,
         principalUid,
         createdAt: FieldValue.serverTimestamp(),
       });
     }
-  } else if (!schoolSnap.data()?.principalUid) {
-    // School exists but is unstamped (e.g. an old partial run). Stamp it now
-    // so the rules' belongsToSchool() path opens up for the demo principal.
-    console.log(`[plan] schools/${DEMO_SCHOOL_ID} (stamp principalUid)`);
+  } else {
+    // School exists; patch in any missing fields without clobbering operator
+    // edits (e.g. a real rotated teacherCode).
+    const data = schoolSnap.data() ?? {};
+    const patch: Record<string, unknown> = {};
+    if (!data.principalUid) patch.principalUid = principalUid;
+    if (typeof data.teacherCode !== 'string' || data.teacherCode.length === 0) {
+      patch.teacherCode = DEMO_TEACHER_CODE;
+    }
+    if (Object.keys(patch).length > 0) {
+      console.log(
+        `[plan] schools/${DEMO_SCHOOL_ID} (patch ${Object.keys(patch).join('+')})`,
+      );
+      if (flags.apply) await schoolRef.update(patch);
+    } else {
+      console.log(`[skip] schools/${DEMO_SCHOOL_ID} already seeded`);
+    }
+  }
+
+  // Pending teacher request: schools/{DEMO_SCHOOL_ID}/teachers/{teacherUid}.
+  // doc id == userId so the same shape used by `requestTeacherJoin` (P4.3).
+  // Re-running the seed is a no-op once this doc exists -- we don't blat a
+  // status='active' back to 'pending' if the operator approved the demo
+  // teacher between runs.
+  const teacherRef = schoolRef.collection('teachers').doc(teacherUid);
+  const teacherSnap = await teacherRef.get();
+  if (!teacherSnap.exists) {
+    console.log(
+      `[plan] schools/${DEMO_SCHOOL_ID}/teachers/${teacherUid} (create pending)`,
+    );
     if (flags.apply) {
-      await schoolRef.update({principalUid});
+      await teacherRef.set({
+        userId: teacherUid,
+        displayName: DEMO_TEACHER_NAME,
+        phone: DEMO_TEACHER_PHONE,
+        status: 'pending',
+        requestedAt: FieldValue.serverTimestamp(),
+      });
     }
   } else {
-    console.log(`[skip] schools/${DEMO_SCHOOL_ID} already seeded`);
+    console.log(
+      `[skip] schools/${DEMO_SCHOOL_ID}/teachers/${teacherUid} already seeded (status=${teacherSnap.data()?.status})`,
+    );
   }
 
   for (const k of CLASSES) {
@@ -173,6 +231,43 @@ async function ensureUser(
     const created = await auth.createUser({phoneNumber: phone, displayName});
     return created.uid;
   }
+}
+
+/**
+ * Bootstrap a user doc that is INTENTIONALLY unroled (roles=[]). Used for the
+ * demo teacher whose role grant lands later via `approveTeacher`. Idempotent
+ * against an already-approved user: if `roles[]` is non-empty we leave it
+ * alone (don't reset a real grant to []).
+ */
+async function ensureUnroledUserDoc(
+  db: ReturnType<typeof initScriptAdmin>['db'],
+  uid: string,
+  phone: string,
+  apply: boolean,
+): Promise<void> {
+  const ref = db.collection('users').doc(uid);
+  const snap = await ref.get();
+  if (snap.exists) {
+    const data = snap.data() ?? {};
+    const roles: string[] = Array.isArray(data.roles)
+      ? data.roles.filter((r: unknown): r is string => typeof r === 'string')
+      : [];
+    if (roles.length > 0) {
+      console.log(
+        `[skip] users/${uid} already has roles=[${roles.join(',')}] -- preserving`,
+      );
+      return;
+    }
+    console.log(`[skip] users/${uid} already exists with roles=[]`);
+    return;
+  }
+  console.log(`[plan] users/${uid} (create unroled: roles=[], phone)`);
+  if (!apply) return;
+  await ref.set({
+    phone,
+    roles: [],
+    createdAt: FieldValue.serverTimestamp(),
+  });
 }
 
 async function ensureUserDoc(

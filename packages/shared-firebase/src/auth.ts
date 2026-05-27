@@ -123,6 +123,39 @@ interface EnsureUserDocInput {
  * branch (`firestore/rules`) still accepts the write while the v1 branch is in place.
  * The legacy field drops after Phase 4 widens the create rule to v2-only.
  */
+/**
+ * P4.3 -- bootstrap the v2 user doc for a phone-OTP signup that just landed
+ * from ZConnect's PhoneConfirmScreen.
+ *
+ * Idempotent: skipped if a doc already exists (so a re-OTP by an existing
+ * teacher/parent doesn't blat their roles[]). The fresh-doc shape is
+ * `{roles: [], phone, createdAt}` -- intentionally NO `primaryRole` and NO
+ * `role` (legacy) -- so RoleOnboardingGate routes them through the
+ * intent picker.
+ *
+ * Matches the v2 create branch in firestore/rules:
+ *   `roles is list && hasAll(['roles', 'createdAt']) && phone is string`
+ *
+ * Errors bubble up to the caller (PhoneConfirmScreen) which surfaces them
+ * as an Alert; we don't swallow because a failed write means the user
+ * will land on a screen that can't resolve their role.
+ */
+export async function ensurePhoneUserDoc(
+  uid: string,
+  phone: string,
+): Promise<void> {
+  const ref = firestore().collection('users').doc(uid);
+  const snap = await withFirestoreRetry(() => ref.get());
+  if (snap.exists) return;
+  await withFirestoreRetry(() =>
+    ref.set({
+      roles: [],
+      phone,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    }),
+  );
+}
+
 export async function ensureUserDoc(uid: string, partial: EnsureUserDocInput) {
   const ref = firestore().collection('users').doc(uid);
   const snap = await withFirestoreRetry(() => ref.get());
@@ -165,20 +198,35 @@ export async function getUserDoc(uid: string): Promise<UserDoc | null> {
 /**
  * v1 -> v2 normaliser. Pure function so call sites can also use it on Firestore
  * `onSnapshot` payloads (e.g. ZConnect's RootNavigator subscription).
+ *
+ * P4.3 -- the previous implementation silently coerced an empty `roles[]`
+ * into `['parent']` so that downstream consumers always had a non-empty
+ * array. That coercion HID the role-intent picker: RootNavigator decides
+ * to mount `RoleOnboardingGate` (the new parent vs teacher picker) when
+ * `userDoc.roles.length === 0`, and the legacy fallback meant brand-new
+ * phone-OTP signups silently slipped into the ParentNavigator branch
+ * instead. We now preserve `roles=[]` end-to-end and only fall back to
+ * the legacy single-`role` field if a true v1 doc is read.
+ *
+ * `primaryRole` keeps a 'parent' placeholder when both fields are absent
+ * because the type is non-optional and downstream code (RoleSwitcher,
+ * Wrong-app screens) reads it unconditionally. The placeholder is
+ * navigationally inert when `roles.length === 0` -- RootNavigator's gate
+ * predicate fires first and short-circuits the `primaryRole` switch.
  */
 export function normaliseUserDoc(raw: Partial<UserDoc>): UserDoc {
   const roles =
     Array.isArray(raw.roles) && raw.roles.length > 0
       ? raw.roles
-      : raw.role
-        ? [raw.role]
-        : [];
+      : Array.isArray(raw.roles)
+        ? raw.roles
+        : raw.role
+          ? [raw.role]
+          : [];
   const primaryRole: Role = raw.primaryRole ?? roles[0] ?? 'parent';
-  // Cast: roles[0] above guarantees `parent` fallback when both fields are missing,
-  // matching the migration script's "default to parent" branch for orphan docs.
   const normalised: UserDoc = {
     ...raw,
-    roles: roles.length > 0 ? roles : ['parent'],
+    roles,
     primaryRole,
     createdAt: raw.createdAt ?? 0,
   };

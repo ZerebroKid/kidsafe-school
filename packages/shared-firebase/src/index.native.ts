@@ -13,3 +13,4 @@ export const PLATFORM = 'native' as const;
 
 export * from './auth';
 export * from './firestore';
+export * from './callable.native';

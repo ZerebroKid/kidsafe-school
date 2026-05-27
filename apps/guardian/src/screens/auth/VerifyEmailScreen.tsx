@@ -16,7 +16,12 @@ export function VerifyEmailScreen() {
     const id = setInterval(async () => {
       const u = await reloadCurrentUser();
       if (u?.emailVerified) {
-        setFirebaseUser({uid: u.uid, email: u.email, emailVerified: true});
+        setFirebaseUser({
+          uid: u.uid,
+          email: u.email,
+          phone: u.phoneNumber,
+          emailVerified: true,
+        });
       }
     }, 5000);
     return () => clearInterval(id);
@@ -27,7 +32,12 @@ export function VerifyEmailScreen() {
       setChecking(true);
       const u = await reloadCurrentUser();
       if (u?.emailVerified) {
-        setFirebaseUser({uid: u.uid, email: u.email, emailVerified: true});
+        setFirebaseUser({
+          uid: u.uid,
+          email: u.email,
+          phone: u.phoneNumber,
+          emailVerified: true,
+        });
       } else {
         Alert.alert('Not yet', 'We still see your email as unverified. Click the link in the email.');
       }

@@ -396,6 +396,20 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Cross-school collection-group read for `teachers/*` (P4.3).
+    //   ZConnect's pending screen subscribes to
+    //   `collectionGroup('teachers').where('userId','==',myUid).limit(1)` to
+    //   find its own join request without knowing the schoolId first. Same
+    //   self-read predicate as the principals cross-school rule above.
+    //   Writes are NEVER allowed at any depth -- only Admin SDK callables
+    //   (`requestTeacherJoin`, `approveTeacher`, `rejectTeacher`) mutate
+    //   `teachers/*` docs.
+    match /{path=**}/teachers/{teacherId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == myUid());
+      allow write: if false;
+    }
+
     // studyAssignments/{id}
     //   Written exclusively by the `assignTopic` callable (Admin SDK).
     //   Reads: assigned teacher, kids in the class, parents of those kids,

@@ -86,6 +86,36 @@ export interface PrincipalDoc {
 }
 
 /**
+ * `schools/{schoolId}/teachers/{teacherId}` -- teacher join record.
+ *
+ * Written by `requestTeacherJoin` (status='pending') and updated by
+ * `approveTeacher` (status='active') or `rejectTeacher` (status='rejected').
+ * Approval is the trigger that ARRAY-UNIONS `'teacher'` into
+ * `users/{userId}.roles` -- never overwrites, so parent-teachers keep their
+ * parent role and the RoleSwitcher pill appears for them automatically.
+ *
+ * `teacherId == userId` by construction (same trick PrincipalDoc uses):
+ *   1. Guarantees one pending request per phone per school.
+ *   2. Lets ZConnect's pending screen subscribe via
+ *      `collectionGroup('teachers').where('userId','==',myUid).limit(1)`
+ *      without first knowing the schoolId -- the cross-school rule in
+ *      firestore/rules `/{path=**}/teachers/{teacherId}` allows the read
+ *      because `resource.data.userId == myUid()`.
+ *   3. Aligns with the rules' `belongsToSchool()` predicate at write
+ *      time (the principal can read every teacher doc under their school).
+ */
+export interface TeacherDoc {
+  userId: string;
+  displayName: string;
+  phone: string;
+  status: 'pending' | 'active' | 'rejected';
+  requestedAt: FirestoreFieldValueLike;
+  approvedByUid?: string;
+  approvedAt?: FirestoreFieldValueLike;
+  rejectedReason?: string;
+}
+
+/**
  * `schools/{schoolId}/classes/{classId}` -- a single class section in a school.
  *
  * Created by the principal in Zerebro Campus. `teacherIds` and `studentChildUids`

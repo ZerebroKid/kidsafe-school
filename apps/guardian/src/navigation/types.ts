@@ -11,6 +11,18 @@ import type {Role} from '@zerebro/shared-types';
  */
 
 export type AuthStackParamList = {
+  /** P4.3 -- new phone-OTP flow; ZConnect's default entry. */
+  PhoneLogin: undefined;
+  /**
+   * P4.3 -- after `signInWithPhoneNumber` succeeds we navigate here with the
+   * confirmation handle serialised as the verificationId so the next screen
+   * can call `auth().PhoneAuthProvider.credential(verificationId, code)`.
+   * (The full `confirmation` object isn't a plain serialisable object so we
+   * can't pass it through React Navigation params; ferrying the
+   * verificationId + phone preserves the type contract.)
+   */
+  PhoneConfirm: {verificationId: string; phone: string};
+  /** Email/password kept as a "Continue with email" escape hatch from PhoneLogin. */
   Login: undefined;
   Signup: {role: Role};
 };

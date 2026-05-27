@@ -52,3 +52,9 @@ export {claimSchool} from './callable/claimSchool';
 export {rotateInviteCode} from './callable/rotateInviteCode';
 export {approvePrincipal} from './callable/approvePrincipal';
 export {rejectPrincipal} from './callable/rejectPrincipal';
+
+// P4.3 -- teacher onboarding
+export {rotateTeacherCode} from './callable/rotateTeacherCode';
+export {requestTeacherJoin} from './callable/requestTeacherJoin';
+export {approveTeacher} from './callable/approveTeacher';
+export {rejectTeacher} from './callable/rejectTeacher';

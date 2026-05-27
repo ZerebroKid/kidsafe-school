@@ -55,7 +55,8 @@ const navTheme = {
  * parent dashboard.
  */
 export function RootNavigator() {
-  const {firebaseUid, userDoc, emailVerified, bootstrapped} = useAuthStore();
+  const {firebaseUid, firebasePhone, userDoc, emailVerified, bootstrapped} =
+    useAuthStore();
   const setFirebaseUser = useAuthStore(s => s.setFirebaseUser);
   const setUserDoc = useAuthStore(s => s.setUserDoc);
   const setBootstrapped = useAuthStore(s => s.setBootstrapped);
@@ -64,7 +65,15 @@ export function RootNavigator() {
   useEffect(() => {
     const unsubAuth = auth().onAuthStateChanged(user => {
       if (user) {
-        setFirebaseUser({uid: user.uid, email: user.email, emailVerified: user.emailVerified});
+        setFirebaseUser({
+          uid: user.uid,
+          email: user.email,
+          // P4.3 -- thread phoneNumber through so the email-verified gate
+          // below can skip it for phone-OTP users (who have no email and
+          // can't ever "verify" one).
+          phone: user.phoneNumber,
+          emailVerified: user.emailVerified,
+        });
       } else {
         setFirebaseUser(null);
         setUserDoc(null);
@@ -138,7 +147,12 @@ export function RootNavigator() {
         <View style={{flex: 1}}>
           {!firebaseUid ? (
             <AuthNavigator />
-          ) : !emailVerified ? (
+          ) : // P4.3 -- email-verified gate ONLY applies to accounts that
+          // signed in via email/password. Phone-OTP users have a verified
+          // phone-number-claim on their token but `user.emailVerified` is
+          // always false (they have no email), so checking the gate
+          // unconditionally would deadlock them on VerifyEmailScreen.
+          !emailVerified && !firebasePhone ? (
             <VerifyEmailScreen />
           ) : !userDoc ? (
             <AuthNavigator />

@@ -68,8 +68,14 @@ What lands:
   phone `+919999900001`
 - `users/<demoPrincipalUid>` -- `roles=['principal']`, `primaryRole='principal'`,
   phone `+919999900002`
+- `users/<demoTeacherUid>` -- `roles=[]` (intentionally unroled), phone
+  `+919999900003` (P4.3 -- ZConnect treats this as a fresh phone-OTP signup
+  that needs to pick parent / teacher intent)
 - `schools/demo_school_001` -- "Demo Public School", Mumbai, inviteCode
-  `DEMO2026`, principalUid pre-stamped to the demo principal
+  `DEMO2026`, teacherCode `TEACH7`, principalUid pre-stamped to the demo
+  principal
+- `schools/demo_school_001/teachers/<demoTeacherUid>` -- `status='pending'`
+  (P4.3 -- ready to be Approved from Campus /teachers)
 - `schools/demo_school_001/classes/{8a,8b}` -- two classes for grade 8
 - `schools/demo_school_001/classes/{8a,8b}/subjects/{science,maths,english}`
   -- three subjects per class with placeholder `curriculumId`
