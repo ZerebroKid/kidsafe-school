@@ -25,6 +25,11 @@ export type ParentTabsParamList = {
 
 export type ChildStackParamList = {
   Pairing: undefined;
+  // P4.4 -- inserted between Pairing and PermissionsOnboarding. Mounted only
+  // when the child has paired (users/{uid}.parentUid set) but has not yet
+  // joined a school (users/{uid}.schoolIds is empty / missing). Once the
+  // joinSchool callable populates schoolIds, this screen is bypassed forever.
+  SchoolStep: undefined;
   PermissionsOnboarding: undefined;
   Status: undefined;
 };

@@ -3,23 +3,23 @@ import {Pressable, StyleSheet, Text, View} from 'react-native';
 
 import {signOut} from '@zerebro/shared-firebase/auth';
 
+import {JoinSchoolScreen} from '../parent/JoinSchoolScreen';
 import {TeacherJoinScreen} from '../teacher/JoinScreen';
 import {colors, radius, spacing} from '../../theme';
 
 /**
- * P4.3 -- parent vs teacher INTENT picker.
+ * P4.3 / P4.4 -- parent vs teacher INTENT picker.
  *
  * Mounted by RootNavigator when the signed-in user's `users/{uid}` doc has
- * `roles: []`. Today (post-P4.3) the only paths a roles=[] user can travel
- * are:
- *   1. Teacher: enter the principal-shared teacherCode via TeacherJoinScreen.
- *      After approval, `users/{uid}.roles` array-unions 'teacher', the
- *      RootNavigator onSnapshot ticks, and the user lands on
- *      TeacherNavigator on the same screen tick. No app restart.
- *   2. Parent: NOT YET WIRED to a server flow -- P4.4 will add a school
- *      claim callable (`joinSchoolAsParent`). For now we show a polite
- *      placeholder telling them parent self-serve onboarding is coming
- *      and to ask their school principal for help if they need it today.
+ * `roles: []`. Both branches now wire to first-signup callables that grant
+ * the role server-side and let RootNavigator's user-doc onSnapshot swap to
+ * the right home navigator on the same render tick:
+ *   1. Teacher (P4.3): enter principal-shared 6-char teacherCode via
+ *      TeacherJoinScreen -> `requestTeacherJoin` -> wait for principal
+ *      approval -> roles += 'teacher' -> TeacherNavigator.
+ *   2. Parent (P4.4): enter principal-shared 8-char schoolCode via
+ *      JoinSchoolScreen -> `joinSchoolAsParent` -> roles += 'parent'
+ *      INSTANTLY (no approval gate) -> ParentNavigator.
  *
  * Intent is LOCAL state (not persisted). If the user back-navigates or
  * kills the app mid-flow, they'll see the picker again on next sign-in,
@@ -36,7 +36,7 @@ export function RoleOnboardingGate() {
     return <TeacherJoinScreen onBack={() => setIntent(null)} />;
   }
   if (intent === 'parent') {
-    return <ParentComingSoon onBack={() => setIntent(null)} />;
+    return <JoinSchoolScreen onBack={() => setIntent(null)} />;
   }
   return <IntentPicker onPick={setIntent} />;
 }
@@ -76,33 +76,6 @@ function IntentPicker({
         </Pressable>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        style={styles.signOut}
-        onPress={() => {
-          signOut().catch(err => console.warn('signOut failed', err));
-        }}>
-        <Text style={styles.signOutText}>Sign out</Text>
-      </Pressable>
-    </View>
-  );
-}
-
-function ParentComingSoon({onBack}: {onBack: () => void}) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Parent onboarding</Text>
-      <Text style={styles.body}>
-        Parent self-serve signup is launching in the next update. For now,
-        please ask your child's school principal to share the parent
-        invite, then sign back in.
-      </Text>
-      <Pressable
-        accessibilityRole="button"
-        style={styles.signOut}
-        onPress={onBack}>
-        <Text style={styles.signOutText}>Back</Text>
-      </Pressable>
       <Pressable
         accessibilityRole="button"
         style={styles.signOut}

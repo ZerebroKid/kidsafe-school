@@ -39,6 +39,22 @@
         {"fieldPath": "status", "order": "ASCENDING"},
         {"fieldPath": "requestedAt", "order": "ASCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "classes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "grade", "order": "ASCENDING"},
+        {"fieldPath": "section", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "roles", "arrayConfig": "CONTAINS"},
+        {"fieldPath": "pairingCode", "order": "ASCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

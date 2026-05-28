@@ -4,6 +4,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {PairingCodeScreen} from '../screens/auth/PairingCodeScreen';
 import {PermissionsOnboardingScreen} from '../screens/child/PermissionsOnboardingScreen';
+import {SchoolStep} from '../screens/child/onboarding/SchoolStep';
 import {StatusScreen} from '../screens/child/StatusScreen';
 import {
   AppBlocker,
@@ -19,10 +20,16 @@ import type {ChildStackParamList} from './types';
 const Stack = createNativeStackNavigator<ChildStackParamList>();
 
 /**
- * Routes a child user through three linear states:
+ * Routes a child user through four linear states (post-P4.4):
  *   1. Not paired to a parent yet → Pairing
- *   2. Paired but permissions missing → PermissionsOnboarding
- *   3. All good → Status
+ *   2. Paired but not yet school-linked → SchoolStep (P4.4)
+ *   3. School-linked but permissions missing → PermissionsOnboarding
+ *   4. All good → Status
+ *
+ * The SchoolStep gate (`users.schoolIds` empty/missing) MUST come BEFORE
+ * the permissions gate -- a child who hasn't joined a school yet has no
+ * roster to drive their study mission, so forcing them through Android
+ * permission grants first would just be friction.
  */
 export function ChildNavigator() {
   const userDoc = useAuthStore(s => s.userDoc);
@@ -81,6 +88,19 @@ export function ChildNavigator() {
     return (
       <Stack.Navigator screenOptions={screenOptions}>
         <Stack.Screen name="Pairing" component={PairingCodeScreen} />
+      </Stack.Navigator>
+    );
+  }
+
+  // P4.4 -- school-link gate. Paired but no schoolIds yet -> SchoolStep.
+  // After `joinSchool` writes schoolIds + children/{uid}.classId, the
+  // user-doc tick re-evaluates and drops us into the next gate.
+  const hasJoinedSchool =
+    Array.isArray(userDoc.schoolIds) && userDoc.schoolIds.length > 0;
+  if (!hasJoinedSchool) {
+    return (
+      <Stack.Navigator screenOptions={screenOptions}>
+        <Stack.Screen name="SchoolStep" component={SchoolStep} />
       </Stack.Navigator>
     );
   }

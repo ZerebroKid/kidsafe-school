@@ -58,3 +58,7 @@ export {rotateTeacherCode} from './callable/rotateTeacherCode';
 export {requestTeacherJoin} from './callable/requestTeacherJoin';
 export {approveTeacher} from './callable/approveTeacher';
 export {rejectTeacher} from './callable/rejectTeacher';
+
+// P4.4 -- parent + child school link (no approval gate; one-shot if code valid)
+export {joinSchoolAsParent} from './callable/joinSchoolAsParent';
+export {joinSchool} from './callable/joinSchool';

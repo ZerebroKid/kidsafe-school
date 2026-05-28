@@ -71,6 +71,14 @@ What lands:
 - `users/<demoTeacherUid>` -- `roles=[]` (intentionally unroled), phone
   `+919999900003` (P4.3 -- ZConnect treats this as a fresh phone-OTP signup
   that needs to pick parent / teacher intent)
+- `users/<demoParentUid>` -- `roles=[]` (intentionally unroled), phone
+  `+919999900004` (P4.4 -- ZConnect treats this as a fresh phone-OTP signup
+  so the user lands on the parent-vs-teacher intent picker, then can submit
+  the school inviteCode to JoinSchoolAsParent)
+- `users/<demoChildUid>` -- `roles=['child']`, `parentUid=<demoParentUid>`,
+  `schoolIds` MISSING. Email `zkidchild_demo@kidsafe.test`, password
+  `DemoChild#2026`. P4.4 -- pre-paired but not yet school-linked so ZKid
+  lands directly on the new SchoolStep when signed in.
 - `schools/demo_school_001` -- "Demo Public School", Mumbai, inviteCode
   `DEMO2026`, teacherCode `TEACH7`, principalUid pre-stamped to the demo
   principal

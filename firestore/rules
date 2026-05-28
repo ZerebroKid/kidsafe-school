@@ -377,6 +377,18 @@ service cloud.firestore {
           || (isSignedIn() && resource.data.userId == myUid());
         allow create, update, delete: if false;
       }
+
+      // parents subcollection (P4.4)
+      //   `joinSchoolAsParent` callable writes here via Admin SDK; clients
+      //   only READ. UNLIKE teachers, the principal does NOT get read access
+      //   here -- the parents audit list lives in admin web only (decided in
+      //   P4.4 plan: principal has no parent-list view). Self-read is allowed
+      //   so a parent can subscribe to their own membership doc if needed.
+      match /parents/{parentId} {
+        allow read: if isAdmin()
+          || (isSignedIn() && resource.data.userId == myUid());
+        allow create, update, delete: if false;
+      }
     }
 
     // Cross-school collection-group read for `principals/*` (P4.2.7).

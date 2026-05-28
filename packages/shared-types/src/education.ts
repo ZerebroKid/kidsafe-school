@@ -116,6 +116,33 @@ export interface TeacherDoc {
 }
 
 /**
+ * `schools/{schoolId}/parents/{parentId}` -- parent join record.
+ *
+ * Written by `joinSchoolAsParent` callable in a single transaction together
+ * with `users/{userId}.roles arrayUnion 'parent'` and
+ * `users/{userId}.schoolIds arrayUnion schoolId`. UNLIKE principal/teacher
+ * there is NO approval gate -- the role is granted in the same call (§14 of
+ * the tech spec). So there is no `status` / `approvedBy*` / `rejectedReason`
+ * field here; presence of the doc is itself the proof of membership.
+ *
+ * `parentId == userId` by construction (same trick PrincipalDoc / TeacherDoc
+ * use): one doc per parent per school, idempotent writes, and the doc id is
+ * trivially predictable for the admin web's per-school audit view.
+ *
+ * Read access (firestore/rules):
+ *   - the parent themselves (`resource.data.userId == myUid()`)
+ *   - admin users
+ *   - NOT the principal -- principal-web does not show the parents list
+ *     anywhere; parents audit lives in admin web only.
+ */
+export interface ParentDoc {
+  userId: string;
+  phone: string;
+  displayName?: string;
+  joinedAt: FirestoreFieldValueLike;
+}
+
+/**
  * `schools/{schoolId}/classes/{classId}` -- a single class section in a school.
  *
  * Created by the principal in Zerebro Campus. `teacherIds` and `studentChildUids`

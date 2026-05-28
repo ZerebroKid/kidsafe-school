@@ -92,6 +92,14 @@ export interface UserDoc {
   email?: string;
   photoURL?: string | null;
   fcmToken?: string | null;
+  /**
+   * Every school this user belongs to (parent, teacher, or child). Array-unioned
+   * by `joinSchoolAsParent` / `joinSchool` / `approveTeacher` / `approvePrincipal`
+   * in the same transaction that flips `roles[]`. Optional because v1 docs and
+   * fresh OTP users (pre-`joinSchool*`) don't have it. Drives the ZKid
+   * SchoolStep gate ("paired but not yet school-linked").
+   */
+  schoolIds?: string[];
   createdAt: FirestoreFieldValueLike;
   // Parent only: rotatable 6-digit code the child enters to link.
   pairingCode?: string;
@@ -247,9 +255,29 @@ export interface ChildForegroundApp {
   lastNonLauncherAt?: number;
 }
 
+/**
+ * Pointer from a `children/{uid}` doc back to its school + class section.
+ * Written by `joinSchool` callable in the same transaction that array-unions
+ * the child uid into `schools/{schoolId}/classes/{classId}.studentChildUids`.
+ * `schoolId` matches `users/{uid}.schoolIds[0]` for a child (children only
+ * join ONE school today; the array shape on the user doc is forward-compat
+ * with multi-school parents and is intentional).
+ */
+export interface ChildClassRef {
+  schoolId: string;
+  classId: string;
+}
+
 export interface ChildDoc {
   status: 'online' | 'offline';
   lastSeenAt: FirestoreFieldValueLike;
+  /**
+   * Set by `joinSchool` callable after first-time ZKid school-step. Absent
+   * until the child enters a valid school code + grade + section. Drives the
+   * class roster the principal sees and the curriculum the topic-learn screens
+   * pull. Once set, future logins skip the school step entirely.
+   */
+  classId?: ChildClassRef;
   /**
    * `'child_owned'` (legacy / default): doc was created by a child Firebase user signed in
    * on their own phone. `'shared'`: the parent owns this profile on a shared-phone install

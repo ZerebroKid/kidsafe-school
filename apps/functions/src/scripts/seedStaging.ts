@@ -13,11 +13,16 @@
  *   pnpm seed:staging -- --apply --target=prod   # commit to prod (careful)
  *
  * What it creates:
- *   - users/<demoAdminUid>   roles=['admin'],     primaryRole='admin'
+ *   - users/<demoAdminUid>     roles=['admin'],     primaryRole='admin'
  *   - users/<demoPrincipalUid> roles=['principal'], primaryRole='principal'
- *   - schools/demo_school_001 (inviteCode=DEMO2026, principalUid=demoPrincipalUid)
+ *   - users/<demoTeacherUid>   roles=[]               (P4.3 unroled)
+ *   - users/<demoParentUid>    roles=[]               (P4.4 unroled)
+ *   - users/<demoChildUid>     roles=['child'], parentUid=<demoParentUid>,
+ *                              schoolIds missing       (P4.4 pre-paired, awaiting SchoolStep)
+ *   - schools/demo_school_001  (inviteCode=DEMO2026, principalUid=demoPrincipalUid)
  *   - schools/demo_school_001/classes/{8a,8b}
  *   - schools/demo_school_001/classes/{8a,8b}/subjects/{science,maths,english}
+ *   - schools/demo_school_001/teachers/<demoTeacherUid> status='pending' (P4.3)
  */
 
 import {FieldValue} from 'firebase-admin/firestore';
@@ -34,6 +39,19 @@ const DEMO_PRINCIPAL_NAME = 'Demo Principal';
 // collectionGroup('teachers') listener.
 const DEMO_TEACHER_PHONE = '+919999900003';
 const DEMO_TEACHER_NAME = 'Demo Teacher';
+// P4.4 -- fourth demo user is a PARENT who hasn't joined a school yet. The
+// roles=[] shape mirrors what a fresh phone-OTP signup looks like before
+// `joinSchoolAsParent` runs, so ZConnect's intent picker is reachable on
+// first sign-in. The script does NOT pre-create a parents/{uid} doc; that's
+// what we want QA to exercise via the JoinSchoolScreen.
+const DEMO_PARENT_PHONE = '+919999900004';
+const DEMO_PARENT_NAME = 'Demo Parent';
+// P4.4 -- demo child is EMAIL-signed-up (ZKid stays on email/password in
+// this phase) and pre-paired to the demo parent so QA can exercise
+// SchoolStep directly without first running the pairing flow.
+const DEMO_CHILD_EMAIL = 'zkidchild_demo@kidsafe.test';
+const DEMO_CHILD_PASSWORD = 'DemoChild#2026';
+const DEMO_CHILD_NAME = 'Demo Child';
 
 const DEMO_SCHOOL_ID = 'demo_school_001';
 const DEMO_SCHOOL_NAME = 'Demo Public School';
@@ -94,6 +112,19 @@ async function main(): Promise<void> {
     DEMO_TEACHER_NAME,
     flags.apply,
   );
+  const parentUid = await ensureUser(
+    auth,
+    DEMO_PARENT_PHONE,
+    DEMO_PARENT_NAME,
+    flags.apply,
+  );
+  const childUid = await ensureEmailUser(
+    auth,
+    DEMO_CHILD_EMAIL,
+    DEMO_CHILD_PASSWORD,
+    DEMO_CHILD_NAME,
+    flags.apply,
+  );
 
   await ensureUserDoc(db, adminUid, DEMO_ADMIN_PHONE, 'admin', flags.apply);
   await ensureUserDoc(
@@ -103,12 +134,24 @@ async function main(): Promise<void> {
     'principal',
     flags.apply,
   );
-  // Demo teacher: roles=[] is the whole point -- ZConnect treats this user as
-  // an unroled phone-OTP signup so the role-intent picker is reachable. We
-  // therefore use a separate helper that ARRAY-UNIONS into an empty roles[]
-  // (preserving any role a previous seed run granted in case the operator
-  // also approved them).
+  // Demo teacher + parent: roles=[] is the whole point -- ZConnect treats
+  // these as unroled phone-OTP signups so the role-intent picker is reachable.
+  // We therefore use a separate helper that ARRAY-UNIONS into an empty
+  // roles[] (preserving any role a previous seed run granted in case the
+  // operator also approved them).
   await ensureUnroledUserDoc(db, teacherUid, DEMO_TEACHER_PHONE, flags.apply);
+  await ensureUnroledUserDoc(db, parentUid, DEMO_PARENT_PHONE, flags.apply);
+  // Demo child: signed up via ZKid email path, paired with the demo parent
+  // out of the box, but NOT yet school-linked. This lets QA land directly on
+  // the SchoolStep screen by signing in with DEMO_CHILD_EMAIL on ZKid.
+  await ensureChildUserDoc(
+    db,
+    childUid,
+    DEMO_CHILD_EMAIL,
+    DEMO_CHILD_NAME,
+    parentUid,
+    flags.apply,
+  );
 
   const schoolRef = db.collection('schools').doc(DEMO_SCHOOL_ID);
   const schoolSnap = await schoolRef.get();
@@ -266,6 +309,99 @@ async function ensureUnroledUserDoc(
   await ref.set({
     phone,
     roles: [],
+    createdAt: FieldValue.serverTimestamp(),
+  });
+}
+
+/**
+ * Email/password counterpart to `ensureUser`. Used by the demo CHILD account
+ * because ZKid still ships email signup (Phase P4.4 explicitly kept ZKid on
+ * email -- phone OTP migration is deferred). Idempotent.
+ */
+async function ensureEmailUser(
+  auth: ReturnType<typeof initScriptAdmin>['auth'],
+  email: string,
+  password: string,
+  displayName: string,
+  apply: boolean,
+): Promise<string> {
+  try {
+    const existing = await auth.getUserByEmail(email);
+    console.log(`[skip] auth user ${email} already exists uid=${existing.uid}`);
+    return existing.uid;
+  } catch {
+    console.log(`[plan] auth user ${email} (create displayName="${displayName}")`);
+    if (!apply) {
+      return `DRYRUN_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    }
+    const created = await auth.createUser({
+      email,
+      password,
+      displayName,
+      emailVerified: true,
+    });
+    return created.uid;
+  }
+}
+
+/**
+ * P4.4 -- bootstrap a ZKid child user doc that is pre-paired to a parent
+ * but NOT yet school-linked. The combination users/{uid}.parentUid set +
+ * users/{uid}.schoolIds empty/missing is exactly what `ChildNavigator`'s
+ * SchoolStep gate looks for, so QA lands on SchoolStep on first sign-in.
+ *
+ * Idempotent against an already-linked child: if `roles[]` already includes
+ * 'child' AND `parentUid` is set we don't overwrite (don't reset a real
+ * school-link if the operator ran the kid flow between seeds).
+ */
+async function ensureChildUserDoc(
+  db: ReturnType<typeof initScriptAdmin>['db'],
+  uid: string,
+  email: string,
+  displayName: string,
+  parentUid: string,
+  apply: boolean,
+): Promise<void> {
+  const ref = db.collection('users').doc(uid);
+  const snap = await ref.get();
+  if (snap.exists) {
+    const data = snap.data() ?? {};
+    const roles: string[] = Array.isArray(data.roles)
+      ? data.roles.filter((r: unknown): r is string => typeof r === 'string')
+      : [];
+    if (roles.includes('child') && typeof data.parentUid === 'string') {
+      console.log(
+        `[skip] users/${uid} child already paired (parentUid=${data.parentUid})`,
+      );
+      return;
+    }
+    console.log(
+      `[plan] users/${uid} (patch: parentUid=${parentUid}, ensure role='child')`,
+    );
+    if (!apply) return;
+    await ref.set(
+      {
+        parentUid,
+        role: 'child',
+        roles: FieldValue.arrayUnion('child'),
+        primaryRole: data.primaryRole ?? 'child',
+      },
+      {merge: true},
+    );
+    return;
+  }
+  console.log(
+    `[plan] users/${uid} (create child paired to parent=${parentUid}, no schoolIds yet)`,
+  );
+  if (!apply) return;
+  await ref.set({
+    email,
+    name: displayName,
+    displayName,
+    role: 'child',
+    roles: ['child'],
+    primaryRole: 'child',
+    parentUid,
     createdAt: FieldValue.serverTimestamp(),
   });
 }

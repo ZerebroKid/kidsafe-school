@@ -5,8 +5,11 @@ import {useParams, useRouter} from 'next/navigation';
 import {useCallback, useEffect, useState} from 'react';
 import {
   Timestamp,
+  collection,
   doc,
   onSnapshot,
+  orderBy,
+  query,
 } from 'firebase/firestore';
 import {callFn, getFirestoreInstance} from '@zerebro/shared-firebase';
 
@@ -35,6 +38,20 @@ interface SchoolDoc {
   createdAt?: Timestamp;
 }
 
+/*
+ * P4.4 -- ParentDoc shape (admin-only view). Mirrors
+ * `packages/shared-types/src/education.ts ParentDoc`. Lives at
+ * `schools/{schoolId}/parents/{parentId}`. Written exclusively by the
+ * `joinSchoolAsParent` callable via Admin SDK; rules forbid client writes.
+ */
+interface ParentRow {
+  id: string;
+  userId?: string;
+  phone?: string;
+  displayName?: string;
+  joinedAt?: Timestamp;
+}
+
 export default function SchoolDetailPage() {
   const router = useRouter();
   const params = useParams<{id: string}>();
@@ -43,6 +60,8 @@ export default function SchoolDetailPage() {
   const [data, setData] = useState<SchoolDoc | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [rotating, setRotating] = useState(false);
+  const [parents, setParents] = useState<ParentRow[]>([]);
+  const [parentsError, setParentsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!schoolId) return;
@@ -53,6 +72,29 @@ export default function SchoolDetailPage() {
         setError(null);
       },
       err => setError(err.message),
+    );
+    return unsub;
+  }, [schoolId]);
+
+  useEffect(() => {
+    if (!schoolId) return;
+    // P4.4 -- live audit of parents who joined via the inviteCode. Admin-only
+    // visibility per the parents subcollection rule in firestore/rules
+    // (principal does NOT have read access here). orderBy joinedAt desc so
+    // the most-recent joins surface first; if the field is missing on early
+    // docs the row simply sorts below dated rows.
+    const unsub = onSnapshot(
+      query(
+        collection(getFirestoreInstance(), 'schools', schoolId, 'parents'),
+        orderBy('joinedAt', 'desc'),
+      ),
+      snap => {
+        setParents(
+          snap.docs.map(d => ({id: d.id, ...(d.data() as Omit<ParentRow, 'id'>)})),
+        );
+        setParentsError(null);
+      },
+      err => setParentsError(err.message),
     );
     return unsub;
   }, [schoolId]);
@@ -167,6 +209,69 @@ export default function SchoolDetailPage() {
             {data.principalUid ?? '—'}
           </p>
         </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-surface p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-text-muted">
+              Parents
+            </p>
+            <h2 className="mt-1 text-lg font-semibold text-text">
+              Joined parents
+              <span className="ml-2 rounded-full bg-bg px-2 py-0.5 text-xs font-normal text-text-muted">
+                {parents.length}
+              </span>
+            </h2>
+            <p className="mt-1 text-xs text-text-muted">
+              Parents who entered this school&apos;s invite code in ZConnect.
+              Admin-only view -- the principal does not see this list.
+            </p>
+          </div>
+        </div>
+        {parentsError ? (
+          <p
+            role="alert"
+            className="mt-4 rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger"
+          >
+            {parentsError}
+          </p>
+        ) : null}
+        {parents.length === 0 && !parentsError ? (
+          <p className="mt-4 rounded-md border border-border bg-bg px-3 py-6 text-center text-sm text-text-muted">
+            No parents have joined yet.
+          </p>
+        ) : null}
+        {parents.length > 0 ? (
+          <div className="mt-4 overflow-hidden rounded-md border border-border">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-bg text-xs uppercase tracking-widest text-text-muted">
+                <tr>
+                  <th className="px-3 py-2">Name</th>
+                  <th className="px-3 py-2">Phone</th>
+                  <th className="px-3 py-2">Joined</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {parents.map(p => (
+                  <tr key={p.id}>
+                    <td className="px-3 py-2 text-text">
+                      {p.displayName ?? '—'}
+                    </td>
+                    <td className="px-3 py-2 font-mono text-xs text-text">
+                      {p.phone ?? '—'}
+                    </td>
+                    <td className="px-3 py-2 text-text-muted">
+                      {p.joinedAt
+                        ? p.joinedAt.toDate().toLocaleString()
+                        : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
       </section>
 
       {error ? (

@@ -21,9 +21,14 @@ export async function generatePairingCode(parentUid: string): Promise<string> {
  * `users/{childUid}.parentUid = parentUid`. Throws on invalid / expired code.
  */
 export async function linkChildToParent(childUid: string, code: string): Promise<string> {
+  // P4.4 -- query by v2 `roles[]` (array-contains) instead of v1 `role` (==).
+  // Phone-OTP parents created post-P4.4 only have `roles: ['parent']` and no
+  // legacy `role` field, so the old v1-style query missed them and pairing
+  // silently failed with "invalid code". v1 parents still match because the
+  // P3 migration script back-filled `roles` on every legacy doc.
   const query = await firestore()
     .collection('users')
-    .where('role', '==', 'parent')
+    .where('roles', 'array-contains', 'parent')
     .where('pairingCode', '==', code.trim())
     .limit(1)
     .get();
