@@ -4,6 +4,9 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {StudyMissionScreen} from '../screens/learn/StudyMissionScreen';
 import {TopicScreen} from '../screens/learn/TopicScreen';
 import {QuizScreen} from '../screens/learn/QuizScreen';
+import {QuizResultScreen} from '../screens/learn/QuizResultScreen';
+import {RewardUnlockScreen} from '../screens/learn/RewardUnlockScreen';
+import {RewardWebViewScreen} from '../screens/learn/RewardWebViewScreen';
 import {VideoPlayerScreen} from '../screens/learn/VideoPlayerScreen';
 import {colors} from '../theme';
 import type {StudyStackParamList} from './types';
@@ -33,6 +36,23 @@ export function StudyNavigator() {
         name="Quiz"
         component={QuizScreen}
         options={{headerTitle: 'Quiz'}}
+      />
+      <Stack.Screen
+        name="QuizResult"
+        component={QuizResultScreen}
+        options={{headerTitle: 'Results', headerBackVisible: false}}
+      />
+      <Stack.Screen
+        name="RewardUnlock"
+        component={RewardUnlockScreen}
+        options={{headerTitle: 'Reward', headerBackVisible: false}}
+      />
+      <Stack.Screen
+        name="RewardWebView"
+        component={RewardWebViewScreen}
+        options={({route}) => ({
+          headerTitle: route.params.title ?? 'Reward',
+        })}
       />
       <Stack.Screen
         name="VideoPlayer"

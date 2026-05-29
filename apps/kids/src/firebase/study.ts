@@ -300,6 +300,64 @@ export function useTopicContent(
   return state;
 }
 
+export type RewardType = 'youtube_link' | 'game_link' | 'article_link';
+
+export interface RewardUnlock {
+  id: string;
+  attemptId: string;
+  rewardId: string;
+  rewardType: RewardType;
+  rewardTitle: string;
+  rewardUrl: string;
+}
+
+/**
+ * P4.10.3 -- live subscription to a child's reward unlock for one quiz attempt.
+ *
+ * The `onQuizAttemptWrite` trigger writes `rewardUnlocks/{attemptId}` (doc id
+ * == the quiz attempt id) a few seconds after the child first passes, so the
+ * reward screen subscribes by the deterministic id and lights up as soon as
+ * the trigger lands. `data === null` with `loading === false` means "no
+ * reward yet" -- the screen shows a friendly fallback after a short wait.
+ */
+export function useRewardUnlock(
+  attemptId: string | null,
+): HookState<RewardUnlock> {
+  const [state, setState] = useState<HookState<RewardUnlock>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  useEffect(() => {
+    if (!attemptId) {
+      setState({data: null, loading: false, error: null});
+      return;
+    }
+    setState(s => ({...s, loading: true}));
+    const unsub = firestore()
+      .collection('rewardUnlocks')
+      .doc(attemptId)
+      .onSnapshot(
+        snap => {
+          if (!snap.exists) {
+            setState({data: null, loading: false, error: null});
+            return;
+          }
+          setState({
+            data: {id: snap.id, ...(snap.data() as Omit<RewardUnlock, 'id'>)},
+            loading: false,
+            error: null,
+          });
+        },
+        err => setState({data: null, loading: false, error: err.message}),
+      );
+    return unsub;
+  }, [attemptId]);
+
+  return state;
+}
+
 function todayInSchoolTz(): string {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: SCHOOL_TIMEZONE,

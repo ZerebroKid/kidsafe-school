@@ -130,6 +130,7 @@ export function TopicScreen({route, navigation}: Props) {
               curriculumId,
               chapterId,
               topicId,
+              topicName,
             })
           }
         />

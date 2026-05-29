@@ -1,4 +1,4 @@
-import type {Role} from '@zerebro/shared-types';
+import type {Role, SubmitQuizAttemptOutput} from '@zerebro/shared-types';
 
 /**
  * ZKid navigation type contracts.
@@ -48,6 +48,24 @@ export type StudyStackParamList = {
     curriculumId: string;
     chapterId: string;
     topicId: string;
+    topicName: string;
+  };
+  QuizResult: {
+    result: SubmitQuizAttemptOutput;
+    topicName: string;
+    // Re-entry params so a failed quiz can offer "Try again" without going back.
+    assignmentId: string;
+    curriculumId: string;
+    chapterId: string;
+    topicId: string;
+  };
+  RewardUnlock: {
+    attemptId: string;
+    topicName: string;
+  };
+  RewardWebView: {
+    url: string;
+    title?: string;
   };
   VideoPlayer: {
     videoUrl: string;

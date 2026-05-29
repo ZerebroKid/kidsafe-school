@@ -65,3 +65,9 @@ export {joinSchool} from './callable/joinSchool';
 
 // P4.5 -- teacher assigns a curated topic to a class
 export {assignTopic} from './callable/assignTopic';
+
+// P4.9 -- child submits a quiz attempt (server-authoritative scoring)
+export {submitQuizAttempt} from './callable/submitQuizAttempt';
+
+// P4.10 -- reward unlock trigger (fires on quizAttempts writes)
+export {onQuizAttemptWrite} from './triggers/onQuizAttemptWrite';

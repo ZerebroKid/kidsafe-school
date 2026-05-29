@@ -370,3 +370,168 @@ export interface AssignTopicOutput {
    */
   alreadyExisted: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// P4.9 -- Quiz attempt (submitQuizAttempt callable)
+// ---------------------------------------------------------------------------
+
+/**
+ * A single answer the child submits for one quiz question. The server NEVER
+ * trusts `selectedIndex` for the score -- it re-grades against the topic doc's
+ * `quiz[].correctIndex`. This shape is only the raw selection.
+ */
+export interface QuizAnswerInput {
+  questionId: string;
+  /** Zero-based index into the question's `options[]`. */
+  selectedIndex: number;
+}
+
+/**
+ * Input contract for the `submitQuizAttempt` callable. The child sends only
+ * the assignment id + their raw selections; everything else (topic, school,
+ * class, grading) is resolved server-side from the assignment.
+ */
+export interface SubmitQuizAttemptInput {
+  assignmentId: string;
+  answers: QuizAnswerInput[];
+}
+
+/**
+ * Per-question grading result returned to the client so the result screen can
+ * render a correct/wrong breakdown WITHOUT a second Firestore read. Includes
+ * `correctIndex` + `explanation` (already readable in the topic doc anyway).
+ */
+export interface QuizQuestionResult {
+  questionId: string;
+  /** What the child picked (-1 if they left it blank / sent an out-of-range value). */
+  selectedIndex: number;
+  correctIndex: number;
+  isCorrect: boolean;
+  explanation?: string;
+}
+
+/**
+ * Output of `submitQuizAttempt`. `passed` uses the locked 60% threshold. The
+ * result screen renders entirely from this payload.
+ */
+export interface SubmitQuizAttemptOutput {
+  attemptId: string;
+  score: number;
+  total: number;
+  /** Integer 0-100, rounded. */
+  percentage: number;
+  passed: boolean;
+  /** True only on the attempt that first crossed the pass threshold. */
+  firstPass: boolean;
+  results: QuizQuestionResult[];
+}
+
+/**
+ * `quizAttempts/{assignmentId}_{childUid}` -- ONE doc per (assignment, child),
+ * written exclusively by the `submitQuizAttempt` callable (Admin SDK). The
+ * deterministic id makes retakes an idempotent upsert: each submit bumps
+ * `attemptCount`, refreshes the `last*` fields, keeps the `best*` high-water
+ * mark, and flips `passed` sticky-true once any attempt clears 60%.
+ *
+ * Field naming aligns with firestore/rules `match /quizAttempts/{id}`:
+ *   - `childUid` (child self-read + parent `isOwnChild` read)
+ *   - `assignedByTeacherUid` (teacher self-read)
+ *   - `schoolId` (principal `belongsToSchool` read)
+ */
+export interface QuizAttemptDoc {
+  /** Same value as the Firestore doc id (`{assignmentId}_{childUid}`). */
+  id: string;
+  assignmentId: string;
+  schoolId: string;
+  classId: string;
+  curriculumId: string;
+  chapterId: string;
+  topicId: string;
+  /** Denormalised from the assignment for report UIs. */
+  topicName: string;
+  /** Denormalised from the assignment; lowercased copy in `subjectTag` drives reward matching. */
+  subjectName: string;
+  childUid: string;
+  /** Best-effort copy of `users/{childUid}.parentUid`; absent if the child has no linked parent. */
+  parentUid?: string;
+  /** Copied from the assignment so the teacher self-read rule resolves. */
+  assignedByTeacherUid: string;
+  /** `YYYY-MM-DD` (school TZ) copied from the assignment. */
+  assignedDate: string;
+  /** Number of questions graded (denominator). */
+  total: number;
+  /** How many times this child has submitted this assignment's quiz. */
+  attemptCount: number;
+  /** Most recent attempt. */
+  lastScore: number;
+  lastPercentage: number;
+  lastAnswers: QuizAnswerInput[];
+  /** High-water mark across all attempts. */
+  bestScore: number;
+  bestPercentage: number;
+  /** Sticky once any attempt clears the 60% threshold. */
+  passed: boolean;
+  /** Server-stamped the first time `passed` flips true. Drives the reward trigger. */
+  firstPassedAt?: FirestoreFieldValueLike;
+  createdAt: FirestoreFieldValueLike;
+  updatedAt: FirestoreFieldValueLike;
+}
+
+// ---------------------------------------------------------------------------
+// P4.10 -- Reward catalog + reward unlock
+// ---------------------------------------------------------------------------
+
+export type RewardType = 'youtube_link' | 'game_link' | 'article_link';
+export type RewardModerationStatus = 'pending' | 'approved' | 'rejected';
+
+/**
+ * `rewardCatalog/{rewardId}` -- admin-curated reward pool. Written by the
+ * admin web (`isAdmin()` rule); read by signed-in clients ONLY when
+ * `moderationStatus == 'approved'` (firestore/rules) and by the
+ * `onQuizAttemptWrite` trigger via Admin SDK.
+ *
+ * MVP eligibility (locked decision): the reward picker matches on
+ * `subjectTags array-contains <subject>` + `moderationStatus == 'approved'`
+ * only -- no age/grade filtering yet. `subjectTags` MUST be stored lowercased
+ * so the trigger's lowercased `array-contains` lookup matches.
+ */
+export interface RewardDoc {
+  id: string;
+  type: RewardType;
+  title: string;
+  /** Reward destination. youtube_link -> in-app player; others -> sandboxed in-app webview. */
+  url: string;
+  /** Lowercased subject keys (e.g. ["science"]). Matched against the topic's subject. */
+  subjectTags: string[];
+  moderationStatus: RewardModerationStatus;
+  /** Admin uid who set `moderationStatus` to approved/rejected. */
+  approvedBy?: string;
+  createdAt: FirestoreFieldValueLike;
+}
+
+/**
+ * `rewardUnlocks/{attemptId}` -- written exclusively by the
+ * `onQuizAttemptWrite` trigger (Admin SDK) the first time a child passes a
+ * given assignment's quiz. Doc id == the quiz attempt id so the write is
+ * idempotent across trigger re-fires. Reward fields are denormalised so ZKid
+ * can render the unlock without a follow-up `rewardCatalog` read.
+ *
+ * firestore/rules `match /rewardUnlocks/{id}` reads `childUid` for the child
+ * self-read + parent `isOwnChild` read.
+ */
+export interface RewardUnlockDoc {
+  /** Same value as the Firestore doc id (== the quiz attempt id). */
+  id: string;
+  attemptId: string;
+  childUid: string;
+  parentUid?: string;
+  schoolId: string;
+  classId: string;
+  topicId: string;
+  rewardId: string;
+  /** Denormalised reward snapshot for ZKid rendering. */
+  rewardType: RewardType;
+  rewardTitle: string;
+  rewardUrl: string;
+  unlockedAt: FirestoreFieldValueLike;
+}

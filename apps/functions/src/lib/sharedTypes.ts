@@ -36,3 +36,43 @@ export interface AssignTopicOutput {
   assignmentId: string;
   alreadyExisted: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// P4.9.2 -- submitQuizAttempt I/O contracts. Mirror of the same interfaces in
+// @zerebro/shared-types/education.ts -- keep these IN SYNC.
+// ---------------------------------------------------------------------------
+
+export interface QuizAnswerInput {
+  questionId: string;
+  selectedIndex: number;
+}
+
+export interface SubmitQuizAttemptInput {
+  assignmentId: string;
+  answers: QuizAnswerInput[];
+}
+
+export interface QuizQuestionResult {
+  questionId: string;
+  selectedIndex: number;
+  correctIndex: number;
+  isCorrect: boolean;
+  explanation?: string;
+}
+
+export interface SubmitQuizAttemptOutput {
+  attemptId: string;
+  score: number;
+  total: number;
+  percentage: number;
+  passed: boolean;
+  firstPass: boolean;
+  results: QuizQuestionResult[];
+}
+
+// ---------------------------------------------------------------------------
+// P4.10.2 -- reward types the onQuizAttemptWrite trigger needs. Mirror of
+// RewardType / RewardDoc fields in @zerebro/shared-types/education.ts.
+// ---------------------------------------------------------------------------
+
+export type RewardType = 'youtube_link' | 'game_link' | 'article_link';

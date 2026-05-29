@@ -71,6 +71,22 @@
         {"fieldPath": "classId", "order": "ASCENDING"},
         {"fieldPath": "assignedDate", "order": "DESCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "rewardCatalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "moderationStatus", "order": "ASCENDING"},
+        {"fieldPath": "subjectTags", "arrayConfig": "CONTAINS"}
+      ]
+    },
+    {
+      "collectionGroup": "rewardUnlocks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "childUid", "order": "ASCENDING"},
+        {"fieldPath": "unlockedAt", "order": "DESCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

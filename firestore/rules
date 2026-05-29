@@ -499,8 +499,15 @@ service cloud.firestore {
     //   clients only need read access to render "what could I unlock?"
     //   previews. We gate visibility on moderationStatus so unapproved
     //   drafts don't leak to a kid's preview UI.
+    //
+    //   Admins get an unconditional read so the catalogue moderation UI can
+    //   LIST every reward (pending / approved / rejected). Without this branch
+    //   the admin list query is denied wholesale because "rules are not
+    //   filters" -- a query that could surface a non-approved doc is rejected
+    //   even for an admin. Kids/parents still only ever read approved rewards.
     match /rewardCatalog/{id} {
-      allow read: if isSignedIn() && resource.data.moderationStatus == 'approved';
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.moderationStatus == 'approved');
       allow create, update, delete: if isAdmin();
     }
 
