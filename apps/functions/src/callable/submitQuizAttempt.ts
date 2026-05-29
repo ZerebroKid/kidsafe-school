@@ -151,6 +151,9 @@ export const submitQuizAttempt = onCall<
     throw new HttpsError('not-found', 'Topic content not found.');
   }
   const topic = topicSnap.data() ?? {};
+  // Denormalise the human-readable chapter name onto the attempt so report UIs
+  // (parent Study tab) can show "which chapter" without an extra read.
+  const chapterName = String(topic.chapterName ?? '');
   const quiz: QuizQuestionShape[] = Array.isArray(topic.quiz)
     ? (topic.quiz as QuizQuestionShape[])
     : [];
@@ -228,6 +231,7 @@ export const submitQuizAttempt = onCall<
         classId,
         curriculumId,
         chapterId,
+        chapterName,
         topicId,
         topicName,
         subjectName,

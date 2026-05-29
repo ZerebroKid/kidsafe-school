@@ -87,6 +87,14 @@
         {"fieldPath": "childUid", "order": "ASCENDING"},
         {"fieldPath": "unlockedAt", "order": "DESCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "quizAttempts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "assignedByTeacherUid", "order": "ASCENDING"},
+        {"fieldPath": "classId", "order": "ASCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

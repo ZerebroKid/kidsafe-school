@@ -1,6 +1,8 @@
 import React, {useMemo} from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -9,6 +11,7 @@ import {
 } from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
+import {signOut} from '@zerebro/shared-firebase/auth';
 import {Button} from '../../components/Button';
 import {
   useTeacherActiveSchool,
@@ -67,7 +70,12 @@ export function TeacherHomeScreen({navigation}: Props) {
         />
       }>
       <View>
-        <Text style={styles.greeting}>Welcome, {teacherName}</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.greeting}>Welcome, {teacherName}</Text>
+          <Pressable hitSlop={8} onPress={confirmSignOut}>
+            <Text style={styles.signOut}>Sign out</Text>
+          </Pressable>
+        </View>
         {schoolState.error ? (
           <Text style={styles.errorBanner}>{schoolState.error}</Text>
         ) : !schoolState.data && !schoolState.loading ? (
@@ -100,7 +108,9 @@ export function TeacherHomeScreen({navigation}: Props) {
             </Text>
           </View>
         ) : (
-          renderByClass(byClass, classesState.data ?? [])
+          renderByClass(byClass, classesState.data ?? [], (classId, className) =>
+            navigation.navigate('TeacherClassReport', {classId, className}),
+          )
         )}
       </View>
     </ScrollView>
@@ -110,6 +120,7 @@ export function TeacherHomeScreen({navigation}: Props) {
 function renderByClass(
   byClass: Map<string, AssignmentRow[]>,
   classes: Array<{id: string; className: string}>,
+  onOpenReport: (classId: string, className: string) => void,
 ): React.ReactElement {
   const classLabel = new Map<string, string>();
   for (const c of classes) classLabel.set(c.id, c.className);
@@ -118,23 +129,42 @@ function renderByClass(
   );
   return (
     <View style={{gap: spacing.md}}>
-      {groups.map(([classId, rows]) => (
+      {groups.map(([classId, rows]) => {
+        const className = classLabel.get(classId) ?? classId;
+        return (
         <View key={classId} style={styles.classGroup}>
-          <Text style={styles.classGroupTitle}>
-            Class {classLabel.get(classId) ?? classId}
-          </Text>
+          <Pressable
+            style={styles.classGroupHeader}
+            onPress={() => onOpenReport(classId, className)}>
+            <Text style={styles.classGroupTitle}>Class {className}</Text>
+            <Text style={styles.classGroupLink}>View report ›</Text>
+          </Pressable>
           {rows.map(row => (
             <View key={row.id} style={styles.card}>
               <Text style={styles.cardTitle}>{row.topicName}</Text>
               <Text style={styles.cardMeta}>
-                Due {formatDueAt(row.dueAt)} • {row.subjectId}
+                Due {formatDueAt(row.dueAt)} • {row.subjectName}
               </Text>
             </View>
           ))}
         </View>
-      ))}
+        );
+      })}
     </View>
   );
+}
+
+function confirmSignOut(): void {
+  Alert.alert('Sign out', 'You will need to sign in again with your phone number.', [
+    {text: 'Cancel', style: 'cancel'},
+    {
+      text: 'Sign out',
+      style: 'destructive',
+      onPress: () => {
+        signOut().catch(err => console.warn('signOut failed', err));
+      },
+    },
+  ]);
 }
 
 function formatDueAt(epochMs: number): string {
@@ -153,7 +183,14 @@ function formatDueAt(epochMs: number): string {
 const styles = StyleSheet.create({
   scroll: {flex: 1, backgroundColor: colors.bg},
   container: {padding: spacing.lg, gap: spacing.lg},
-  greeting: {color: colors.text, fontSize: 24, fontWeight: '700'},
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  greeting: {flex: 1, color: colors.text, fontSize: 24, fontWeight: '700'},
+  signOut: {color: colors.danger, fontSize: 14, fontWeight: '600'},
   bodyMuted: {
     color: colors.textMuted,
     fontSize: 14,
@@ -181,11 +218,21 @@ const styles = StyleSheet.create({
   emptyTitle: {color: colors.text, fontSize: 15, fontWeight: '600'},
   emptyBody: {color: colors.textMuted, fontSize: 13, lineHeight: 18},
   classGroup: {gap: spacing.xs},
+  classGroupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   classGroupTitle: {
     color: colors.textMuted,
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  classGroupLink: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '600',
   },
   card: {
     backgroundColor: colors.surface,

@@ -10,12 +10,13 @@ import {CurrentAppPill} from './CurrentAppPill';
 import {LocationTab} from './LocationTab';
 import {PinTab} from './PinTab';
 import {ScheduleTab} from './ScheduleTab';
+import {StudyTab} from './StudyTab';
 import {UsageTab} from './UsageTab';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<ParentStackParamList, 'ChildDetails'>;
 
-type Tab = 'apps' | 'schedule' | 'location' | 'usage' | 'pin';
+type Tab = 'apps' | 'schedule' | 'location' | 'usage' | 'pin' | 'study';
 
 interface TamperEvent {
   id: string;
@@ -81,6 +82,7 @@ export function ChildDetailsScreen({route}: Props) {
             active={tab === 'location'}
             onPress={() => setTab('location')}
           />
+          <TabButton label="Study" active={tab === 'study'} onPress={() => setTab('study')} />
           <TabButton label="Usage" active={tab === 'usage'} onPress={() => setTab('usage')} />
           <TabButton label="PIN" active={tab === 'pin'} onPress={() => setTab('pin')} />
         </View>
@@ -104,6 +106,7 @@ export function ChildDetailsScreen({route}: Props) {
               </>
             )}
             {tab === 'schedule' && <ScheduleTab childUid={childUid} />}
+            {tab === 'study' && <StudyTab childUid={childUid} />}
             {tab === 'usage' && <UsageTab childUid={childUid} />}
             {tab === 'pin' && <PinTab childUid={childUid} childName={childName} />}
           </ScrollView>
@@ -178,7 +181,11 @@ function TabButton({
 }) {
   return (
     <Pressable onPress={onPress} style={[styles.tab, active && styles.tabActive]}>
-      <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>{label}</Text>
+      <Text
+        numberOfLines={1}
+        style={[styles.tabLabel, active && styles.tabLabelActive]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -212,11 +219,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
     borderRadius: radius.pill,
   },
   tabActive: {backgroundColor: colors.primary},
-  tabLabel: {color: colors.textMuted, fontWeight: '600', fontSize: 12},
+  tabLabel: {color: colors.textMuted, fontWeight: '600', fontSize: 11},
   tabLabelActive: {color: colors.primaryText},
   tamperCard: {
     marginHorizontal: spacing.md,

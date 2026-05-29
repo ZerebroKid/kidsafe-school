@@ -3,6 +3,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {TeacherHomeScreen} from '../screens/teacher/HomeScreen';
 import {TeacherAssignScreen} from '../screens/teacher/AssignScreen';
+import {ClassReportScreen} from '../screens/teacher/ClassReportScreen';
+import {ClassStudentListScreen} from '../screens/teacher/ClassStudentListScreen';
 import type {TeacherStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<TeacherStackParamList>();
@@ -31,6 +33,16 @@ export function TeacherNavigator() {
         name="TeacherAssign"
         component={TeacherAssignScreen}
         options={{title: 'Assign a topic'}}
+      />
+      <Stack.Screen
+        name="TeacherClassReport"
+        component={ClassReportScreen}
+        options={{title: 'Class report'}}
+      />
+      <Stack.Screen
+        name="TeacherClassStudents"
+        component={ClassStudentListScreen}
+        options={{title: 'Students'}}
       />
     </Stack.Navigator>
   );

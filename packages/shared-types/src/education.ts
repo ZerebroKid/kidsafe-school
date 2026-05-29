@@ -446,6 +446,8 @@ export interface QuizAttemptDoc {
   classId: string;
   curriculumId: string;
   chapterId: string;
+  /** Denormalised from the topic content (`chapterName`) for report UIs. */
+  chapterName: string;
   topicId: string;
   /** Denormalised from the assignment for report UIs. */
   topicName: string;

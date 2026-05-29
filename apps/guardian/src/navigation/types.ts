@@ -49,4 +49,8 @@ export type ParentTabsParamList = {
 export type TeacherStackParamList = {
   TeacherHome: undefined;
   TeacherAssign: undefined;
+  /** P4.11 -- per-class study report (aggregated charts + stats). */
+  TeacherClassReport: {classId: string; className: string};
+  /** P4.11 -- full per-student roster for a class (reached from the report). */
+  TeacherClassStudents: {classId: string; className: string};
 };
