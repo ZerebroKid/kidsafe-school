@@ -287,3 +287,86 @@ export interface TopicContent {
   curatedBy: string;
   publishedAt?: FirestoreFieldValueLike;
 }
+
+// ---------------------------------------------------------------------------
+// P4.5.1 -- StudyAssignment (teacher -> class topic assignment)
+// ---------------------------------------------------------------------------
+
+/**
+ * `studyAssignments/{id}` -- TOP-LEVEL doc written exclusively by the
+ * `assignTopic` callable via Admin SDK (firestore/rules blocks all client
+ * writes -- only Admin SDK can create / update / delete).
+ *
+ * Doc id is DETERMINISTIC: `{classId}_{topicId}_{assignedDate}` where
+ * `assignedDate` is the YYYY-MM-DD of the assignment in the school's TZ
+ * (Asia/Kolkata for the MVP). The id lets the callable hard-block
+ * duplicate same-day assignments inside the transaction with a single
+ * point read instead of a query.
+ *
+ * Field naming aligns with the already-deployed rules (P3.4.2):
+ *   - `assignedByTeacherUid` (NOT `assignedByTeacherId`) -- the rules at
+ *     `match /studyAssignments/{id}` read `resource.data.assignedByTeacherUid`
+ *     to grant the teacher self-read; changing the field name would silently
+ *     break that rule.
+ *
+ * Denormalisation: `topicName` and `curriculumId` are copied onto the
+ * assignment doc so list UIs (teacher home, ZKid Study Mission) can render
+ * a card with one query instead of a fan-out read per assignment.
+ *
+ * `status` is `'active'` on creation; `'cancelled'` is reserved for a
+ * future cancel flow (not built in P4.5). The callable treats a stale
+ * `cancelled` doc with the same id as overwritable -- a teacher can
+ * re-assign the same topic on the same day after cancelling.
+ */
+export interface StudyAssignmentDoc {
+  /** Same value as the Firestore doc id. Denormalised so list reads don't need `snap.id`. */
+  id: string;
+  schoolId: string;
+  classId: string;
+  /** Doc id in the global `curriculum` collection (e.g. `cbse_8_science`). */
+  curriculumId: string;
+  /** Human-readable subject name from `curriculum/{curriculumId}.subject`. */
+  subjectName: string;
+  chapterId: string;
+  topicId: string;
+  /** Denormalised from `curriculum/.../topics/{topicId}.topicName` at write time. */
+  topicName: string;
+  /** Auth uid of the teacher who issued the assignment. Matches the firestore/rules predicate. */
+  assignedByTeacherUid: string;
+  /** Optional display name -- best effort copy from the active teacher doc; absent if missing. */
+  assignedByTeacherDisplayName?: string;
+  /** `YYYY-MM-DD` in the school TZ (Asia/Kolkata for MVP). Part of the deterministic doc id. */
+  assignedDate: string;
+  /** Server-stamped on create/overwrite. */
+  assignedAt: FirestoreFieldValueLike;
+  /** Epoch ms in UTC. Enforced by the callable to be >= now AND <= now + 30d. */
+  dueAt: number;
+  status: 'active' | 'cancelled';
+}
+
+/**
+ * Input contract for the `assignTopic` callable. Mirrored on both the
+ * client side (`callFn<AssignTopicInput, AssignTopicOutput>(...)`) and the
+ * server side. `dueAt` is epoch ms in UTC; the client should default it
+ * to today 23:59 in the teacher's TZ.
+ */
+export interface AssignTopicInput {
+  schoolId: string;
+  classId: string;
+  curriculumId: string;
+  chapterId: string;
+  topicId: string;
+  dueAt: number;
+}
+
+export interface AssignTopicOutput {
+  assignmentId: string;
+  /**
+   * Always `false` from the production callable -- duplicate same-day
+   * assignments throw `failed-precondition` instead of returning a
+   * pre-existing id (locked decision in the P4.5 plan: hard-block dups).
+   * Kept on the contract so a future `force=true` override stays a
+   * non-breaking change.
+   */
+  alreadyExisted: boolean;
+}

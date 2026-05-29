@@ -25,8 +25,11 @@
  *   - schools/demo_school_001/teachers/<demoTeacherUid> status='pending' (P4.3)
  */
 
+import * as path from 'path';
+
 import {FieldValue} from 'firebase-admin/firestore';
 import {initScriptAdmin, parseBaseFlags} from './lib/scriptInit';
+import {importBundle, resolveBundles} from './importCurriculum';
 
 const DEMO_ADMIN_PHONE = '+919999900001';
 const DEMO_ADMIN_NAME = 'Demo Admin';
@@ -251,7 +254,167 @@ async function main(): Promise<void> {
     }
   }
 
+  // P4.5 -- import the sample curriculum bundle (cbse_8_science / Force &
+  // Pressure) so the demo teacher's Assign Topic flow has real published
+  // topics to pick from out of the box. Idempotent against re-runs.
+  await seedCurriculum(db, flags.apply);
+
+  // P4.5 -- approve the demo teacher AND stamp them into class 8A so they
+  // can immediately assign topics. We never demote an already-approved
+  // teacher; this only flips a pending status forward.
+  await seedDemoTeacherApproval(db, teacherUid, flags.apply);
+
   console.log('[done]', flags.apply ? 'applied' : 'dry-run (re-run with --apply)');
+}
+
+/**
+ * Pulls in the sample bundle under `content/cbse_8_science/` via the
+ * importCurriculum helpers so the emulator has a published topic to
+ * assign. Re-runs the same import logic the standalone CLI uses, so the
+ * idempotency story is identical.
+ *
+ * Resolves the content path relative to the monorepo root rather than
+ * `process.cwd()` because `pnpm seed:staging` is launched from various
+ * directories (root, apps/functions/, CI). The seed script lives at
+ * `apps/functions/dist/scripts/seedStaging.js` -- four `..` jumps land
+ * us at the monorepo root (dist/scripts -> dist -> apps/functions ->
+ * apps -> <root>).
+ */
+async function seedCurriculum(
+  db: ReturnType<typeof initScriptAdmin>['db'],
+  apply: boolean,
+): Promise<void> {
+  const contentRoot = path.resolve(__dirname, '..', '..', '..', '..', 'content');
+  const bundles = resolveBundles(contentRoot);
+  if (bundles.length === 0) {
+    console.log(`[skip] no curriculum bundles under ${contentRoot}`);
+    return;
+  }
+  const counts = {curricula: 0, chapters: 0, topics: 0, topicErrors: 0};
+  for (const bundle of bundles) {
+    console.log(`[bundle] ${bundle}`);
+    await importBundle(db, bundle, apply, counts);
+  }
+  console.log(
+    `[curriculum] ${apply ? 'applied' : 'dry-run'} ` +
+      `curricula=${counts.curricula} chapters=${counts.chapters} topics=${counts.topics} errors=${counts.topicErrors}`,
+  );
+}
+
+/**
+ * Approves the demo teacher and stamps their uid onto every demo class +
+ * its science subject's `teacherIds`. Idempotent -- skips when already
+ * applied. This is the same shape `approveTeacher` callable produces in
+ * prod, just without going through the callable round-trip.
+ */
+async function seedDemoTeacherApproval(
+  db: ReturnType<typeof initScriptAdmin>['db'],
+  teacherUid: string,
+  apply: boolean,
+): Promise<void> {
+  if (teacherUid.startsWith('DRYRUN_')) {
+    console.log('[skip] demo teacher approval -- DRYRUN uid (no auth user)');
+    return;
+  }
+
+  const schoolRef = db.collection('schools').doc(DEMO_SCHOOL_ID);
+  const teacherDocRef = schoolRef.collection('teachers').doc(teacherUid);
+  const teacherSnap = await teacherDocRef.get();
+  if (!teacherSnap.exists) {
+    console.log(
+      `[skip] schools/${DEMO_SCHOOL_ID}/teachers/${teacherUid} missing -- run seed for users first`,
+    );
+    return;
+  }
+  const teacherData = teacherSnap.data() ?? {};
+
+  if (teacherData.status === 'active') {
+    console.log(
+      `[skip] schools/${DEMO_SCHOOL_ID}/teachers/${teacherUid} already active`,
+    );
+  } else if (teacherData.status === 'pending') {
+    console.log(
+      `[plan] schools/${DEMO_SCHOOL_ID}/teachers/${teacherUid} (approve: status=active)`,
+    );
+    if (apply) {
+      await teacherDocRef.update({
+        status: 'active',
+        approvedByUid: 'seed_script',
+        approvedAt: FieldValue.serverTimestamp(),
+      });
+    }
+  } else {
+    console.log(
+      `[skip] schools/${DEMO_SCHOOL_ID}/teachers/${teacherUid} status=${teacherData.status} -- leaving alone`,
+    );
+  }
+
+  // Mirror the `users/{uid}.roles arrayUnion 'teacher'` write that
+  // `approveTeacher` does. Keeps the seed-only path identical to prod so
+  // RoleOnboardingGate doesn't strand the demo teacher.
+  const userRef = db.collection('users').doc(teacherUid);
+  const userSnap = await userRef.get();
+  const userData = userSnap.exists ? userSnap.data() ?? {} : {};
+  const roles: string[] = Array.isArray(userData.roles)
+    ? userData.roles.filter((r: unknown): r is string => typeof r === 'string')
+    : [];
+  if (!roles.includes('teacher')) {
+    console.log(`[plan] users/${teacherUid} (roles += 'teacher')`);
+    if (apply) {
+      const patch: Record<string, unknown> = {
+        roles: FieldValue.arrayUnion('teacher'),
+      };
+      if (typeof userData.primaryRole !== 'string' || userData.primaryRole.length === 0) {
+        patch.primaryRole = 'teacher';
+      }
+      await userRef.set(patch, {merge: true});
+    }
+  } else {
+    console.log(`[skip] users/${teacherUid} already has role 'teacher'`);
+  }
+
+  // Stamp the teacher into class 8A + each subject (so the Assign topic
+  // picker has real options to render).
+  for (const klass of CLASSES) {
+    const classRef = schoolRef.collection('classes').doc(klass.id);
+    const snap = await classRef.get();
+    if (!snap.exists) continue;
+    const data = snap.data() ?? {};
+    const teacherIds: string[] = Array.isArray(data.teacherIds)
+      ? data.teacherIds.filter((t: unknown): t is string => typeof t === 'string')
+      : [];
+    if (teacherIds.includes(teacherUid)) {
+      console.log(`[skip] classes/${klass.id} already has teacher`);
+    } else {
+      console.log(`[plan] classes/${klass.id}.teacherIds += teacher`);
+      if (apply) {
+        await classRef.update({
+          teacherIds: FieldValue.arrayUnion(teacherUid),
+        });
+      }
+    }
+
+    for (const subject of SUBJECTS) {
+      const subjectRef = classRef.collection('subjects').doc(subject.id);
+      const subjSnap = await subjectRef.get();
+      if (!subjSnap.exists) continue;
+      const sData = subjSnap.data() ?? {};
+      const sTeacherIds: string[] = Array.isArray(sData.teacherIds)
+        ? sData.teacherIds.filter(
+            (t: unknown): t is string => typeof t === 'string',
+          )
+        : [];
+      if (sTeacherIds.includes(teacherUid)) continue;
+      console.log(
+        `[plan] classes/${klass.id}/subjects/${subject.id}.teacherIds += teacher`,
+      );
+      if (apply) {
+        await subjectRef.update({
+          teacherIds: FieldValue.arrayUnion(teacherUid),
+        });
+      }
+    }
+  }
 }
 
 async function ensureUser(

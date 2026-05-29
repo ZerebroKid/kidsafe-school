@@ -22,6 +22,7 @@ const NAV = [
   {href: '/schools', label: 'Schools'},
   {href: '/principals', label: 'Principals'},
   {href: '/syllabus-sources', label: 'Syllabus sources'},
+  {href: '/curriculum', label: 'Curriculum'},
   {href: '/rewards', label: 'Rewards'},
   {href: '/users', label: 'Users'},
   {href: '/audit', label: 'Audit'},

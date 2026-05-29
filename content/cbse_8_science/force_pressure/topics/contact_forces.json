@@ -1,0 +1,90 @@
+{
+  "curriculumId": "cbse_8_science",
+  "grade": 8,
+  "subject": "science",
+  "chapterNo": 11,
+  "chapterName": "Force and Pressure",
+  "topicId": "contact_forces",
+  "topicName": "Contact Forces: Muscular and Frictional",
+  "explanation": "Contact forces only act when two objects are physically touching. Muscular force is what your body produces when you push, pull, lift, or kick. Frictional force opposes the relative motion between two surfaces that slide (or try to slide) over each other; it depends on the roughness of the surfaces and the weight pressing them together. Without friction, walking would be impossible because your shoe would simply slide on the floor.",
+  "examples": [
+    "Lifting a school bag involves muscular force from your arm.",
+    "A car slowing down without using brakes is mainly stopped by friction between its tyres and the road.",
+    "Rubbing your palms together quickly produces heat because of the friction between them."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=contact_forces_approved",
+  "brainstorming": [
+    {
+      "question": "Why is it easier to slide a heavy box on a polished floor than on a rough mat?",
+      "answer": "Smoother surfaces have less friction. The rough mat has more bumps that interlock with the box's bottom, so it resists motion more strongly than the polished floor.",
+      "videoUrl": "https://www.youtube.com/watch?v=friction_surfaces"
+    },
+    {
+      "question": "What would happen on a perfectly frictionless football field?",
+      "answer": "Players couldn't push off the ground to run or stop. The ball would never slow down on its own, and a tiny push could send it flying for a very long time."
+    },
+    {
+      "question": "Are wheels designed to reduce friction or use it?",
+      "answer": "Both. Wheels REDUCE sliding friction at the axle (rolling friction is much smaller), but tyres USE friction with the road so a vehicle can grip, turn, and brake."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Friction is a force that:",
+      "options": [
+        "Acts at a distance through a field",
+        "Opposes the relative motion of two contacting surfaces",
+        "Always speeds up moving objects",
+        "Only acts on magnetic objects"
+      ],
+      "correctIndex": 1,
+      "explanation": "Friction acts only between surfaces in contact and opposes their relative motion."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which surface produces the LEAST friction with a sliding box?",
+      "options": ["A rough carpet", "A wooden plank", "A sheet of glass", "Sandpaper"],
+      "correctIndex": 2,
+      "explanation": "Smoother surfaces produce less friction; a sheet of glass is smoother than the others listed."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Lifting your school bag uses primarily which force?",
+      "options": ["Magnetic", "Frictional", "Muscular", "Gravitational"],
+      "correctIndex": 2,
+      "explanation": "Your arm muscles produce muscular force to lift the bag against gravity."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Rubbing two surfaces produces heat because:",
+      "options": [
+        "Air gets trapped between them",
+        "Friction converts movement into heat",
+        "The surfaces become magnetised",
+        "Gravity increases"
+      ],
+      "correctIndex": 1,
+      "explanation": "Friction does work against the motion and that work shows up as heat."
+    },
+    {
+      "questionId": "q5",
+      "type": "mcq",
+      "question": "Which of these would be the BEST way to reduce friction between two metal parts?",
+      "options": [
+        "Spray water on them",
+        "Apply oil between them",
+        "Make them rougher",
+        "Press them together harder"
+      ],
+      "correctIndex": 1,
+      "explanation": "Lubricants like oil form a thin film that keeps the surfaces from grinding directly together."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

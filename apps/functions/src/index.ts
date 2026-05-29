@@ -62,3 +62,6 @@ export {rejectTeacher} from './callable/rejectTeacher';
 // P4.4 -- parent + child school link (no approval gate; one-shot if code valid)
 export {joinSchoolAsParent} from './callable/joinSchoolAsParent';
 export {joinSchool} from './callable/joinSchool';
+
+// P4.5 -- teacher assigns a curated topic to a class
+export {assignTopic} from './callable/assignTopic';

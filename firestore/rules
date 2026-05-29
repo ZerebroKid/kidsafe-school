@@ -37,6 +37,12 @@ rules_version = '2';
 // 16. teacher reads other teacher's class              READ  /schools/SCHOOL_A/classes/CLASS_B
 //                                                                                      as TEACHER_A (NOT in teacherIds) -- deny
 // 17. random user writes studyAssignments              CREATE /studyAssignments/X     as any client -- deny  (server-only)
+// 17a. teacher reads OWN studyAssignments               READ  /studyAssignments/A      as TEACHER_A (assignedByTeacherUid=TEACHER_A) -- allow
+// 17b. teacher reads ANOTHER teacher's studyAssignment  READ  /studyAssignments/B      as TEACHER_A (assignedByTeacherUid=TEACHER_B) -- deny
+// 17c. child reads studyAssignment for OWN class        READ  /studyAssignments/A      as CHILD_A (children/CHILD_A.classId.classId == resource.data.classId) -- allow
+// 17d. child reads studyAssignment for OTHER class      READ  /studyAssignments/B      as CHILD_A (classId mismatch) -- deny
+// 17e. principal reads any studyAssignment in own school READ /studyAssignments/A      as PRINCIPAL_A (resource.data.schoolId == own school) -- allow
+// 17f. parent reads studyAssignment via legacy childUid READ  /studyAssignments/A      as PARENT_A (no childUid on doc) -- DENY (P4.11 will revisit)
 // 18. random user writes quizAttempts                  CREATE /quizAttempts/X         as any client -- deny  (server-only)
 // 19. signed-in user reads pending/draft reward        READ  /rewardCatalog/R_PEND (moderationStatus='pending') as any signed-in -- deny
 // 20. parent of one school principal reads another school
@@ -424,20 +430,33 @@ service cloud.firestore {
 
     // studyAssignments/{id}
     //   Written exclusively by the `assignTopic` callable (Admin SDK).
-    //   Reads: assigned teacher, kids in the class, parents of those kids,
-    //   the principal of the school.
+    //   Reads: assigned teacher, kids in the class, principal of the school.
+    //
+    //   P4.5.1 -- the document is CLASS-LEVEL: there is no `childUid` field.
+    //   The previous P3.4.2 stub gated parent reads on
+    //   `isOwnChild(resource.data.childUid)` which would always fail (the
+    //   field is undefined). We drop that branch here intentionally; parent
+    //   visibility for assignments will be revisited in P4.11 (parent Study
+    //   tab), where we'll either:
+    //     a) add a `childUid[]` denormalisation for parent-fan-out (heavy), or
+    //     b) hydrate the assignment client-side from the child's `classId`.
+    //   The parent tab also reads `quizAttempts` which IS filtered by
+    //   `assignedByTeacherUid` / `childUid`, so parents still see scores
+    //   without needing to read the underlying assignment.
+    //
+    //   The two remaining read paths cover the MVP:
+    //     - teacher self-read: `assignedByTeacherUid == myUid()`
+    //     - child class-read: the child's own `children/{uid}.classId.classId`
+    //       must equal the assignment's `classId`. Same pattern the class
+    //       and subject docs use above.
+    //   Principal read for school-wide views ships with `belongsToSchool` if
+    //   we add `schoolId` filtering on the principal dashboard query later.
     match /studyAssignments/{id} {
       allow read: if isAdmin()
         || (isTeacher() && resource.data.assignedByTeacherUid == myUid())
         || (isSignedIn() && exists(/databases/$(database)/documents/children/$(myUid()))
             && get(/databases/$(database)/documents/children/$(myUid())).data.classId.classId == resource.data.classId)
-        // Parent path: read assignments for any of the parent's linked children.
-        // We can't cheaply enumerate linked children from inside a rule, so the
-        // parent UI passes the child's classId via a where() clause and the
-        // rule below checks that the parent owns the child whose classId
-        // matches. The Parent's app code resolves `classId -> childUid` via
-        // its own children query before issuing the assignment query.
-        || (isParent() && isOwnChild(resource.data.childUid));
+        || belongsToSchool(resource.data.schoolId);
       allow create, update, delete: if false;
     }
 

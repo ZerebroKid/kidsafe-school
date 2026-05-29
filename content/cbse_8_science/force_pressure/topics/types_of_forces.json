@@ -1,0 +1,80 @@
+{
+  "curriculumId": "cbse_8_science",
+  "grade": 8,
+  "subject": "science",
+  "chapterNo": 11,
+  "chapterName": "Force and Pressure",
+  "topicId": "types_of_forces",
+  "topicName": "Types of Forces",
+  "explanation": "A force is a push or a pull on an object. Forces are broadly grouped into contact forces, which act only when two objects touch (muscular force, friction), and non-contact forces, which act at a distance through fields (gravitational force, magnetic force, electrostatic force). Forces change the state of motion, the speed, the direction, or the shape of an object they act upon.",
+  "examples": [
+    "Pushing a door open is a muscular force -- it acts only while your hand is in contact with the door.",
+    "A magnet picking up an iron nail without touching it is a non-contact magnetic force.",
+    "An apple falling from a tree is pulled by gravity, a non-contact force exerted by the Earth."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=force_types_intro_approved",
+  "brainstorming": [
+    {
+      "question": "Can two forces act on the same object at the same time?",
+      "answer": "Yes. When you push a book across a table, your muscular push and friction both act on it. The book moves when your push is larger than friction; it stays put when they are balanced.",
+      "videoUrl": "https://www.youtube.com/watch?v=balanced_unbalanced_forces"
+    },
+    {
+      "question": "Why does a falling leaf drift instead of dropping straight down?",
+      "answer": "Gravity pulls it down, but air resistance (a contact force from millions of air molecules) pushes back on its large surface, so the leaf zig-zags as the two forces compete."
+    },
+    {
+      "question": "Is friction always bad?",
+      "answer": "No. Friction is what lets you walk, write with a pencil, and stop a moving bike. We reduce friction with oil or wheels only when it slows down useful motion."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Which of the following is a contact force?",
+      "options": ["Gravity", "Friction", "Magnetic force", "Electrostatic force"],
+      "correctIndex": 1,
+      "explanation": "Friction acts only when two surfaces are in contact -- it is a contact force."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "A magnet attracts a nail across a small gap. The force between them is:",
+      "options": ["Muscular", "Frictional", "Magnetic (non-contact)", "Gravitational"],
+      "correctIndex": 2,
+      "explanation": "Magnetic force acts at a distance through a field -- it is a non-contact force."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "When you press a soft sponge, the force changes its:",
+      "options": ["Color", "Shape", "Mass", "Temperature"],
+      "correctIndex": 1,
+      "explanation": "Forces can change the shape of an object, especially a soft one like a sponge."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Two equal forces act in opposite directions on a box and it does not move. The forces are:",
+      "options": ["Unbalanced", "Balanced", "Frictionless", "Magnetic"],
+      "correctIndex": 1,
+      "explanation": "Equal and opposite forces on the same object cancel each other -- they are balanced."
+    },
+    {
+      "questionId": "q5",
+      "type": "mcq",
+      "question": "An object falling freely toward the Earth is pulled by:",
+      "options": [
+        "Friction",
+        "Muscular force",
+        "Gravitational force",
+        "Electrostatic force"
+      ],
+      "correctIndex": 2,
+      "explanation": "The Earth pulls every object towards its center -- this is gravitational force."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

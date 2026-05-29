@@ -55,6 +55,22 @@
         {"fieldPath": "roles", "arrayConfig": "CONTAINS"},
         {"fieldPath": "pairingCode", "order": "ASCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "studyAssignments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "assignedByTeacherUid", "order": "ASCENDING"},
+        {"fieldPath": "assignedDate", "order": "DESCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "studyAssignments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "classId", "order": "ASCENDING"},
+        {"fieldPath": "assignedDate", "order": "DESCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

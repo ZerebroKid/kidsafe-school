@@ -120,7 +120,7 @@ export default function ClassesPage() {
       ) : rows.length === 0 ? (
         <div className="rounded-2xl border border-border bg-surface p-8 text-center">
           <p className="text-sm text-text-muted">
-            No classes yet. Create one to start adding subjects and teachers.
+            No classes yet. Create one to get started.
           </p>
         </div>
       ) : (

@@ -5,7 +5,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {PairingCodeScreen} from '../screens/auth/PairingCodeScreen';
 import {PermissionsOnboardingScreen} from '../screens/child/PermissionsOnboardingScreen';
 import {SchoolStep} from '../screens/child/onboarding/SchoolStep';
-import {StatusScreen} from '../screens/child/StatusScreen';
+import {MainTabNavigator} from './MainTabNavigator';
 import {
   AppBlocker,
   DeviceAdmin,
@@ -20,16 +20,11 @@ import type {ChildStackParamList} from './types';
 const Stack = createNativeStackNavigator<ChildStackParamList>();
 
 /**
- * Routes a child user through four linear states (post-P4.4):
+ * Routes a child user through linear gates:
  *   1. Not paired to a parent yet → Pairing
- *   2. Paired but not yet school-linked → SchoolStep (P4.4)
+ *   2. Paired but not yet school-linked → SchoolStep
  *   3. School-linked but permissions missing → PermissionsOnboarding
- *   4. All good → Status
- *
- * The SchoolStep gate (`users.schoolIds` empty/missing) MUST come BEFORE
- * the permissions gate -- a child who hasn't joined a school yet has no
- * roster to drive their study mission, so forcing them through Android
- * permission grants first would just be friction.
+ *   4. All good → MainTabNavigator (Home + Study bottom tabs)
  */
 export function ChildNavigator() {
   const userDoc = useAuthStore(s => s.userDoc);
@@ -113,9 +108,5 @@ export function ChildNavigator() {
     );
   }
 
-  return (
-    <Stack.Navigator screenOptions={screenOptions}>
-      <Stack.Screen name="Status" component={StatusScreen} />
-    </Stack.Navigator>
-  );
+  return <MainTabNavigator />;
 }

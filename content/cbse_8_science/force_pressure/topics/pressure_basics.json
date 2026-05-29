@@ -1,0 +1,85 @@
+{
+  "curriculumId": "cbse_8_science",
+  "grade": 8,
+  "subject": "science",
+  "chapterNo": 11,
+  "chapterName": "Force and Pressure",
+  "topicId": "pressure_basics",
+  "topicName": "Pressure: Force per Unit Area",
+  "explanation": "Pressure is the force acting per unit area. The same force can produce very different effects depending on how spread out the contact is. A sharp knife cuts because all the force is squeezed into a tiny edge -- the pressure is huge. A heavy elephant walking does not sink into soft mud as much as a thin high-heel on the same mud, because the elephant's weight is spread across a large foot. The formula is pressure = force / area. In SI units, force is measured in newtons (N), area in square metres (m^2), and pressure in pascals (Pa).",
+  "examples": [
+    "A drawing pin has a flat head (lots of area for your thumb) and a sharp point (tiny area for the wall) -- you press gently but the wall feels enormous pressure.",
+    "School bags have wide, padded straps so the same weight is spread over more shoulder area -- lower pressure, less pain.",
+    "Snow shoes are very wide so a person's weight doesn't push deep into soft snow."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=pressure_basics_approved",
+  "brainstorming": [
+    {
+      "question": "Why does a sharp knife cut more easily than a blunt one?",
+      "answer": "Both knives can use the same downward force, but the sharp knife's edge has a much smaller area. Pressure = force / area, so a smaller area means a larger pressure -- enough to push the metal through the food.",
+      "videoUrl": "https://www.youtube.com/watch?v=pressure_edge_area"
+    },
+    {
+      "question": "If you stand on one foot, does the pressure under your shoe change?",
+      "answer": "Yes. Your weight is the same, but now the area in contact is just one shoe instead of two. The pressure under that single shoe roughly doubles."
+    },
+    {
+      "question": "Why are dam walls thicker at the bottom than at the top?",
+      "answer": "Water pressure grows with depth, so the wall at the bottom has to push back against much greater pressure than the wall near the surface. A thicker wall can resist that force without cracking."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Pressure is defined as:",
+      "options": [
+        "Force times area",
+        "Force divided by area",
+        "Area divided by force",
+        "Force plus area"
+      ],
+      "correctIndex": 1,
+      "explanation": "Pressure is force per unit area, i.e. force divided by area."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "If the same force is applied through a smaller area, the pressure becomes:",
+      "options": ["Smaller", "Larger", "The same", "Zero"],
+      "correctIndex": 1,
+      "explanation": "Smaller area in the denominator means larger pressure for the same force."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "The SI unit of pressure is the:",
+      "options": ["Newton", "Joule", "Pascal", "Watt"],
+      "correctIndex": 2,
+      "explanation": "One pascal equals one newton per square metre."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Why do school bags have wide, padded straps?",
+      "options": [
+        "They look nicer",
+        "They reduce pressure on the shoulder by increasing the contact area",
+        "They make the bag heavier",
+        "They reduce gravity"
+      ],
+      "correctIndex": 1,
+      "explanation": "Wider straps spread the same weight over more area, lowering the pressure on the shoulder."
+    },
+    {
+      "questionId": "q5",
+      "type": "mcq",
+      "question": "A force of 20 N acts on an area of 4 square metres. The pressure is:",
+      "options": ["5 Pa", "16 Pa", "80 Pa", "24 Pa"],
+      "correctIndex": 0,
+      "explanation": "Pressure = 20 N / 4 m^2 = 5 N/m^2 = 5 pascals."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

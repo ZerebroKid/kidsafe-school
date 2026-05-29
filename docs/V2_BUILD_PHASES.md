@@ -1308,9 +1308,9 @@ flowchart TD
 
 **Acceptance:** Principal sees 1 child + 1 parent after one parent+child completes onboarding. Updates within ~2 seconds of each `joinSchool*` call.
 
-### Group P4.5 — Assign topic
+### Group P4.5 — Assign topic — ✅ shipped
 
-#### P4.5.1 — `assignTopic` callable (4h)
+#### P4.5.1 — `assignTopic` callable (4h) — ✅ shipped
 
 **Files touched:**
 - `apps/functions/src/callable/assignTopic.ts`
@@ -1328,7 +1328,7 @@ flowchart TD
 
 **Acceptance:** Returns assignment id; second teacher cannot assign to another class.
 
-#### P4.5.2 — ZConnect (teacher mode): assign topic UI (4h)
+#### P4.5.2 — ZConnect (teacher mode): assign topic UI (4h) — ✅ shipped
 
 **Files touched:**
 - `apps/guardian/src/screens/teacher/AssignScreen.tsx`
@@ -1341,7 +1341,7 @@ flowchart TD
 
 **Acceptance:** Teacher picks a topic from real Class 8 Science curriculum, assigns it.
 
-#### P4.5.3 — Teacher "today's assignments" list (3h)
+#### P4.5.3 — Teacher "today's assignments" list (3h) — ✅ shipped
 
 **Files touched:**
 - `apps/guardian/src/screens/teacher/HomeScreen.tsx` — list today's `studyAssignments` by teacher
@@ -1350,48 +1350,52 @@ flowchart TD
 
 ### Group P4.6 — Curated content import
 
-#### P4.6.1 — JSON schema for topic (3h)
+#### P4.6.1 — JSON schema for topic (3h) — ✅ shipped (Zod)
 
 **What you build:** Strict JSON schema for `TopicContent`.
 
 **Files touched:**
-- `packages/shared-types/src/schemas/topicContent.schema.json` (JSON Schema)
-- Validator function `validateTopicContent(json)` using `ajv` or `zod`
+- `packages/shared-types/src/schemas/topicContent.ts` — Zod schema (chose Zod over Ajv for unified validator family across the repo + TS inference). Mirror at `apps/functions/src/lib/topicContentSchema.ts` (Cloud Build can't resolve workspace specifiers; same policy as `sharedTypes.ts`).
+- `validateTopicContent(json)` + `safeValidateTopicContent(json)` helpers exported from the canonical file.
 
-**Acceptance:** Sample JSON from content team passes; intentionally-broken JSON fails with clear message.
+**Acceptance:** Sample JSON in `content/cbse_8_science/force_pressure/` passes; intentionally-broken JSON (e.g. `correctIndex` out of range) fails with the exact field path. Covered by `apps/functions/src/scripts/__tests__/importCurriculum.test.ts`.
 
-#### P4.6.2 — `scripts/import-curriculum.ts` (4h)
+#### P4.6.2 — `scripts/import-curriculum.ts` (4h) — ✅ shipped
 
 **What you build:** CLI script that reads a folder of JSON files and bulk-writes to Firestore.
 
 **Files touched:**
-- `scripts/import-curriculum.ts`:
-  - Walks folder e.g. `content/cbse_8_science/`
-  - For each topic JSON: validate → write to `curriculum/cbse_8_science/chapters/{chId}/topics/{tId}`
-  - Uses Firebase Admin SDK (server credentials)
-  - `--dry-run` flag
+- `apps/functions/src/scripts/importCurriculum.ts` (lives next to other admin-side scripts so it inherits the functions tsconfig + reuses `lib/scriptInit.ts`). Exposed at the workspace root as `pnpm import:curriculum`.
+- `content/README.md` documents the bundle layout.
+
+**Behaviour:**
+- Walks `content/{curriculumId}/{chapterDir}/topics/*.json`
+- Validates each topic against the Zod schema (P4.6.1); prints field paths on failure and CONTINUES (one broken topic does not abort the import).
+- Writes deterministic doc ids derived from folder + filename.
+- Idempotent: re-runs `set` with merge; `publishedAt` only stamped on the first `draft -> published` transition.
+- Flags: `--apply` / `--dry-run` (default dry-run), `--target=emulator|prod`, `--content=PATH`.
 
 **Firestore paths:**
-- Write: `curriculum/*/chapters/*/topics/*`
+- Write: `curriculum/{id}`, `curriculum/{id}/chapters/{id}`, `curriculum/{id}/chapters/{id}/topics/{id}`
 
 **Interacts with:** Topic learn screen (P4.7) reads from these docs.
 
-**Acceptance:** Import full Class 8 Science → all chapters/topics in Firestore with `status: 'published'`.
+**Acceptance:** Re-running `pnpm import:curriculum -- --apply` is idempotent (no errors, no schema regressions). Covered by the test suite at `apps/functions/src/scripts/__tests__/importCurriculum.test.ts`.
 
-#### P4.6.3 — Admin-web: curriculum preview (4h)
+#### P4.6.3 — Admin-web: curriculum preview (4h) — 🟡 lite (JSON viewer only; rendered preview deferred)
 
 **Files touched:**
-- `apps/admin-web/app/curriculum/page.tsx` — list curricula
-- `apps/admin-web/app/curriculum/[id]/page.tsx` — chapters + topics
-- Click topic → JSON viewer + rendered preview
+- `apps/admin-web/src/app/(dashboard)/curriculum/page.tsx` — live list of every `curriculum/{id}` doc.
+- `apps/admin-web/src/app/(dashboard)/curriculum/[id]/page.tsx` — chapters drill.
+- `apps/admin-web/src/app/(dashboard)/curriculum/[id]/[chapterId]/page.tsx` — topics list with collapsible **View JSON** + Zod validation badge per row (green "schema ok" / red "N schema issues").
 
-**Acceptance:** Admin team can QA imported topics without opening Firestore console.
+**What's deferred:** the rendered preview (explanation + brainstorming + quiz formatted like the ZKid screen) — JSON viewer is sufficient for QA and ships now; rendered preview lands with P4.7 once we have a shareable React component.
 
-#### P4.6.4 — Re-run import idempotency (2h)
+#### P4.6.4 — Re-run import idempotency (2h) — ✅ shipped (folded into P4.6.2)
 
 **What you build:** Make import script safe to re-run (no duplicate writes, update existing docs).
 
-**Acceptance:** Running import twice = same Firestore state.
+**Acceptance:** Running import twice = same Firestore state. Covered by the `re-running the importer is idempotent` test in `apps/functions/src/scripts/__tests__/importCurriculum.test.ts`.
 
 ### Group P4.7 — Topic learn screen (ZKid)
 

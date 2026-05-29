@@ -36,3 +36,17 @@ export type ParentTabsParamList = {
   Children: undefined;
   Settings: undefined;
 };
+
+/**
+ * P4.5 — ZConnect teacher mode stack.
+ *
+ * `TeacherHome` is the landing screen (today's assignments + Assign CTA);
+ * `TeacherAssign` is the cascading topic picker screen that calls the
+ * `assignTopic` callable. The home screen pushes the assign screen via
+ * `navigation.navigate('TeacherAssign')` -- no params today, but the
+ * `undefined` shape keeps the contract explicit.
+ */
+export type TeacherStackParamList = {
+  TeacherHome: undefined;
+  TeacherAssign: undefined;
+};

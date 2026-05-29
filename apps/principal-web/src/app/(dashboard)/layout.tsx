@@ -47,7 +47,6 @@ const NAV = [
   // can copy + manually share it with parents. There is intentionally no
   // /parents link here -- the parents audit list lives in admin web only.
   {href: '/school/code', label: 'School code'},
-  {href: '/syllabus', label: 'Syllabus'},
 ] as const;
 
 type GuardState =
