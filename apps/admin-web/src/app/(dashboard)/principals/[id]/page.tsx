@@ -33,6 +33,9 @@ interface PrincipalDoc {
   requestedAt?: Timestamp;
   approvedAt?: Timestamp;
   rejectedReason?: string;
+  requestedGrades?: number[];
+  requestedGradeSections?: Record<string, number>;
+  requestedClassSubjects?: Array<{classId: string; curriculumId: string}>;
 }
 
 interface SchoolDoc {
@@ -210,6 +213,33 @@ export default function PrincipalReviewPage() {
           ) : null}
         </div>
       </section>
+
+      {principal.requestedGrades && principal.requestedGrades.length > 0 ? (
+        <section className="rounded-2xl border border-border bg-surface p-4">
+          <p className="text-xs uppercase tracking-widest text-text-muted">
+            Requested grades &amp; sections
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {[...principal.requestedGrades]
+              .sort((a, b) => a - b)
+              .map(g => {
+                const sections = principal.requestedGradeSections?.[String(g)];
+                return (
+                  <span
+                    key={g}
+                    className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+                  >
+                    Class {g}{sections ? ` (${sections} section${sections > 1 ? 's' : ''})` : ''}
+                  </span>
+                );
+              })}
+          </div>
+          <p className="mt-2 text-xs text-text-muted">
+            On approval these grades become the school&apos;s active curriculum
+            and class sections (e.g. 1A, 1B) are auto-created.
+          </p>
+        </section>
+      ) : null}
 
       {error ? (
         <p

@@ -1,0 +1,75 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Linear Equations in One Variable",
+  "topicId": "variables_on_both_sides",
+  "topicName": "Equations with Variables on Both Sides",
+  "explanation": "Sometimes the variable appears on both sides of the equation, for example 5x + 3 = 3x + 11. To solve these, we collect all variable terms on one side and all constant terms on the other. We can do this by subtracting the smaller variable term from both sides to eliminate it from one side. For instance, subtract 3x from both sides to get 2x + 3 = 11, then solve as before. Equations may also involve fractions or decimals — the strategy is the same, but multiplying through by the LCM of all denominators first simplifies the work. Always check your answer by substituting back into the original equation.",
+  "examples": [
+    "Solve 7x - 4 = 3x + 12: Subtract 3x from both sides → 4x - 4 = 12. Add 4 → 4x = 16. Divide by 4 → x = 4. Check: 7(4) - 4 = 24, 3(4) + 12 = 24. Both sides equal!",
+    "Solve 2x/3 + 1 = x/2 + 3: Multiply everything by 6 (LCM of 3 and 2) → 4x + 6 = 3x + 18 → x = 12.",
+    "Solve 5(x - 1) = 2(x + 5): Expand → 5x - 5 = 2x + 10 → 3x = 15 → x = 5."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=variables_both_sides_approved",
+  "brainstorming": [
+    {
+      "question": "Does it matter which side we collect the variable terms on?",
+      "answer": "No. You can move variables to the left or right side. It is usually easier to move them to the side where the coefficient will be positive, so you avoid working with negative numbers.",
+      "videoUrl": "https://www.youtube.com/watch?v=choosing_sides"
+    },
+    {
+      "question": "Why do we multiply by the LCM when the equation has fractions?",
+      "answer": "Multiplying every term by the LCM of all denominators clears the fractions completely, turning the equation into one with whole numbers only, which is much simpler to solve."
+    },
+    {
+      "question": "What happens when the variable cancels out on both sides?",
+      "answer": "If you get a true statement like 0 = 0, the equation has infinitely many solutions (identity). If you get a false statement like 0 = 7, the equation has no solution — it is inconsistent."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Solve: 6x + 5 = 2x + 21. The value of x is:",
+      "options": ["3", "4", "5", "6"],
+      "correctIndex": 1,
+      "explanation": "6x - 2x = 21 - 5 → 4x = 16 → x = 4. Check: 6(4)+5=29, 2(4)+21=29."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "The first step to solve 8x - 3 = 5x + 9 is:",
+      "options": ["Add 3 to both sides", "Subtract 5x from both sides", "Divide by 8", "Multiply by 3"],
+      "correctIndex": 1,
+      "explanation": "Subtracting 5x from both sides collects all variable terms on the left: 3x - 3 = 9."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Solve: 3(x + 2) = 2(x + 5). The value of x is:",
+      "options": ["2", "3", "4", "5"],
+      "correctIndex": 2,
+      "explanation": "Expand: 3x + 6 = 2x + 10 → x = 4. Check: 3(6)=18, 2(9)=18."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "To clear fractions in x/2 + x/3 = 5, we multiply both sides by:",
+      "options": ["2", "3", "5", "6"],
+      "correctIndex": 3,
+      "explanation": "The LCM of 2 and 3 is 6. Multiplying by 6 gives 3x + 2x = 30, which is simpler."
+    },
+    {
+      "questionId": "q5",
+      "type": "mcq",
+      "question": "If solving an equation gives 0 = 0, the equation has:",
+      "options": ["No solution", "Exactly one solution", "Infinitely many solutions", "Exactly two solutions"],
+      "correctIndex": 2,
+      "explanation": "0 = 0 is always true, meaning the equation is satisfied by every value of the variable — infinitely many solutions."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

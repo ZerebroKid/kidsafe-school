@@ -1,0 +1,90 @@
+{
+  "curriculumId": "cbse_8_science",
+  "grade": 8,
+  "subject": "science",
+  "chapterNo": 11,
+  "chapterName": "Force and Pressure",
+  "topicId": "effects_of_force",
+  "topicName": "Effects of Force on Objects",
+  "explanation": "A force can produce several observable effects on an object. It can change the speed of a moving object — speeding it up or slowing it down. It can change the direction of motion, as when you hit a cricket ball with a bat. It can change the shape of an object, like squeezing a rubber ball or stretching a spring. A force can also start the motion of a stationary object or stop a moving one. These effects depend on two things: the magnitude (size) of the force and the direction in which it acts. Importantly, more than one force can act on an object at the same time; the overall effect depends on the net (resultant) force — the combined effect of all forces acting together.",
+  "examples": [
+    "A goalkeeper catches a fast-moving football — the muscular force of the hands changes both the speed (to zero) and the shape (the ball dents slightly on impact).",
+    "A potter shapes a lump of clay on a spinning wheel by pressing with the hands — the force changes the shape of the clay.",
+    "When you pedal a bicycle harder, the increased force makes the bicycle speed up; when you squeeze the brakes, friction force slows it down."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=effects_of_force_approved",
+  "brainstorming": [
+    {
+      "question": "Can a force change both the speed and shape of an object at the same time?",
+      "answer": "Yes. Think of catching a cricket ball — your hands slow the ball down (change in speed) and both the ball and your hand compress slightly (change in shape) at the moment of impact.",
+      "videoUrl": "https://www.youtube.com/watch?v=force_speed_shape"
+    },
+    {
+      "question": "Why does a ball rolling on grass stop on its own but a ball rolling on a smooth floor goes much farther?",
+      "answer": "Grass produces more friction than a smooth floor. The friction force opposes the ball's motion and slows it down. More friction means the ball loses speed faster and stops sooner."
+    },
+    {
+      "question": "If two people push a box in opposite directions with equal force, what happens?",
+      "answer": "The net force is zero, so the box does not move. The two forces cancel each other out. If one pushes harder, the box moves in the direction of the stronger push because the net force is non-zero."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Which of the following is NOT an effect of force?",
+      "options": [
+        "Changing the speed of an object",
+        "Changing the colour of an object",
+        "Changing the shape of an object",
+        "Changing the direction of motion"
+      ],
+      "correctIndex": 1,
+      "explanation": "Force can change speed, shape, or direction, but it cannot change the colour of an object."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "When two equal forces act on an object in opposite directions, the net force is:",
+      "options": ["Double the individual force", "Zero", "Half the individual force", "Unpredictable"],
+      "correctIndex": 1,
+      "explanation": "Equal and opposite forces cancel each other out, resulting in a net force of zero."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "A rubber ball changes shape when squeezed. This is an example of force changing the:",
+      "options": ["Speed of the ball", "Direction of the ball", "Shape of the ball", "Weight of the ball"],
+      "correctIndex": 2,
+      "explanation": "Squeezing applies a force that deforms (changes the shape of) the rubber ball."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "A cricket bat hitting a ball changes the ball's:",
+      "options": [
+        "Only speed",
+        "Only direction",
+        "Both speed and direction",
+        "Neither speed nor direction"
+      ],
+      "correctIndex": 2,
+      "explanation": "The bat applies a large force that changes both how fast and in which direction the ball travels."
+    },
+    {
+      "questionId": "q5",
+      "type": "mcq",
+      "question": "The overall effect on an object when multiple forces act on it depends on the:",
+      "options": [
+        "Colour of the object",
+        "Net (resultant) force",
+        "Temperature of the surroundings",
+        "Time of day"
+      ],
+      "correctIndex": 1,
+      "explanation": "The net force is the combined effect of all individual forces and determines the object's acceleration."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

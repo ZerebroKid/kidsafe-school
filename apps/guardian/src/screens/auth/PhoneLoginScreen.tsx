@@ -1,12 +1,11 @@
 import React, {useState} from 'react';
-import {Alert, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Alert} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import auth from '@react-native-firebase/auth';
 
 import {Button} from '../../components/Button';
 import {Screen} from '../../components/Screen';
 import {TextInput} from '../../components/TextInput';
-import {colors, spacing} from '../../theme';
 import {stashConfirmation} from './phoneConfirmationStore';
 import type {AuthStackParamList} from '../../navigation/types';
 
@@ -82,25 +81,6 @@ export function PhoneLoginScreen({navigation}: Props) {
       />
 
       <Button title="Send code" onPress={onSendCode} loading={loading} />
-
-      <View style={styles.divider} />
-
-      <Pressable onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.link}>Continue with email instead</Text>
-      </Pressable>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  divider: {
-    height: 1,
-    backgroundColor: colors.border,
-    marginVertical: spacing.md,
-  },
-  link: {
-    color: colors.primary,
-    textAlign: 'center',
-    paddingVertical: spacing.sm,
-  },
-});

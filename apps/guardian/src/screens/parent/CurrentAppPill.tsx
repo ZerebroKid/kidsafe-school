@@ -27,7 +27,7 @@ import type {AppEntry, ChildDoc, ChildForegroundApp} from '@zerebro/shared-types
  * aggressive OEMs. If the doc IS truly stale (we explicitly hit `LONG_STALE_THRESHOLD_MS`
  * without a refresh), we show "Phone idle" to fail safe.
  *
- * The pill hugs its content (`alignSelf: 'flex-start'`) so it doesn't dominate the header.
+ * The pill spans the content width and ellipsizes long app names after "Using".
  */
 
 /** Past this many ms without any update we assume the child device is genuinely offline. */
@@ -62,7 +62,10 @@ function isLauncher(pkg: string): boolean {
 }
 
 interface PillView {
+  /** Full label for muted / idle states. */
   label: string;
+  /** When set, render "Using {appName}" with only the name ellipsized. */
+  appName?: string;
   sublabel?: string;
   dotColor: string;
   iconUri?: string;
@@ -113,7 +116,8 @@ function resolvePillView(
   const friendlyName = entry?.appName ?? pkg;
 
   return {
-    label: `Using ${friendlyName}`,
+    label: '',
+    appName: friendlyName,
     dotColor: colors.success,
     iconUri: entry?.icon,
     iconFallback: friendlyName.charAt(0).toUpperCase(),
@@ -152,13 +156,26 @@ export function CurrentAppPill({childUid}: {childUid: string}) {
         </View>
       ) : null}
       <View style={styles.textWrap}>
-        <Text
-          style={[styles.label, view.muted && styles.labelMuted]}
-          numberOfLines={1}>
-          {view.label}
-        </Text>
+        {view.appName ? (
+          <View style={styles.labelRow}>
+            <Text style={styles.label}>Using </Text>
+            <Text
+              style={[styles.label, styles.labelEllipsis]}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              {view.appName}
+            </Text>
+          </View>
+        ) : (
+          <Text
+            style={[styles.label, view.muted && styles.labelMuted]}
+            numberOfLines={1}
+            ellipsizeMode="tail">
+            {view.label}
+          </Text>
+        )}
         {view.sublabel ? (
-          <Text style={styles.sublabel} numberOfLines={1}>
+          <Text style={styles.sublabel} numberOfLines={1} ellipsizeMode="tail">
             {view.sublabel}
           </Text>
         ) : null}
@@ -169,7 +186,7 @@ export function CurrentAppPill({childUid}: {childUid: string}) {
 
 const styles = StyleSheet.create({
   pill: {
-    alignSelf: 'flex-start',
+    alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
@@ -178,6 +195,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: spacing.lg - 4,
     maxWidth: '100%',
+    overflow: 'hidden',
   },
   pillMuted: {
     backgroundColor: colors.surface,
@@ -214,8 +232,18 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   textWrap: {
-    flexShrink: 1,
+    flex: 1,
+    minWidth: 0,
     gap: 3,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 0,
+  },
+  labelEllipsis: {
+    flex: 1,
+    minWidth: 0,
   },
   sublabel: {
     color: colors.textMuted,

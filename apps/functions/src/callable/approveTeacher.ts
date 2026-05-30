@@ -127,16 +127,94 @@ export const approveTeacher = onCall<Input, Promise<Output>>(
         userData.primaryRole.length === 0 ||
         !existingRoles.includes(userData.primaryRole);
 
+      // Read the teacher's requested class+subject pairs (new) or plain class IDs (legacy).
+      interface ClassSubjectPair {
+        classId: string;
+        curriculumId: string;
+      }
+      const requestedClassSubjects: ClassSubjectPair[] = Array.isArray(
+        teacher.requestedClassSubjects,
+      )
+        ? teacher.requestedClassSubjects.filter(
+            (cs: unknown): cs is ClassSubjectPair =>
+              !!cs &&
+              typeof (cs as ClassSubjectPair).classId === 'string' &&
+              typeof (cs as ClassSubjectPair).curriculumId === 'string',
+          )
+        : [];
+
+      const requestedClassIds: string[] = Array.isArray(teacher.requestedClassIds)
+        ? teacher.requestedClassIds.filter(
+            (c: unknown): c is string => typeof c === 'string' && c.length > 0,
+          )
+        : [];
+
+      // Collect unique class IDs from both sources.
+      const allClassIds = new Set<string>(requestedClassIds);
+      for (const cs of requestedClassSubjects) {
+        allClassIds.add(cs.classId);
+      }
+
+      // Read all affected class docs to validate subject exclusivity.
+      const classSnaps = new Map<
+        string,
+        FirebaseFirestore.DocumentSnapshot
+      >();
+      for (const classId of allClassIds) {
+        const classRef = schoolRef.collection('classes').doc(classId);
+        const snap = await tx.get(classRef);
+        classSnaps.set(classId, snap);
+      }
+
+      // Validate that no requested subject is already taken by another teacher.
+      for (const cs of requestedClassSubjects) {
+        const snap = classSnaps.get(cs.classId);
+        if (!snap || !snap.exists) continue;
+        const classData = snap.data() ?? {};
+        const existing =
+          classData.subjectTeachers &&
+          typeof classData.subjectTeachers === 'object'
+            ? (classData.subjectTeachers as Record<string, string>)
+            : {};
+        const currentHolder = existing[cs.curriculumId];
+        if (currentHolder && currentHolder !== teacherUid) {
+          throw new HttpsError(
+            'failed-precondition',
+            'A requested subject is already assigned to another teacher. Ask the teacher to re-submit.',
+          );
+        }
+      }
+
       tx.update(teacherRef, {
         status: 'active',
         approvedByUid: caller.uid,
         approvedAt: FieldValue.serverTimestamp(),
+        ...(allClassIds.size > 0
+          ? {assignedClassIds: Array.from(allClassIds)}
+          : {}),
+        ...(requestedClassSubjects.length > 0
+          ? {assignedClassSubjects: requestedClassSubjects}
+          : {}),
       });
       const userPatch: Record<string, unknown> = {
         roles: FieldValue.arrayUnion('teacher'),
       };
       if (primaryNeedsFix) userPatch.primaryRole = 'teacher';
       tx.set(userRef, userPatch, {merge: true});
+
+      // Add teacher UID to each class's teacherIds AND subjectTeachers map.
+      for (const classId of allClassIds) {
+        const classRef = schoolRef.collection('classes').doc(classId);
+        const subjectPatch: Record<string, FieldValue | string> = {
+          teacherIds: FieldValue.arrayUnion(teacherUid),
+        };
+        for (const cs of requestedClassSubjects) {
+          if (cs.classId === classId) {
+            subjectPatch[`subjectTeachers.${cs.curriculumId}`] = teacherUid;
+          }
+        }
+        tx.update(classRef, subjectPatch);
+      }
     });
 
     return {ok: true};

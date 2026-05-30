@@ -8,13 +8,18 @@ folder maps 1:1 to a `curriculum/{curriculumId}` doc in Firestore.
 
 ```
 content/
-  {curriculumId}/             # e.g. cbse_8_science
-    curriculum.json           # CurriculumDoc fields (board, grade, subject)
-    {chapterId}/              # e.g. force_pressure
-      chapter.json            # ChapterDoc fields (chapterNo, chapterName, status)
-      topics/
-        {topicId}.json        # TopicContent fields -- ONE file per topic
+  {gradeId}/                  # e.g. cbse_8 -- one folder per class/grade
+    {curriculumId}/           # e.g. cbse_8_science, cbse_8_math
+      curriculum.json         # CurriculumDoc fields (board, grade, subject)
+      {chapterId}/            # e.g. force_pressure
+        chapter.json          # ChapterDoc fields (chapterNo, chapterName, status)
+        topics/
+          {topicId}.json      # TopicContent fields -- ONE file per topic
 ```
+
+The importer walks grade folders recursively and finds every sub-folder
+that contains a `curriculum.json` (so `content/cbse_8/cbse_8_math` is a
+valid bundle path).
 
 `curriculumId`, `chapterId`, and `topicId` are derived from the folder /
 filename respectively (lowercase snake_case, validated by Zod).
@@ -45,9 +50,9 @@ their `publishedAt` timestamp; only the mutable fields are refreshed.
 
 ## Sample bundle
 
-`cbse_8_science/force_pressure/` ships with the repo as a small smoke
-bundle (1 chapter, 3 topics) so the emulator seed script (`pnpm seed:staging`)
+`cbse_8/cbse_8_science/force_pressure/` ships with the repo as a small smoke
+bundle (1 chapter, 4 topics) so the emulator seed script (`pnpm seed:staging`)
 populates a working teacher Assign Topic flow out of the box. Larger bundles
 delivered by the content team live OUTSIDE this repo (private Drive / git);
-copy them into `content/{curriculumId}/` only when explicitly running the
+copy them into `content/{gradeId}/{curriculumId}/` only when explicitly running the
 import.

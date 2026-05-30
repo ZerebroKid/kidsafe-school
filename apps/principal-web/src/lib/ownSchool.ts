@@ -4,7 +4,9 @@ import {useEffect, useState} from 'react';
 import {onAuthStateChanged} from 'firebase/auth';
 import {
   collectionGroup,
+  doc,
   getDocs,
+  getDoc,
   limit,
   query,
   where,
@@ -46,6 +48,8 @@ import {getAuthInstance, getFirestoreInstance} from '@zerebro/shared-firebase';
 export interface OwnSchool {
   loading: boolean;
   schoolId: string | null;
+  /** Sorted grades this school teaches. Null while loading; empty array means legacy/unset. */
+  activeGrades: number[] | null;
   error: string | null;
 }
 
@@ -53,6 +57,7 @@ export function useOwnSchool(): OwnSchool {
   const [state, setState] = useState<OwnSchool>({
     loading: true,
     schoolId: null,
+    activeGrades: null,
     error: null,
   });
 
@@ -61,7 +66,7 @@ export function useOwnSchool(): OwnSchool {
     const unsub = onAuthStateChanged(getAuthInstance(), async user => {
       if (cancelled) return;
       if (!user) {
-        setState({loading: false, schoolId: null, error: 'Not signed in.'});
+        setState({loading: false, schoolId: null, activeGrades: null, error: 'Not signed in.'});
         return;
       }
       try {
@@ -76,12 +81,28 @@ export function useOwnSchool(): OwnSchool {
         if (cancelled) return;
         const claim = claims.docs[0];
         const schoolId = claim?.ref.parent.parent?.id ?? null;
-        setState({loading: false, schoolId, error: null});
+
+        let activeGrades: number[] = [];
+        if (schoolId) {
+          const schoolSnap = await getDoc(
+            doc(getFirestoreInstance(), 'schools', schoolId),
+          );
+          if (!cancelled && schoolSnap.exists()) {
+            const data = schoolSnap.data();
+            if (Array.isArray(data.activeGrades)) {
+              activeGrades = data.activeGrades as number[];
+            }
+          }
+        }
+        if (cancelled) return;
+
+        setState({loading: false, schoolId, activeGrades, error: null});
       } catch (err) {
         if (!cancelled) {
           setState({
             loading: false,
             schoolId: null,
+            activeGrades: null,
             error:
               (err as {message?: string} | null)?.message ?? 'Read failed.',
           });

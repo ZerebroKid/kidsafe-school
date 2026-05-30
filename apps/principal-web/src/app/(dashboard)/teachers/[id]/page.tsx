@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import {useParams, useRouter} from 'next/navigation';
 import {useCallback, useEffect, useState} from 'react';
-import {Timestamp, doc, onSnapshot} from 'firebase/firestore';
+import {Timestamp, collection, doc, getDocs, onSnapshot} from 'firebase/firestore';
 import {callFn, getFirestoreInstance} from '@zerebro/shared-firebase';
 
 import {useOwnSchool} from '@/lib/ownSchool';
@@ -37,6 +37,9 @@ interface TeacherDoc {
   requestedAt?: Timestamp;
   approvedAt?: Timestamp;
   rejectedReason?: string;
+  requestedClassIds?: string[];
+  assignedClassIds?: string[];
+  requestedClassSubjects?: Array<{classId: string; curriculumId: string}>;
 }
 
 export default function TeacherReviewPage() {
@@ -52,6 +55,8 @@ export default function TeacherReviewPage() {
   const [busy, setBusy] = useState<'approve' | 'reject' | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [classMap, setClassMap] = useState<Map<string, string>>(new Map());
+  const [curriculumMap, setCurriculumMap] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     if (!own.schoolId || !teacherId) return;
@@ -69,6 +74,38 @@ export default function TeacherReviewPage() {
     );
     return unsub;
   }, [own.schoolId, teacherId]);
+
+  // Fetch class names for resolving requestedClassIds.
+  useEffect(() => {
+    if (!own.schoolId) return;
+    getDocs(
+      collection(
+        getFirestoreInstance(),
+        'schools',
+        own.schoolId,
+        'classes',
+      ),
+    ).then(snap => {
+      const m = new Map<string, string>();
+      snap.docs.forEach(d => {
+        const data = d.data() as {className?: string};
+        m.set(d.id, data.className ?? d.id);
+      });
+      setClassMap(m);
+    }).catch(() => {});
+    // Fetch curriculum names for resolving requestedClassSubjects.
+    getDocs(collection(getFirestoreInstance(), 'curriculum'))
+      .then(snap => {
+        const m = new Map<string, string>();
+        snap.docs.forEach(d => {
+          const data = d.data() as {subject?: string};
+          const subj = data.subject ?? d.id;
+          m.set(d.id, subj.charAt(0).toUpperCase() + subj.slice(1));
+        });
+        setCurriculumMap(m);
+      })
+      .catch(() => {});
+  }, [own.schoolId]);
 
   const handleApprove = useCallback(async () => {
     if (!own.schoolId || !teacherId) return;
@@ -207,6 +244,48 @@ export default function TeacherReviewPage() {
           </p>
         </div>
       </section>
+
+      {teacher.requestedClassSubjects &&
+      teacher.requestedClassSubjects.length > 0 ? (
+        <section className="rounded-2xl border border-border bg-surface p-4">
+          <p className="text-xs uppercase tracking-widest text-text-muted">
+            Requested classes &amp; subjects
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {teacher.requestedClassSubjects.map((cs, i) => (
+              <span
+                key={`${cs.classId}-${cs.curriculumId}-${i}`}
+                className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
+              >
+                {classMap.get(cs.classId) ?? cs.classId}
+                {' — '}
+                {curriculumMap.get(cs.curriculumId) ?? cs.curriculumId}
+              </span>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-text-muted">
+            On approval, the teacher will be assigned to these
+            class-subject combinations.
+          </p>
+        </section>
+      ) : teacher.requestedClassIds &&
+        teacher.requestedClassIds.length > 0 ? (
+        <section className="rounded-2xl border border-border bg-surface p-4">
+          <p className="text-xs uppercase tracking-widest text-text-muted">
+            Requested classes
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {teacher.requestedClassIds.map(cid => (
+              <span
+                key={cid}
+                className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
+              >
+                {classMap.get(cid) ?? cid}
+              </span>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {error ? (
         <p

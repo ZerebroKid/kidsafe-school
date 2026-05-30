@@ -1,5 +1,3 @@
-import type {Role} from '@zerebro/shared-types';
-
 /**
  * ZConnect (parent + teacher) navigation type contracts.
  *
@@ -22,9 +20,6 @@ export type AuthStackParamList = {
    * verificationId + phone preserves the type contract.)
    */
   PhoneConfirm: {verificationId: string; phone: string};
-  /** Email/password kept as a "Continue with email" escape hatch from PhoneLogin. */
-  Login: undefined;
-  Signup: {role: Role};
 };
 
 export type ParentStackParamList = {

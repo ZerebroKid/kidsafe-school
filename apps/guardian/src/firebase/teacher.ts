@@ -114,6 +114,7 @@ export interface ClassRow {
   className: string;
   academicYear?: string;
   teacherIds: string[];
+  subjectTeachers?: Record<string, string>;
 }
 
 export function useTeacherClasses(
@@ -346,6 +347,95 @@ export function useTeacherAssignmentsToday(
             })
             .filter(r => r.status === 'active');
           rows.sort((a, b) => b.dueAt - a.dueAt);
+          setState({data: rows, loading: false, error: null});
+        },
+        err => setState({data: null, loading: false, error: err.message}),
+      );
+    return unsub;
+  }, [uid]);
+
+  return state;
+}
+
+export interface WeakTopic {
+  topicId: string;
+  topicName: string;
+  subjectName: string;
+  avgBestPercentage: number;
+}
+
+export interface ClassWeakTopics {
+  classId: string;
+  className: string;
+  topics: WeakTopic[];
+}
+
+/**
+ * P5.4 -- weak topics across all classes the caller teaches, for the home
+ * "Re-teach" callout.
+ *
+ * Reads the cron-written pointer docs `classReports/{classId}` via a single
+ * `teacherIds array-contains uid` query. firestore/rules allows this for a
+ * teacher because every returned doc carries them in `teacherIds`; the
+ * array-contains uses the automatic single-field index (no composite). Classes
+ * with an empty `weakTopics` list are dropped so the callout only shows
+ * actionable rows.
+ */
+export function useTeacherWeakTopics(
+  uid: string | null,
+): HookState<ClassWeakTopics[]> {
+  const [state, setState] = useState<HookState<ClassWeakTopics[]>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  useEffect(() => {
+    if (!uid) {
+      setState({data: null, loading: false, error: null});
+      return;
+    }
+    setState(s => ({...s, loading: true}));
+    const unsub = firestore()
+      .collection('classReports')
+      .where('teacherIds', 'array-contains', uid)
+      .onSnapshot(
+        snap => {
+          const rows: ClassWeakTopics[] = [];
+          for (const d of snap.docs) {
+            const data = d.data() as {
+              classId?: string;
+              className?: string;
+              weakTopics?: Array<{
+                topicId?: string;
+                topicName?: string;
+                subjectName?: string;
+                avgBestPercentage?: number;
+              }>;
+            };
+            const topics: WeakTopic[] = Array.isArray(data.weakTopics)
+              ? data.weakTopics.map(t => ({
+                  topicId: typeof t.topicId === 'string' ? t.topicId : '',
+                  topicName:
+                    typeof t.topicName === 'string'
+                      ? t.topicName
+                      : (t.topicId ?? ''),
+                  subjectName:
+                    typeof t.subjectName === 'string' ? t.subjectName : '',
+                  avgBestPercentage:
+                    typeof t.avgBestPercentage === 'number'
+                      ? t.avgBestPercentage
+                      : 0,
+                }))
+              : [];
+            if (topics.length === 0) continue;
+            rows.push({
+              classId: data.classId ?? d.id,
+              className: data.className ?? data.classId ?? d.id,
+              topics,
+            });
+          }
+          rows.sort((a, b) => a.className.localeCompare(b.className));
           setState({data: rows, loading: false, error: null});
         },
         err => setState({data: null, loading: false, error: err.message}),

@@ -146,6 +146,15 @@ describe('importCurriculum', () => {
     expect(resolveBundles(parent).sort()).toEqual([childA, childB].sort());
   });
 
+  test('resolveBundles finds curricula nested under grade folders', () => {
+    const gradeDir = path.join(tmpRoot, 'cbse_8');
+    const math = path.join(gradeDir, 'cbse_8_math');
+    const science = path.join(gradeDir, 'cbse_8_science');
+    makeValidBundle(math);
+    makeValidBundle(science);
+    expect(resolveBundles(tmpRoot).sort()).toEqual([math, science].sort());
+  });
+
   test('dry-run reports a plan but does not write', async () => {
     const bundle = path.join(tmpRoot, 'cbse_8_science');
     makeValidBundle(bundle);

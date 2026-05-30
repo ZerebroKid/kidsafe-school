@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import Svg, {Circle, Path} from 'react-native-svg';
 
 import {signOut} from '@zerebro/shared-firebase/auth';
 
@@ -9,25 +11,6 @@ import {colors, radius, spacing} from '../../theme';
 
 /**
  * P4.3 / P4.4 -- parent vs teacher INTENT picker.
- *
- * Mounted by RootNavigator when the signed-in user's `users/{uid}` doc has
- * `roles: []`. Both branches now wire to first-signup callables that grant
- * the role server-side and let RootNavigator's user-doc onSnapshot swap to
- * the right home navigator on the same render tick:
- *   1. Teacher (P4.3): enter principal-shared 6-char teacherCode via
- *      TeacherJoinScreen -> `requestTeacherJoin` -> wait for principal
- *      approval -> roles += 'teacher' -> TeacherNavigator.
- *   2. Parent (P4.4): enter principal-shared 8-char schoolCode via
- *      JoinSchoolScreen -> `joinSchoolAsParent` -> roles += 'parent'
- *      INSTANTLY (no approval gate) -> ParentNavigator.
- *
- * Intent is LOCAL state (not persisted). If the user back-navigates or
- * kills the app mid-flow, they'll see the picker again on next sign-in,
- * which is fine -- once roles[] is non-empty RootNavigator bypasses this
- * gate entirely.
- *
- * The "Sign out" escape hatch is always rendered so a user who got here
- * by accident (e.g. wrong phone number) can recover without uninstalling.
  */
 export function RoleOnboardingGate() {
   const [intent, setIntent] = useState<'parent' | 'teacher' | null>(null);
@@ -41,95 +24,164 @@ export function RoleOnboardingGate() {
   return <IntentPicker onPick={setIntent} />;
 }
 
+function ParentIcon({color = colors.primary}: {color?: string}) {
+  return (
+    <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+      <Circle cx="9" cy="7" r="3" stroke={color} strokeWidth={1.8} />
+      <Circle cx="16" cy="8" r="2.5" stroke={color} strokeWidth={1.8} />
+      <Path
+        d="M4 20c0-3 2.5-5 5-5s5 2 5 5"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M13 19.5c0-2 1.5-3.5 3-3.5"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+function TeacherIcon({color = colors.primary}: {color?: string}) {
+  return (
+    <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M4 5.5A2.5 2.5 0 016.5 3H20v16H6.5A2.5 2.5 0 004 16.5v-11z"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinejoin="round"
+      />
+      <Path d="M6.5 3v16" stroke={color} strokeWidth={1.8} />
+      <Path
+        d="M8 7h8M8 11h6"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
 function IntentPicker({
   onPick,
 }: {
   onPick: (intent: 'parent' | 'teacher') => void;
 }) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Zerebro</Text>
-      <Text style={styles.body}>
-        Tell us how you'll use ZConnect so we can set up the right home
-        screen for you.
-      </Text>
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Welcome to Zerebro</Text>
+          <Text style={styles.subtitle}>
+            Choose how you'll use ZConnect. You only set this up once.
+          </Text>
+        </View>
 
-      <View style={styles.choices}>
+        <View style={styles.choices}>
+          <Pressable
+            accessibilityRole="button"
+            style={({pressed}) => [styles.choice, pressed && styles.choicePressed]}
+            onPress={() => onPick('parent')}>
+            <View style={styles.iconWrap}>
+              <ParentIcon />
+            </View>
+            <View style={styles.choiceText}>
+              <Text style={styles.choiceTitle}>I'm a parent</Text>
+              <Text style={styles.choiceBody}>
+                Join your child's school and manage their device.
+              </Text>
+            </View>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            style={({pressed}) => [styles.choice, pressed && styles.choicePressed]}
+            onPress={() => onPick('teacher')}>
+            <View style={styles.iconWrap}>
+              <TeacherIcon />
+            </View>
+            <View style={styles.choiceText}>
+              <Text style={styles.choiceTitle}>I'm a teacher</Text>
+              <Text style={styles.choiceBody}>
+                Enter the code from your principal and pick your classes.
+              </Text>
+            </View>
+          </Pressable>
+        </View>
+
         <Pressable
           accessibilityRole="button"
-          style={({pressed}) => [styles.choice, pressed && styles.choicePressed]}
-          onPress={() => onPick('parent')}>
-          <Text style={styles.choiceTitle}>I'm a parent</Text>
-          <Text style={styles.choiceBody}>
-            Manage your child's phone, screen time, and location.
-          </Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          style={({pressed}) => [styles.choice, pressed && styles.choicePressed]}
-          onPress={() => onPick('teacher')}>
-          <Text style={styles.choiceTitle}>I'm a teacher</Text>
-          <Text style={styles.choiceBody}>
-            Enter the 6-digit code your principal shared with you.
-          </Text>
+          style={({pressed}) => [styles.signOut, pressed && styles.choicePressed]}
+          onPress={() => {
+            signOut().catch(err => console.warn('signOut failed', err));
+          }}>
+          <Text style={styles.signOutText}>Sign out</Text>
         </Pressable>
       </View>
-
-      <Pressable
-        accessibilityRole="button"
-        style={styles.signOut}
-        onPress={() => {
-          signOut().catch(err => console.warn('signOut failed', err));
-        }}>
-        <Text style={styles.signOutText}>Sign out</Text>
-      </Pressable>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safe: {
     flex: 1,
     backgroundColor: colors.bg,
-    padding: spacing.xl,
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
     justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.xl,
+  },
+  header: {
+    gap: spacing.sm,
   },
   title: {
     color: colors.text,
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '700',
-    textAlign: 'center',
   },
-  body: {
+  subtitle: {
     color: colors.textMuted,
     fontSize: 15,
     lineHeight: 22,
-    textAlign: 'center',
-    maxWidth: 360,
   },
   choices: {
-    alignSelf: 'stretch',
     gap: spacing.md,
-    marginTop: spacing.lg,
   },
   choice: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: spacing.lg,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.surfaceAlt,
-    gap: spacing.xs,
+    backgroundColor: colors.surface,
+    gap: spacing.md,
   },
   choicePressed: {
-    opacity: 0.7,
+    opacity: 0.85,
+  },
+  iconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.sm,
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  choiceText: {
+    flex: 1,
+    gap: spacing.xs,
   },
   choiceTitle: {
     color: colors.text,
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   choiceBody: {
     color: colors.textMuted,
@@ -137,16 +189,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   signOut: {
-    marginTop: spacing.md,
-    paddingHorizontal: spacing.lg,
+    alignSelf: 'center',
     paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   signOutText: {
-    color: colors.text,
+    color: colors.textMuted,
     fontSize: 14,
-    fontWeight: '600',
   },
 });

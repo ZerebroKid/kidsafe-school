@@ -21,6 +21,7 @@ import {LogoutButton} from '@/components/LogoutButton';
 const NAV = [
   {href: '/schools', label: 'Schools'},
   {href: '/principals', label: 'Principals'},
+  {href: '/grade-requests', label: 'Grade requests'},
   {href: '/syllabus-sources', label: 'Syllabus sources'},
   {href: '/curriculum', label: 'Curriculum'},
   {href: '/rewards', label: 'Rewards'},
@@ -63,7 +64,9 @@ export default function AdminDashboardLayout({
   return (
     <div className="flex min-h-full flex-1">
       <AdminSidebar />
-      <section className="flex flex-1 flex-col bg-bg p-8">{children}</section>
+      <section className="flex min-w-0 flex-1 flex-col overflow-x-hidden bg-bg p-8">
+        {children}
+      </section>
     </div>
   );
 }

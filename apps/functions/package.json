@@ -18,6 +18,8 @@
     "seed:staging": "pnpm build && node dist/scripts/seedStaging.js",
     "grant-role": "pnpm build && node dist/scripts/grantRole.js",
     "import:curriculum": "pnpm build && node dist/scripts/importCurriculum.js",
+    "aggregate:reports": "pnpm build && node dist/scripts/runAggregateClassReports.js",
+    "set-school-grades": "pnpm build && node dist/scripts/setSchoolGrades.js",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {

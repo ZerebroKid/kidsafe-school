@@ -208,6 +208,21 @@ export const assignTopic = onCall<AssignTopicInput, Promise<AssignTopicOutput>>(
         );
       }
 
+      // Subject-level check: if subjectTeachers is set on the class,
+      // enforce that this teacher owns the specific subject (curriculum).
+      const subjectTeachers =
+        classData.subjectTeachers &&
+        typeof classData.subjectTeachers === 'object'
+          ? (classData.subjectTeachers as Record<string, string>)
+          : {};
+      const subjectOwner = subjectTeachers[curriculumId];
+      if (subjectOwner && subjectOwner !== caller.uid) {
+        throw new HttpsError(
+          'permission-denied',
+          'You are not assigned to teach this subject in this class.',
+        );
+      }
+
       if (!curriculumSnap.exists) {
         throw new HttpsError('not-found', 'Curriculum not found.');
       }

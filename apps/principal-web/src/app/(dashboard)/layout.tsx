@@ -43,6 +43,7 @@ const NAV = [
   {href: '/dashboard', label: 'Dashboard'},
   {href: '/classes', label: 'Classes'},
   {href: '/teachers', label: 'Teachers'},
+  {href: '/grades', label: 'Grades'},
   // P4.4 -- principal-facing read-only view of the school invite code so they
   // can copy + manually share it with parents. There is intentionally no
   // /parents link here -- the parents audit list lives in admin web only.

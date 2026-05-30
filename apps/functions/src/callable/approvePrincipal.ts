@@ -29,6 +29,11 @@ import {FieldValue} from 'firebase-admin/firestore';
 
 import {db} from '../lib/admin';
 import {requireAuth, requireRole} from '../lib/auth';
+import {
+  createClassSections,
+  currentAcademicYear,
+  gradesFromSections,
+} from '../lib/createClassSections';
 
 interface Input {
   schoolId: string;
@@ -120,7 +125,40 @@ export const approvePrincipal = onCall<Input, Promise<Output>>(
         approvedByUid: caller.uid,
         approvedAt: FieldValue.serverTimestamp(),
       });
-      tx.update(schoolRef, {principalUid});
+
+      // Derive activeGrades and auto-create class sections if the principal
+      // supplied a grade-sections map during onboarding.
+      const schoolPatch: Record<string, string | number[]> = {principalUid};
+      const reqSections: unknown = principal.requestedGradeSections;
+      const reqGrades: unknown = principal.requestedGrades;
+
+      let gradeSections: Record<string, number> | null = null;
+      if (
+        typeof reqSections === 'object' &&
+        reqSections !== null &&
+        !Array.isArray(reqSections) &&
+        Object.keys(reqSections as Record<string, unknown>).length > 0
+      ) {
+        gradeSections = reqSections as Record<string, number>;
+        schoolPatch.activeGrades = gradesFromSections(gradeSections);
+      } else if (Array.isArray(reqGrades) && reqGrades.length > 0) {
+        const sorted = (reqGrades as number[])
+          .filter(g => typeof g === 'number' && g >= 1 && g <= 12)
+          .sort((a, b) => a - b);
+        if (sorted.length > 0) {
+          schoolPatch.activeGrades = sorted;
+        }
+      }
+      tx.update(schoolRef, schoolPatch);
+
+      if (gradeSections) {
+        createClassSections(
+          tx,
+          schoolRef,
+          gradeSections,
+          currentAcademicYear(),
+        );
+      }
       const userPatch: Record<string, unknown> = {
         roles: FieldValue.arrayUnion('principal'),
       };

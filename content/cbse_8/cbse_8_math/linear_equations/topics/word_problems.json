@@ -1,0 +1,75 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Linear Equations in One Variable",
+  "topicId": "word_problems",
+  "topicName": "Word Problems on Linear Equations",
+  "explanation": "Word problems require translating a real-life situation into a mathematical equation, solving it, and interpreting the answer in context. The key steps are: (1) Read the problem carefully and identify the unknown — assign it a variable like x. (2) Translate the words into mathematical operations — 'more than' means addition, 'less than' means subtraction, 'times' means multiplication, 'divided equally' means division. (3) Form the equation and solve it. (4) Check the answer makes sense in the original context. Common word problem types involve ages, numbers, money, perimeter and area, and speed-distance-time.",
+  "examples": [
+    "The sum of three consecutive integers is 72. Find them. Let the integers be x, x+1, x+2. Then x + (x+1) + (x+2) = 72 → 3x + 3 = 72 → 3x = 69 → x = 23. The integers are 23, 24, 25.",
+    "A father is 30 years older than his son. In 5 years, the father's age will be 3 times the son's age. Find their current ages. Let son's age = x. Father = x + 30. In 5 years: (x + 30 + 5) = 3(x + 5) → x + 35 = 3x + 15 → 20 = 2x → x = 10. Son is 10, father is 40.",
+    "The perimeter of a rectangle is 40 cm. Its length is 4 cm more than its width. Find the dimensions. Let width = x. Length = x + 4. Perimeter: 2(x + x + 4) = 40 → 4x + 8 = 40 → 4x = 32 → x = 8. Width = 8 cm, length = 12 cm."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=word_problems_linear_approved",
+  "brainstorming": [
+    {
+      "question": "How do you decide what to call x in a word problem?",
+      "answer": "Choose x to be the quantity you are asked to find. If the problem says 'find the son's age', let x = son's age. Then express every other unknown quantity in terms of x using the relationships given in the problem.",
+      "videoUrl": "https://www.youtube.com/watch?v=choosing_variable"
+    },
+    {
+      "question": "Can a word problem have an answer that doesn't make sense?",
+      "answer": "Yes. If you solve for the number of students and get x = -3 or x = 4.5, the answer is meaningless because students must be a positive whole number. This usually means the problem has no valid solution, or you may have set up the equation incorrectly."
+    },
+    {
+      "question": "What if a problem has two unknowns?",
+      "answer": "In Class 8, you can often express one unknown in terms of the other using a given relationship (e.g. 'the length is twice the width' → l = 2w), reducing it to one variable. For truly independent unknowns, you need two separate equations — that is the subject of simultaneous equations in later classes."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "The sum of two consecutive even numbers is 54. What is the smaller number?",
+      "options": ["24", "26", "27", "28"],
+      "correctIndex": 1,
+      "explanation": "Let the numbers be x and x+2. Then x + (x+2) = 54 → 2x = 52 → x = 26."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "A number is 12 more than twice another number. If their sum is 45, what is the smaller number?",
+      "options": ["11", "15", "23", "33"],
+      "correctIndex": 0,
+      "explanation": "Let smaller = x, larger = 2x + 12. Sum: x + 2x + 12 = 45 → 3x = 33 → x = 11."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Riya is 5 years older than Priya. The sum of their ages is 31. How old is Priya?",
+      "options": ["10", "12", "13", "18"],
+      "correctIndex": 2,
+      "explanation": "Let Priya = x, Riya = x + 5. Sum: 2x + 5 = 31 → 2x = 26 → x = 13."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "The perimeter of a square field is 96 m. The length of each side is:",
+      "options": ["12 m", "24 m", "32 m", "48 m"],
+      "correctIndex": 1,
+      "explanation": "Perimeter of square = 4 × side. So 4x = 96 → x = 24 m."
+    },
+    {
+      "questionId": "q5",
+      "type": "mcq",
+      "question": "In translating word problems, 'less than' means which operation?",
+      "options": ["Addition", "Subtraction", "Multiplication", "Division"],
+      "correctIndex": 1,
+      "explanation": "'5 less than x' means x - 5. 'Less than' translates to subtraction."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

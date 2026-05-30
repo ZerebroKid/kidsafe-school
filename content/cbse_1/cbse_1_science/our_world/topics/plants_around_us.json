@@ -1,0 +1,99 @@
+{
+  "curriculumId": "cbse_1_science",
+  "grade": 1,
+  "subject": "science",
+  "chapterNo": 1,
+  "chapterName": "The World Around Us",
+  "topicId": "plants_around_us",
+  "topicName": "Plants Around Us",
+  "explanation": "This is a CBSE Class 1 Science topic on \"Plants Around Us\". Students learn key ideas through clear explanations, everyday examples, and practice questions aligned with the NCERT syllabus for grade 1. Understanding this topic builds a strong foundation for the next chapter and higher classes.",
+  "examples": [
+    "Example 1: A real-life situation in Class 1 Science where \"Plants Around Us\" applies.",
+    "Example 2: A classroom activity that helps students practise \"Plants Around Us\".",
+    "Example 3: A quick check question teachers can use to assess understanding of \"Plants Around Us\"."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=cbse_1_science_plants_around_us",
+  "brainstorming": [
+    {
+      "question": "Why is \"Plants Around Us\" important for Class 1 students?",
+      "answer": "It connects to daily life and helps students build logical thinking and scientific curiosity expected at this grade level."
+    },
+    {
+      "question": "How can you tell if you have understood \"Plants Around Us\"?",
+      "answer": "You can explain the idea in your own words, solve a simple problem, and connect it to something you see at home or school."
+    },
+    {
+      "question": "What should you revise before studying \"Plants Around Us\"?",
+      "answer": "Review the previous chapter in the same subject and note any formulas, definitions, or vocabulary your teacher highlighted in class."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Which statement best describes \"Plants Around Us\"?",
+      "options": [
+        "It is unrelated to the Class syllabus",
+        "It is a core idea in this chapter",
+        "It only appears in higher grades",
+        "It is optional for exams"
+      ],
+      "correctIndex": 1,
+      "explanation": "\"Plants Around Us\" is a core concept in this chapter for Class 1 Science."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Class 1 students study \"Plants Around Us\" mainly to:",
+      "options": [
+        "Memorise unrelated facts",
+        "Build understanding step by step",
+        "Skip practical learning",
+        "Avoid homework"
+      ],
+      "correctIndex": 1,
+      "explanation": "The goal is to build understanding that can be applied in problems and daily life."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "A good way to prepare for the quiz on this topic is to:",
+      "options": [
+        "Read the explanation once only",
+        "Practise examples and discuss doubts",
+        "Ignore class notes",
+        "Memorise answers without understanding"
+      ],
+      "correctIndex": 1,
+      "explanation": "Practising examples and clearing doubts leads to lasting learning."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "This topic belongs to which subject?",
+      "options": [
+        "English",
+        "Science",
+        "Social Science",
+        "Computer Science"
+      ],
+      "correctIndex": 1,
+      "explanation": "This topic is part of Class 1 Science."
+    },
+    {
+      "questionId": "q5",
+      "type": "mcq",
+      "question": "After completing this topic, you should be able to:",
+      "options": [
+        "Explain the main idea in your own words",
+        "Avoid all practice questions",
+        "Skip revision entirely",
+        "Ignore teacher feedback"
+      ],
+      "correctIndex": 0,
+      "explanation": "Being able to explain the idea shows you have understood it."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

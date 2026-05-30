@@ -195,6 +195,8 @@ const styles = StyleSheet.create({
   statusStrip: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
+    width: '100%',
+    overflow: 'hidden',
   },
   /** Column below the status pill — tab bar is fixed; Location fills remainder. */
   body: {

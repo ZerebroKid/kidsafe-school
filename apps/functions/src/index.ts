@@ -55,6 +55,7 @@ export {rejectPrincipal} from './callable/rejectPrincipal';
 
 // P4.3 -- teacher onboarding
 export {rotateTeacherCode} from './callable/rotateTeacherCode';
+export {lookupSchoolClasses} from './callable/lookupSchoolClasses';
 export {requestTeacherJoin} from './callable/requestTeacherJoin';
 export {approveTeacher} from './callable/approveTeacher';
 export {rejectTeacher} from './callable/rejectTeacher';
@@ -71,3 +72,11 @@ export {submitQuizAttempt} from './callable/submitQuizAttempt';
 
 // P4.10 -- reward unlock trigger (fires on quizAttempts writes)
 export {onQuizAttemptWrite} from './triggers/onQuizAttemptWrite';
+
+// School grade management -- principal requests, admin approves/rejects
+export {requestGradeChange} from './callable/requestGradeChange';
+export {approveGradeChange} from './callable/approveGradeChange';
+export {rejectGradeChange} from './callable/rejectGradeChange';
+
+// P5.1 -- nightly class-report aggregator (scheduled 02:00 IST)
+export {aggregateClassReports} from './crons/aggregateClassReports';

@@ -1,0 +1,99 @@
+{
+  "curriculumId": "cbse_4_math",
+  "grade": 4,
+  "subject": "math",
+  "chapterNo": 4,
+  "chapterName": "Fractions and Decimals",
+  "topicId": "understanding_fractions",
+  "topicName": "Understanding Fractions",
+  "explanation": "This is a CBSE Class 4 Mathematics topic on \"Understanding Fractions\". Students learn key ideas through clear explanations, everyday examples, and practice questions aligned with the NCERT syllabus for grade 4. Understanding this topic builds a strong foundation for the next chapter and higher classes.",
+  "examples": [
+    "Example 1: A real-life situation in Class 4 Mathematics where \"Understanding Fractions\" applies.",
+    "Example 2: A classroom activity that helps students practise \"Understanding Fractions\".",
+    "Example 3: A quick check question teachers can use to assess understanding of \"Understanding Fractions\"."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=cbse_4_math_understanding_fractions",
+  "brainstorming": [
+    {
+      "question": "Why is \"Understanding Fractions\" important for Class 4 students?",
+      "answer": "It connects to daily life and helps students build logical thinking and scientific curiosity expected at this grade level."
+    },
+    {
+      "question": "How can you tell if you have understood \"Understanding Fractions\"?",
+      "answer": "You can explain the idea in your own words, solve a simple problem, and connect it to something you see at home or school."
+    },
+    {
+      "question": "What should you revise before studying \"Understanding Fractions\"?",
+      "answer": "Review the previous chapter in the same subject and note any formulas, definitions, or vocabulary your teacher highlighted in class."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Which statement best describes \"Understanding Fractions\"?",
+      "options": [
+        "It is unrelated to the Class syllabus",
+        "It is a core idea in this chapter",
+        "It only appears in higher grades",
+        "It is optional for exams"
+      ],
+      "correctIndex": 1,
+      "explanation": "\"Understanding Fractions\" is a core concept in this chapter for Class 4 Mathematics."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Class 4 students study \"Understanding Fractions\" mainly to:",
+      "options": [
+        "Memorise unrelated facts",
+        "Build understanding step by step",
+        "Skip practical learning",
+        "Avoid homework"
+      ],
+      "correctIndex": 1,
+      "explanation": "The goal is to build understanding that can be applied in problems and daily life."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "A good way to prepare for the quiz on this topic is to:",
+      "options": [
+        "Read the explanation once only",
+        "Practise examples and discuss doubts",
+        "Ignore class notes",
+        "Memorise answers without understanding"
+      ],
+      "correctIndex": 1,
+      "explanation": "Practising examples and clearing doubts leads to lasting learning."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "This topic belongs to which subject?",
+      "options": [
+        "English",
+        "Mathematics",
+        "Social Science",
+        "Computer Science"
+      ],
+      "correctIndex": 1,
+      "explanation": "This topic is part of Class 4 Mathematics."
+    },
+    {
+      "questionId": "q5",
+      "type": "mcq",
+      "question": "After completing this topic, you should be able to:",
+      "options": [
+        "Explain the main idea in your own words",
+        "Avoid all practice questions",
+        "Skip revision entirely",
+        "Ignore teacher feedback"
+      ],
+      "correctIndex": 0,
+      "explanation": "Being able to explain the idea shows you have understood it."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

@@ -69,7 +69,7 @@ export function TeacherAssignScreen({navigation}: Props) {
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [selectedCurriculumId, setSelectedCurriculumId] = useState<string | null>(null);
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null);
-  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([]);
   const [dueAt, setDueAt] = useState<number>(defaultDueAtEpochMs());
   const [submitting, setSubmitting] = useState(false);
 
@@ -79,7 +79,19 @@ export function TeacherAssignScreen({navigation}: Props) {
     () => (classesState.data ?? []).find(c => c.id === selectedClassId) ?? null,
     [classesState.data, selectedClassId],
   );
-  const curriculaState = useCurriculaForGrade(selectedClass?.grade ?? null);
+  const allCurriculaState = useCurriculaForGrade(selectedClass?.grade ?? null);
+
+  // Filter curricula to only show subjects assigned to this teacher.
+  // If the class has no subjectTeachers map (legacy), show all.
+  const curriculaState = useMemo(() => {
+    if (!allCurriculaState.data || !selectedClass) return allCurriculaState;
+    const st = selectedClass.subjectTeachers;
+    if (!st || Object.keys(st).length === 0) return allCurriculaState;
+    const filtered = allCurriculaState.data.filter(
+      c => st[c.id] === uid,
+    );
+    return {...allCurriculaState, data: filtered};
+  }, [allCurriculaState, selectedClass, uid]);
 
   const chaptersState = useChaptersForCurriculum(selectedCurriculumId);
   const topicsState = usePublishedTopics(selectedCurriculumId, selectedChapterId);
@@ -87,14 +99,14 @@ export function TeacherAssignScreen({navigation}: Props) {
   useEffect(() => {
     setSelectedCurriculumId(null);
     setSelectedChapterId(null);
-    setSelectedTopicId(null);
+    setSelectedTopicIds([]);
   }, [selectedClassId]);
   useEffect(() => {
     setSelectedChapterId(null);
-    setSelectedTopicId(null);
+    setSelectedTopicIds([]);
   }, [selectedCurriculumId]);
   useEffect(() => {
-    setSelectedTopicId(null);
+    setSelectedTopicIds([]);
   }, [selectedChapterId]);
 
   const canSubmit =
@@ -102,8 +114,16 @@ export function TeacherAssignScreen({navigation}: Props) {
     !!selectedClassId &&
     !!selectedCurriculumId &&
     !!selectedChapterId &&
-    !!selectedTopicId &&
+    selectedTopicIds.length > 0 &&
     !submitting;
+
+  function toggleTopic(topicId: string) {
+    setSelectedTopicIds(prev =>
+      prev.includes(topicId)
+        ? prev.filter(id => id !== topicId)
+        : [...prev, topicId],
+    );
+  }
 
   async function onAssign() {
     if (
@@ -111,37 +131,50 @@ export function TeacherAssignScreen({navigation}: Props) {
       !selectedClassId ||
       !selectedCurriculumId ||
       !selectedChapterId ||
-      !selectedTopicId
+      selectedTopicIds.length === 0
     ) {
-      Alert.alert('Pick a topic first', 'Choose class, subject, chapter, and topic.');
+      Alert.alert('Pick topics first', 'Choose class, subject, chapter, and at least one topic.');
       return;
     }
     setSubmitting(true);
     try {
-      const out = await callFn<AssignTopicPayload, AssignTopicResult>(
-        'assignTopic',
-        {
-          schoolId: schoolState.data.schoolId,
-          classId: selectedClassId,
-          curriculumId: selectedCurriculumId,
-          chapterId: selectedChapterId,
-          topicId: selectedTopicId,
-          dueAt,
-        },
-      );
-      Alert.alert(
-        'Assigned',
-        `Students will see the new topic in their Study Mission within a few seconds.`,
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ],
-      );
-      console.log('assignTopic ok', out);
-    } catch (err) {
-      Alert.alert('Could not assign', humanise(err));
+      const results: AssignTopicResult[] = [];
+      const errors: string[] = [];
+      for (const topicId of selectedTopicIds) {
+        try {
+          const out = await callFn<AssignTopicPayload, AssignTopicResult>(
+            'assignTopic',
+            {
+              schoolId: schoolState.data.schoolId,
+              classId: selectedClassId,
+              curriculumId: selectedCurriculumId,
+              chapterId: selectedChapterId,
+              topicId,
+              dueAt,
+            },
+          );
+          results.push(out);
+        } catch (err) {
+          const topicData = (topicsState.data ?? []).find(t => t.id === topicId);
+          const label = topicData?.topicName ?? topicId;
+          errors.push(`${label}: ${humanise(err)}`);
+        }
+      }
+      if (errors.length > 0 && results.length === 0) {
+        Alert.alert('Could not assign', errors.join('\n'));
+      } else if (errors.length > 0) {
+        Alert.alert(
+          'Partially assigned',
+          `${results.length} topic${results.length > 1 ? 's' : ''} assigned. ${errors.length} failed:\n\n${errors.join('\n')}`,
+          [{text: 'OK', onPress: () => navigation.goBack()}],
+        );
+      } else {
+        Alert.alert(
+          'Assigned',
+          `${results.length} topic${results.length > 1 ? 's' : ''} assigned. Students will see them in their Study Mission within a few seconds.`,
+          [{text: 'OK', onPress: () => navigation.goBack()}],
+        );
+      }
     } finally {
       setSubmitting(false);
     }
@@ -221,7 +254,7 @@ export function TeacherAssignScreen({navigation}: Props) {
 
       {selectedChapterId ? (
         <Section
-          title="Topic"
+          title={`Topics${selectedTopicIds.length > 0 ? ` (${selectedTopicIds.length} selected)` : ''}`}
           loading={topicsState.loading}
           error={topicsState.error}
           emptyCopy="No published topics in this chapter yet.">
@@ -229,14 +262,15 @@ export function TeacherAssignScreen({navigation}: Props) {
             <PickerRow
               key={t.id}
               label={t.topicName}
-              selected={selectedTopicId === t.id}
-              onPress={() => setSelectedTopicId(t.id)}
+              selected={selectedTopicIds.includes(t.id)}
+              onPress={() => toggleTopic(t.id)}
+              multiSelect
             />
           ))}
         </Section>
       ) : null}
 
-      {selectedTopicId ? (
+      {selectedTopicIds.length > 0 ? (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Due</Text>
           <View style={styles.card}>
@@ -252,7 +286,13 @@ export function TeacherAssignScreen({navigation}: Props) {
       <View style={{height: spacing.lg}} />
 
       <Button
-        title={submitting ? 'Assigning…' : 'Assign'}
+        title={
+          submitting
+            ? 'Assigning…'
+            : selectedTopicIds.length > 1
+              ? `Assign ${selectedTopicIds.length} topics`
+              : 'Assign'
+        }
         onPress={onAssign}
         disabled={!canSubmit}
         loading={submitting}
@@ -294,11 +334,13 @@ function PickerRow({
   sublabel,
   selected,
   onPress,
+  multiSelect,
 }: {
   label: string;
   sublabel?: string;
   selected: boolean;
   onPress: () => void;
+  multiSelect?: boolean;
 }) {
   return (
     <Pressable
@@ -307,11 +349,16 @@ function PickerRow({
       style={[styles.row, selected && styles.rowSelected]}
       accessibilityRole="button"
       accessibilityState={{selected}}>
+      {multiSelect ? (
+        <View style={styles.checkbox}>
+          {selected ? <View style={styles.checkboxFilled} /> : null}
+        </View>
+      ) : null}
       <View style={{flex: 1}}>
         <Text style={styles.rowLabel}>{label}</Text>
         {sublabel ? <Text style={styles.rowSublabel}>{sublabel}</Text> : null}
       </View>
-      {selected ? <Text style={styles.check}>✓</Text> : null}
+      {!multiSelect && selected ? <Text style={styles.check}>✓</Text> : null}
     </Pressable>
   );
 }
@@ -387,6 +434,21 @@ const styles = StyleSheet.create({
   rowLabel: {color: colors.text, fontSize: 15, fontWeight: '600'},
   rowSublabel: {color: colors.textMuted, fontSize: 12, marginTop: 2},
   check: {color: colors.primary, fontSize: 18, fontWeight: '700'},
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.textMuted,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  checkboxFilled: {
+    width: 14,
+    height: 14,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+  },
   card: {
     backgroundColor: colors.surface,
     borderColor: colors.border,

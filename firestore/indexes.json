@@ -95,6 +95,14 @@
         {"fieldPath": "assignedByTeacherUid", "order": "ASCENDING"},
         {"fieldPath": "classId", "order": "ASCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "gradeChangeRequests",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "requestedAt", "order": "DESCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

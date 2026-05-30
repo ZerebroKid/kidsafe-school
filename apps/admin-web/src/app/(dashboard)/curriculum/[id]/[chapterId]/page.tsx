@@ -97,7 +97,7 @@ export default function ChapterDetailPage() {
   if (!curriculumId || !chapterId) return null;
 
   return (
-    <main className="flex flex-col gap-6">
+    <main className="flex min-w-0 max-w-full flex-col gap-6">
       <header className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-widest text-text-muted">
@@ -128,7 +128,7 @@ export default function ChapterDetailPage() {
         </p>
       ) : null}
 
-      <section className="rounded-2xl border border-border bg-surface p-6">
+      <section className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold text-text">Topics</h2>
         {topics === null ? (
           <p className="mt-3 text-sm text-text-muted">Loading…</p>
@@ -142,7 +142,7 @@ export default function ChapterDetailPage() {
               const result = safeValidateTopicContent(t.raw);
               const isOpen = expanded === t.id;
               return (
-                <li key={t.id} className="py-3">
+                <li key={t.id} className="min-w-0 py-3">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-text">
@@ -180,9 +180,13 @@ export default function ChapterDetailPage() {
                     </div>
                   </div>
                   {isOpen ? (
-                    <pre className="mt-3 max-h-[480px] overflow-auto rounded-md border border-border bg-bg p-3 text-xs text-text">
-                      {JSON.stringify(t.raw, null, 2)}
-                    </pre>
+                    <div className="mt-3 min-w-0 max-w-full overflow-hidden rounded-md border border-border bg-bg">
+                      <div className="max-h-[480px] overflow-x-auto overflow-y-auto">
+                        <pre className="whitespace-pre p-3 text-xs text-text">
+                          {JSON.stringify(t.raw, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
                   ) : null}
                 </li>
               );

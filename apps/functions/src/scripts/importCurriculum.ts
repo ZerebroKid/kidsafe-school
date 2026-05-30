@@ -29,13 +29,16 @@
  *
  * Bundle layout (see content/README.md):
  *   content/
- *     cbse_8_science/
- *       curriculum.json                # CurriculumDoc shape
- *       force_pressure/
- *         chapter.json                 # ChapterDoc shape
- *         topics/
- *           types_of_forces.json       # TopicContent shape
- *           ...
+ *     cbse_8/
+ *       cbse_8_science/
+ *         curriculum.json                # CurriculumDoc shape
+ *         force_pressure/
+ *           chapter.json                 # ChapterDoc shape
+ *           topics/
+ *             types_of_forces.json       # TopicContent shape
+ *             ...
+ *       cbse_8_math/
+ *         ...
  *
  * `curriculumId`, `chapterId`, and `topicId` are derived from the folder /
  * filename (lowercase snake_case). The script cross-checks that the
@@ -143,19 +146,28 @@ async function main(): Promise<void> {
 
 /**
  * If `contentPath` itself is a bundle (contains `curriculum.json`), use it
- * directly. Otherwise treat it as a parent folder and enumerate every
- * sub-folder that contains a `curriculum.json`.
+ * directly. Otherwise walk sub-folders recursively and collect every directory
+ * that contains a `curriculum.json` (e.g. `content/cbse_8/cbse_8_math`).
  */
 function resolveBundles(contentPath: string): string[] {
   const direct = path.join(contentPath, 'curriculum.json');
   if (fs.existsSync(direct)) return [contentPath];
 
   const out: string[] = [];
-  for (const entry of fs.readdirSync(contentPath, {withFileTypes: true})) {
-    if (!entry.isDirectory()) continue;
-    const child = path.join(contentPath, entry.name);
-    if (fs.existsSync(path.join(child, 'curriculum.json'))) out.push(child);
+
+  function walk(dir: string): void {
+    for (const entry of fs.readdirSync(dir, {withFileTypes: true})) {
+      if (!entry.isDirectory()) continue;
+      const child = path.join(dir, entry.name);
+      if (fs.existsSync(path.join(child, 'curriculum.json'))) {
+        out.push(child);
+      } else {
+        walk(child);
+      }
+    }
   }
+
+  walk(contentPath);
   return out.sort();
 }
 

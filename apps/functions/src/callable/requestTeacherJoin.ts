@@ -19,14 +19,11 @@
  *   3. Aligns with the rules' `belongsToSchool()` predicate so the principal
  *      can read every teacher doc under their school.
  *
- * Mirrors `claimSchool.ts` line-for-line in structure -- the only differences
- * are the field name (`teacherCode` vs `inviteCode`) and the subcollection
- * path (`teachers` vs `principals`).
- *
  * Error contract (mapped to HttpsError):
  *   - unauthenticated      -> caller not signed in
  *   - failed-precondition  -> caller signed in via non-phone provider (no phone token)
  *                             OR teacher already approved on this school
+ *                             OR a selected subject is already taken by another teacher
  *   - invalid-argument     -> input fields missing OR teacherCode does not match
  *                             any school. Same code for both so a brute-forcer
  *                             can't probe for valid codes by reading error text.
@@ -39,9 +36,17 @@ import {FieldValue} from 'firebase-admin/firestore';
 import {db} from '../lib/admin';
 import {requireAuth} from '../lib/auth';
 
+interface ClassSubject {
+  classId: string;
+  curriculumId: string;
+}
+
 interface Input {
   teacherCode: string;
   displayName: string;
+  classSubjects?: ClassSubject[];
+  /** @deprecated Use classSubjects instead. Kept for backward compat. */
+  classIds?: string[];
 }
 
 interface Output {
@@ -54,7 +59,8 @@ export const requestTeacherJoin = onCall<Input, Promise<Output>>(
   {region: 'asia-south1'},
   async request => {
     const caller = requireAuth(request);
-    const {teacherCode, displayName} = request.data ?? {};
+    const {teacherCode, displayName, classSubjects, classIds} =
+      request.data ?? {};
 
     if (
       typeof teacherCode !== 'string' ||
@@ -68,10 +74,6 @@ export const requestTeacherJoin = onCall<Input, Promise<Output>>(
       );
     }
     if (!caller.phone) {
-      // Phone-OTP is the only sign-in method that reaches this callable in
-      // Phase 4. A missing phone token means the caller signed in via some
-      // other provider (email / Google / anonymous) which we don't yet support
-      // for teacher onboarding.
       throw new HttpsError(
         'failed-precondition',
         'Sign in with your phone number to join as a teacher.',
@@ -98,14 +100,81 @@ export const requestTeacherJoin = onCall<Input, Promise<Output>>(
       );
     }
     const schoolId = schoolSnap.id;
+    const classesRef = schoolSnap.ref.collection('classes');
 
-    // Idempotency: teacherId = caller.uid (see file header). If a doc already
-    // exists for THIS user under THIS school, branch on its status.
+    // Build validated class-subject pairs.
+    const validClassSubjects: ClassSubject[] = [];
+    const validClassIds = new Set<string>();
+
+    if (Array.isArray(classSubjects) && classSubjects.length > 0) {
+      for (const cs of classSubjects) {
+        if (
+          !cs ||
+          typeof cs.classId !== 'string' ||
+          cs.classId.length === 0 ||
+          typeof cs.curriculumId !== 'string' ||
+          cs.curriculumId.length === 0
+        ) {
+          continue;
+        }
+        const cSnap = await classesRef.doc(cs.classId).get();
+        if (!cSnap.exists) {
+          throw new HttpsError(
+            'invalid-argument',
+            `Class ${cs.classId} does not exist in this school.`,
+          );
+        }
+        // Check that this subject isn't already taken by another teacher.
+        const classData = cSnap.data() ?? {};
+        const existing =
+          classData.subjectTeachers &&
+          typeof classData.subjectTeachers === 'object'
+            ? (classData.subjectTeachers as Record<string, string>)
+            : {};
+        const currentHolder = existing[cs.curriculumId];
+        if (currentHolder && currentHolder !== caller.uid) {
+          throw new HttpsError(
+            'failed-precondition',
+            `This subject is already assigned to another teacher in this class.`,
+          );
+        }
+        validClassSubjects.push({
+          classId: cs.classId,
+          curriculumId: cs.curriculumId,
+        });
+        validClassIds.add(cs.classId);
+      }
+    } else if (Array.isArray(classIds) && classIds.length > 0) {
+      // Backward compat: old clients that only send classIds
+      for (const cid of classIds) {
+        if (typeof cid !== 'string' || cid.trim().length === 0) continue;
+        const cSnap = await classesRef.doc(cid).get();
+        if (!cSnap.exists) {
+          throw new HttpsError(
+            'invalid-argument',
+            `Class ${cid} does not exist in this school.`,
+          );
+        }
+        validClassIds.add(cid);
+      }
+    }
+
+    // Idempotency: teacherId = caller.uid (see file header).
     const teacherRef = schoolSnap.ref.collection('teachers').doc(caller.uid);
     const existingSnap = await teacherRef.get();
     if (existingSnap.exists) {
       const existing = existingSnap.data() ?? {};
       if (existing.status === 'pending') {
+        const patch: Record<string, unknown> = {};
+        if (validClassSubjects.length > 0) {
+          patch.requestedClassSubjects = validClassSubjects;
+          patch.requestedClassIds = Array.from(validClassIds);
+        } else if (validClassIds.size > 0) {
+          patch.requestedClassIds = Array.from(validClassIds);
+        }
+        if (Object.keys(patch).length > 0) {
+          await teacherRef.update(patch);
+        }
         return {schoolId, teacherId: caller.uid, status: 'pending'};
       }
       if (existing.status === 'active') {
@@ -114,8 +183,6 @@ export const requestTeacherJoin = onCall<Input, Promise<Output>>(
           'You are already an active teacher at this school.',
         );
       }
-      // rejected -> let them re-submit by overwriting (the principal may have
-      // rotated the code and the teacher is retrying with the new one).
     }
 
     await teacherRef.set({
@@ -123,6 +190,8 @@ export const requestTeacherJoin = onCall<Input, Promise<Output>>(
       displayName: displayName.trim(),
       phone: caller.phone,
       status: 'pending',
+      requestedClassIds: Array.from(validClassIds),
+      requestedClassSubjects: validClassSubjects,
       requestedAt: FieldValue.serverTimestamp(),
     });
 

@@ -1,5 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {ActivityIndicator, Alert, Pressable, StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 
 import {callFn} from '@zerebro/shared-firebase';
@@ -14,32 +22,40 @@ import {colors, radius, spacing} from '../../theme';
 /**
  * P4.3 -- the teacher-side onboarding screen.
  *
- * Two states, swapped by `pending`:
- *   1. `pending === false` -- form: 6-char teacherCode + display name.
- *      Submit calls `requestTeacherJoin` which writes
- *      `schools/{schoolId}/teachers/{myUid}` status='pending' and
- *      returns `{schoolId, teacherId, status: 'pending'}`. We flip the
- *      local UI state immediately so the user sees the "Waiting" screen.
- *   2. `pending === true` -- waiting view with a `collectionGroup('teachers')
- *      .where('userId','==',myUid)` listener. When the principal approves
- *      via Campus, this listener never fires the "all approved" path
- *      directly -- instead the SIBLING listener in RootNavigator picks up
- *      the `users/{uid}.roles` array-union of 'teacher' and re-routes the
- *      whole nav to TeacherNavigator on the same tick. We surface
- *      `status: 'rejected'` here so the teacher sees the principal's
- *      reason and can re-submit with a new code.
- *
- * IMPORTANT: the listener uses the cross-school collection-group rule
- * `match /{path=**}/teachers/{teacherId}` (see firestore/rules) which
- * permits a self-read when `resource.data.userId == myUid()`. The query
- * is paired with the `teachers userId+status` composite index that
- * was deployed in Checkpoint A.
- *
- * `onBack` is passed in by RoleOnboardingGate so the teacher can return
- * to the intent picker if they hit the wrong button. Once the request
- * is `pending` we hide Back so a user can't accidentally abandon a
- * pending request and create confusion in the Campus queue.
+ * Three-phase flow:
+ *   1. Enter teacher code + name -> "Verify code" calls `lookupSchoolClasses`.
+ *   2. Pick class(es) and subject(s) per class (with already-taken subjects
+ *      shown as unavailable).
+ *   3. "Submit for approval" calls `requestTeacherJoin` with `classSubjects`.
  */
+
+interface ClassSummary {
+  id: string;
+  className: string;
+  grade: number;
+  section: string;
+  subjectTeachers: Record<string, string>;
+}
+
+interface CurriculumSummary {
+  id: string;
+  subject: string;
+  grade: number;
+  board: string;
+}
+
+interface LookupResult {
+  schoolId: string;
+  schoolName: string;
+  classes: ClassSummary[];
+  curricula: CurriculumSummary[];
+}
+
+interface ClassSubjectSelection {
+  classId: string;
+  curriculumId: string;
+}
+
 export function TeacherJoinScreen({onBack}: {onBack: () => void}) {
   const uid = useAuthStore(s => s.firebaseUid);
   const [code, setCode] = useState('');
@@ -51,9 +67,9 @@ export function TeacherJoinScreen({onBack}: {onBack: () => void}) {
   } | null>(null);
   const [rejection, setRejection] = useState<string | null>(null);
 
-  // Subscribe to my OWN teacher request across all schools. Boots even
-  // before the user fills the form -- if they already submitted a request
-  // and killed the app, we jump straight to the pending view.
+  const [lookup, setLookup] = useState<LookupResult | null>(null);
+  const [selections, setSelections] = useState<ClassSubjectSelection[]>([]);
+
   useEffect(() => {
     if (!uid) return;
     const unsub = firestore()
@@ -77,13 +93,6 @@ export function TeacherJoinScreen({onBack}: {onBack: () => void}) {
               setPending({schoolId, teacherId: docSnap.id});
               setRejection(null);
             }
-          } else if (data.status === 'active') {
-            // Don't try to flip the UI here -- RootNavigator's user-doc
-            // listener will see roles=['teacher'] on the next snapshot
-            // and unmount this whole gate, dropping us into the
-            // TeacherNavigator on the same render tick. Showing a
-            // "Success!" screen for the few ms in between would just
-            // flash.
           } else if (data.status === 'rejected') {
             setPending(null);
             setRejection(data.rejectedReason ?? 'Your request was rejected.');
@@ -94,7 +103,7 @@ export function TeacherJoinScreen({onBack}: {onBack: () => void}) {
     return unsub;
   }, [uid]);
 
-  async function onSubmit() {
+  async function onVerifyCode() {
     const trimmedCode = code.trim().toUpperCase();
     const trimmedName = name.trim();
     if (trimmedCode.length === 0) {
@@ -107,12 +116,45 @@ export function TeacherJoinScreen({onBack}: {onBack: () => void}) {
     }
     try {
       setLoading(true);
+      const result = await callFn<
+        {teacherCode: string},
+        LookupResult
+      >('lookupSchoolClasses', {teacherCode: trimmedCode});
+      setLookup(result);
+      setSelections([]);
+    } catch (err) {
+      Alert.alert(
+        'Invalid code',
+        (err as {message?: string} | null)?.message ??
+          'Code is incorrect or has been rotated.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onSubmit() {
+    if (!lookup) return;
+    if (selections.length === 0) {
+      Alert.alert(
+        'Select subjects',
+        'Pick at least one subject in a class before submitting.',
+      );
+      return;
+    }
+    try {
+      setLoading(true);
       const out = await callFn<
-        {teacherCode: string; displayName: string},
+        {
+          teacherCode: string;
+          displayName: string;
+          classSubjects: ClassSubjectSelection[];
+        },
         {schoolId: string; teacherId: string; status: string}
       >('requestTeacherJoin', {
-        teacherCode: trimmedCode,
-        displayName: trimmedName,
+        teacherCode: code.trim().toUpperCase(),
+        displayName: name.trim(),
+        classSubjects: selections,
       });
       setPending({schoolId: out.schoolId, teacherId: out.teacherId});
       setRejection(null);
@@ -127,14 +169,148 @@ export function TeacherJoinScreen({onBack}: {onBack: () => void}) {
     }
   }
 
+  function toggleSubject(classId: string, curriculumId: string) {
+    setSelections(prev => {
+      const exists = prev.some(
+        s => s.classId === classId && s.curriculumId === curriculumId,
+      );
+      if (exists) {
+        return prev.filter(
+          s => !(s.classId === classId && s.curriculumId === curriculumId),
+        );
+      }
+      return [...prev, {classId, curriculumId}];
+    });
+  }
+
+  function isSelected(classId: string, curriculumId: string): boolean {
+    return selections.some(
+      s => s.classId === classId && s.curriculumId === curriculumId,
+    );
+  }
+
+  // Group curricula by grade for easy lookup
+  const curriculaByGrade = useMemo(() => {
+    if (!lookup) return new Map<number, CurriculumSummary[]>();
+    const m = new Map<number, CurriculumSummary[]>();
+    for (const c of lookup.curricula) {
+      const list = m.get(c.grade) ?? [];
+      list.push(c);
+      m.set(c.grade, list);
+    }
+    return m;
+  }, [lookup]);
+
+  // Check if any class has a selected subject
+  const hasClassSelection = useMemo(() => {
+    const classIds = new Set(selections.map(s => s.classId));
+    return classIds.size > 0;
+  }, [selections]);
+
   if (pending) {
     return <PendingView onSignOut={() => signOut().catch(() => {})} />;
   }
 
+  // Phase 2: class + subject selection
+  if (lookup) {
+    return (
+      <Screen
+        title="Select your classes & subjects"
+        subtitle={`School: ${lookup.schoolName || 'Your school'}`}
+        scroll={false}>
+        <Text style={styles.selectHint}>
+          For each class, tap the subject(s) you teach. Subjects already
+          assigned to another teacher are shown as taken.
+        </Text>
+
+        <ScrollView style={styles.classList} nestedScrollEnabled>
+          {lookup.classes.length === 0 ? (
+            <Text style={styles.emptyText}>
+              No classes found. Ask your principal to create classes first.
+            </Text>
+          ) : (
+            lookup.classes.map(cls => {
+              const subjects = curriculaByGrade.get(cls.grade) ?? [];
+              return (
+                <View key={cls.id} style={styles.classBlock}>
+                  <Text style={styles.classHeader}>
+                    {cls.className} (Grade {cls.grade}{cls.section})
+                  </Text>
+                  {subjects.length === 0 ? (
+                    <Text style={styles.noSubjects}>
+                      No subjects available for grade {cls.grade}
+                    </Text>
+                  ) : (
+                    subjects.map(subj => {
+                      const takenBy = cls.subjectTeachers[subj.id];
+                      const isTaken = !!takenBy && takenBy !== uid;
+                      const selected = isSelected(cls.id, subj.id);
+                      return (
+                        <Pressable
+                          key={subj.id}
+                          onPress={() =>
+                            !isTaken && toggleSubject(cls.id, subj.id)
+                          }
+                          disabled={isTaken}
+                          style={[
+                            styles.subjectCard,
+                            selected && styles.subjectCardSelected,
+                            isTaken && styles.subjectCardTaken,
+                          ]}>
+                          <View style={styles.checkbox}>
+                            {selected ? (
+                              <View style={styles.checkboxFilled} />
+                            ) : null}
+                          </View>
+                          <View style={styles.subjectInfo}>
+                            <Text
+                              style={[
+                                styles.subjectName,
+                                isTaken && styles.subjectNameTaken,
+                              ]}>
+                              {subj.subject.charAt(0).toUpperCase() +
+                                subj.subject.slice(1)}
+                            </Text>
+                            {isTaken ? (
+                              <Text style={styles.takenLabel}>
+                                Taken by another teacher
+                              </Text>
+                            ) : null}
+                          </View>
+                        </Pressable>
+                      );
+                    })
+                  )}
+                </View>
+              );
+            })
+          )}
+        </ScrollView>
+
+        <View style={styles.actionRow}>
+          <Button
+            title="Submit for approval"
+            onPress={onSubmit}
+            loading={loading}
+            disabled={selections.length === 0}
+          />
+          <Pressable
+            onPress={() => {
+              setLookup(null);
+              setSelections([]);
+            }}>
+            <Text style={styles.linkMuted}>Change code</Text>
+          </Pressable>
+        </View>
+      </Screen>
+    );
+  }
+
+  // Phase 1: code + name entry
   return (
     <Screen
       title="Join your school"
-      subtitle="Enter the 6-character code your principal shared with you, then submit for approval.">
+      subtitle="Enter the 6-character code your principal shared with you.">
       {rejection ? (
         <View style={styles.banner}>
           <Text style={styles.bannerTitle}>Your last request was rejected</Text>
@@ -163,7 +339,7 @@ export function TeacherJoinScreen({onBack}: {onBack: () => void}) {
         placeholder="e.g. Priya Sharma"
       />
 
-      <Button title="Submit for approval" onPress={onSubmit} loading={loading} />
+      <Button title="Verify code" onPress={onVerifyCode} loading={loading} />
 
       <Pressable onPress={onBack}>
         <Text style={styles.linkMuted}>Back to options</Text>
@@ -220,6 +396,89 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 13,
     lineHeight: 18,
+  },
+  selectHint: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: spacing.sm,
+  },
+  classList: {
+    flex: 1,
+  },
+  classBlock: {
+    marginBottom: spacing.md,
+    gap: spacing.xs,
+  },
+  classHeader: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: spacing.xs,
+  },
+  noSubjects: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontStyle: 'italic',
+    paddingLeft: spacing.sm,
+  },
+  subjectCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.md,
+  },
+  subjectCardSelected: {
+    borderColor: colors.primary,
+    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+  },
+  subjectCardTaken: {
+    opacity: 0.5,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.textMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxFilled: {
+    width: 14,
+    height: 14,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+  },
+  subjectInfo: {
+    flex: 1,
+  },
+  subjectName: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  subjectNameTaken: {
+    color: colors.textMuted,
+  },
+  takenLabel: {
+    color: colors.danger,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  emptyText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    textAlign: 'center',
+    paddingVertical: spacing.xl,
+  },
+  actionRow: {
+    gap: spacing.md,
+    marginTop: spacing.md,
   },
   pendingContainer: {
     flex: 1,

@@ -395,6 +395,17 @@ service cloud.firestore {
           || (isSignedIn() && resource.data.userId == myUid());
         allow create, update, delete: if false;
       }
+
+      // gradeChangeRequests subcollection
+      //   Written by `requestGradeChange`, `approveGradeChange`, and
+      //   `rejectGradeChange` callables via Admin SDK. Clients only READ.
+      //   The principal of the school can see their own school's requests;
+      //   admins see all (the cross-school collectionGroup rule below also
+      //   grants admin reads).
+      match /gradeChangeRequests/{requestId} {
+        allow read: if isAdmin() || belongsToSchool(schoolId);
+        allow create, update, delete: if false;
+      }
     }
 
     // Cross-school collection-group read for `principals/*` (P4.2.7).
@@ -411,6 +422,16 @@ service cloud.firestore {
     match /{path=**}/principals/{principalId} {
       allow read: if isAdmin()
         || (isSignedIn() && resource.data.userId == myUid());
+      allow write: if false;
+    }
+
+    // Cross-school collection-group read for `gradeChangeRequests/*`.
+    //   Admin web lists every pending grade-change request across all schools
+    //   via `collectionGroup('gradeChangeRequests').where('status','==','pending')`.
+    //   Only admin gets cross-school access; per-school reads for the principal
+    //   are handled by the nested rule above.
+    match /{path=**}/gradeChangeRequests/{requestId} {
+      allow read: if isAdmin();
       allow write: if false;
     }
 

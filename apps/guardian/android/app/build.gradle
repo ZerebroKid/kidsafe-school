@@ -5,6 +5,7 @@ apply plugin: "com.facebook.react"
 // app startup. Without this plugin, FirebaseApp.initialize() silently no-ops and any
 // firebase.* call throws "No Firebase App '[DEFAULT]' has been created".
 apply plugin: "com.google.gms.google-services"
+apply from: file("../../../../node_modules/react-native-vector-icons/fonts.gradle")
 
 /**
  * This is the configuration block to customize your React Native Android app.

@@ -60,6 +60,13 @@ export interface SchoolDoc {
    */
   teacherCode?: string;
   teacherCodeRotatedAt?: FirestoreFieldValueLike;
+  /**
+   * Sorted list of grades this school teaches (e.g. [1,2,...,8]). Set by
+   * `approvePrincipal` from the principal's initial `requestedGrades`, and
+   * updated by `approveGradeChange` for later additions. Absent on legacy
+   * schools created before this feature -- consumers fall back to 1-12.
+   */
+  activeGrades?: number[];
   createdAt: FirestoreFieldValueLike;
 }
 
@@ -83,6 +90,18 @@ export interface PrincipalDoc {
   approvedByUid?: string;
   approvedAt?: FirestoreFieldValueLike;
   rejectedReason?: string;
+  /**
+   * Grades the principal selected during onboarding (e.g. [1,2,...,8]).
+   * Copied to `schools/{schoolId}.activeGrades` on approval by the admin.
+   * @deprecated Prefer `requestedGradeSections`.
+   */
+  requestedGrades?: number[];
+  /**
+   * Maps grade (as string key) to number of sections.
+   * E.g. {"1":2,"2":3,"8":1}. Written during onboarding alongside
+   * `requestedGrades` (the flat array is kept for backward compat).
+   */
+  requestedGradeSections?: Record<string, number>;
 }
 
 /**
@@ -163,6 +182,12 @@ export interface ClassDoc {
   academicYear: string;
   teacherIds: string[];
   /**
+   * Maps curriculumId -> teacher UID. Enforces one teacher per subject per
+   * class. Written by `approveTeacher` based on the teacher's class+subject
+   * selections during onboarding.
+   */
+  subjectTeachers?: Record<string, string>;
+  /**
    * Child UIDs (auth user ids of ZKid children) array-unioned by `joinSchool`.
    * Note: this is the child's `users/{uid}`, NOT a `children/{id}` doc id.
    * The Phase 2 pairing-only fallback uses `children/{id}` -- those rare
@@ -188,6 +213,30 @@ export interface SubjectDoc {
   code?: string;
   curriculumId: string;
   teacherIds: string[];
+}
+
+/**
+ * `schools/{schoolId}/gradeChangeRequests/{requestId}` -- request to add
+ * new grades to a school's `activeGrades`. Written by the `requestGradeChange`
+ * callable when a principal wants to expand grade coverage. Approved or rejected
+ * by an admin via `approveGradeChange` / `rejectGradeChange`. On approval the
+ * requested grades are merged into `schools/{schoolId}.activeGrades`.
+ */
+export interface GradeChangeRequestDoc {
+  id: string;
+  requestedByUid: string;
+  /** Grades to ADD (not the full list -- merged into existing activeGrades on approval). */
+  gradesToAdd: number[];
+  /**
+   * Maps grade (as string key) to section count for auto-creation.
+   * E.g. {"9":2,"10":3}. When present, class docs are auto-created on approval.
+   */
+  gradesSections?: Record<string, number>;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedAt: FirestoreFieldValueLike;
+  reviewedByUid?: string;
+  reviewedAt?: FirestoreFieldValueLike;
+  rejectedReason?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -536,4 +585,89 @@ export interface RewardUnlockDoc {
   rewardTitle: string;
   rewardUrl: string;
   unlockedAt: FirestoreFieldValueLike;
+}
+
+// ---------------------------------------------------------------------------
+// P5.1 -- Aggregated class reports (nightly cron output)
+// ---------------------------------------------------------------------------
+
+/**
+ * Per-topic rollup inside a daily class report. One entry per `topicId` that
+ * had at least one quiz attempt on the report's day. Sorted weakest-first
+ * (ascending `avgBestPercentage`) so the principal/teacher dashboards can show
+ * the topics most in need of re-teaching at the top.
+ *
+ * Because there is exactly one `quizAttempts` doc per (assignment, child),
+ * `attemptedStudents` == number of attempt docs for the topic and
+ * `passedStudents` == number of those with `passed == true`.
+ */
+export interface ClassReportTopicStat {
+  topicId: string;
+  topicName: string;
+  subjectName: string;
+  /** Distinct children who attempted this topic on the report day. */
+  attemptedStudents: number;
+  /** Distinct children whose attempt for this topic is `passed`. */
+  passedStudents: number;
+  /** Mean `bestPercentage` (0-100) across this topic's attempts, rounded. */
+  avgBestPercentage: number;
+  /** True when `avgBestPercentage` is below the weak threshold (< 60). */
+  weak: boolean;
+}
+
+/**
+ * `classReports/{classId}/daily/{YYYY-MM-DD}` -- written exclusively by the
+ * nightly `aggregateClassReports` cron (Admin SDK). Pre-computed so principal /
+ * teacher dashboards read one tiny doc instead of scanning `quizAttempts`.
+ *
+ * `schoolId` + `teacherIds` are denormalised onto the doc because
+ * firestore/rules gate reads on them (principal via `belongsToSchool(schoolId)`,
+ * teacher via `myUid() in teacherIds`).
+ */
+export interface ClassReportDailyDoc {
+  /** Same value as the Firestore doc id (`YYYY-MM-DD`, school timezone). */
+  date: string;
+  schoolId: string;
+  classId: string;
+  /** Denormalised from the class doc for the teacher read rule. */
+  teacherIds: string[];
+  /** `studentChildUids.length` from the class doc at aggregation time. */
+  rosterSize: number;
+  /** Distinct children with >= 1 attempt on this day. */
+  attemptedStudents: number;
+  /** Total `quizAttempts` docs counted for this class on this day. */
+  totalAttempts: number;
+  /** Distinct children who passed >= 1 topic on this day. */
+  passedStudents: number;
+  /** Class-level mean `bestPercentage` (0-100) across all attempts, rounded. */
+  avgBestPercentage: number;
+  /** Per-topic breakdown, sorted ascending by `avgBestPercentage`. */
+  topics: ClassReportTopicStat[];
+  /** Whether the run came from the schedule or the manual/backfill script. */
+  source: 'cron' | 'script';
+  generatedAt: FirestoreFieldValueLike;
+}
+
+/**
+ * `classReports/{classId}` top-level pointer doc -- a lightweight index written
+ * (merged) alongside each daily doc so a principal/teacher UI can resolve a
+ * class's school + latest report date without a collectionGroup scan. Carries
+ * `schoolId` + `teacherIds` for the same read-rule reason as the daily doc.
+ */
+export interface ClassReportPointerDoc {
+  schoolId: string;
+  classId: string;
+  teacherIds: string[];
+  className?: string;
+  /** Most recent `daily/{date}` written for this class. */
+  lastDailyDate: string;
+  /**
+   * Topics from the latest report whose `avgBestPercentage < 60`, sorted
+   * weakest-first. Rewritten on every run (cleared to `[]` when a class
+   * recovers) so the teacher "Re-teach" callout always reflects the latest day.
+   */
+  weakTopics?: ClassReportTopicStat[];
+  /** `daily` date the `weakTopics` list was derived from. */
+  weakTopicsDate?: string;
+  updatedAt: FirestoreFieldValueLike;
 }

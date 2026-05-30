@@ -31,10 +31,15 @@ import {FieldValue} from 'firebase-admin/firestore';
 
 import {db} from '../lib/admin';
 import {requireAuth} from '../lib/auth';
+import {validateGradeSections} from '../lib/createClassSections';
 
 interface Input {
   inviteCode: string;
   displayName: string;
+  /** @deprecated Use requestedGradeSections instead. */
+  requestedGrades?: number[];
+  /** Maps grade (as string) to section count. E.g. {"1":2,"8":1}. */
+  requestedGradeSections?: Record<string, number>;
 }
 
 interface Output {
@@ -47,7 +52,8 @@ export const claimSchool = onCall<Input, Promise<Output>>(
   {region: 'asia-south1'},
   async request => {
     const caller = requireAuth(request);
-    const {inviteCode, displayName} = request.data ?? {};
+    const {inviteCode, displayName, requestedGrades, requestedGradeSections} =
+      request.data ?? {};
 
     if (
       typeof inviteCode !== 'string' ||
@@ -59,6 +65,39 @@ export const claimSchool = onCall<Input, Promise<Output>>(
         'invalid-argument',
         'Code is incorrect or has been rotated.',
       );
+    }
+
+    // Validate grade selections -- prefer the new sections map, fall back to
+    // the legacy flat array for backward compatibility.
+    let validatedSections: Record<string, number> | undefined;
+    let validatedGrades: number[] | undefined;
+
+    if (requestedGradeSections !== undefined) {
+      const parsed = validateGradeSections(requestedGradeSections);
+      if (!parsed) {
+        throw new HttpsError(
+          'invalid-argument',
+          'requestedGradeSections must map grade (1-12) to section count (1-10).',
+        );
+      }
+      validatedSections = parsed;
+      validatedGrades = Object.keys(parsed)
+        .map(Number)
+        .sort((a, b) => a - b);
+    } else if (requestedGrades !== undefined) {
+      if (
+        !Array.isArray(requestedGrades) ||
+        requestedGrades.length === 0 ||
+        !requestedGrades.every(
+          g => typeof g === 'number' && Number.isInteger(g) && g >= 1 && g <= 12,
+        )
+      ) {
+        throw new HttpsError(
+          'invalid-argument',
+          'requestedGrades must be a non-empty array of integers 1-12.',
+        );
+      }
+      validatedGrades = [...new Set(requestedGrades)].sort((a, b) => a - b);
     }
     if (!caller.phone) {
       // Phone-OTP is the only sign-in method that reaches this callable in
@@ -109,6 +148,14 @@ export const claimSchool = onCall<Input, Promise<Output>>(
     if (existingSnap.exists) {
       const existing = existingSnap.data() ?? {};
       if (existing.status === 'pending') {
+        if (validatedSections) {
+          await principalRef.update({
+            requestedGradeSections: validatedSections,
+            requestedGrades: validatedGrades,
+          });
+        } else if (validatedGrades) {
+          await principalRef.update({requestedGrades: validatedGrades});
+        }
         return {schoolId, principalId: caller.uid, status: 'pending'};
       }
       if (existing.status === 'active') {
@@ -120,13 +167,20 @@ export const claimSchool = onCall<Input, Promise<Output>>(
       // rejected -> let them re-submit by overwriting.
     }
 
-    await principalRef.set({
+    const principalPayload: Record<string, unknown> = {
       userId: caller.uid,
       displayName: displayName.trim(),
       phone: caller.phone,
       status: 'pending',
       requestedAt: FieldValue.serverTimestamp(),
-    });
+    };
+    if (validatedSections) {
+      principalPayload.requestedGradeSections = validatedSections;
+      principalPayload.requestedGrades = validatedGrades;
+    } else if (validatedGrades) {
+      principalPayload.requestedGrades = validatedGrades;
+    }
+    await principalRef.set(principalPayload);
 
     return {schoolId, principalId: caller.uid, status: 'pending'};
   },
