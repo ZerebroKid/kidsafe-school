@@ -502,6 +502,8 @@ export interface QuizAttemptDoc {
   topicName: string;
   /** Denormalised from the assignment; lowercased copy in `subjectTag` drives reward matching. */
   subjectName: string;
+  /** Denormalised from the topic content; drives grade-scoped reward matching. */
+  grade: number;
   childUid: string;
   /** Best-effort copy of `users/{childUid}.parentUid`; absent if the child has no linked parent. */
   parentUid?: string;
@@ -541,10 +543,12 @@ export type RewardModerationStatus = 'pending' | 'approved' | 'rejected';
  * `moderationStatus == 'approved'` (firestore/rules) and by the
  * `onQuizAttemptWrite` trigger via Admin SDK.
  *
- * MVP eligibility (locked decision): the reward picker matches on
- * `subjectTags array-contains <subject>` + `moderationStatus == 'approved'`
- * only -- no age/grade filtering yet. `subjectTags` MUST be stored lowercased
- * so the trigger's lowercased `array-contains` lookup matches.
+ * Eligibility: the reward picker matches on `moderationStatus == 'approved'`
+ * + `subjectTags array-contains <subject>` + the passing attempt's `grade`
+ * being in the reward's `grades` list. `subjectTags` MUST be stored lowercased
+ * so the trigger's lowercased `array-contains` lookup matches. Because
+ * Firestore allows only one `array-contains` per query, the grade filter is
+ * applied in memory over the subject-matched candidates.
  */
 export interface RewardDoc {
   id: string;
@@ -554,6 +558,8 @@ export interface RewardDoc {
   url: string;
   /** Lowercased subject keys (e.g. ["science"]). Matched against the topic's subject. */
   subjectTags: string[];
+  /** Grades this reward can unlock for; matched against the passing attempt's grade. */
+  grades: number[];
   moderationStatus: RewardModerationStatus;
   /** Admin uid who set `moderationStatus` to approved/rejected. */
   approvedBy?: string;

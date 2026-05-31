@@ -97,6 +97,7 @@ function passedAttempt(overrides: Record<string, unknown> = {}) {
     classId: 'class_8a',
     topicId: 'types_of_forces',
     subjectName: 'science',
+    grade: 8,
     passed: true,
     ...overrides,
   };
@@ -110,6 +111,7 @@ describe('handleQuizAttemptWrite', () => {
         title: 'Cool science clip',
         url: 'https://youtube.com/watch?v=abc',
         subjectTags: ['science'],
+        grades: [8],
         moderationStatus: 'approved',
       },
     });
@@ -213,6 +215,7 @@ describe('handleQuizAttemptWrite', () => {
     const {db} = makeFakeDb({
       'rewardCatalog/r1': {
         subjectTags: ['science'],
+        grades: [8],
         moderationStatus: 'approved',
         type: 'youtube_link',
         title: 'x',
@@ -228,6 +231,77 @@ describe('handleQuizAttemptWrite', () => {
       {pickIndex: () => 0},
     );
     expect(res.unlocked).toBe(true);
+  });
+
+  test('same subject but different grade -> no unlock', async () => {
+    const {db, state} = makeFakeDb({
+      'rewardCatalog/r1': {
+        subjectTags: ['science'],
+        grades: [6, 7],
+        moderationStatus: 'approved',
+        type: 'youtube_link',
+        title: 'x',
+        url: 'y',
+      },
+    });
+
+    const res = await handleQuizAttemptWrite(
+      db,
+      ATTEMPT_ID,
+      {passed: false},
+      passedAttempt({grade: 8}),
+      {pickIndex: () => 0},
+    );
+    expect(res.unlocked).toBe(false);
+    expect(res.reason).toBe('no-eligible-reward');
+    expect(state.docs.has(`rewardUnlocks/${ATTEMPT_ID}`)).toBe(false);
+  });
+
+  test('attempt missing grade -> no-grade', async () => {
+    const {db, state} = makeFakeDb({
+      'rewardCatalog/r1': {
+        subjectTags: ['science'],
+        grades: [8],
+        moderationStatus: 'approved',
+        type: 'youtube_link',
+        title: 'x',
+        url: 'y',
+      },
+    });
+
+    const res = await handleQuizAttemptWrite(
+      db,
+      ATTEMPT_ID,
+      {passed: false},
+      passedAttempt({grade: undefined}),
+      {pickIndex: () => 0},
+    );
+    expect(res.unlocked).toBe(false);
+    expect(res.reason).toBe('no-grade');
+    expect(state.docs.has(`rewardUnlocks/${ATTEMPT_ID}`)).toBe(false);
+  });
+
+  test('reward without a grades list is not eligible', async () => {
+    const {db, state} = makeFakeDb({
+      'rewardCatalog/r1': {
+        subjectTags: ['science'],
+        moderationStatus: 'approved',
+        type: 'youtube_link',
+        title: 'legacy reward, no grades',
+        url: 'y',
+      },
+    });
+
+    const res = await handleQuizAttemptWrite(
+      db,
+      ATTEMPT_ID,
+      {passed: false},
+      passedAttempt(),
+      {pickIndex: () => 0},
+    );
+    expect(res.unlocked).toBe(false);
+    expect(res.reason).toBe('no-eligible-reward');
+    expect(state.docs.has(`rewardUnlocks/${ATTEMPT_ID}`)).toBe(false);
   });
 
   test('deleted attempt doc -> no-op', async () => {

@@ -40,6 +40,7 @@ interface RewardRow {
   title?: string;
   url?: string;
   subjectTags?: string[];
+  grades?: number[];
   moderationStatus?: ModerationStatus;
   approvedBy?: string | null;
   createdAt?: Timestamp;
@@ -51,6 +52,8 @@ const REWARD_TYPES: {value: RewardType; label: string}[] = [
   {value: 'article_link', label: 'Article link'},
 ];
 
+const ALL_GRADES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
 export default function AdminRewardsPage() {
   const [rows, setRows] = useState<RewardRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +64,82 @@ export default function AdminRewardsPage() {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [tags, setTags] = useState('');
+  const [grades, setGrades] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  // --- edit modal state ---
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editType, setEditType] = useState<RewardType>('youtube_link');
+  const [editTitle, setEditTitle] = useState('');
+  const [editUrl, setEditUrl] = useState('');
+  const [editTags, setEditTags] = useState('');
+  const [editGrades, setEditGrades] = useState<number[]>([]);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  function toggleGrade(g: number) {
+    setGrades(prev =>
+      prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g].sort((a, b) => a - b),
+    );
+  }
+
+  function toggleEditGrade(g: number) {
+    setEditGrades(prev =>
+      prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g].sort((a, b) => a - b),
+    );
+  }
+
+  function openEdit(r: RewardRow) {
+    setEditId(r.id);
+    setEditType(r.type ?? 'youtube_link');
+    setEditTitle(r.title ?? '');
+    setEditUrl(r.url ?? '');
+    setEditTags(r.subjectTags?.length ? r.subjectTags.join(', ') : '');
+    setEditGrades(r.grades ?? []);
+    setEditError(null);
+  }
+
+  function closeEdit() {
+    if (editSaving) return;
+    setEditId(null);
+  }
+
+  const editParsedTags = editTags
+    .split(',')
+    .map(t => t.trim().toLowerCase())
+    .filter(Boolean);
+
+  const canSaveEdit =
+    editTitle.trim().length >= 2 &&
+    editUrl.trim().length > 0 &&
+    editParsedTags.length > 0 &&
+    editGrades.length > 0;
+
+  async function handleUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editId || !canSaveEdit || editSaving) return;
+    setEditSaving(true);
+    setEditError(null);
+    try {
+      // Editing re-approves the reward: the admin reviewed the latest fields,
+      // so we stamp it approved (by the current admin) on save.
+      const uid = getAuthInstance().currentUser?.uid ?? null;
+      await updateDoc(doc(getFirestoreInstance(), 'rewardCatalog', editId), {
+        type: editType,
+        title: editTitle.trim(),
+        url: editUrl.trim(),
+        subjectTags: editParsedTags,
+        grades: editGrades,
+        moderationStatus: 'approved',
+        approvedBy: uid,
+      });
+      setEditId(null);
+    } catch (err) {
+      setEditError((err as {message?: string} | null)?.message ?? 'Update failed.');
+    } finally {
+      setEditSaving(false);
+    }
+  }
 
   useEffect(() => {
     const q = query(
@@ -95,7 +173,10 @@ export default function AdminRewardsPage() {
     .filter(Boolean);
 
   const canSubmit =
-    title.trim().length >= 2 && url.trim().length > 0 && parsedTags.length > 0;
+    title.trim().length >= 2 &&
+    url.trim().length > 0 &&
+    parsedTags.length > 0 &&
+    grades.length > 0;
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -108,6 +189,7 @@ export default function AdminRewardsPage() {
         title: title.trim(),
         url: url.trim(),
         subjectTags: parsedTags,
+        grades,
         moderationStatus: 'pending',
         approvedBy: null,
         createdAt: serverTimestamp(),
@@ -115,6 +197,7 @@ export default function AdminRewardsPage() {
       setTitle('');
       setUrl('');
       setTags('');
+      setGrades([]);
       setType('youtube_link');
     } catch (err) {
       setError((err as {message?: string} | null)?.message ?? 'Create failed.');
@@ -232,6 +315,33 @@ export default function AdminRewardsPage() {
             className="rounded-lg border border-border bg-bg px-3 py-2 text-text outline-none focus:border-primary"
           />
         </label>
+        <div className="flex flex-col gap-2 text-sm">
+          <span className="text-text-muted">
+            Grades (the reward only unlocks for these grades)
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {ALL_GRADES.map(g => {
+              const selected = grades.includes(g);
+              return (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => toggleGrade(g)}
+                  disabled={submitting}
+                  aria-pressed={selected}
+                  className={
+                    'h-9 w-12 rounded-lg border text-sm font-medium transition-colors disabled:opacity-60 ' +
+                    (selected
+                      ? 'border-primary bg-primary text-primary-text'
+                      : 'border-border bg-bg text-text hover:border-primary/60')
+                  }
+                >
+                  {g}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <div className="flex justify-end">
           <button
             type="submit"
@@ -260,6 +370,7 @@ export default function AdminRewardsPage() {
                 <th className="px-4 py-3">Title</th>
                 <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Subjects</th>
+                <th className="px-4 py-3">Grades</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -290,6 +401,9 @@ export default function AdminRewardsPage() {
                     <td className="px-4 py-3 text-text-muted">
                       {r.subjectTags?.length ? r.subjectTags.join(', ') : '—'}
                     </td>
+                    <td className="px-4 py-3 text-text-muted">
+                      {r.grades?.length ? r.grades.join(', ') : '—'}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={
@@ -306,6 +420,14 @@ export default function AdminRewardsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openEdit(r)}
+                          disabled={busy}
+                          className="rounded-lg border border-border px-3 py-1 text-xs text-text disabled:opacity-50"
+                        >
+                          Edit
+                        </button>
                         {status !== 'approved' ? (
                           <button
                             type="button"
@@ -343,6 +465,136 @@ export default function AdminRewardsPage() {
           </table>
         </div>
       )}
+
+      {editId ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={e => {
+            if (e.target === e.currentTarget) closeEdit();
+          }}
+        >
+          <form
+            onSubmit={handleUpdate}
+            className="flex max-h-[90vh] w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-2xl border border-border bg-surface p-6"
+          >
+            <div>
+              <h2 className="text-lg font-semibold text-text">Edit reward</h2>
+              <p className="mt-1 text-xs text-text-muted">
+                Saving re-approves this reward with the latest details.
+              </p>
+            </div>
+
+            {editError ? (
+              <p
+                role="alert"
+                className="rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger"
+              >
+                {editError}
+              </p>
+            ) : null}
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-text-muted">Type</span>
+                <select
+                  value={editType}
+                  onChange={e => setEditType(e.target.value as RewardType)}
+                  disabled={editSaving}
+                  className="rounded-lg border border-border bg-bg px-3 py-2 text-text outline-none focus:border-primary"
+                >
+                  {REWARD_TYPES.map(t => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="text-text-muted">
+                  Subject tags (comma-separated)
+                </span>
+                <input
+                  type="text"
+                  value={editTags}
+                  onChange={e => setEditTags(e.target.value)}
+                  placeholder="e.g. science, maths"
+                  disabled={editSaving}
+                  className="rounded-lg border border-border bg-bg px-3 py-2 text-text outline-none focus:border-primary"
+                />
+              </label>
+            </div>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-text-muted">Title</span>
+              <input
+                type="text"
+                value={editTitle}
+                onChange={e => setEditTitle(e.target.value)}
+                placeholder="e.g. Fun science experiment video"
+                disabled={editSaving}
+                className="rounded-lg border border-border bg-bg px-3 py-2 text-text outline-none focus:border-primary"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-text-muted">URL</span>
+              <input
+                type="url"
+                value={editUrl}
+                onChange={e => setEditUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=…"
+                disabled={editSaving}
+                className="rounded-lg border border-border bg-bg px-3 py-2 text-text outline-none focus:border-primary"
+              />
+            </label>
+            <div className="flex flex-col gap-2 text-sm">
+              <span className="text-text-muted">
+                Grades (the reward only unlocks for these grades)
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {ALL_GRADES.map(g => {
+                  const selected = editGrades.includes(g);
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => toggleEditGrade(g)}
+                      disabled={editSaving}
+                      aria-pressed={selected}
+                      className={
+                        'h-9 w-12 rounded-lg border text-sm font-medium transition-colors disabled:opacity-60 ' +
+                        (selected
+                          ? 'border-primary bg-primary text-primary-text'
+                          : 'border-border bg-bg text-text hover:border-primary/60')
+                      }
+                    >
+                      {g}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={closeEdit}
+                disabled={editSaving}
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!canSaveEdit || editSaving}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-text disabled:opacity-60"
+              >
+                {editSaving ? 'Saving…' : 'Update & approve'}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </main>
   );
 }

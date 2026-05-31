@@ -151,7 +151,7 @@ function seedBasic(opts?: {
 
   fakeStore.docs.set(
     `curriculum/${CURRICULUM_ID}/chapters/${CHAPTER_ID}/topics/${TOPIC_ID}`,
-    {topicName: 'Types of Forces', status: 'published', quiz},
+    {topicName: 'Types of Forces', grade: 8, status: 'published', quiz},
   );
 }
 
@@ -205,6 +205,7 @@ describe('submitQuizAttempt', () => {
     expect(doc.childUid).toBe(CHILD_UID);
     expect(doc.parentUid).toBe(PARENT_UID);
     expect(doc.assignedByTeacherUid).toBe(TEACHER_UID);
+    expect(doc.grade).toBe(8);
     expect(doc.firstPassedAt).toBe('__serverTimestamp__');
   });
 

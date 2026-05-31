@@ -154,6 +154,12 @@ export const submitQuizAttempt = onCall<
   // Denormalise the human-readable chapter name onto the attempt so report UIs
   // (parent Study tab) can show "which chapter" without an extra read.
   const chapterName = String(topic.chapterName ?? '');
+  // Denormalise the topic's grade onto the attempt so the reward-unlock trigger
+  // can match grade-scoped rewards without a follow-up curriculum/class read.
+  const grade =
+    typeof topic.grade === 'number' && Number.isFinite(topic.grade)
+      ? topic.grade
+      : null;
   const quiz: QuizQuestionShape[] = Array.isArray(topic.quiz)
     ? (topic.quiz as QuizQuestionShape[])
     : [];
@@ -235,6 +241,7 @@ export const submitQuizAttempt = onCall<
         topicId,
         topicName,
         subjectName,
+        ...(grade !== null ? {grade} : {}),
         childUid: caller.uid,
         ...(parentUid ? {parentUid} : {}),
         assignedByTeacherUid,

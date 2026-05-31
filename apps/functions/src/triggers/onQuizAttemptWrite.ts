@@ -12,12 +12,14 @@
  * re-fire (Cloud Functions delivers at-least-once) is a no-op once the
  * unlock exists.
  *
- * Eligibility (locked MVP decision): match `moderationStatus == 'approved'`
- * + `subjectTags array-contains <subject>` only -- no age/grade filtering.
- * `subjectTags` are stored lowercased in the catalog, so we lowercase the
- * attempt's `subjectName` before the `array-contains` lookup. A random
- * eligible reward is chosen; if none match we simply write nothing (ZKid
- * shows a friendly "you passed, no reward today" fallback).
+ * Eligibility: match `moderationStatus == 'approved'` + `subjectTags
+ * array-contains <subject>` + the attempt's `grade` being in the reward's
+ * `grades` list. `subjectTags` are stored lowercased in the catalog, so we
+ * lowercase the attempt's `subjectName` before the `array-contains` lookup;
+ * the grade filter runs in memory over the subject matches (Firestore allows
+ * only one `array-contains` per query). A random eligible reward is chosen; if
+ * none match we simply write nothing (ZKid shows a friendly "you passed, no
+ * reward today" fallback).
  *
  * The reward fields are denormalised onto the unlock doc so ZKid can render
  * the unlock without a follow-up `rewardCatalog` read.
@@ -39,6 +41,7 @@ export interface HandleResult {
     | 'not-first-pass'
     | 'already-unlocked'
     | 'no-subject'
+    | 'no-grade'
     | 'no-eligible-reward'
     | 'deleted';
 }
@@ -76,6 +79,15 @@ export async function handleQuizAttemptWrite(
     return {unlocked: false, reason: 'no-subject'};
   }
 
+  // Grade-scoped matching: the attempt must carry a grade (denormalised from
+  // the topic by `submitQuizAttempt`), and the reward's `grades` list must
+  // include it. Attempts written before grade denormalisation -- or any reward
+  // created before the `grades` field existed -- simply don't match.
+  const grade = Number(after.grade);
+  if (!Number.isFinite(grade)) {
+    return {unlocked: false, reason: 'no-grade'};
+  }
+
   const query = await database
     .collection('rewardCatalog')
     .where('moderationStatus', '==', 'approved')
@@ -86,7 +98,17 @@ export async function handleQuizAttemptWrite(
     return {unlocked: false, reason: 'no-eligible-reward'};
   }
 
-  const docs = query.docs;
+  // Firestore allows only one `array-contains` per query, so we filter the
+  // subject-matched candidates by grade in memory (the result set is small).
+  const docs = query.docs.filter(d => {
+    const grades = d.data()?.grades;
+    return Array.isArray(grades) && grades.includes(grade);
+  });
+
+  if (docs.length === 0) {
+    return {unlocked: false, reason: 'no-eligible-reward'};
+  }
+
   const pickIndex =
     options?.pickIndex ?? ((count: number) => Math.floor(Math.random() * count));
   const idx = Math.min(Math.max(pickIndex(docs.length), 0), docs.length - 1);
