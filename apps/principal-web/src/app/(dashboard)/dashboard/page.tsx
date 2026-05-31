@@ -49,15 +49,15 @@ export default function CampusDashboardPage() {
   const rows = coverage.data;
 
   return (
-    <main className="flex flex-col gap-6">
-      <header>
-        <p className="text-xs uppercase tracking-widest text-text-muted">
+    <main className="flex flex-col gap-8">
+      <header className="flex flex-col gap-2">
+        <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
           Dashboard
         </p>
-        <h1 className="mt-1 text-2xl font-semibold text-text">
+        <h1 className="text-3xl font-bold tracking-tight text-text">
           Class coverage
         </h1>
-        <p className="mt-1 text-sm text-text-muted">
+        <p className="text-sm text-text-muted">
           Latest study activity per class, refreshed nightly.
         </p>
       </header>
@@ -74,7 +74,7 @@ export default function CampusDashboardPage() {
       {rows === null ? (
         <p className="text-sm text-text-muted">Loading coverage…</p>
       ) : rows.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-surface p-8 text-center">
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border p-12 text-center">
           <p className="text-sm text-text-muted">
             No classes yet.{' '}
             <Link href="/classes/new" className="text-primary hover:underline">
@@ -84,7 +84,7 @@ export default function CampusDashboardPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {rows.map(row => (
             <CoverageCard key={row.classId} row={row} />
           ))}
@@ -106,14 +106,15 @@ function CoverageCard({row}: {row: ClassCoverage}) {
           ? 'warning'
           : 'danger';
 
+  const cardCls = hasReport
+    ? 'flex flex-col gap-4 rounded-2xl border border-border bg-surface p-6 ring-1 ring-primary/20 transition-colors hover:border-primary/60'
+    : 'flex flex-col gap-4 rounded-2xl border border-border bg-surface p-6 transition-colors hover:border-primary/60';
+
   return (
-    <Link
-      href={`/classes/${row.classId}`}
-      className="flex flex-col gap-4 rounded-2xl border border-border bg-surface p-5 transition-colors hover:border-primary/60"
-    >
+    <Link href={`/classes/${row.classId}`} className={cardCls}>
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <h2 className="text-lg font-semibold text-text">{row.className}</h2>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-bold text-text">{row.className}</h2>
           <p className="text-xs text-text-muted">
             {row.rosterSize} student{row.rosterSize === 1 ? '' : 's'}
             {row.assignedTopicsTotal > 0
@@ -159,9 +160,9 @@ function CoverageCard({row}: {row: ClassCoverage}) {
           </div>
         </>
       ) : (
-        <div className="rounded-xl border border-border bg-bg p-4 text-center">
-          <p className="text-sm text-text-muted">No activity yet</p>
-          <p className="mt-1 text-xs text-text-muted">
+        <div className="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border p-8 text-center">
+          <p className="text-sm font-medium text-text">No activity yet</p>
+          <p className="text-xs text-text-muted">
             Reports appear after students attempt assigned quizzes.
           </p>
         </div>

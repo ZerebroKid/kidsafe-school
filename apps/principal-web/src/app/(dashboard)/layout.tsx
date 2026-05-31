@@ -39,16 +39,67 @@ import {LogoutButton} from '@/components/LogoutButton';
  * to approval; this layout just gets the user there.
  */
 
-const NAV = [
-  {href: '/dashboard', label: 'Dashboard'},
-  {href: '/classes', label: 'Classes'},
-  {href: '/teachers', label: 'Teachers'},
-  {href: '/grades', label: 'Grades'},
-  // P4.4 -- principal-facing read-only view of the school invite code so they
-  // can copy + manually share it with parents. There is intentionally no
-  // /parents link here -- the parents audit list lives in admin web only.
-  {href: '/school/code', label: 'School code'},
-] as const;
+const ICON =
+  'inline-block size-4 shrink-0 fill-none stroke-current stroke-[2] [stroke-linecap:round] [stroke-linejoin:round]';
+
+const NAV: readonly {href: string; label: string; icon: React.ReactNode}[] = [
+  {
+    href: '/dashboard',
+    label: 'Dashboard',
+    icon: (
+      <svg className={ICON} viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="9" rx="1" />
+        <rect x="14" y="3" width="7" height="5" rx="1" />
+        <rect x="14" y="12" width="7" height="9" rx="1" />
+        <rect x="3" y="16" width="7" height="5" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    href: '/classes',
+    label: 'Classes',
+    icon: (
+      <svg className={ICON} viewBox="0 0 24 24">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/teachers',
+    label: 'Teachers',
+    icon: (
+      <svg className={ICON} viewBox="0 0 24 24">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
+  },
+  {
+    href: '/grades',
+    label: 'Grades',
+    icon: (
+      <svg className={ICON} viewBox="0 0 24 24">
+        <path d="M3 3v18h18" />
+        <path d="M18 17V9" />
+        <path d="M13 17V5" />
+        <path d="M8 17v-3" />
+      </svg>
+    ),
+  },
+  {
+    href: '/school/code',
+    label: 'School code',
+    icon: (
+      <svg className={ICON} viewBox="0 0 24 24">
+        <polyline points="16 18 22 12 16 6" />
+        <polyline points="8 6 2 12 8 18" />
+      </svg>
+    ),
+  },
+];
 
 type GuardState =
   | {kind: 'loading'}
@@ -135,7 +186,7 @@ export default function CampusDashboardLayout({
   return (
     <div className="flex min-h-full flex-1">
       <CampusSidebar />
-      <section className="flex flex-1 flex-col bg-bg p-8">{children}</section>
+      <section className="flex flex-1 flex-col overflow-auto bg-bg p-12">{children}</section>
     </div>
   );
 }
@@ -143,36 +194,36 @@ export default function CampusDashboardLayout({
 function CampusSidebar() {
   const pathname = usePathname();
   return (
-    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-surface">
+    <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col border-r border-border bg-sidebar">
       <div className="flex flex-col gap-1 p-6">
-        <p className="text-xs uppercase tracking-widest text-text-muted">
+        <p className="text-xs font-medium uppercase tracking-widest text-text-muted">
           Zerebro
         </p>
-        <p className="text-lg font-semibold text-text">Campus</p>
+        <p className="text-xl font-bold text-text">Campus</p>
       </div>
       <nav className="flex flex-1 flex-col gap-1 px-3">
         {NAV.map(item => {
-          const active = pathname === item.href;
+          const active =
+            pathname === item.href ||
+            (item.href !== '/dashboard' && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
               href={item.href}
               className={
-                'rounded-md px-3 py-2 text-sm transition-colors ' +
+                'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ' +
                 (active
-                  ? 'bg-surface-alt text-text'
-                  : 'text-text-muted hover:bg-surface-alt hover:text-text')
+                  ? 'bg-nav-active text-nav-active-text'
+                  : 'text-text hover:bg-surface-alt')
               }
             >
+              {item.icon}
               {item.label}
             </Link>
           );
         })}
       </nav>
-      <div
-        id="campus-sidebar-footer"
-        className="border-t border-border p-3"
-      >
+      <div className="border-t border-border p-3">
         <LogoutButton />
       </div>
     </aside>

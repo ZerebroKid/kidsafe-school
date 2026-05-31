@@ -22,7 +22,7 @@ export function StatTile({
           ? 'text-danger'
           : 'text-text';
   return (
-    <div className="rounded-xl border border-border bg-bg p-3">
+    <div className="rounded-xl bg-surface-alt p-3">
       <p className="text-[10px] uppercase tracking-widest text-text-muted">
         {label}
       </p>

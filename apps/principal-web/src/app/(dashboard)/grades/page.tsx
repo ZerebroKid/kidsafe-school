@@ -228,7 +228,7 @@ export default function ManageGradesPage() {
             {requests.map(r => (
               <div
                 key={r.id}
-                className="flex items-center justify-between rounded-lg border border-border bg-bg px-4 py-3"
+                className="flex items-center justify-between rounded-lg bg-surface-alt px-4 py-3"
               >
                 <div>
                   <div className="flex flex-wrap gap-1.5">

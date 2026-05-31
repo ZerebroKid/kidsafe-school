@@ -17,7 +17,10 @@ export function CoverageBar({
   const safeTotal = total > 0 ? total : 0;
   const pct =
     safeTotal > 0 ? Math.min(100, Math.round((value / safeTotal) * 100)) : 0;
-  const fill = tone === 'success' ? 'bg-success' : 'bg-primary';
+  const fillColor =
+    tone === 'success'
+      ? 'var(--color-pass-rate)'
+      : 'var(--color-engagement)';
   return (
     <div>
       <div className="flex items-baseline justify-between">
@@ -35,8 +38,8 @@ export function CoverageBar({
         aria-label={label}
       >
         <div
-          className={`h-full rounded-full ${fill}`}
-          style={{width: `${pct}%`}}
+          className="h-full rounded-full"
+          style={{width: `${pct}%`, backgroundColor: fillColor}}
         />
       </div>
     </div>

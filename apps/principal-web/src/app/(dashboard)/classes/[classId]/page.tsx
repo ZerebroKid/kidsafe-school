@@ -109,17 +109,37 @@ export default function ClassDetailPage() {
       <section className="rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold text-text">Overview</h2>
         <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="rounded-xl border border-border bg-bg p-4">
-            <p className="text-xs uppercase tracking-widest text-text-muted">Teachers</p>
-            <p className="mt-1 text-2xl font-semibold text-text">
-              {klass.teacherIds?.length ?? 0}
-            </p>
+          <div className="flex items-start gap-3 rounded-xl bg-surface-alt p-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-bg text-text-muted">
+              <svg className="size-4 fill-none stroke-current stroke-[2]" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </span>
+            <div>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Teachers</p>
+              <p className="mt-1 text-2xl font-semibold text-text">
+                {klass.teacherIds?.length ?? 0}
+              </p>
+            </div>
           </div>
-          <div className="rounded-xl border border-border bg-bg p-4">
-            <p className="text-xs uppercase tracking-widest text-text-muted">Students</p>
-            <p className="mt-1 text-2xl font-semibold text-text">
-              {klass.studentChildUids?.length ?? 0}
-            </p>
+          <div className="flex items-start gap-3 rounded-xl bg-surface-alt p-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-bg text-text-muted">
+              <svg className="size-4 fill-none stroke-current stroke-[2]" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </span>
+            <div>
+              <p className="text-xs uppercase tracking-widest text-text-muted">Students</p>
+              <p className="mt-1 text-2xl font-semibold text-text">
+                {klass.studentChildUids?.length ?? 0}
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -195,7 +215,7 @@ function CoverageSection({
                 {detail.assignedTopics.map(t => (
                   <li
                     key={t.topicId}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg px-3 py-2"
+                    className="flex items-center justify-between gap-3 rounded-lg bg-surface-alt px-3 py-2"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-text">
@@ -238,10 +258,10 @@ function CoverageSection({
 const CHART = {
   success: '#4ade80',
   warning: '#facc15',
-  danger: '#f87171',
-  grid: '#334155',
-  axis: '#94a3b8',
-  text: '#f8fafc',
+  danger: '#e7000b',
+  grid: '#e5e5e5',
+  axis: '#737373',
+  text: '#0a0a0a',
 } as const;
 
 function bandColor(pct: number): string {
@@ -312,7 +332,7 @@ function TopicCoverageChart({topics}: {topics: ClassReportTopicStat[]}) {
 
       {/* Cross-subject comparison — only useful when there's more than one. */}
       {groups.length > 1 ? (
-        <div className="rounded-xl border border-border bg-bg p-4">
+        <div className="rounded-xl bg-surface-alt p-4">
           <h4 className="text-xs font-semibold uppercase tracking-widest text-text-muted">
             Average score by subject
           </h4>
@@ -326,7 +346,7 @@ function TopicCoverageChart({topics}: {topics: ClassReportTopicStat[]}) {
       {groups.map(group => (
         <div
           key={group.subjectName}
-          className="rounded-xl border border-border bg-bg p-4"
+          className="rounded-xl bg-surface-alt p-4"
         >
           <div className="flex items-baseline justify-between gap-2">
             <h4 className="text-sm font-semibold capitalize text-text">
