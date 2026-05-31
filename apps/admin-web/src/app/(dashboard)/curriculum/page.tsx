@@ -87,7 +87,7 @@ export default function AdminCurriculumPage() {
         <div className="rounded-2xl border border-border bg-surface p-8 text-center">
           <p className="text-sm text-text-muted">
             No curriculum bundles imported yet. Run{' '}
-            <code className="rounded bg-bg px-1 py-0.5">
+            <code className="rounded bg-surface-alt px-1 py-0.5">
               pnpm import:curriculum -- --apply
             </code>{' '}
             with a bundle under <code>content/</code>.

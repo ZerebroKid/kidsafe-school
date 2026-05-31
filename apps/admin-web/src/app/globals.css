@@ -9,25 +9,27 @@
 @source "../../../../packages/shared-types/src/**/*.{ts,tsx}";
 
 /*
- * Brand tokens shared across all four Zerebro products. Mirrored verbatim in
- *   - apps/principal-web/src/app/globals.css
- *   - apps/kids/src/theme.ts  (RN constants object)
- *   - apps/guardian/src/theme.ts  (RN constants object)
- * If you change a value here, change it in those three other files too.
+ * Admin light theme. Diverged from the shared dark palette (kids / guardian)
+ * to match the principal-web (Campus) clean white/neutral look.
  * Class names follow Tailwind v4 derivation: --color-foo-bar -> bg-foo-bar.
  */
 @theme {
-  --color-bg: #0f172a;
-  --color-surface: #1e293b;
-  --color-surface-alt: #334155;
-  --color-text: #f8fafc;
-  --color-text-muted: #94a3b8;
-  --color-primary: #38bdf8;
-  --color-primary-text: #0f172a;
-  --color-danger: #f87171;
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5f5f5;
+  --color-text: #0a0a0a;
+  --color-text-muted: #737373;
+  --color-primary: #171717;
+  --color-primary-text: #ffffff;
+  --color-danger: #e7000b;
   --color-success: #4ade80;
   --color-warning: #facc15;
-  --color-border: #334155;
+  --color-border: #e5e5e5;
+  --color-sidebar: #fafafa;
+  --color-nav-active: #171717;
+  --color-nav-active-text: #fafafa;
+  --color-engagement: oklch(0.6 0.118 184.704);
+  --color-pass-rate: oklch(0.7 0.18 150);
 }
 
 body {

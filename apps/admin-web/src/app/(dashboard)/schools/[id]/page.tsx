@@ -219,7 +219,7 @@ export default function SchoolDetailPage() {
             </p>
             <h2 className="mt-1 text-lg font-semibold text-text">
               Joined parents
-              <span className="ml-2 rounded-full bg-bg px-2 py-0.5 text-xs font-normal text-text-muted">
+              <span className="ml-2 rounded-full bg-surface-alt px-2 py-0.5 text-xs font-normal text-text-muted">
                 {parents.length}
               </span>
             </h2>
@@ -245,7 +245,7 @@ export default function SchoolDetailPage() {
         {parents.length > 0 ? (
           <div className="mt-4 overflow-hidden rounded-md border border-border">
             <table className="w-full text-left text-sm">
-              <thead className="bg-bg text-xs uppercase tracking-widest text-text-muted">
+              <thead className="bg-surface-alt text-xs uppercase tracking-widest text-text-muted">
                 <tr>
                   <th className="px-3 py-2">Name</th>
                   <th className="px-3 py-2">Phone</th>
