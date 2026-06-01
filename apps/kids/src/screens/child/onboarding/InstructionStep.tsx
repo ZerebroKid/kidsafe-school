@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   bulletCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     padding: spacing.md,
     gap: spacing.md,

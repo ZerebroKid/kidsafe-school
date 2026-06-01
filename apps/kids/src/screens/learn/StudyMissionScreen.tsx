@@ -184,7 +184,7 @@ function ChapterAccordion({
     <View style={styles.chapterCard}>
       <Pressable
         onPress={toggle}
-        android_ripple={{color: 'rgba(255,255,255,0.06)'}}
+        android_ripple={{color: 'rgba(0,0,0,0.04)'}}
         style={styles.chapterRow}>
         <View style={styles.chapterInfo}>
           <Text style={styles.chapterLabel}>{chapter.chapterLabel}</Text>
@@ -202,7 +202,7 @@ function ChapterAccordion({
             <Pressable
               key={topic.id}
               onPress={() => onOpenTopic(topic)}
-              android_ripple={{color: 'rgba(255,255,255,0.06)'}}
+              android_ripple={{color: 'rgba(0,0,0,0.04)'}}
               style={styles.topicRow}>
               <View style={styles.topicInfo}>
                 <Text style={styles.topicName}>{topic.topicName}</Text>
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   },
   topicCta: {
     fontSize: 14,
-    color: colors.primary,
+    color: colors.text,
     marginLeft: spacing.sm,
   },
   emptyCard: {

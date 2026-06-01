@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   auditCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     padding: spacing.md,
     gap: spacing.sm,
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     color: colors.warning,
   },
   tipCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     padding: spacing.md,
     borderRadius: radius.md,
   },

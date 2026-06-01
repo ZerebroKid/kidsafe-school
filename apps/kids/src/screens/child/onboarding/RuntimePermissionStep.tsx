@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   rationale: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     padding: spacing.md,
     borderRadius: 12,
     marginTop: spacing.md,

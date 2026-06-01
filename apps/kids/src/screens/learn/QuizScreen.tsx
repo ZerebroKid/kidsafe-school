@@ -181,7 +181,7 @@ export function QuizScreen({route, navigation}: Props) {
               <Pressable
                 key={idx}
                 onPress={() => select(question.questionId, idx)}
-                android_ripple={{color: 'rgba(255,255,255,0.12)'}}
+                android_ripple={{color: 'rgba(0,0,0,0.06)'}}
                 style={[styles.option, isSelected && styles.optionSelected]}>
                 <View
                   style={[
@@ -295,8 +295,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   optionSelected: {
-    borderColor: colors.primary,
-    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    borderColor: colors.text,
+    backgroundColor: colors.surfaceAlt,
   },
   radio: {
     width: 22,
@@ -307,12 +307,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioSelected: {borderColor: colors.primary},
+  radioSelected: {borderColor: colors.text},
   radioDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.text,
   },
   optionText: {
     flex: 1,

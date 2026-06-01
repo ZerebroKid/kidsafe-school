@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, Pressable, StyleSheet, Text, View} from 'react-native';
-import {NavigationContainer, DarkTheme} from '@react-navigation/native';
+import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
 
 import auth from '@react-native-firebase/auth';
 
@@ -17,9 +17,9 @@ import {colors} from '../theme';
 import {VerifyEmailScreen} from '../screens/auth/VerifyEmailScreen';
 
 const navTheme = {
-  ...DarkTheme,
+  ...DefaultTheme,
   colors: {
-    ...DarkTheme.colors,
+    ...DefaultTheme.colors,
     background: colors.bg,
     card: colors.bg,
     primary: colors.primary,
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   wrongAppButtonText: {
-    color: '#fff',
+    color: colors.primaryText,
     fontSize: 15,
     fontWeight: '600',
   },

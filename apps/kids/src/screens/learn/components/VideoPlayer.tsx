@@ -39,7 +39,7 @@ export function VideoPlayer({url, title}: Props) {
   return (
     <Pressable
       onPress={openPlayer}
-      android_ripple={{color: 'rgba(255,255,255,0.15)'}}
+      android_ripple={{color: 'rgba(0,0,0,0.08)'}}
       style={styles.container}>
       <Image
         source={{uri: thumbnailUrl}}

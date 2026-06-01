@@ -84,7 +84,7 @@ export function SignupScreen({route, navigation}: Props) {
 
 const styles = StyleSheet.create({
   link: {
-    color: colors.primary,
+    color: colors.text,
     textAlign: 'center',
     paddingVertical: spacing.sm,
   },

@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, Text} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import {StatusScreen} from '../screens/child/StatusScreen';
@@ -9,34 +9,37 @@ import {StudyNavigator} from './StudyNavigator';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+function TabItem({emoji, label, focused}: {emoji: string; label: string; focused: boolean}) {
+  const tint = focused ? colors.primary : colors.textMuted;
+  return (
+    <View style={styles.tabItem}>
+      <Text style={[styles.tabIcon, {color: tint}]}>{emoji}</Text>
+      <Text style={[styles.tabLabel, {color: tint}]}>{label}</Text>
+      <View style={[styles.indicator, focused && styles.indicatorActive]} />
+    </View>
+  );
+}
+
 export function MainTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: styles.tabLabel,
+        tabBarShowLabel: false,
       }}>
       <Tab.Screen
         name="HomeTab"
         component={StatusScreen}
         options={{
-          tabBarLabel: 'Home',
-          tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>🏠</Text>
-          ),
+          tabBarIcon: ({focused}) => <TabItem emoji="🏠" label="Home" focused={focused} />,
         }}
       />
       <Tab.Screen
         name="StudyTab"
         component={StudyNavigator}
         options={{
-          tabBarLabel: 'Study',
-          tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>📖</Text>
-          ),
+          tabBarIcon: ({focused}) => <TabItem emoji="📖" label="Study" focused={focused} />,
         }}
       />
     </Tab.Navigator>
@@ -45,18 +48,32 @@ export function MainTabNavigator() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderTopColor: colors.border,
     borderTopWidth: 1,
-    height: 60,
-    paddingBottom: 6,
+    height: 64,
+    paddingBottom: 0,
     paddingTop: 6,
+  },
+  tabItem: {
+    alignItems: 'center',
+    gap: 2,
+  },
+  tabIcon: {
+    fontSize: 20,
   },
   tabLabel: {
     fontSize: 11,
     fontWeight: '600',
   },
-  tabIcon: {
-    fontSize: 20,
+  indicator: {
+    width: 32,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: 'transparent',
+    marginTop: 4,
+  },
+  indicatorActive: {
+    backgroundColor: colors.primary,
   },
 });

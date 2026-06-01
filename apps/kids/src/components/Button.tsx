@@ -49,7 +49,7 @@ export function Button({title, onPress, variant = 'primary', disabled, loading, 
     <Pressable
       onPress={onPress}
       disabled={isInactive}
-      android_ripple={{color: 'rgba(255,255,255,0.18)'}}
+      android_ripple={{color: 'rgba(0,0,0,0.08)'}}
       style={[
         styles.base,
         {backgroundColor: bg},

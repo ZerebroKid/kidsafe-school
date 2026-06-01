@@ -139,8 +139,8 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
   },
   rewardTitle: {

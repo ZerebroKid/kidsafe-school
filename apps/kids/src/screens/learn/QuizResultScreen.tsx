@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   heroEmoji: {fontSize: 48},
   heroTitle: {fontSize: 22, fontWeight: '800', color: colors.text},
   heroScore: {fontSize: 15, color: colors.text},
-  heroPct: {fontSize: 32, fontWeight: '800', color: colors.primary},
+  heroPct: {fontSize: 32, fontWeight: '800', color: colors.text},
   heroSub: {fontSize: 13, color: colors.textMuted, textAlign: 'center'},
   sectionTitle: {
     fontSize: 16,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   qBadgeBad: {
     color: colors.danger,
-    backgroundColor: 'rgba(248, 113, 113, 0.15)',
+    backgroundColor: 'rgba(231, 0, 11, 0.08)',
   },
   qText: {fontSize: 15, color: colors.text, lineHeight: 21},
   answerRow: {fontSize: 14, lineHeight: 20},

@@ -3,17 +3,17 @@
  * this into a proper design system after launch.
  */
 export const colors = {
-  bg: '#0F172A',
-  surface: '#1E293B',
-  surfaceAlt: '#334155',
-  text: '#F8FAFC',
-  textMuted: '#94A3B8',
-  primary: '#38BDF8',
-  primaryText: '#0F172A',
-  danger: '#F87171',
-  success: '#4ADE80',
-  warning: '#FACC15',
-  border: '#334155',
+  bg: '#ffffff',
+  surface: '#ffffff',
+  surfaceAlt: '#f5f5f5',
+  text: '#0a0a0a',
+  textMuted: '#737373',
+  primary: '#171717',
+  primaryText: '#ffffff',
+  danger: '#e7000b',
+  success: '#4ade80',
+  warning: '#facc15',
+  border: '#e5e5e5',
 };
 
 export const spacing = {

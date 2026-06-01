@@ -89,12 +89,12 @@ export function LoginScreen({navigation}: Props) {
 
 const styles = StyleSheet.create({
   link: {
-    color: colors.primary,
+    color: colors.text,
     textAlign: 'center',
     paddingVertical: spacing.sm,
   },
   linkStrong: {
-    color: colors.primary,
+    color: colors.text,
     fontWeight: '700',
   },
   footer: {

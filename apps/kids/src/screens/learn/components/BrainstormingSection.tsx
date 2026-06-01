@@ -61,7 +61,7 @@ function AccordionCard({item, index}: {item: BrainstormingItem; index: number}) 
     <Pressable
       onPress={toggle}
       style={styles.card}
-      android_ripple={{color: 'rgba(255,255,255,0.06)'}}>
+      android_ripple={{color: 'rgba(0,0,0,0.04)'}}>
       <View style={styles.questionRow}>
         <Text style={styles.questionNumber}>Q{index + 1}</Text>
         <Text style={styles.questionText}>{item.question}</Text>
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: radius.md,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   questionNumber: {
     fontSize: 13,
     fontWeight: '700',
-    color: colors.primary,
+    color: colors.text,
     marginTop: 2,
   },
   questionText: {
@@ -135,12 +135,12 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
-    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.sm,
   },
   videoLinkText: {
     fontSize: 13,
     fontWeight: '600',
-    color: colors.primary,
+    color: colors.text,
   },
 });

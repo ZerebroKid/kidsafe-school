@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     padding: spacing.md,
     gap: spacing.sm,
@@ -176,6 +176,8 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: colors.bg,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     color: colors.text,
     fontSize: 26,
     fontWeight: '700',

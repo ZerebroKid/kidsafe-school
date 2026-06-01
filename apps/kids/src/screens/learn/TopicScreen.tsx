@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   header: {gap: spacing.sm},
   chapterBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    backgroundColor: colors.surfaceAlt,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.pill,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   chapterBadgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.primary,
+    color: colors.text,
   },
   topicTitle: {
     fontSize: 24,
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   bullet: {
     fontSize: 16,
-    color: colors.primary,
+    color: colors.text,
     marginTop: 1,
   },
   exampleText: {

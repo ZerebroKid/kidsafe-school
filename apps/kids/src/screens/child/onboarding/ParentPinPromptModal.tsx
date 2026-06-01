@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.lg,
     padding: spacing.lg,
     gap: spacing.md,
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   input: {
-    backgroundColor: colors.bg,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     color: colors.text,
     fontSize: 22,
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.danger,
   },
   destructiveText: {
-    color: colors.text,
+    color: '#ffffff',
     fontWeight: '700',
   },
   buttonBusy: {

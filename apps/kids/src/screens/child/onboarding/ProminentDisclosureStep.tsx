@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   bodyCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     padding: spacing.md,
     borderRadius: 12,
     gap: spacing.md,
