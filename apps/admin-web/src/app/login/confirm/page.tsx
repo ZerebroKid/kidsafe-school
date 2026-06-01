@@ -78,11 +78,11 @@ export default function AdminOtpConfirmPage() {
     <main className="flex min-h-screen flex-1">
       {/* Left hero panel — mirrors login */}
       <div className="relative hidden w-1/2 overflow-hidden bg-neutral-100 lg:block">
-        <img
+        {/* <img
           alt="Campus"
           className="absolute inset-0 h-full w-full object-cover"
           src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3OTAzMTh8MHwxfHNlYXJjaHwxfHxjYW1wdXMlMjBzdHVkZW50c3xlbnwxfHx8fDE3NTQ5MjM3Nzd8MA&ixlib=rb-4.1.0&q=80&w=1200"
-        />
+        /> */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
         <div className="relative z-10 flex h-full w-full flex-col justify-between p-12 text-white">
           <div className="flex flex-col gap-1">
