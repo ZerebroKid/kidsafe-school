@@ -71,7 +71,7 @@ export function RoleSwitcher() {
               key={role}
               onPress={() => onPick(role)}
               disabled={active || busy}
-              android_ripple={{color: 'rgba(255,255,255,0.18)'}}
+              android_ripple={{color: 'rgba(0,0,0,0.08)'}}
               style={[styles.pill, active && styles.pillActive]}>
               <Text style={[styles.pillText, active && styles.pillTextActive]}>
                 {formatRole(role)}

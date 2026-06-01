@@ -24,7 +24,7 @@ export function RoleOnboardingGate() {
   return <IntentPicker onPick={setIntent} />;
 }
 
-function ParentIcon({color = colors.primary}: {color?: string}) {
+function ParentIcon({color = colors.text}: {color?: string}) {
   return (
     <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
       <Circle cx="9" cy="7" r="3" stroke={color} strokeWidth={1.8} />
@@ -45,7 +45,7 @@ function ParentIcon({color = colors.primary}: {color?: string}) {
   );
 }
 
-function TeacherIcon({color = colors.primary}: {color?: string}) {
+function TeacherIcon({color = colors.text}: {color?: string}) {
   return (
     <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
       <Path
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     gap: spacing.md,
   },
   choicePressed: {
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: radius.sm,
-    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },

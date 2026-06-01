@@ -19,7 +19,7 @@ function ParentTabs() {
         headerTintColor: colors.text,
         headerShadowVisible: false,
         tabBarStyle: {
-          backgroundColor: colors.surface,
+          backgroundColor: colors.bg,
           borderTopColor: colors.border,
           borderTopWidth: 1,
           height: 60,

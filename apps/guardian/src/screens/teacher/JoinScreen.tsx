@@ -382,9 +382,9 @@ const styles = StyleSheet.create({
   banner: {
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: 'rgba(248, 113, 113, 0.12)',
+    backgroundColor: 'rgba(231, 0, 11, 0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(248, 113, 113, 0.4)',
+    borderColor: 'rgba(231, 0, 11, 0.2)',
     gap: spacing.xs,
   },
   bannerTitle: {
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
   },
   subjectCardSelected: {
     borderColor: colors.primary,
-    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+    backgroundColor: colors.surfaceAlt,
   },
   subjectCardTaken: {
     opacity: 0.5,

@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.pill,
     paddingVertical: 12,
     paddingHorizontal: spacing.lg - 4,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   pillMuted: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     opacity: 0.85,
   },
   dot: {

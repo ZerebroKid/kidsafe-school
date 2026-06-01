@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   errorBanner: {
     padding: spacing.sm,
     borderRadius: radius.sm,
-    backgroundColor: 'rgba(248, 113, 113, 0.12)',
+    backgroundColor: 'rgba(231, 0, 11, 0.08)',
     color: colors.danger,
     fontSize: 13,
   },

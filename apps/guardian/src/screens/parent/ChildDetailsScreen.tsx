@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   tabbar: {
     flexDirection: 'row',
     margin: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.pill,
     padding: 4,
   },
@@ -230,8 +230,10 @@ const styles = StyleSheet.create({
   tamperCard: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.sm,
   },

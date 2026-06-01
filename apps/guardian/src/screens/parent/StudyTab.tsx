@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
   },
   toggle: {
     flexDirection: 'row',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.pill,
     padding: 4,
   },
@@ -475,9 +475,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    backgroundColor: colors.surfaceAlt,
   },
-  rewardChipText: {color: colors.primary, fontSize: 12, fontWeight: '600'},
+  rewardChipText: {color: colors.text, fontSize: 12, fontWeight: '600'},
   emptyCard: {
     backgroundColor: colors.surface,
     borderColor: colors.border,

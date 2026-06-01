@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   headerCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     padding: spacing.md,
     gap: spacing.xs,
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   headerValue: {
-    color: colors.primary,
+    color: colors.text,
     fontSize: 32,
     fontWeight: '800',
     letterSpacing: -0.5,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   },
   pill: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
@@ -266,8 +266,10 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   emptyCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: spacing.lg,
     gap: spacing.xs,
   },
@@ -287,8 +289,10 @@ const styles = StyleSheet.create({
   appRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.md,
   },

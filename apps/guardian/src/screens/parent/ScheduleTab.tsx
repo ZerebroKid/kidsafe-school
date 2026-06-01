@@ -148,8 +148,8 @@ export function ScheduleTab({childUid}: Props) {
           <Switch
             value={draft.enabled}
             onValueChange={v => setDraft(d => ({...d, enabled: v}))}
-            trackColor={{true: colors.primary, false: colors.surfaceAlt}}
-            thumbColor={colors.text}
+            trackColor={{true: colors.primary, false: colors.border}}
+            thumbColor="#ffffff"
           />
         </View>
       </View>
@@ -315,8 +315,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: spacing.md,
   },
   row: {flexDirection: 'row', alignItems: 'center', gap: spacing.md},
@@ -367,8 +369,10 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   modalCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: spacing.md,
     maxHeight: '70%',
   },
@@ -405,7 +409,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   modalCloseText: {
-    color: colors.primary,
+    color: colors.text,
     fontWeight: '700',
     fontSize: 14,
   },
@@ -413,12 +417,12 @@ const styles = StyleSheet.create({
   appRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
     padding: spacing.md,
     gap: spacing.md,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: colors.border,
   },
   appRowOn: {borderColor: colors.primary},
   appText: {flex: 1},

@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     color: colors.text,
     borderColor: colors.border,
     borderWidth: 1,

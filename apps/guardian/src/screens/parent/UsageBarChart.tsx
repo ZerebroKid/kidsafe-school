@@ -173,7 +173,7 @@ function formatAxisMins(mins: number): string {
 
 const styles = StyleSheet.create({
   wrap: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     padding: spacing.md,
     position: 'relative',

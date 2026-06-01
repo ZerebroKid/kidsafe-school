@@ -81,8 +81,8 @@ export function ChildrenListScreen() {
             <Switch
               value={item.doc?.lockState?.locked ?? false}
               onValueChange={v => toggleLock(item, v)}
-              trackColor={{true: colors.primary, false: colors.surfaceAlt}}
-              thumbColor={colors.text}
+              trackColor={{true: colors.primary, false: colors.border}}
+              thumbColor="#ffffff"
             />
           </Pressable>
           );
@@ -109,8 +109,10 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.md,
   },

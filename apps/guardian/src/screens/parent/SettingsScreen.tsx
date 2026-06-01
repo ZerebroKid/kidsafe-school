@@ -92,7 +92,7 @@ export function SettingsScreen() {
 
 const styles = StyleSheet.create({
   codeCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceAlt,
     padding: spacing.lg,
     borderRadius: radius.lg,
     alignItems: 'center',
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   codeValue: {
-    color: colors.primary,
+    color: colors.text,
     fontSize: 44,
     fontWeight: '700',
     letterSpacing: 8,

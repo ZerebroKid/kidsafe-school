@@ -87,8 +87,8 @@ export function AppsTab({childUid}: {childUid: string}) {
           <Switch
             value={item.isBlocked}
             onValueChange={v => setAppBlocked(childUid, item.packageName, v)}
-            trackColor={{true: colors.danger, false: colors.surfaceAlt}}
-            thumbColor={colors.text}
+            trackColor={{true: colors.danger, false: colors.border}}
+            thumbColor="#ffffff"
           />
         </View>
       ))}
@@ -105,8 +105,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.md,
   },
@@ -142,8 +144,10 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   waitingCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.bg,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     padding: spacing.lg,
     gap: spacing.sm,
     borderLeftWidth: 4,

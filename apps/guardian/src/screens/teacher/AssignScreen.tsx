@@ -345,7 +345,7 @@ function PickerRow({
   return (
     <Pressable
       onPress={onPress}
-      android_ripple={{color: 'rgba(255,255,255,0.06)'}}
+      android_ripple={{color: 'rgba(0,0,0,0.04)'}}
       style={[styles.row, selected && styles.rowSelected]}
       accessibilityRole="button"
       accessibilityState={{selected}}>
@@ -429,11 +429,11 @@ const styles = StyleSheet.create({
   },
   rowSelected: {
     borderColor: colors.primary,
-    backgroundColor: 'rgba(56, 189, 248, 0.08)',
+    backgroundColor: colors.surfaceAlt,
   },
   rowLabel: {color: colors.text, fontSize: 15, fontWeight: '600'},
   rowSublabel: {color: colors.textMuted, fontSize: 12, marginTop: 2},
-  check: {color: colors.primary, fontSize: 18, fontWeight: '700'},
+  check: {color: colors.text, fontSize: 18, fontWeight: '700'},
   checkbox: {
     width: 22,
     height: 22,
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
   errorBanner: {
     padding: spacing.sm,
     borderRadius: radius.sm,
-    backgroundColor: 'rgba(248, 113, 113, 0.12)',
+    backgroundColor: 'rgba(231, 0, 11, 0.08)',
     color: colors.danger,
     fontSize: 13,
   },
