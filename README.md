@@ -1,4 +1,4 @@
-# Zerebro (formerly KidSafe)
+# ZerebroKid
 
 Zerebro is an Android-first ecosystem for safe-and-focused screen time on
 kids' phones, with a parallel education/AI track. The v2 codebase is a
