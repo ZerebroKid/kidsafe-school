@@ -15,7 +15,7 @@ import {
 import {getFirestoreInstance} from '@zerebro/shared-firebase';
 
 /*
- * P4.2.7 -- admin pending-principals list.
+ * P4.2.7 -- admin pending-principals list
  *
  * Cross-school collection-group query over `principals/*` where
  * status='pending', sorted by `requestedAt asc` so the oldest claim is on
