@@ -147,6 +147,17 @@ interface ClassListEntry {
   rosterSize: number;
 }
 
+/** Sort classes ascending by grade, then section (e.g. 3A, 4A, 7A, 7B, 8A). */
+function compareByGradeSection(
+  a: {grade: number | null; section: string},
+  b: {grade: number | null; section: string},
+): number {
+  const gradeA = a.grade ?? Number.MAX_SAFE_INTEGER;
+  const gradeB = b.grade ?? Number.MAX_SAFE_INTEGER;
+  if (gradeA !== gradeB) return gradeA - gradeB;
+  return a.section.localeCompare(b.section, undefined, {sensitivity: 'base'});
+}
+
 async function fetchClasses(schoolId: string): Promise<ClassListEntry[]> {
   const snap = await getDocs(
     collection(getFirestoreInstance(), 'schools', schoolId, 'classes'),
@@ -262,9 +273,11 @@ async function fetchSchoolCoverage(schoolId: string): Promise<ClassCoverage[]> {
   const reports = await Promise.all(
     classes.map(c => fetchDailyFromPointer(c.id, pointers.get(c.id))),
   );
-  return classes.map((c, i) =>
-    mergeCoverage(c, reports[i], distinctAssignedTopics(assignments, c.id)),
-  );
+  return classes
+    .map((c, i) =>
+      mergeCoverage(c, reports[i], distinctAssignedTopics(assignments, c.id)),
+    )
+    .sort(compareByGradeSection);
 }
 
 /** Per-class coverage cards for the dashboard. */

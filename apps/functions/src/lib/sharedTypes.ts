@@ -76,3 +76,98 @@ export interface SubmitQuizAttemptOutput {
 // ---------------------------------------------------------------------------
 
 export type RewardType = 'youtube_link' | 'game_link' | 'article_link';
+
+// ---------------------------------------------------------------------------
+// Phase 5 -- Subscription types. Mirror of interfaces in
+// packages/shared-types/src/subscription.ts -- keep IN SYNC.
+// ---------------------------------------------------------------------------
+
+export type SubscriptionStatus =
+  | 'created'
+  | 'authenticated'
+  | 'active'
+  | 'pending'
+  | 'halted'
+  | 'cancelled'
+  | 'completed'
+  | 'expired';
+
+export interface SubscriptionDoc {
+  razorpaySubscriptionId: string;
+  razorpayCustomerId: string | null;
+  razorpayPlanId: string;
+  status: SubscriptionStatus;
+  quantity: number;
+  amountPerStudent: number;
+  totalAmount: number;
+  currentPeriodStart: unknown;
+  currentPeriodEnd: unknown;
+  nextChargeAt: unknown;
+  lastChargeFailedAt: unknown;
+  gracePeriodEnd: unknown;
+  pendingQuantity: number | null;
+  hasScheduledChanges: boolean;
+  manuallyActivated: boolean;
+  manuallyActivatedBy: string | null;
+  manuallyActivatedUntil: unknown;
+  createdAt: unknown;
+  updatedAt: unknown;
+  cancelledAt: unknown;
+}
+
+export interface CreateSubscriptionInput {
+  schoolId: string;
+}
+
+export interface CreateSubscriptionOutput {
+  subscriptionId: string;
+  shortUrl: string;
+  amount: number;
+  quantity: number;
+  alreadyActive?: boolean;
+}
+
+export interface GetSubscriptionStatusInput {
+  schoolId: string;
+}
+
+export interface GetSubscriptionStatusOutput {
+  exists: boolean;
+  isActive: boolean;
+  subscription: SubscriptionDoc | null;
+  graceRemainingHours: number | null;
+  studentCount: number | null;
+}
+
+export interface UpdateStudentCountInput {
+  schoolId: string;
+  newCount: number;
+}
+
+export interface UpdateStudentCountOutput {
+  newCount: number;
+  effectiveFrom: 'next_cycle' | 'immediate';
+  newMonthlyAmount: number;
+}
+
+export interface CancelSubscriptionInput {
+  schoolId: string;
+  reason?: string;
+}
+
+export interface CancelSubscriptionOutput {
+  cancelled: boolean;
+  alreadyCancelled?: boolean;
+  cancelledAt: unknown;
+}
+
+export interface AdminActivateInput {
+  schoolId: string;
+  until: string | number | null;
+}
+
+export interface AdminActivateOutput {
+  activated: boolean;
+  deactivated: boolean;
+  activatedUntil: unknown;
+}

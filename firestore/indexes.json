@@ -103,6 +103,14 @@
         {"fieldPath": "status", "order": "ASCENDING"},
         {"fieldPath": "requestedAt", "order": "DESCENDING"}
       ]
+    },
+    {
+      "collectionGroup": "paymentEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "schoolId", "order": "ASCENDING"},
+        {"fieldPath": "processedAt", "order": "DESCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

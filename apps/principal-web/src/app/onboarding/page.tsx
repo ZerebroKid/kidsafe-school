@@ -34,6 +34,7 @@ export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState('');
   const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
   const [sectionCounts, setSectionCounts] = useState<Record<number, number>>({});
+  const [studentCount, setStudentCount] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,6 +67,11 @@ export default function OnboardingPage() {
         setError('Select at least one grade your school teaches.');
         return;
       }
+      const parsedStudentCount = Math.floor(Number(studentCount));
+      if (!parsedStudentCount || parsedStudentCount < 1) {
+        setError('Enter the total number of students in your school.');
+        return;
+      }
       setSubmitting(true);
       try {
         const gradeSections: Record<string, number> = {};
@@ -78,6 +84,7 @@ export default function OnboardingPage() {
             displayName: string;
             requestedGrades: number[];
             requestedGradeSections: Record<string, number>;
+            studentCount: number;
           },
           ClaimResponse
         >('claimSchool', {
@@ -85,6 +92,7 @@ export default function OnboardingPage() {
           displayName: name,
           requestedGrades: [...selectedGrades].sort((a, b) => a - b),
           requestedGradeSections: gradeSections,
+          studentCount: parsedStudentCount,
         });
         router.replace(
           `/onboarding/pending?schoolId=${encodeURIComponent(res.schoolId)}&principalId=${encodeURIComponent(res.principalId)}`,
@@ -94,7 +102,7 @@ export default function OnboardingPage() {
         setSubmitting(false);
       }
     },
-    [inviteCode, displayName, selectedGrades, router],
+    [inviteCode, displayName, selectedGrades, sectionCounts, studentCount, router],
   );
 
   return (
@@ -195,6 +203,29 @@ export default function OnboardingPage() {
             </>
           ) : null}
         </fieldset>
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-text-muted">Total number of students</span>
+          <input
+            type="number"
+            value={studentCount}
+            onChange={e => setStudentCount(e.target.value)}
+            placeholder="e.g. 200"
+            min={1}
+            max={50000}
+            disabled={submitting}
+            required
+            className="rounded-lg border border-border bg-bg px-3 py-2 text-text outline-none focus:border-primary"
+          />
+          {Number(studentCount) >= 1 ? (
+            <p className="mt-1 text-xs text-text-muted">
+              {Math.floor(Number(studentCount))} students &times; &#8377;99 ={' '}
+              <span className="font-medium text-text">
+                &#8377;{(Math.floor(Number(studentCount)) * 99).toLocaleString('en-IN')}
+              </span>
+              /month
+            </p>
+          ) : null}
+        </label>
         {error ? (
           <p
             role="alert"
@@ -205,7 +236,7 @@ export default function OnboardingPage() {
         ) : null}
         <button
           type="submit"
-          disabled={submitting || inviteCode.length < 4 || displayName.length < 2 || selectedGrades.length === 0}
+          disabled={submitting || inviteCode.length < 4 || displayName.length < 2 || selectedGrades.length === 0 || Number(studentCount) < 1}
           className="rounded-lg bg-primary px-4 py-2 font-medium text-primary-text disabled:opacity-60"
         >
           {submitting ? 'Submitting…' : 'Submit for verification'}

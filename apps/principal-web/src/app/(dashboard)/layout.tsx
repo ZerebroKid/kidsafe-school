@@ -12,12 +12,14 @@ import {
   where,
 } from 'firebase/firestore';
 import {
+  callFn,
   getAuthInstance,
   getCurrentUserDoc,
   getFirestoreInstance,
   hasRole,
 } from '@zerebro/shared-firebase';
 import {LogoutButton} from '@/components/LogoutButton';
+import {SubscriptionBanner} from '@/components/SubscriptionBanner';
 
 /*
  * Auth + role-guarded shell for everything Campus shows once a verified
@@ -99,12 +101,25 @@ const NAV: readonly {href: string; label: string; icon: React.ReactNode}[] = [
       </svg>
     ),
   },
+  {
+    href: '/subscription',
+    label: 'Subscription',
+    icon: (
+      <svg className={ICON} viewBox="0 0 24 24">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+        <line x1="1" y1="10" x2="23" y2="10" />
+      </svg>
+    ),
+  },
 ];
+
+/** Paths that remain accessible even when subscription is inactive */
+const SUBSCRIPTION_EXEMPT_PATHS = ['/subscription', '/subscription/history'];
 
 type GuardState =
   | {kind: 'loading'}
   | {kind: 'signedOut'}
-  | {kind: 'allowed'}
+  | {kind: 'allowed'; schoolId: string}
   | {kind: 'redirected'};
 
 export default function CampusDashboardLayout({
@@ -113,8 +128,13 @@ export default function CampusDashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [state, setState] = useState<GuardState>({kind: 'loading'});
+  const [subLoading, setSubLoading] = useState(true);
+  const [subActive, setSubActive] = useState(true);
+  const [graceRemainingHours, setGraceRemainingHours] = useState<number | null>(null);
 
+  // Auth + role guard
   useEffect(() => {
     let cancelled = false;
     const unsub = onAuthStateChanged(getAuthInstance(), async user => {
@@ -128,11 +148,20 @@ export default function CampusDashboardLayout({
         const userDoc = await getCurrentUserDoc(user.uid);
         if (cancelled) return;
         if (hasRole(userDoc, 'principal')) {
-          setState({kind: 'allowed'});
+          const activeClaims = await getDocs(
+            query(
+              collectionGroup(getFirestoreInstance(), 'principals'),
+              where('userId', '==', user.uid),
+              where('status', '==', 'active'),
+              limit(1),
+            ),
+          );
+          if (cancelled) return;
+          const schoolId =
+            activeClaims.docs[0]?.ref.parent.parent?.id ?? '';
+          setState({kind: 'allowed', schoolId});
           return;
         }
-        // No principal role -- look for a claim to decide which onboarding
-        // screen to show.
         const claims = await getDocs(
           query(
             collectionGroup(getFirestoreInstance(), 'principals'),
@@ -156,8 +185,6 @@ export default function CampusDashboardLayout({
         setState({kind: 'redirected'});
         router.replace('/onboarding');
       } catch {
-        // If the role probe fails (e.g. rules transient), send them to
-        // onboarding instead of dead-ending in the dashboard.
         if (!cancelled) {
           setState({kind: 'redirected'});
           router.replace('/onboarding');
@@ -170,7 +197,50 @@ export default function CampusDashboardLayout({
     };
   }, [router]);
 
-  if (state.kind === 'loading') {
+  // Subscription gate (runs after auth resolves with schoolId)
+  useEffect(() => {
+    if (state.kind !== 'allowed' || !state.schoolId) {
+      setSubLoading(false);
+      setSubActive(true); // Don't block if no schoolId yet
+      return;
+    }
+
+    let cancelled = false;
+    setSubLoading(true);
+
+    callFn<
+      {schoolId: string},
+      {isActive: boolean; graceRemainingHours: number | null; manuallyActivated: boolean; status: string | null}
+    >('getSubscriptionStatus', {schoolId: state.schoolId})
+      .then(result => {
+        if (cancelled) return;
+        setSubActive(result.isActive);
+        setGraceRemainingHours(result.graceRemainingHours);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // On network failure, don't hard-block; fallback to active
+        setSubActive(true);
+      })
+      .finally(() => {
+        if (!cancelled) setSubLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [state]);
+
+  // Redirect to /subscription if inactive and not on exempt path
+  useEffect(() => {
+    if (subLoading || subActive) return;
+    const isExempt = SUBSCRIPTION_EXEMPT_PATHS.some(
+      p => pathname === p || pathname.startsWith(p + '/'),
+    );
+    if (!isExempt) {
+      router.replace('/subscription');
+    }
+  }, [subLoading, subActive, pathname, router]);
+
+  if (state.kind === 'loading' || (state.kind === 'allowed' && subLoading)) {
     return (
       <main className="flex flex-1 items-center justify-center">
         <p className="text-sm text-text-muted">Loading…</p>
@@ -178,15 +248,18 @@ export default function CampusDashboardLayout({
     );
   }
   if (state.kind !== 'allowed') {
-    // signedOut + redirected: the router.replace above is in flight; render
-    // nothing to avoid a flash of dashboard chrome.
     return null;
   }
 
   return (
     <div className="flex min-h-full flex-1">
       <CampusSidebar />
-      <section className="flex flex-1 flex-col overflow-auto bg-bg p-12">{children}</section>
+      <div className="flex flex-1 flex-col overflow-auto">
+        {graceRemainingHours != null && graceRemainingHours > 0 && (
+          <SubscriptionBanner graceRemainingHours={graceRemainingHours} />
+        )}
+        <section className="flex flex-1 flex-col bg-bg p-12">{children}</section>
+      </div>
     </div>
   );
 }

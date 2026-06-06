@@ -80,3 +80,12 @@ export {rejectGradeChange} from './callable/rejectGradeChange';
 
 // P5.1 -- nightly class-report aggregator (scheduled 02:00 IST)
 export {aggregateClassReports} from './crons/aggregateClassReports';
+
+// Phase 5 -- Subscription (Razorpay)
+export {createSubscription} from './callable/subscription/createSubscription';
+export {getSubscriptionStatus} from './callable/subscription/getSubscriptionStatus';
+export {updateStudentCount} from './callable/subscription/updateStudentCount';
+export {cancelSubscription} from './callable/subscription/cancelSubscription';
+export {adminActivateSubscription} from './callable/subscription/adminActivateSubscription';
+export {getPaymentHistory} from './callable/subscription/getPaymentHistory';
+export {razorpayWebhook} from './http/razorpayWebhook';

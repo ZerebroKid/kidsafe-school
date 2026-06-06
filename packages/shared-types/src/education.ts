@@ -67,6 +67,12 @@ export interface SchoolDoc {
    * schools created before this feature -- consumers fall back to 1-12.
    */
   activeGrades?: number[];
+  /**
+   * Total number of students in the school. Entered by the principal during
+   * onboarding. Used as the Razorpay subscription quantity (₹99/student/month).
+   * Optional for backward compat with schools created before this field existed.
+   */
+  studentCount?: number;
   createdAt: FirestoreFieldValueLike;
 }
 

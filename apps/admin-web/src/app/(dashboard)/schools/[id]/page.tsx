@@ -14,6 +14,7 @@ import {
 import {callFn, getFirestoreInstance} from '@zerebro/shared-firebase';
 
 import {CopyButton} from '@/components/CopyButton';
+import {SubscriptionSection} from './SubscriptionSection';
 
 /*
  * P4.2.3 -- school detail.
@@ -210,6 +211,8 @@ export default function SchoolDetailPage() {
           </p>
         </div>
       </section>
+
+      <SubscriptionSection schoolId={schoolId} />
 
       <section className="rounded-2xl border border-border bg-surface p-6">
         <div className="flex items-center justify-between">

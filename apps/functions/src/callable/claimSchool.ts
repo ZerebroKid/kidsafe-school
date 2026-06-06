@@ -40,6 +40,8 @@ interface Input {
   requestedGrades?: number[];
   /** Maps grade (as string) to section count. E.g. {"1":2,"8":1}. */
   requestedGradeSections?: Record<string, number>;
+  /** Total students in the school. Used as Razorpay subscription quantity. */
+  studentCount?: number;
 }
 
 interface Output {
@@ -52,7 +54,7 @@ export const claimSchool = onCall<Input, Promise<Output>>(
   {region: 'asia-south1'},
   async request => {
     const caller = requireAuth(request);
-    const {inviteCode, displayName, requestedGrades, requestedGradeSections} =
+    const {inviteCode, displayName, requestedGrades, requestedGradeSections, studentCount} =
       request.data ?? {};
 
     if (
@@ -99,6 +101,24 @@ export const claimSchool = onCall<Input, Promise<Output>>(
       }
       validatedGrades = [...new Set(requestedGrades)].sort((a, b) => a - b);
     }
+
+    // Validate studentCount if provided (optional for backward compat).
+    let validatedStudentCount: number | undefined;
+    if (studentCount !== undefined) {
+      if (
+        typeof studentCount !== 'number' ||
+        !Number.isInteger(studentCount) ||
+        studentCount < 1 ||
+        studentCount > 50000
+      ) {
+        throw new HttpsError(
+          'invalid-argument',
+          'studentCount must be an integer between 1 and 50,000.',
+        );
+      }
+      validatedStudentCount = studentCount;
+    }
+
     if (!caller.phone) {
       // Phone-OTP is the only sign-in method that reaches this callable in
       // Phase 4. A missing phone token means the caller signed in via some
@@ -156,6 +176,9 @@ export const claimSchool = onCall<Input, Promise<Output>>(
         } else if (validatedGrades) {
           await principalRef.update({requestedGrades: validatedGrades});
         }
+        if (validatedStudentCount !== undefined) {
+          await schoolSnap.ref.update({studentCount: validatedStudentCount});
+        }
         return {schoolId, principalId: caller.uid, status: 'pending'};
       }
       if (existing.status === 'active') {
@@ -181,6 +204,10 @@ export const claimSchool = onCall<Input, Promise<Output>>(
       principalPayload.requestedGrades = validatedGrades;
     }
     await principalRef.set(principalPayload);
+
+    if (validatedStudentCount !== undefined) {
+      await schoolSnap.ref.update({studentCount: validatedStudentCount});
+    }
 
     return {schoolId, principalId: caller.uid, status: 'pending'};
   },

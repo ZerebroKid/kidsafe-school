@@ -406,6 +406,16 @@ service cloud.firestore {
         allow read: if isAdmin() || belongsToSchool(schoolId);
         allow create, update, delete: if false;
       }
+
+      // subscription doc (Phase 5 — Razorpay)
+      //   Single document per school. Written exclusively by subscription
+      //   callables and the razorpayWebhook HTTP function via Admin SDK.
+      //   Principal of the school can read (for feature gate + status display);
+      //   admins can read (for override controls).
+      match /subscription/{docId} {
+        allow read: if isAdmin() || belongsToSchool(schoolId);
+        allow create, update, delete: if false;
+      }
     }
 
     // Cross-school collection-group read for `principals/*` (P4.2.7).
@@ -540,6 +550,15 @@ service cloud.firestore {
       allow read: if isAdmin()
         || isSelf(resource.data.childUid)
         || (isParent() && isOwnChild(resource.data.childUid));
+      allow create, update, delete: if false;
+    }
+
+    // paymentEvents/{eventId} (Phase 5 — Razorpay)
+    //   Append-only webhook event log. Written exclusively by the
+    //   razorpayWebhook HTTP function via Admin SDK. Only admins read
+    //   (for audit/debugging). Principals see payment history via callables.
+    match /paymentEvents/{eventId} {
+      allow read: if isAdmin();
       allow create, update, delete: if false;
     }
 

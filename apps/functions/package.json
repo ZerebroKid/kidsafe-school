@@ -20,11 +20,13 @@
     "import:curriculum": "pnpm build && node dist/scripts/importCurriculum.js",
     "aggregate:reports": "pnpm build && node dist/scripts/runAggregateClassReports.js",
     "set-school-grades": "pnpm build && node dist/scripts/setSchoolGrades.js",
+    "create:plan": "pnpm build && node dist/scripts/createRazorpayPlan.js",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "firebase-admin": "^12.7.0",
     "firebase-functions": "^6.1.0",
+    "razorpay": "^2.9.6",
     "zod": "^3.24.1"
   },
   "devDependencies": {

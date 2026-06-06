@@ -63,7 +63,7 @@ export default function PendingPage() {
   // "Approved -- redirecting" state rather than an abrupt jump.
   useEffect(() => {
     if (data?.status === 'active') {
-      const t = setTimeout(() => router.replace('/dashboard'), 600);
+      const t = setTimeout(() => router.replace('/subscription'), 600);
       return () => clearTimeout(t);
     }
     return;
@@ -116,7 +116,7 @@ export default function PendingPage() {
             Approved!
           </h1>
           <p className="mt-2 text-sm text-text-muted">
-            Redirecting you to the dashboard…
+            Redirecting you to subscription…
           </p>
         </>
       ) : (
