@@ -66,7 +66,7 @@ export default function SubscriptionPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // --- Update student count state ---
+  // --- Update student count state 
   const [newCount, setNewCount] = useState('');
   const [showCancel, setShowCancel] = useState(false);
   const [cancelInput, setCancelInput] = useState('');
