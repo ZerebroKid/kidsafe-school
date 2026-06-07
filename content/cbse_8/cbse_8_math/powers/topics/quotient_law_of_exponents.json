@@ -1,0 +1,184 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "quotient_law_of_exponents",
+  "topicName": "5. Quotient Law of Exponents",
+  "explanation": "When dividing powers with the same base, subtract the exponents: nᵃ ÷ nᵇ = nᵃ⁻ᵇ (n ≠ 0). Example: 2¹⁰⁰ ÷ 2²⁵ = 2⁷⁵. Cancelling b factors from a factors leaves a − b factors. This law explains negative exponents: 2⁰ ÷ 2⁵ = 2⁻⁵ = 1/32. It also works when exponents are negative: 2⁻² ÷ 2⁻⁵ = 2³ = 8.",
+  "examples": [
+    "5⁷ ÷ 5⁴ = 5³ = 125",
+    "2¹⁰⁰ ÷ 2²⁵ = 2⁷⁵",
+    "9⁻⁷ ÷ 9⁴ = 9⁻¹¹",
+    "10⁴ ÷ 5⁴ = (10/5)⁴ = 2⁴"
+  ],
+  "videoUrl": "https://youtu.be/A1wKTiBTsfk",
+  "brainstorming": [
+    {
+      "question": "Why can n not be 0 in nᵃ ÷ nᵇ?",
+      "answer": "If n = 0, the denominator 0ᵇ (b > 0) is 0, giving division by zero — undefined."
+    },
+    {
+      "question": "What happens when a = b?",
+      "answer": "nᵃ ÷ nᵃ = n⁰ = 1 — any non-zero base to power 0 is 1."
+    },
+    {
+      "question": "How does quotient law create negative exponents?",
+      "answer": "2³ ÷ 2⁵ = 2⁻² = 1/4 — subtracting gives a negative exponent meaning reciprocal."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "5⁷ ÷ 5⁴ = 5³/⁴",
+      "correct": "Subtract exponents: 5⁷⁻⁴ = 5³."
+    },
+    {
+      "wrong": "2¹⁰⁰ ÷ 2²⁵ = 2⁴",
+      "correct": "100 - 25 = 75, so 2⁷⁵."
+    },
+    {
+      "wrong": "nᵃ ÷ nᵇ works when n = 0",
+      "correct": "Division by zero is undefined — n must be non-zero."
+    },
+    {
+      "wrong": "9⁻⁷ ÷ 9⁴ = 9³",
+      "correct": "-7 - 4 = -11, so 9⁻¹¹."
+    },
+    {
+      "wrong": "You divide the bases: 6⁴ ÷ 2⁴ = 3⁴",
+      "correct": "Same exponent different bases: (6/2)⁴ = 3⁴ — quotient law on bases, not subtracting unlike bases."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Comparing cell counts",
+      "description": "If bacteria double daily, ratio after 100 days vs 25 days is 2¹⁰⁰ ÷ 2²⁵ = 2⁷⁵."
+    },
+    {
+      "title": "Signal attenuation",
+      "description": "Signal halving each km: after 10 km vs 3 km, strength ratio is 2¹⁰ ÷ 2³ = 2⁷."
+    },
+    {
+      "title": "Storage tiers",
+      "description": "Ratio of 1 TB (2⁴⁰ bytes) to 1 GB (2³⁰ bytes) is 2¹⁰."
+    },
+    {
+      "title": "Population ratios",
+      "description": "Comparing 10⁹ people to 10⁶ uses 10⁹ ÷ 10⁶ = 10³."
+    },
+    {
+      "title": "Simplifying fractions",
+      "description": "10⁴/5⁴ = (10/5)⁴ = 2⁴ — quotient of powers with same exponent."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Cancel and count",
+      "instructions": "Write 2⁵/2² as (2×2×2×2×2)/(2×2). Cancel two 2s and count three left → 2³."
+    },
+    {
+      "title": "Quotient law relay",
+      "instructions": "Teams simplify 5⁷÷5⁴, 9⁻⁷÷9⁴, 2⁻²÷2⁻⁵. Pass the answer to the next teammate."
+    },
+    {
+      "title": "Zero exponent discovery",
+      "instructions": "Compute 3⁴÷3⁴, 7⁶÷7⁶, aⁿ÷aⁿ. What pattern do you notice?"
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "quot_q1",
+      "type": "mcq",
+      "question": "5⁷ ÷ 5⁴ =",
+      "options": [
+        "5³",
+        "5¹¹",
+        "5⁷/⁴",
+        "1³"
+      ],
+      "correctIndex": 0,
+      "explanation": "7 - 4 = 3."
+    },
+    {
+      "questionId": "quot_q2",
+      "type": "mcq",
+      "question": "2¹⁰⁰ ÷ 2²⁵ =",
+      "options": [
+        "2⁷⁵",
+        "2⁴",
+        "2¹²⁵",
+        "2²⁵"
+      ],
+      "correctIndex": 0,
+      "explanation": "100 - 25 = 75."
+    },
+    {
+      "questionId": "quot_q3",
+      "type": "mcq",
+      "question": "9⁻⁷ ÷ 9⁴ =",
+      "options": [
+        "9⁻¹¹",
+        "9⁻³",
+        "9³",
+        "9¹¹"
+      ],
+      "correctIndex": 0,
+      "explanation": "-7 - 4 = -11."
+    },
+    {
+      "questionId": "quot_q4",
+      "type": "mcq",
+      "question": "nᵃ ÷ nᵃ equals:",
+      "options": [
+        "n⁰",
+        "0",
+        "1",
+        "n²ᵃ"
+      ],
+      "correctIndex": 0,
+      "explanation": "a - a = 0, and n⁰ = 1 for n ≠ 0."
+    },
+    {
+      "questionId": "quot_q5",
+      "type": "mcq",
+      "question": "2⁻² ÷ 2⁻⁵ =",
+      "options": [
+        "2³",
+        "2⁻⁷",
+        "2⁻³",
+        "1"
+      ],
+      "correctIndex": 0,
+      "explanation": "-2 - (-5) = 3."
+    },
+    {
+      "questionId": "quot_q6",
+      "type": "mcq",
+      "question": "Why must n ≠ 0?",
+      "options": [
+        "Negative exponents fail",
+        "Division by zero is undefined",
+        "n⁰ is undefined",
+        "Exponents must be positive"
+      ],
+      "correctIndex": 1,
+      "explanation": "0ᵇ = 0 for b > 0, causing division by zero."
+    },
+    {
+      "questionId": "quot_q7",
+      "type": "mcq",
+      "question": "10⁴ ÷ 5⁴ =",
+      "options": [
+        "2⁴",
+        "5⁴",
+        "10⁴/⁵",
+        "(10-5)⁴"
+      ],
+      "correctIndex": 0,
+      "explanation": "(10/5)⁴ = 2⁴."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

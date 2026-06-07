@@ -1,0 +1,180 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "decimal_exponential_form",
+  "topicName": "3. Decimal Numbers in Exponential Form",
+  "explanation": "Decimals can be written using negative exponents of 10. Moving the decimal point one place left multiplies by 10⁻¹. Since 12² = 144, we can find powers of decimal numbers by adjusting place value: (1.2)² = (12/10)² = 144/100 = 1.44; (0.12)² = 144/10000 = 0.0144; (0.012)² = 0.000144; and 120² = 144 × 100 = 14400. The exponent on 10 tracks how many places the decimal shifted. This links ordinary decimals to the laws of exponents.",
+  "examples": [
+    "(1.2)² = 1.44",
+    "(0.12)² = 0.0144",
+    "172 = 1×10² + 7×10¹ + 2×10⁰",
+    "0.001 = 1×10⁻³"
+  ],
+  "videoUrl": "https://youtu.be/0fKBhvDjuy0",
+  "brainstorming": [
+    {
+      "question": "If 12² = 144, why is (0.12)² much smaller than 1.44?",
+      "answer": "0.12 = 12/100, so squaring gives 144/10000 — dividing by 100 twice makes the result 100 times smaller than (1.2)²."
+    },
+    {
+      "question": "How does 10⁻¹ relate to the decimal 0.1?",
+      "answer": "10⁻¹ = 1/10 = 0.1 — each negative step on the power of 10 moves the decimal point left."
+    },
+    {
+      "question": "Can every decimal be written with powers of 10?",
+      "answer": "Many can, especially those with finitely many digits after the decimal point, by expressing each place as a power of 10."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "(0.12)² = 0.144",
+      "correct": "(0.12)² = 0.0144 — squaring 0.12 means 0.12 × 0.12, not just moving the decimal one place."
+    },
+    {
+      "wrong": "10⁻² = -100",
+      "correct": "10⁻² = 1/100 = 0.01 — negative exponent means reciprocal, not a negative number."
+    },
+    {
+      "wrong": "120² = 144",
+      "correct": "120² = (12×10)² = 144×100 = 14400."
+    },
+    {
+      "wrong": "Decimals cannot use exponent laws",
+      "correct": "Rewrite decimals as fractions with powers of 10, then apply the same laws."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Currency and cents",
+      "description": "₹1.20 = 1.2 × 10⁰ rupees; small price differences use decimal powers implicitly."
+    },
+    {
+      "title": "Scientific measurements",
+      "description": "A cell width of 0.00001 m is written as 1×10⁻⁵ m — decimals become clean powers of 10."
+    },
+    {
+      "title": "Engineering tolerances",
+      "description": "Machine parts specified to 0.001 cm precision use negative powers of 10 for accuracy."
+    },
+    {
+      "title": "Digital displays",
+      "description": "Multiplying a decimal reading by 10² shifts two places right — like converting metres to centimetres."
+    },
+    {
+      "title": "Medicine dosages",
+      "description": "A dose of 0.25 mg can be expressed as 2.5×10⁻¹ mg for scientific calculation."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Decimal square table",
+      "instructions": "Given 12² = 144, complete a table for (1.2)², (0.12)², (0.012)², and 120² by tracking powers of 10."
+    },
+    {
+      "title": "Place-value expansion",
+      "instructions": "Expand 5642 and 0.0056 as sums of terms like a×10ⁿ. Identify each digit's place using exponents."
+    },
+    {
+      "title": "Calculator check",
+      "instructions": "Compute (0.12)² on a calculator and verify it matches 144/10000 from exponent reasoning."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "decexp_q1",
+      "type": "mcq",
+      "question": "If 12² = 144, then (1.2)² =",
+      "options": [
+        "14.4",
+        "1.44",
+        "0.144",
+        "1440"
+      ],
+      "correctIndex": 1,
+      "explanation": "(12/10)² = 144/100 = 1.44."
+    },
+    {
+      "questionId": "decexp_q2",
+      "type": "mcq",
+      "question": "(0.12)² equals:",
+      "options": [
+        "0.144",
+        "0.0144",
+        "1.44",
+        "0.00144"
+      ],
+      "correctIndex": 1,
+      "explanation": "(12/100)² = 144/10000 = 0.0144."
+    },
+    {
+      "questionId": "decexp_q3",
+      "type": "mcq",
+      "question": "120² equals:",
+      "options": [
+        "144",
+        "1440",
+        "14400",
+        "1.44"
+      ],
+      "correctIndex": 2,
+      "explanation": "(12×10)² = 144×100 = 14400."
+    },
+    {
+      "questionId": "decexp_q4",
+      "type": "mcq",
+      "question": "0.001 as a power of 10 is:",
+      "options": [
+        "10³",
+        "10⁻³",
+        "10⁻¹",
+        "10¹"
+      ],
+      "correctIndex": 1,
+      "explanation": "0.001 = 1/1000 = 10⁻³."
+    },
+    {
+      "questionId": "decexp_q5",
+      "type": "mcq",
+      "question": "172 = 1×10² + 7×10¹ + 2×10⁰ shows:",
+      "options": [
+        "Prime factorisation",
+        "Place-value with exponents",
+        "Negative exponents only",
+        "Standard form"
+      ],
+      "correctIndex": 1,
+      "explanation": "Each digit is multiplied by a power of 10 matching its place."
+    },
+    {
+      "questionId": "decexp_q6",
+      "type": "mcq",
+      "question": "(0.012)² equals:",
+      "options": [
+        "0.000144",
+        "0.00144",
+        "0.0144",
+        "1.44"
+      ],
+      "correctIndex": 0,
+      "explanation": "(12/1000)² = 144/1000000 = 0.000144."
+    },
+    {
+      "questionId": "decexp_q7",
+      "type": "mcq",
+      "question": "Moving decimal 2 places left divides by:",
+      "options": [
+        "10²",
+        "10⁻²",
+        "2",
+        "100²"
+      ],
+      "correctIndex": 0,
+      "explanation": "Each place left divides by 10; two places divides by 10²."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

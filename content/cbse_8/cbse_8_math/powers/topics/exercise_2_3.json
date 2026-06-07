@@ -1,0 +1,255 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "exercise_2_3",
+  "topicName": "13. Exercise 2.3",
+  "explanation": "Exercise 2.3 tests standard form (scientific notation): a × 10ⁿ where 1 ≤ a < 10. Large numbers: move decimal LEFT, positive exponent. Small numbers: move decimal RIGHT, negative exponent. To convert back: positive exponent → move decimal right; negative → move left.",
+  "examples": [
+    "6020000000000 = 6.02 × 10¹²",
+    "0.00000000000942 = 9.42 × 10⁻¹²",
+    "4.83 × 10⁷ = 48300000"
+  ],
+  "brainstorming": [
+    {
+      "question": "What makes a number standard form?",
+      "answer": "Coefficient between 1 and 10, times a power of 10. Example: 3.5 × 10⁵, not 35 × 10⁴."
+    },
+    {
+      "question": "Positive vs negative exponent when converting back?",
+      "answer": "Positive → move decimal right. Negative → move decimal left."
+    }
+  ],
+  "workedProblems": [
+    {
+      "problemId": "ex2_3_q1_i",
+      "question": "Express 6020000000000 in standard form.",
+      "steps": [
+        "Move decimal after first digit: 6.02",
+        "12 places left → 10¹²"
+      ],
+      "answer": "6.02 × 10¹²"
+    },
+    {
+      "problemId": "ex2_3_q1_ii",
+      "question": "Express 0.00000000000942 in standard form.",
+      "steps": [
+        "First non-zero digit: 9.42",
+        "12 places right → 10⁻¹²"
+      ],
+      "answer": "9.42 × 10⁻¹²"
+    },
+    {
+      "problemId": "ex2_3_q1_iii",
+      "question": "Express 0.00000000085 in standard form.",
+      "steps": [
+        "8.5 × 10⁻¹⁰"
+      ],
+      "answer": "8.5 × 10⁻¹⁰"
+    },
+    {
+      "problemId": "ex2_3_q1_iv",
+      "question": "Express 846 × 10⁷ in standard form.",
+      "steps": [
+        "846 = 8.46 × 10²",
+        "8.46 × 10² × 10⁷ = 8.46 × 10⁹"
+      ],
+      "answer": "8.46 × 10⁹"
+    },
+    {
+      "problemId": "ex2_3_q1_v",
+      "question": "Express 3759 × 10⁻⁴ in standard form.",
+      "steps": [
+        "3759 = 3.759 × 10³",
+        "3.759 × 10³ × 10⁻⁴ = 3.759 × 10⁻¹"
+      ],
+      "answer": "3.759 × 10⁻¹"
+    },
+    {
+      "problemId": "ex2_3_q1_vi",
+      "question": "Express 0.00072984 in standard form.",
+      "steps": [
+        "7.2984 × 10⁻⁴"
+      ],
+      "answer": "7.2984 × 10⁻⁴"
+    },
+    {
+      "problemId": "ex2_3_q1_vii",
+      "question": "Express 0.000437 × 10⁴ in standard form.",
+      "steps": [
+        "0.000437 = 4.37 × 10⁻⁴",
+        "4.37 × 10⁻⁴ × 10⁴ = 4.37"
+      ],
+      "answer": "4.37"
+    },
+    {
+      "problemId": "ex2_3_q1_viii",
+      "question": "Express 4 ÷ 100000 in standard form.",
+      "steps": [
+        "0.00004 = 4 × 10⁻⁵"
+      ],
+      "answer": "4 × 10⁻⁵"
+    },
+    {
+      "problemId": "ex2_3_q2_i",
+      "question": "Write 4.83 × 10⁷ in usual form.",
+      "steps": [
+        "Move decimal 7 places right"
+      ],
+      "answer": "48300000"
+    },
+    {
+      "problemId": "ex2_3_q2_ii",
+      "question": "Write 3.02 × 10⁻⁶ in usual form.",
+      "steps": [
+        "Move decimal 6 places left"
+      ],
+      "answer": "0.00000302"
+    },
+    {
+      "problemId": "ex2_3_q2_iii",
+      "question": "Write 4.5 × 10⁴ in usual form.",
+      "steps": [
+        "Move decimal 4 places right"
+      ],
+      "answer": "45000"
+    },
+    {
+      "problemId": "ex2_3_q2_iv",
+      "question": "Write 3 × 10⁻⁸ in usual form.",
+      "steps": [
+        "Move decimal 8 places left"
+      ],
+      "answer": "0.00000003"
+    },
+    {
+      "problemId": "ex2_3_q2_v",
+      "question": "Write 1.0001 × 10⁹ in usual form.",
+      "steps": [
+        "Move decimal 9 places right"
+      ],
+      "answer": "1000100000"
+    },
+    {
+      "problemId": "ex2_3_q2_vi",
+      "question": "Write 5.8 × 10² in usual form.",
+      "steps": [
+        "Move decimal 2 places right"
+      ],
+      "answer": "580"
+    },
+    {
+      "problemId": "ex2_3_q2_vii",
+      "question": "Write 3.61492 × 10⁶ in usual form.",
+      "steps": [
+        "Move decimal 6 places right"
+      ],
+      "answer": "3614920"
+    },
+    {
+      "problemId": "ex2_3_q2_viii",
+      "question": "Write 3.25 × 10⁻⁷ in usual form.",
+      "steps": [
+        "Move decimal 7 places left"
+      ],
+      "answer": "0.000000325"
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "ex23_q1",
+      "type": "mcq",
+      "question": "5000 in standard form is",
+      "options": [
+        "5 × 10³",
+        "50 × 10²",
+        "500 × 10",
+        "5 × 10⁴"
+      ],
+      "correctIndex": 0,
+      "explanation": "5.0 × 10³ — one non-zero digit before decimal."
+    },
+    {
+      "questionId": "ex23_q2",
+      "type": "mcq",
+      "question": "0.0004 in standard form is",
+      "options": [
+        "4 × 10⁻⁴",
+        "4 × 10⁻³",
+        "4 × 10⁴",
+        "40 × 10⁻⁵"
+      ],
+      "correctIndex": 0,
+      "explanation": "4 × 10⁻⁴."
+    },
+    {
+      "questionId": "ex23_q3",
+      "type": "mcq",
+      "question": "Which is in standard form?",
+      "options": [
+        "35 × 10⁴",
+        "3.5 × 10⁵",
+        "350 × 10³",
+        "0.35 × 10⁶"
+      ],
+      "correctIndex": 1,
+      "explanation": "3.5 is between 1 and 10."
+    },
+    {
+      "questionId": "ex23_q4",
+      "type": "mcq",
+      "question": "4.83 × 10⁷ =",
+      "options": [
+        "48300000",
+        "4830000",
+        "483000000",
+        "0.48300000"
+      ],
+      "correctIndex": 0,
+      "explanation": "Move decimal 7 places right."
+    },
+    {
+      "questionId": "ex23_q5",
+      "type": "mcq",
+      "question": "3.02 × 10⁻⁶ =",
+      "options": [
+        "0.00000302",
+        "0.000302",
+        "3020000",
+        "0.302"
+      ],
+      "correctIndex": 0,
+      "explanation": "Move decimal 6 places left."
+    },
+    {
+      "questionId": "ex23_q6",
+      "type": "mcq",
+      "question": "Large numbers have exponent usually",
+      "options": [
+        "Positive",
+        "Negative",
+        "Zero",
+        "Fractional"
+      ],
+      "correctIndex": 0,
+      "explanation": "Decimal moves left → positive exponent."
+    },
+    {
+      "questionId": "ex23_q7",
+      "type": "mcq",
+      "question": "6.02 × 10⁻⁵ =",
+      "options": [
+        "0.0000602",
+        "602000",
+        "0.602",
+        "60200"
+      ],
+      "correctIndex": 0,
+      "explanation": "Negative exponent → move decimal left."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

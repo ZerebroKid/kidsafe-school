@@ -311,6 +311,36 @@ export interface BrainstormingItem {
   videoUrl?: string;
 }
 
+/** Common wrong belief paired with the correct understanding. */
+export interface MisconceptionItem {
+  wrong: string;
+  correct: string;
+}
+
+/** Real-world application of the topic concept. */
+export interface RealLifeConnectionItem {
+  title: string;
+  description: string;
+  videoUrl?: string;
+}
+
+/** Hands-on activity or experiment for the topic. */
+export interface ActivityItem {
+  title: string;
+  instructions: string;
+  videoUrl?: string;
+}
+
+/** Step-by-step worked problem (used heavily in exercise topics). */
+export interface WorkedProblem {
+  problemId: string;
+  question: string;
+  conceptsUsed?: string[];
+  steps: string[];
+  answer: string;
+  commonMistake?: string;
+}
+
 /**
  * `curriculum/{curriculumId}/chapters/{chapterId}/topics/{topicId}` -- full curated
  * topic content (explanation + examples + brainstorming + quiz).
@@ -336,6 +366,10 @@ export interface TopicContent {
   examples: string[];
   videoUrl?: string;
   brainstorming: BrainstormingItem[];
+  misconceptions?: MisconceptionItem[];
+  realLifeConnections?: RealLifeConnectionItem[];
+  activities?: ActivityItem[];
+  workedProblems?: WorkedProblem[];
   quiz: QuizQuestion[];
   status: 'draft' | 'published';
   /** UID of the human content curator who wrote this topic. */

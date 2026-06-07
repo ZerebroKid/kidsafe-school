@@ -13,6 +13,10 @@ import {useTopicContent} from '../../firebase/study';
 import {colors, radius, spacing} from '../../theme';
 import type {StudyStackParamList} from '../../navigation/types';
 import {BrainstormingSection} from './components/BrainstormingSection';
+import {RealLifeSection} from './components/RealLifeSection';
+import {MisconceptionsSection} from './components/MisconceptionsSection';
+import {ActivitiesSection} from './components/ActivitiesSection';
+import {WorkedProblemsSection} from './components/WorkedProblemsSection';
 import {VideoPlayer} from './components/VideoPlayer';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'TopicLearn'>;
@@ -109,10 +113,33 @@ export function TopicScreen({route, navigation}: Props) {
           </View>
         ) : null}
 
-        {/* Brainstorming */}
+        {topic.realLifeConnections && topic.realLifeConnections.length > 0 ? (
+          <View style={styles.section}>
+            <RealLifeSection items={topic.realLifeConnections} />
+          </View>
+        ) : null}
+
         {topic.brainstorming.length > 0 ? (
           <View style={styles.section}>
             <BrainstormingSection items={topic.brainstorming} />
+          </View>
+        ) : null}
+
+        {topic.misconceptions && topic.misconceptions.length > 0 ? (
+          <View style={styles.section}>
+            <MisconceptionsSection items={topic.misconceptions} />
+          </View>
+        ) : null}
+
+        {topic.activities && topic.activities.length > 0 ? (
+          <View style={styles.section}>
+            <ActivitiesSection items={topic.activities} />
+          </View>
+        ) : null}
+
+        {topic.workedProblems && topic.workedProblems.length > 0 ? (
+          <View style={styles.section}>
+            <WorkedProblemsSection items={topic.workedProblems} />
           </View>
         ) : null}
 

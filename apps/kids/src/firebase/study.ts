@@ -231,6 +231,32 @@ export interface BrainstormingItem {
   videoUrl?: string;
 }
 
+export interface MisconceptionItem {
+  wrong: string;
+  correct: string;
+}
+
+export interface RealLifeConnectionItem {
+  title: string;
+  description: string;
+  videoUrl?: string;
+}
+
+export interface ActivityItem {
+  title: string;
+  instructions: string;
+  videoUrl?: string;
+}
+
+export interface WorkedProblem {
+  problemId: string;
+  question: string;
+  conceptsUsed?: string[];
+  steps: string[];
+  answer: string;
+  commonMistake?: string;
+}
+
 export interface QuizQuestion {
   questionId: string;
   type: 'mcq';
@@ -252,6 +278,10 @@ export interface TopicContent {
   examples: string[];
   videoUrl?: string;
   brainstorming: BrainstormingItem[];
+  misconceptions?: MisconceptionItem[];
+  realLifeConnections?: RealLifeConnectionItem[];
+  activities?: ActivityItem[];
+  workedProblems?: WorkedProblem[];
   quiz: QuizQuestion[];
   status: 'draft' | 'published';
 }

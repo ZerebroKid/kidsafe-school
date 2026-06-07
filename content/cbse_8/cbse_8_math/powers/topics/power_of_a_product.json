@@ -1,0 +1,180 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "power_of_a_product",
+  "topicName": "7. Power of a Product",
+  "explanation": "When the same exponent applies to a product, distribute it to each factor: (mn)ᵃ = mᵃ × nᵃ. Example: (2×5)³ = 2³ × 5³ = 8 × 125 = 1000. This also works in reverse to simplify: 2⁴ × 3⁴ = (2×3)⁴ = 6⁴. The law connects multiplication inside brackets with adding the same power to each part.",
+  "examples": [
+    "(2×5)³ = 2³ × 5³ = 1000",
+    "2⁴ × 3⁴ = 6⁴ = 1296",
+    "(ab)² = a²b²",
+    "(-3)² × (-5)² = 9 × 25 = 225"
+  ],
+  "videoUrl": "https://youtu.be/0Y4Er1gM2Ew",
+  "brainstorming": [
+    {
+      "question": "Why does (2×5)³ equal 2³ × 5³?",
+      "answer": "Expanding (2×5)³ = (2×5)(2×5)(2×5) — each bracket picks one 2 and one 5, giving three 2s and three 5s."
+    },
+    {
+      "question": "Can (2+3)² = 2² + 3²?",
+      "answer": "No! (2+3)² = 25 but 2²+3² = 13. Power of a product works for multiplication, not addition."
+    },
+    {
+      "question": "How does this help simplify 2⁴ × 3⁴?",
+      "answer": "Same exponent → combine bases: (2×3)⁴ = 6⁴."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "(2+3)² = 2² + 3²",
+      "correct": "(2+3)² = 25, but 2²+3² = 13. The law applies to products, not sums."
+    },
+    {
+      "wrong": "(2×5)³ = 2×5³",
+      "correct": "Both factors get the exponent: 2³ × 5³."
+    },
+    {
+      "wrong": "2³ × 3⁴ = 6⁷",
+      "correct": "Exponents differ — cannot combine. 2³ × 3⁴ = 8 × 81 = 648."
+    },
+    {
+      "wrong": "(mn)ᵃ = mᵃ + nᵃ",
+      "correct": "It is mᵃ × nᵃ (multiplication), not addition."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Box dimensions",
+      "description": "Volume of a rectangular box (l×w×h)² for scaling all sides doubles each dimension factor together."
+    },
+    {
+      "title": "Team combinations",
+      "description": "(2×3)⁴ patterns appear when independent choices each have the same number of rounds."
+    },
+    {
+      "title": "Engineering stress",
+      "description": "Force on (a×b)² area distributes as a² × b² when each dimension scales equally."
+    },
+    {
+      "title": "Chemistry moles",
+      "description": "(2×3)³ molecule counts split into 2³ and 3³ when counting arrangements."
+    },
+    {
+      "title": "Currency pairs",
+      "description": "Converting (₹×$)ⁿ transactions splits into ₹ⁿ and $ⁿ factors."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Expand and compare",
+      "instructions": "Compute (2×3)² by expanding brackets and by 2²×3². Show both give 36."
+    },
+    {
+      "title": "Sum vs product trap",
+      "instructions": "Test (2+3)² vs 2²+3². Discuss why only multiplication distributes the exponent."
+    },
+    {
+      "title": "Simplify products",
+      "instructions": "Rewrite 2⁴×3⁴, 5²×7², and 2³×a³ in the form (product)ⁿ."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "poprod_q1",
+      "type": "mcq",
+      "question": "(2×5)³ =",
+      "options": [
+        "2³×5³",
+        "10³ only",
+        "2+5³",
+        "2³+5³"
+      ],
+      "correctIndex": 0,
+      "explanation": "Each factor is cubed: 2³ × 5³."
+    },
+    {
+      "questionId": "poprod_q2",
+      "type": "mcq",
+      "question": "2⁴ × 3⁴ =",
+      "options": [
+        "6⁴",
+        "6⁸",
+        "5⁴",
+        "6⁷"
+      ],
+      "correctIndex": 0,
+      "explanation": "Same exponent: (2×3)⁴ = 6⁴."
+    },
+    {
+      "questionId": "poprod_q3",
+      "type": "mcq",
+      "question": "(ab)² =",
+      "options": [
+        "a²b²",
+        "a²+b²",
+        "2ab",
+        "(a+b)²"
+      ],
+      "correctIndex": 0,
+      "explanation": "Power distributes over multiplication."
+    },
+    {
+      "questionId": "poprod_q4",
+      "type": "mcq",
+      "question": "(2+3)² equals:",
+      "options": [
+        "25",
+        "13",
+        "10²",
+        "2²+3²"
+      ],
+      "correctIndex": 0,
+      "explanation": "(2+3)² = 5² = 25, not 2²+3²."
+    },
+    {
+      "questionId": "poprod_q5",
+      "type": "mcq",
+      "question": "m⁵ × n⁵ =",
+      "options": [
+        "(mn)⁵",
+        "m⁵⁺⁵",
+        "(m+n)⁵",
+        "m⁵/n⁵"
+      ],
+      "correctIndex": 0,
+      "explanation": "Same exponent on different bases → (mn)⁵."
+    },
+    {
+      "questionId": "poprod_q6",
+      "type": "mcq",
+      "question": "(-3)² × (-5)² =",
+      "options": [
+        "225",
+        "-225",
+        "15²",
+        "(-15)²"
+      ],
+      "correctIndex": 0,
+      "explanation": "9 × 25 = 225 — both squares are positive."
+    },
+    {
+      "questionId": "poprod_q7",
+      "type": "mcq",
+      "question": "(2×3)⁴ =",
+      "options": [
+        "2⁴×3⁴",
+        "6⁴",
+        "Both A and B",
+        "2⁴+3⁴"
+      ],
+      "correctIndex": 2,
+      "explanation": "2⁴×3⁴ = 6⁴ = 1296."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

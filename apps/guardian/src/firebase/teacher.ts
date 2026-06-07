@@ -255,6 +255,31 @@ export interface TopicRow {
   status: 'draft' | 'published';
 }
 
+const TOPIC_ORDER_PREFIX = /^(\d+)\.\s*/;
+
+/** Parse leading "N. " from curated topic names (e.g. "3. Product Law"). */
+export function parseTopicOrder(topicName: string): number | null {
+  const match = TOPIC_ORDER_PREFIX.exec(topicName);
+  return match ? Number.parseInt(match[1], 10) : null;
+}
+
+/** Sort topics 1, 2, 3… not 1, 10, 11, 2 (plain string sort). */
+export function compareTopicOrder(
+  a: {topicName: string; id?: string},
+  b: {topicName: string; id?: string},
+): number {
+  const orderA = parseTopicOrder(a.topicName);
+  const orderB = parseTopicOrder(b.topicName);
+  if (orderA != null && orderB != null && orderA !== orderB) {
+    return orderA - orderB;
+  }
+  if (orderA != null && orderB == null) return -1;
+  if (orderA == null && orderB != null) return 1;
+  const byName = a.topicName.localeCompare(b.topicName);
+  if (byName !== 0) return byName;
+  return (a.id ?? '').localeCompare(b.id ?? '');
+}
+
 export function usePublishedTopics(
   curriculumId: string | null,
   chapterId: string | null,
@@ -288,7 +313,7 @@ export function usePublishedTopics(
               status: (data.status as 'draft' | 'published') ?? 'draft',
             };
           });
-          rows.sort((a, b) => a.topicName.localeCompare(b.topicName));
+          rows.sort(compareTopicOrder);
           setState({data: rows, loading: false, error: null});
         },
         err => setState({data: null, loading: false, error: err.message}),

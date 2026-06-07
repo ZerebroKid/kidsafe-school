@@ -69,6 +69,40 @@ export const BrainstormingItemSchema = z.object({
     .optional(),
 });
 
+export const MisconceptionItemSchema = z.object({
+  wrong: z.string().min(1, 'misconceptions.wrong is required'),
+  correct: z.string().min(1, 'misconceptions.correct is required'),
+});
+
+export const RealLifeConnectionItemSchema = z.object({
+  title: z.string().min(1, 'realLifeConnections.title is required'),
+  description: z.string().min(1, 'realLifeConnections.description is required'),
+  videoUrl: z
+    .string()
+    .regex(HTTPS_URL, 'realLifeConnections.videoUrl must be https')
+    .optional(),
+});
+
+export const ActivityItemSchema = z.object({
+  title: z.string().min(1, 'activities.title is required'),
+  instructions: z.string().min(1, 'activities.instructions is required'),
+  videoUrl: z
+    .string()
+    .regex(HTTPS_URL, 'activities.videoUrl must be https')
+    .optional(),
+});
+
+export const WorkedProblemSchema = z.object({
+  problemId: z.string().min(1, 'workedProblems.problemId is required'),
+  question: z.string().min(1, 'workedProblems.question is required'),
+  conceptsUsed: z.array(z.string().min(1)).optional(),
+  steps: z
+    .array(z.string().min(1))
+    .min(1, 'workedProblems.steps needs at least 1 entry'),
+  answer: z.string().min(1, 'workedProblems.answer is required'),
+  commonMistake: z.string().optional(),
+});
+
 /**
  * Top-level Topic schema. Note we accept either `'draft'` or `'published'`;
  * the import script defaults `status` to `'published'` when missing AND
@@ -103,6 +137,10 @@ export const TopicContentSchema = z.object({
   brainstorming: z
     .array(BrainstormingItemSchema)
     .min(1, 'brainstorming needs at least 1 entry'),
+  misconceptions: z.array(MisconceptionItemSchema).min(1).optional(),
+  realLifeConnections: z.array(RealLifeConnectionItemSchema).min(1).optional(),
+  activities: z.array(ActivityItemSchema).min(1).optional(),
+  workedProblems: z.array(WorkedProblemSchema).min(1).optional(),
   quiz: z
     .array(QuizQuestionSchema)
     .min(1, 'quiz needs at least 1 question')

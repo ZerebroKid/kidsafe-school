@@ -1,0 +1,184 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "comparing_standard_form",
+  "topicName": "10. Comparing Large and Small Numbers",
+  "explanation": "To compare numbers in standard form, first compare the exponent n. For large positive numbers, bigger exponent means bigger value. If exponents match, compare the coefficient a. For small numbers (negative exponents), exponent closer to zero is larger: 10⁻² > 10⁻⁵. Example: 3.2×10⁸ > 5.7×10⁷ because 8 > 7.",
+  "examples": [
+    "3.2×10⁸ > 5.7×10⁷ (compare exponents: 8 > 7)",
+    "8.2×10⁶ > 3.5×10⁶ (same exponent, compare 8.2 > 3.5)",
+    "5×10⁻⁴ > 5×10⁻⁶ (10⁻⁴ is larger than 10⁻⁶)",
+    "9×10⁵ < 2×10⁶ (exponent 6 beats coefficient 9)"
+  ],
+  "videoUrl": "https://youtu.be/-3dr74TKqrw",
+  "brainstorming": [
+    {
+      "question": "Which is smaller: 1.49×10¹¹ m or 1.439×10¹² m?",
+      "answer": "1.49×10¹¹ = 1.49×10¹¹ vs 1.439×10¹² = 14.39×10¹¹ — the second is about 10 times larger."
+    },
+    {
+      "question": "How do you compare 4³ and 3⁴?",
+      "answer": "Compute: 4³ = 64, 3⁴ = 81. So 3⁴ > 4³ despite smaller base."
+    },
+    {
+      "question": "Is 2¹⁰⁰ bigger than 100²?",
+      "answer": "100² = 10,000. 2¹⁰⁰ ≈ 1.27×10³⁰ — vastly larger."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Bigger exponent always means bigger number for all a",
+      "correct": "For 0 < a < 1, higher positive n can mean smaller value. Context matters."
+    },
+    {
+      "wrong": "4³ > 3⁴ because base 4 > 3",
+      "correct": "4³ = 64, 3⁴ = 81 — compare values, not just bases."
+    },
+    {
+      "wrong": "10⁹ + 10⁹ = 10¹⁸",
+      "correct": "10⁹ + 10⁹ = 2×10⁹, not add exponents."
+    },
+    {
+      "wrong": "2¹⁰⁰ and 100² are close",
+      "correct": "100² = 10,000; 2¹⁰⁰ has about 30 digits."
+    },
+    {
+      "wrong": "Scientific notation numbers cannot be compared",
+      "correct": "Align exponents, then compare coefficients."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Planet distances",
+      "description": "Comparing Sun–Saturn vs Sun–Earth distances uses aligned powers of 10."
+    },
+    {
+      "title": "Ants per human",
+      "description": "2×10¹⁶ ants ÷ 8×10⁹ people ≈ 2.5×10⁶ ants per person."
+    },
+    {
+      "title": "Starling flocks",
+      "description": "3.1×10⁸ starlings ÷ 10⁴ per flock = 3.1×10⁴ flocks worldwide."
+    },
+    {
+      "title": "Paper to the Moon",
+      "description": "3.84×10⁸ m ÷ 10⁻⁴ m per sheet = 3.84×10¹² sheets."
+    },
+    {
+      "title": "Sheep and goats",
+      "description": "10⁹ + 10⁹ = 2×10⁹ total — not 10¹⁸."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Order the distances",
+      "instructions": "Rank Sun–Earth, Sun–Saturn, and Saturn–Uranus distances given in standard form. Show alignment steps."
+    },
+    {
+      "title": "Greater or lesser",
+      "instructions": "Decide which is greater: 4³ or 3⁴, 2⁸ or 8², 100² or 2¹⁰⁰. Calculate before answering."
+    },
+    {
+      "title": "Ratio calculator",
+      "instructions": "Compute humans per elephant (8×10⁹ ÷ 4×10⁵) and express in scientific notation."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "cmp_q1",
+      "type": "mcq",
+      "question": "Which is greater: 4³ or 3⁴?",
+      "options": [
+        "4³",
+        "3⁴",
+        "Equal",
+        "Cannot tell"
+      ],
+      "correctIndex": 1,
+      "explanation": "4³ = 64, 3⁴ = 81."
+    },
+    {
+      "questionId": "cmp_q2",
+      "type": "mcq",
+      "question": "2⁸ vs 8²:",
+      "options": [
+        "2⁸ is greater",
+        "8² is greater",
+        "Equal",
+        "2⁸ = 64, 8² = 64"
+      ],
+      "correctIndex": 0,
+      "explanation": "2⁸ = 256, 8² = 64."
+    },
+    {
+      "questionId": "cmp_q3",
+      "type": "mcq",
+      "question": "100² vs 2¹⁰⁰:",
+      "options": [
+        "100²",
+        "2¹⁰⁰",
+        "Equal",
+        "100² by a little"
+      ],
+      "correctIndex": 1,
+      "explanation": "2¹⁰⁰ is astronomically larger than 10,000."
+    },
+    {
+      "questionId": "cmp_q4",
+      "type": "mcq",
+      "question": "10⁹ + 10⁹ equals:",
+      "options": [
+        "2×10⁹",
+        "10¹⁸",
+        "10¹⁰",
+        "20⁹"
+      ],
+      "correctIndex": 0,
+      "explanation": "Same term twice → 2×10⁹."
+    },
+    {
+      "questionId": "cmp_q5",
+      "type": "mcq",
+      "question": "Smallest distance: 1.4335×10¹², 1.439×10¹², 1.496×10¹¹ m:",
+      "options": [
+        "1.496×10¹¹",
+        "1.4335×10¹²",
+        "1.439×10¹²",
+        "All equal"
+      ],
+      "correctIndex": 0,
+      "explanation": "1.496×10¹¹ = 0.1496×10¹² — smallest."
+    },
+    {
+      "questionId": "cmp_q6",
+      "type": "mcq",
+      "question": "8×10⁹ ÷ 4×10⁵ =",
+      "options": [
+        "2×10⁴",
+        "2×10⁹",
+        "4×10⁴",
+        "2×10⁵"
+      ],
+      "correctIndex": 0,
+      "explanation": "8/4 = 2; 10⁹⁻⁵ = 10⁴."
+    },
+    {
+      "questionId": "cmp_q7",
+      "type": "mcq",
+      "question": "To compare a₁×10ⁿ and a₂×10ᵐ, first:",
+      "options": [
+        "Add exponents",
+        "Align to same power of 10",
+        "Multiply coefficients",
+        "Ignore exponents"
+      ],
+      "correctIndex": 1,
+      "explanation": "Convert to the same 10ᵏ to compare coefficients."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

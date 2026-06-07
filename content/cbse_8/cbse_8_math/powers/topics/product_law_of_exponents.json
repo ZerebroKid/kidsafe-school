@@ -1,0 +1,180 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "product_law_of_exponents",
+  "topicName": "4. Product Law of Exponents",
+  "explanation": "When multiplying powers with the same base, add the exponents: nᵃ × nᵇ = nᵃ⁺ᵇ. This works because nᵃ means a factors of n and nᵇ means b more factors — together there are a + b factors. Example: 2³ × 2⁴ = 2⁷ = 128. The law also holds for negative exponents: 10⁻² × 10⁻⁵ = 10⁻⁷. The base must be the same; you cannot combine 2³ × 3⁴ this way unless you compute values separately.",
+  "examples": [
+    "2³ × 2⁴ = 2⁷ = 128",
+    "5² × 5³ = 5⁵ = 3125",
+    "10⁻² × 10⁻⁵ = 10⁻⁷",
+    "p³ × p⁻¹⁰ = p⁻⁷"
+  ],
+  "videoUrl": "https://youtu.be/0Y4Er1gM2Ew",
+  "brainstorming": [
+    {
+      "question": "Why do we add exponents when bases match?",
+      "answer": "Multiplying nᵃ × nᵇ joins a factors with b factors — total of a + b factors of n."
+    },
+    {
+      "question": "Can 2³ × 3² be simplified with one exponent?",
+      "answer": "No — different bases. Evaluate 8 × 9 = 72 or leave as 2³ × 3²."
+    },
+    {
+      "question": "Does the product law work for n⁰?",
+      "answer": "Yes: 2³ × 2⁰ = 2³ since 2⁰ = 1."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "2³ × 2⁴ = 2¹²",
+      "correct": "Add exponents: 2³⁺⁴ = 2⁷, not multiply them."
+    },
+    {
+      "wrong": "2³ × 3² = 6⁵",
+      "correct": "Bases differ — cannot combine exponents. 2³ × 3² = 8 × 9 = 72."
+    },
+    {
+      "wrong": "nᵃ × nᵇ = (nᵃ)ᵇ",
+      "correct": "Product law adds exponents; power-of-a-power multiplies them."
+    },
+    {
+      "wrong": "10⁻² × 10⁻⁵ = 10¹⁰",
+      "correct": "10⁻²⁺⁽⁻⁵⁾ = 10⁻⁷."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Combining bacterial generations",
+      "description": "Doubling twice then three more times is 2² × 2³ = 2⁵ total doubling factor."
+    },
+    {
+      "title": "Stacking discounts",
+      "description": "Two successive 10% reductions are not additive — but repeated scaling by powers models compounded effects."
+    },
+    {
+      "title": "Area scaling",
+      "description": "Scaling a square side by 10² then 10³ multiplies area factor by 10⁵."
+    },
+    {
+      "title": "Memory addressing",
+      "description": "Combining 2¹⁰ address lines with 2³ banks gives 2¹³ total addresses."
+    },
+    {
+      "title": "Chemistry concentrations",
+      "description": "Diluting twice: multiply concentration factors using product of powers when same base ratio applies."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Exponent addition strips",
+      "instructions": "Cut strips showing 2³ as three 2-blocks and 2⁴ as four 2-blocks. Join and count seven blocks → 2⁷."
+    },
+    {
+      "title": "Same-base sort",
+      "instructions": "Sort cards into groups with matching bases. Simplify each group using the product law."
+    },
+    {
+      "title": "Error hunt",
+      "instructions": "Find mistakes in expressions like 3⁴ × 3² = 3⁸ and 5⁻¹ × 5³ = 5⁻⁴. Correct and explain."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "prod_q1",
+      "type": "mcq",
+      "question": "2⁵ × 2³ =",
+      "options": [
+        "2⁸",
+        "2¹⁵",
+        "4⁸",
+        "2²"
+      ],
+      "correctIndex": 0,
+      "explanation": "Add exponents: 2⁵⁺³ = 2⁸."
+    },
+    {
+      "questionId": "prod_q2",
+      "type": "mcq",
+      "question": "10⁻² × 10⁻⁵ =",
+      "options": [
+        "10⁻⁷",
+        "10⁻³",
+        "10¹⁰",
+        "10⁷"
+      ],
+      "correctIndex": 0,
+      "explanation": "-2 + (-5) = -7."
+    },
+    {
+      "questionId": "prod_q3",
+      "type": "mcq",
+      "question": "p³ × p⁻¹⁰ =",
+      "options": [
+        "p⁻⁷",
+        "p¹³",
+        "p⁻³",
+        "p³⁰"
+      ],
+      "correctIndex": 0,
+      "explanation": "3 + (-10) = -7."
+    },
+    {
+      "questionId": "prod_q4",
+      "type": "mcq",
+      "question": "Which cannot use the product law directly?",
+      "options": [
+        "2³ × 2⁴",
+        "5⁻¹ × 5²",
+        "2³ × 3²",
+        "10⁶ × 10⁻²"
+      ],
+      "correctIndex": 2,
+      "explanation": "Bases 2 and 3 are different."
+    },
+    {
+      "questionId": "prod_q5",
+      "type": "mcq",
+      "question": "3² × 3⁰ =",
+      "options": [
+        "3²",
+        "3⁰",
+        "9²",
+        "0"
+      ],
+      "correctIndex": 0,
+      "explanation": "3⁰ = 1, so result is 3²."
+    },
+    {
+      "questionId": "prod_q6",
+      "type": "mcq",
+      "question": "m⁵ × n⁵ simplifies to:",
+      "options": [
+        "(mn)⁵",
+        "m⁵⁺⁵",
+        "(m+n)⁵",
+        "Cannot simplify with product law alone"
+      ],
+      "correctIndex": 0,
+      "explanation": "Same exponent on different bases → power of a product: (mn)⁵."
+    },
+    {
+      "questionId": "prod_q7",
+      "type": "mcq",
+      "question": "2⁻⁴ × 2⁷ =",
+      "options": [
+        "2³",
+        "2⁻¹¹",
+        "2¹¹",
+        "2²⁸"
+      ],
+      "correctIndex": 0,
+      "explanation": "-4 + 7 = 3."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

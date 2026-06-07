@@ -14,6 +14,7 @@ import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {signOut} from '@zerebro/shared-firebase/auth';
 import {Button} from '../../components/Button';
 import {
+  compareTopicOrder,
   useTeacherActiveSchool,
   useTeacherAssignmentsToday,
   useTeacherClasses,
@@ -283,7 +284,7 @@ function groupBySubject(rows: AssignmentRow[]): Array<{
     .map(([key, assignments]) => {
       const raw = assignments[0]?.subjectName ?? key;
       const label = raw.charAt(0).toUpperCase() + raw.slice(1);
-      assignments.sort((a, b) => a.topicName.localeCompare(b.topicName));
+      assignments.sort(compareTopicOrder);
       return {key, label, assignments};
     })
     .sort((a, b) => a.label.localeCompare(b.label));

@@ -1,0 +1,183 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "introduction_to_powers",
+  "topicName": "1. Introduction to Powers",
+  "explanation": "A power (or exponent) is a compact way to write repeated multiplication. In aⁿ, a is the base and n is the exponent — meaning a is multiplied by itself n times. Instead of writing 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2, we write 2⁸. Powers are mathematical shorthand, like \"kg\" is shorter than \"kilogram\". Special cases: a¹ = a (exponent 1 changes nothing), and a⁰ = 1 for any non-zero a.",
+  "examples": [
+    "2⁸ = 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2",
+    "5³ = 5 × 5 × 5 = 125",
+    "10⁶ = 10 × 10 × 10 × 10 × 10 × 10 (much shorter than writing all factors)",
+    "7⁴: base = 7, exponent = 4"
+  ],
+  "videoUrl": "https://youtu.be/NS4vHqJIPiE",
+  "brainstorming": [
+    {
+      "question": "Why do we write powers at all?",
+      "answer": "Because numbers can become enormous. 10¹⁰⁰ would require writing 10 one hundred times — powers save time and space.",
+      "videoUrl": "https://youtu.be/uB4HlQW_siE"
+    },
+    {
+      "question": "Why is 2³ called \"2 cubed\"?",
+      "answer": "2³ = 8 can represent the volume of a cube with side 2. Similarly 2² represents area of a square — hence \"squared\"."
+    },
+    {
+      "question": "Why is any number raised to power 0 equal to 1?",
+      "answer": "Observe: 2⁴=16, 2³=8, 2²=4, 2¹=2. Each step divides by 2, so 2⁰=1. The pattern demands it.",
+      "videoUrl": "https://youtu.be/mYtmSx_dN_I"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "2³ = 2×3 = 6",
+      "correct": "2³ = 2 × 2 × 2 = 8. Exponent means repeated multiplication, not multiplication by the exponent."
+    },
+    {
+      "wrong": "5² = 10",
+      "correct": "5² = 25, not 5×2."
+    },
+    {
+      "wrong": "Bigger exponent means addition",
+      "correct": "Exponent means repeated multiplication, not addition."
+    },
+    {
+      "wrong": "Power and multiplication are unrelated",
+      "correct": "Powers are simply repeated multiplication."
+    },
+    {
+      "wrong": "Any number raised to power 0 equals 0",
+      "correct": "5⁰ = 1 (for any non-zero base)."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Computer storage",
+      "description": "Computers use powers of 2: 2¹⁰ = 1024 bytes, 2²⁰ ≈ 1 MB, 2³⁰ ≈ 1 GB.",
+      "videoUrl": "https://youtu.be/A0uhRjFS05A"
+    },
+    {
+      "title": "Viral social media growth",
+      "description": "One person shares with 2 friends, each shares with 2 more: Day 1→2, Day 2→4, Day 3→8 — powers in action."
+    },
+    {
+      "title": "Chessboard rice problem",
+      "description": "Legend: 1 grain on first square, 2 on second, 4 on third — numbers explode rapidly through powers."
+    },
+    {
+      "title": "Population growth",
+      "description": "Bacteria doubling: 1, 2, 4, 8, 16, 32… is repeated multiplication."
+    },
+    {
+      "title": "Compound interest",
+      "description": "Money grows through repeated multiplication — banks and investors care about exponents."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Paper folding activity",
+      "instructions": "Fold a paper 1, 2, 3, 4 times. Observe layers: 2, 4, 8, 16 — this demonstrates powers."
+    },
+    {
+      "title": "Rice grain activity",
+      "instructions": "Draw 8 chessboard squares. Place 1, 2, 4, 8 grains on successive squares. Observe how quickly powers grow."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "intro_q1",
+      "type": "mcq",
+      "question": "What does 3⁴ mean?",
+      "options": [
+        "3×4",
+        "3+3+3+3",
+        "3×3×3×3",
+        "12"
+      ],
+      "correctIndex": 2,
+      "explanation": "3⁴ = 3 × 3 × 3 × 3."
+    },
+    {
+      "questionId": "intro_q2",
+      "type": "mcq",
+      "question": "In 5³, the base is:",
+      "options": [
+        "3",
+        "5",
+        "15",
+        "125"
+      ],
+      "correctIndex": 1,
+      "explanation": "The base is the repeated number: 5."
+    },
+    {
+      "questionId": "intro_q3",
+      "type": "mcq",
+      "question": "In 5³, the exponent is:",
+      "options": [
+        "5",
+        "15",
+        "125",
+        "3"
+      ],
+      "correctIndex": 3,
+      "explanation": "The exponent is 3."
+    },
+    {
+      "questionId": "intro_q4",
+      "type": "mcq",
+      "question": "What is 2⁵?",
+      "options": [
+        "10",
+        "25",
+        "32",
+        "64"
+      ],
+      "correctIndex": 2,
+      "explanation": "2⁵ = 32."
+    },
+    {
+      "questionId": "intro_q5",
+      "type": "mcq",
+      "question": "What is 10³?",
+      "options": [
+        "30",
+        "100",
+        "1000",
+        "10000"
+      ],
+      "correctIndex": 2,
+      "explanation": "10³ = 1000."
+    },
+    {
+      "questionId": "intro_q6",
+      "type": "mcq",
+      "question": "What is 7⁰?",
+      "options": [
+        "0",
+        "1",
+        "7",
+        "70"
+      ],
+      "correctIndex": 1,
+      "explanation": "Any non-zero number to power 0 equals 1."
+    },
+    {
+      "questionId": "intro_q7",
+      "type": "mcq",
+      "question": "Why do mathematicians use powers?",
+      "options": [
+        "To make numbers longer",
+        "To shorten repeated multiplication",
+        "To avoid calculations",
+        "None"
+      ],
+      "correctIndex": 1,
+      "explanation": "Powers are shorthand for repeated multiplication."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

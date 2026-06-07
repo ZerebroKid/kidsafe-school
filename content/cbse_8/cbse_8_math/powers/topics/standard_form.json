@@ -1,0 +1,180 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "standard_form",
+  "topicName": "9. Standard Form",
+  "explanation": "Standard form (scientific notation) writes numbers as a × 10ⁿ where 1 ≤ a < 10 and n is an integer. Large numbers move the decimal left and use positive n: 59,853 = 5.9853 × 10⁴. Small numbers move the decimal right and use negative n: 0.001 = 1 × 10⁻³. Powers of 10 make it easy to express distances in space, mass of planets, and microscopic lengths without long strings of zeros.",
+  "examples": [
+    "59,853 = 5.9853 × 10⁴",
+    "6,374 = 6.374 × 10³",
+    "0.001 = 1 × 10⁻³",
+    "7,00,40,00,00,000 = 7.004 × 10¹⁰"
+  ],
+  "videoUrl": "https://youtu.be/ZtB0vJMGve4",
+  "brainstorming": [
+    {
+      "question": "Why must a be between 1 and 10?",
+      "answer": "One non-zero digit before the decimal keeps a standard unique form — 59853 and 5.9853×10⁴ are the same number."
+    },
+    {
+      "question": "How do you pick n for 0.001?",
+      "answer": "Move decimal 3 places right to get 1.0, so n = -3."
+    },
+    {
+      "question": "How is 172 written with powers of 10?",
+      "answer": "1×10² + 7×10¹ + 2×10⁰ — place-value expansion using exponents."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "59,853 = 59.853 × 10³ is standard form",
+      "correct": "a must satisfy 1 ≤ a < 10. Correct: 5.9853 × 10⁴."
+    },
+    {
+      "wrong": "10⁻³ = -1000",
+      "correct": "10⁻³ = 0.001 — negative exponent means small, not negative."
+    },
+    {
+      "wrong": "Standard form always has positive n",
+      "correct": "Numbers less than 1 use negative n."
+    },
+    {
+      "wrong": "6374 = 6374 × 10⁰ is preferred",
+      "correct": "6.374 × 10³ is cleaner standard form."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Earth–Sun distance",
+      "description": "1.496 × 10¹¹ m — standard form avoids writing 149,600,000,000 m."
+    },
+    {
+      "title": "Mass of the Earth",
+      "description": "5.976 × 10²⁴ kg — powers of 10 handle astronomical mass."
+    },
+    {
+      "title": "Bacterial cell size",
+      "description": "About 1 × 10⁻⁶ m — negative exponent for microscopic scale."
+    },
+    {
+      "title": "National budgets",
+      "description": "₹7.004 × 10¹⁰ expresses crores-scale spending compactly."
+    },
+    {
+      "title": "PIN codes and 10ⁿ",
+      "description": "6-digit PINs use 10⁶ combinations — powers of 10 in daily systems."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Decimal shift drill",
+      "instructions": "Convert 65,950, 0.00056, and 3,43,00,000 to standard form. Count decimal jumps for n."
+    },
+    {
+      "title": "Place-value poster",
+      "instructions": "Expand 5642 and 6374 as sums of a×10ⁿ terms. Colour-code each power of 10."
+    },
+    {
+      "title": "Real data hunt",
+      "instructions": "Find three news facts with very large or small numbers. Rewrite each in standard form."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "std_q1",
+      "type": "mcq",
+      "question": "59,853 in standard form is:",
+      "options": [
+        "5.9853 × 10⁴",
+        "59.853 × 10³",
+        "5.9853 × 10⁵",
+        "0.59853 × 10⁵"
+      ],
+      "correctIndex": 0,
+      "explanation": "Move decimal 4 places left: n = 4."
+    },
+    {
+      "questionId": "std_q2",
+      "type": "mcq",
+      "question": "0.001 in standard form is:",
+      "options": [
+        "1 × 10⁻³",
+        "1 × 10³",
+        "10⁻³ only",
+        "0.1 × 10⁻²"
+      ],
+      "correctIndex": 0,
+      "explanation": "Three places right → n = -3."
+    },
+    {
+      "questionId": "std_q3",
+      "type": "mcq",
+      "question": "In a × 10ⁿ, a must satisfy:",
+      "options": [
+        "1 ≤ a < 10",
+        "a > 10",
+        "a < 1",
+        "any a"
+      ],
+      "correctIndex": 0,
+      "explanation": "Standard form requires one digit before the decimal."
+    },
+    {
+      "questionId": "std_q4",
+      "type": "mcq",
+      "question": "7,00,40,00,00,000 =",
+      "options": [
+        "7.004 × 10¹⁰",
+        "7.004 × 10⁹",
+        "70.04 × 10⁹",
+        "7.004 × 10¹¹"
+      ],
+      "correctIndex": 0,
+      "explanation": "10 places from ones digit → n = 10."
+    },
+    {
+      "questionId": "std_q5",
+      "type": "mcq",
+      "question": "6374 = 6 × 10³ + 3 × 10² + 7 × 10¹ + 4 × 10⁰ shows:",
+      "options": [
+        "Place-value expansion",
+        "Prime factors",
+        "Negative exponents",
+        "Quotient law"
+      ],
+      "correctIndex": 0,
+      "explanation": "Each digit times its place power of 10."
+    },
+    {
+      "questionId": "std_q6",
+      "type": "mcq",
+      "question": "3,43,00,000 in standard form:",
+      "options": [
+        "3.43 × 10⁶",
+        "3.43 × 10⁷",
+        "34.3 × 10⁵",
+        "3.43 × 10⁸"
+      ],
+      "correctIndex": 0,
+      "explanation": "Decimal moves 6 places left."
+    },
+    {
+      "questionId": "std_q7",
+      "type": "mcq",
+      "question": "Scientific notation uses powers of:",
+      "options": [
+        "2",
+        "10",
+        "100",
+        "any base"
+      ],
+      "correctIndex": 1,
+      "explanation": "Standard form is based on powers of 10."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

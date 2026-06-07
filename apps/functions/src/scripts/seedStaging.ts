@@ -82,7 +82,7 @@ const SUBJECTS: Array<{
   curriculumId: string;
 }> = [
   {id: 'science', name: 'Science', code: 'SCI', curriculumId: 'cbse_8_science'},
-  {id: 'maths', name: 'Maths', code: 'MAT', curriculumId: 'cbse_8_maths'},
+  {id: 'maths', name: 'Maths', code: 'MAT', curriculumId: 'cbse_8_math'},
   {id: 'english', name: 'English', code: 'ENG', curriculumId: 'cbse_8_english'},
 ];
 

@@ -42,6 +42,32 @@ export const BrainstormingItemSchema = z.object({
   videoUrl: z.string().regex(HTTPS_URL).optional(),
 });
 
+export const MisconceptionItemSchema = z.object({
+  wrong: z.string().min(1),
+  correct: z.string().min(1),
+});
+
+export const RealLifeConnectionItemSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  videoUrl: z.string().regex(HTTPS_URL).optional(),
+});
+
+export const ActivityItemSchema = z.object({
+  title: z.string().min(1),
+  instructions: z.string().min(1),
+  videoUrl: z.string().regex(HTTPS_URL).optional(),
+});
+
+export const WorkedProblemSchema = z.object({
+  problemId: z.string().min(1),
+  question: z.string().min(1),
+  conceptsUsed: z.array(z.string().min(1)).optional(),
+  steps: z.array(z.string().min(1)).min(1),
+  answer: z.string().min(1),
+  commonMistake: z.string().optional(),
+});
+
 export const TopicContentSchema = z.object({
   curriculumId: z.string().min(1).regex(/^[a-z0-9_]+$/),
   grade: z.number().int().min(1).max(12),
@@ -54,6 +80,10 @@ export const TopicContentSchema = z.object({
   examples: z.array(z.string().min(1)).min(1),
   videoUrl: z.string().regex(HTTPS_URL).optional(),
   brainstorming: z.array(BrainstormingItemSchema).min(1),
+  misconceptions: z.array(MisconceptionItemSchema).min(1).optional(),
+  realLifeConnections: z.array(RealLifeConnectionItemSchema).min(1).optional(),
+  activities: z.array(ActivityItemSchema).min(1).optional(),
+  workedProblems: z.array(WorkedProblemSchema).min(1).optional(),
   quiz: z.array(QuizQuestionSchema).min(1).max(20),
   status: z.enum(['draft', 'published']).default('published'),
   curatedBy: z.string().min(1),

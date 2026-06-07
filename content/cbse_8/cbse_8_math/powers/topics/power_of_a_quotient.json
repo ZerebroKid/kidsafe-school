@@ -1,0 +1,180 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "power_of_a_quotient",
+  "topicName": "8. Power of a Quotient",
+  "explanation": "When the same exponent applies to a quotient, distribute to numerator and denominator: (m/n)ᵃ = mᵃ/nᵃ. Example: (10/5)⁴ = 10⁴/5⁴ = 2⁴ = 16. This is how we simplify 10⁴/5⁴ without computing huge numbers. It also explains (2/3)³ = 2³/3³ = 8/27. The base must be a quotient of two numbers raised to the same power.",
+  "examples": [
+    "(10/5)⁴ = 2⁴ = 16",
+    "10⁴/5⁴ = 2⁴",
+    "(2/3)³ = 8/27",
+    "m⁵/n¹² × (mn)⁹ needs careful grouping"
+  ],
+  "videoUrl": "https://youtu.be/pBQtK3CcpPY",
+  "brainstorming": [
+    {
+      "question": "Why is 10⁴/5⁴ equal to 2⁴?",
+      "answer": "Each of four factors has 10/5 = 2, so (10/5)⁴ = 2⁴."
+    },
+    {
+      "question": "Does (m/n)ᵃ = mᵃ/nᵃ work for negative a?",
+      "answer": "Yes: (2/3)⁻² = 2⁻²/3⁻² = (3/2)²."
+    },
+    {
+      "question": "What is m⁵/n¹² × (mn)⁹?",
+      "answer": "Rewrite (mn)⁹ = m⁹n⁹. Then m⁵⁺⁹/n¹²⁻⁹ = m¹⁴/n³."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "(10/5)⁴ = 10/5⁴",
+      "correct": "Both numerator and denominator are raised: 10⁴/5⁴."
+    },
+    {
+      "wrong": "10⁴/5⁴ = 2",
+      "correct": "2⁴ = 16, not 2. The exponent applies to the quotient."
+    },
+    {
+      "wrong": "(m-n)² = m²-n²",
+      "correct": "Power of a quotient is for division, not subtraction."
+    },
+    {
+      "wrong": "aᵐ/bᵐ = (a-b)ᵐ",
+      "correct": "aᵐ/bᵐ = (a/b)ᵐ."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Unit conversion ratios",
+      "description": "Comparing 10⁴ metres to 5⁴ metres uses (10/5)⁴ = 2⁴ scaling factor."
+    },
+    {
+      "title": "Concentration ratios",
+      "description": "Dilution factors expressed as (1/10)³ show power of a quotient in chemistry."
+    },
+    {
+      "title": "Gear ratios",
+      "description": "Repeated gear pairs (A/B)ⁿ model cumulative rotation ratios."
+    },
+    {
+      "title": "Probability odds",
+      "description": "(1/2)ⁿ for n coin tosses all heads uses power of a quotient."
+    },
+    {
+      "title": "Simplifying large fractions",
+      "description": "10⁴/5⁴ avoids computing 10000/625 directly — use 2⁴ = 16."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Fraction power split",
+      "instructions": "Show (6/2)³ = 6³/2³ = 216/8 = 27. Verify by direct division."
+    },
+    {
+      "title": "Simplify 10⁴/5⁴",
+      "instructions": "Use the quotient power law before calculating. Compare effort with direct division."
+    },
+    {
+      "title": "Mixed expression",
+      "instructions": "Simplify m⁵/n¹² × (mn)⁹ step by step. Identify quotient and product laws used."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "poq_q1",
+      "type": "mcq",
+      "question": "10⁴ ÷ 5⁴ =",
+      "options": [
+        "2⁴",
+        "5⁴",
+        "2",
+        "10⁴/⁵"
+      ],
+      "correctIndex": 0,
+      "explanation": "(10/5)⁴ = 2⁴ = 16."
+    },
+    {
+      "questionId": "poq_q2",
+      "type": "mcq",
+      "question": "(m/n)ᵃ =",
+      "options": [
+        "mᵃ/nᵃ",
+        "mᵃ-nᵃ",
+        "(m-n)ᵃ",
+        "m/nᵃ"
+      ],
+      "correctIndex": 0,
+      "explanation": "Exponent applies to both numerator and denominator."
+    },
+    {
+      "questionId": "poq_q3",
+      "type": "mcq",
+      "question": "(2/3)³ =",
+      "options": [
+        "8/27",
+        "6/9",
+        "2/27",
+        "8/9"
+      ],
+      "correctIndex": 0,
+      "explanation": "2³/3³ = 8/27."
+    },
+    {
+      "questionId": "poq_q4",
+      "type": "mcq",
+      "question": "(10/5)⁴ =",
+      "options": [
+        "16",
+        "2",
+        "10⁴/5",
+        "5⁴/10"
+      ],
+      "correctIndex": 0,
+      "explanation": "2⁴ = 16."
+    },
+    {
+      "questionId": "poq_q5",
+      "type": "mcq",
+      "question": "aᵐ/bᵐ simplifies to:",
+      "options": [
+        "(a/b)ᵐ",
+        "(a-b)ᵐ",
+        "aᵐ⁻ᵐ",
+        "a/b"
+      ],
+      "correctIndex": 0,
+      "explanation": "Same exponent → power of quotient."
+    },
+    {
+      "questionId": "poq_q6",
+      "type": "mcq",
+      "question": "m⁵/n¹² × (mn)⁹ =",
+      "options": [
+        "m¹⁴/n³",
+        "m¹⁴n³",
+        "m⁻⁴/n²¹",
+        "(mn)¹⁴"
+      ],
+      "correctIndex": 0,
+      "explanation": "m⁵⁺⁹/n¹²⁻⁹ = m¹⁴/n³."
+    },
+    {
+      "questionId": "poq_q7",
+      "type": "mcq",
+      "question": "(6/2)³ =",
+      "options": [
+        "27",
+        "3³",
+        "6³/2",
+        "18"
+      ],
+      "correctIndex": 0,
+      "explanation": "6³/2³ = 216/8 = 27."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

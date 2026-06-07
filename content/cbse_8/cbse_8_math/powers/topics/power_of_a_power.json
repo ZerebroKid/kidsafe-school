@@ -1,0 +1,180 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "power_of_a_power",
+  "topicName": "6. Power of a Power",
+  "explanation": "When raising a power to another power, multiply the exponents: (nᵃ)ᵇ = nᵃˣᵇ. For example, (2³)² = 2⁶ = 64 because (2³)² = 2³ × 2³. Similarly, (13⁻²)⁻³ = 13⁶. This law helps rewrite large expressions compactly: 8⁶ can be written as (2³)⁶ = 2¹⁸ or (2²)⁹ = 2¹⁸. It is one of the most useful shortcuts when simplifying nested exponents.",
+  "examples": [
+    "(2³)² = 2⁶ = 64",
+    "(5²)³ = 5⁶ = 15625",
+    "(13⁻²)⁻³ = 13⁶",
+    "(10²)³ = 10⁶ = 1000000"
+  ],
+  "videoUrl": "https://youtu.be/ox06qIV2c1U",
+  "brainstorming": [
+    {
+      "question": "Why multiply exponents in (nᵃ)ᵇ?",
+      "answer": "nᵃ repeated b times means a × b total factors of n."
+    },
+    {
+      "question": "How is (2³)² different from 2³²?",
+      "answer": "(2³)² = 2⁶ = 64, but 2³² = 2⁹ = 512 — brackets matter!"
+    },
+    {
+      "question": "What does (n⁻²)⁻³ become?",
+      "answer": "Multiply exponents: n⁽⁻²⁾ˣ⁽⁻³⁾ = n⁶ — negative × negative is positive."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "(2³)² = 2⁵",
+      "correct": "Multiply exponents: 2³ˣ² = 2⁶."
+    },
+    {
+      "wrong": "(nᵃ)ᵇ = nᵃ⁺ᵇ",
+      "correct": "That is the product law. Power of a power multiplies: nᵃˣᵇ."
+    },
+    {
+      "wrong": "(13⁻²)⁻³ = 13⁻⁶",
+      "correct": "(-2)×(-3) = 6, so 13⁶."
+    },
+    {
+      "wrong": "(2²)³ = 2⁵",
+      "correct": "2²ˣ³ = 2⁶ = 64."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Nested scaling",
+      "description": "Scaling by 10² then cubing the scale factor gives (10²)³ = 10⁶ overall magnification."
+    },
+    {
+      "title": "Fractal repetition",
+      "description": "Each level triples detail: (3²)⁴ patterns model repeated subdivision in art and nature."
+    },
+    {
+      "title": "Cryptography layers",
+      "description": "Applying a square operation twice on a key space can be modelled as a power of a power."
+    },
+    {
+      "title": "Volume of cubes",
+      "description": "(side²)³ relates to expressing volume using power-of-a-power when side is itself a power."
+    },
+    {
+      "title": "Rewriting 64³",
+      "description": "64³ = (2⁶)³ = 2¹⁸ — compact form for very large numbers."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Bracket challenge",
+      "instructions": "Compare (3²)⁴ and 3²⁴. Compute both and discuss why parentheses change the answer."
+    },
+    {
+      "title": "Power tower simplify",
+      "instructions": "Simplify (5²)³, (2⁻¹)⁴, and (10³)² using the multiply-exponents rule."
+    },
+    {
+      "title": "Two ways same answer",
+      "instructions": "Write 8⁶ as both (2³)⁶ and (2²)⁹. Verify both equal 2¹⁸."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "pop_q1",
+      "type": "mcq",
+      "question": "(2³)² =",
+      "options": [
+        "2⁵",
+        "2⁶",
+        "2⁹",
+        "6²"
+      ],
+      "correctIndex": 1,
+      "explanation": "3 × 2 = 6, so 2⁶."
+    },
+    {
+      "questionId": "pop_q2",
+      "type": "mcq",
+      "question": "(13⁻²)⁻³ =",
+      "options": [
+        "13⁻⁶",
+        "13⁶",
+        "13⁻⁵",
+        "13⁵"
+      ],
+      "correctIndex": 1,
+      "explanation": "(-2)×(-3) = 6."
+    },
+    {
+      "questionId": "pop_q3",
+      "type": "mcq",
+      "question": "(5²)³ =",
+      "options": [
+        "5⁵",
+        "5⁶",
+        "5⁸",
+        "25³"
+      ],
+      "correctIndex": 1,
+      "explanation": "2 × 3 = 6."
+    },
+    {
+      "questionId": "pop_q4",
+      "type": "mcq",
+      "question": "(10²)³ =",
+      "options": [
+        "10⁵",
+        "10⁶",
+        "10⁸",
+        "100³"
+      ],
+      "correctIndex": 1,
+      "explanation": "2 × 3 = 6 → 10⁶."
+    },
+    {
+      "questionId": "pop_q5",
+      "type": "mcq",
+      "question": "(nᵃ)ᵇ =",
+      "options": [
+        "nᵃ⁺ᵇ",
+        "nᵃ⁻ᵇ",
+        "nᵃˣᵇ",
+        "nᵃ/ᵇ"
+      ],
+      "correctIndex": 2,
+      "explanation": "Power of a power multiplies exponents."
+    },
+    {
+      "questionId": "pop_q6",
+      "type": "mcq",
+      "question": "(2²)³ =",
+      "options": [
+        "2⁵",
+        "2⁶",
+        "2⁸",
+        "64"
+      ],
+      "correctIndex": 1,
+      "explanation": "2 × 3 = 6."
+    },
+    {
+      "questionId": "pop_q7",
+      "type": "mcq",
+      "question": "(3⁻¹)² =",
+      "options": [
+        "3⁻²",
+        "3²",
+        "3⁻³",
+        "9"
+      ],
+      "correctIndex": 0,
+      "explanation": "(-1) × 2 = -2."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

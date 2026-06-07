@@ -1,0 +1,184 @@
+{
+  "curriculumId": "cbse_8_math",
+  "grade": 8,
+  "subject": "math",
+  "chapterNo": 2,
+  "chapterName": "Powers",
+  "topicId": "negative_integral_exponents",
+  "topicName": "2. Negative Integral Exponents",
+  "explanation": "When we divide powers with the same base, nᵃ ÷ nᵇ = nᵃ⁻ᵇ. If a < b, the exponent becomes negative. A negative exponent means reciprocal: n⁻ᵃ = 1/nᵃ (n ≠ 0). For example, 2⁻⁴ = 1/2⁴ = 1/16. Similarly, 1/10³ = 10⁻³. Negative exponents do not make the number negative — they move the value to the denominator. The laws of exponents continue to work for negative and zero exponents as long as the base is not zero.",
+  "examples": [
+    "2⁻³ = 1/2³ = 1/8",
+    "10⁻² = 1/100 = 0.01",
+    "5⁻¹ = 1/5",
+    "10³ = 1/10⁻³"
+  ],
+  "videoUrl": "https://youtu.be/QH-QZDJctpw",
+  "brainstorming": [
+    {
+      "question": "What does 10⁻³ mean in words?",
+      "answer": "One divided by 10 three times, or 1/1000 = 0.001."
+    },
+    {
+      "question": "Is (-2)⁻³ positive or negative?",
+      "answer": "(-2)⁻³ = 1/(-2)³ = 1/(-8) = -1/8 — negative because the base is negative and the positive exponent 3 is odd."
+    },
+    {
+      "question": "Why must the base n not be zero in n⁻ᵃ?",
+      "answer": "0⁻ᵃ = 1/0ᵃ involves division by zero, which is undefined."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "A negative exponent makes the answer negative",
+      "correct": "n⁻ᵃ = 1/nᵃ — the sign of the result depends on the base, not the negative sign in the exponent."
+    },
+    {
+      "wrong": "2⁻³ = -8",
+      "correct": "2⁻³ = 1/2³ = 1/8, which is positive."
+    },
+    {
+      "wrong": "n⁻¹ means n minus 1",
+      "correct": "n⁻¹ = 1/n — it is the reciprocal, not subtraction."
+    },
+    {
+      "wrong": "0⁻⁵ = 0",
+      "correct": "0⁻⁵ = 1/0⁵ = 1/0, which is undefined."
+    },
+    {
+      "wrong": "You cannot multiply terms with negative exponents",
+      "correct": "Laws still hold: 2⁻⁴ × 2⁷ = 2³ = 8."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Microscopic measurements",
+      "description": "Thickness of paper ≈ 10⁻⁴ m — negative powers of 10 describe very small lengths."
+    },
+    {
+      "title": "Scientific prefixes",
+      "description": "Milli (10⁻³) and micro (10⁻⁶) use negative exponents to express tiny quantities."
+    },
+    {
+      "title": "Half-life decay",
+      "description": "Radioactive decay can be modelled with negative exponents showing shrinking amounts over time."
+    },
+    {
+      "title": "Reciprocals in recipes",
+      "description": "If a recipe uses 2⁻¹ cup, that means 1/2 cup — negative exponents as fractions in daily life."
+    },
+    {
+      "title": "Computer memory fractions",
+      "description": "A kilobyte is 2¹⁰ bytes; describing a fraction of a byte uses negative powers of 2."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Reciprocal flip cards",
+      "instructions": "Write expressions like 3⁻² on one side and 1/9 on the other. Students match and explain why they are equal."
+    },
+    {
+      "title": "Number line jump",
+      "instructions": "On a powers-of-10 line, start at 10³ and move left three steps to reach 10⁰, then two more to 10⁻². Record each value."
+    },
+    {
+      "title": "Negative exponent simplify race",
+      "instructions": "Simplify 2⁻⁴ × 2⁷, 10⁻² × 10⁻⁵, and p³ × p⁻¹⁰. First correct team explains the product law used."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "negexp_q1",
+      "type": "mcq",
+      "question": "2⁻⁴ equals:",
+      "options": [
+        "-16",
+        "1/16",
+        "1/8",
+        "16"
+      ],
+      "correctIndex": 1,
+      "explanation": "2⁻⁴ = 1/2⁴ = 1/16."
+    },
+    {
+      "questionId": "negexp_q2",
+      "type": "mcq",
+      "question": "10⁻³ equals:",
+      "options": [
+        "-1000",
+        "0.001",
+        "0.01",
+        "1000"
+      ],
+      "correctIndex": 1,
+      "explanation": "10⁻³ = 1/10³ = 1/1000 = 0.001."
+    },
+    {
+      "questionId": "negexp_q3",
+      "type": "mcq",
+      "question": "n⁻ᵃ = 1/nᵃ is valid when:",
+      "options": [
+        "n = 0",
+        "n ≠ 0",
+        "a is negative only",
+        "never"
+      ],
+      "correctIndex": 1,
+      "explanation": "Division by zero is undefined, so n must not be 0."
+    },
+    {
+      "questionId": "negexp_q4",
+      "type": "mcq",
+      "question": "2⁻² ÷ 2⁻⁵ equals:",
+      "options": [
+        "2⁻⁷",
+        "2³",
+        "2⁻³",
+        "1"
+      ],
+      "correctIndex": 1,
+      "explanation": "2⁻²⁻⁽⁻⁵⁾ = 2⁻²⁺⁵ = 2³ = 8."
+    },
+    {
+      "questionId": "negexp_q5",
+      "type": "mcq",
+      "question": "Which is equal to 1/5³?",
+      "options": [
+        "5⁻³",
+        "-5³",
+        "5³",
+        "(-5)⁻³"
+      ],
+      "correctIndex": 0,
+      "explanation": "5⁻³ = 1/5³."
+    },
+    {
+      "questionId": "negexp_q6",
+      "type": "mcq",
+      "question": "10³ written with a negative exponent in the denominator equals:",
+      "options": [
+        "10⁻³",
+        "1/10⁻³",
+        "10³",
+        "-10³"
+      ],
+      "correctIndex": 1,
+      "explanation": "10³ = 1/10⁻³."
+    },
+    {
+      "questionId": "negexp_q7",
+      "type": "mcq",
+      "question": "p³ × p⁻¹⁰ simplifies to:",
+      "options": [
+        "p⁻⁷",
+        "p¹³",
+        "p³⁰",
+        "p⁻³"
+      ],
+      "correctIndex": 0,
+      "explanation": "p³⁺⁽⁻¹⁰⁾ = p⁻⁷."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}
