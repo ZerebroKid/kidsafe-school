@@ -77,6 +77,31 @@ export interface AssignmentCard {
   status: 'active' | 'cancelled';
 }
 
+const TOPIC_ORDER_PREFIX = /^(\d+)\.\s*/;
+
+/** Parse leading "N. " from curated topic names (e.g. "3. Product Law"). */
+export function parseTopicOrder(topicName: string): number | null {
+  const match = TOPIC_ORDER_PREFIX.exec(topicName);
+  return match ? Number.parseInt(match[1], 10) : null;
+}
+
+/** Sort topics 1, 2, 3… not 1, 10, 11, 2 (plain string sort). */
+export function compareTopicOrder(
+  a: {topicName: string; id?: string},
+  b: {topicName: string; id?: string},
+): number {
+  const orderA = parseTopicOrder(a.topicName);
+  const orderB = parseTopicOrder(b.topicName);
+  if (orderA != null && orderB != null && orderA !== orderB) {
+    return orderA - orderB;
+  }
+  if (orderA != null && orderB == null) return -1;
+  if (orderA == null && orderB != null) return 1;
+  const byName = a.topicName.localeCompare(b.topicName);
+  if (byName !== 0) return byName;
+  return (a.id ?? '').localeCompare(b.id ?? '');
+}
+
 export function useTodayAssignments(
   classId: string | null,
 ): HookState<AssignmentCard[]> {
@@ -261,6 +286,19 @@ export interface TopicSection {
   heading: string;
   content: string;
   videoUrl?: string;
+}
+
+/** Quiz blocks are shown via Start Quiz only — not in the collapsible list. */
+const QUIZ_SECTION_HEADING = /^7\. QUIZ$|^(QUICK QUIZ|EXTRA QUIZ)/i;
+
+export function isQuizCollapsibleSection(heading: string): boolean {
+  return QUIZ_SECTION_HEADING.test(heading.trim());
+}
+
+export function sectionsForCollapsibleList(
+  sections: TopicSection[],
+): TopicSection[] {
+  return sections.filter(s => !isQuizCollapsibleSection(s.heading));
 }
 
 export interface QuizQuestion {

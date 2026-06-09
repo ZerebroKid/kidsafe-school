@@ -14,6 +14,7 @@ import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 import {
   chapterMetaKey,
+  compareTopicOrder,
   useChildClassId,
   useChapterMetaMap,
   useTodayAssignments,
@@ -248,7 +249,7 @@ function groupBySubjectAndChapter(
     const chapters: ChapterGroup[] = [];
     let topicCount = 0;
     for (const {curriculumId, chapterId, topics} of chapterMap.values()) {
-      topics.sort((x, y) => y.dueAt - x.dueAt);
+      topics.sort(compareTopicOrder);
       topicCount += topics.length;
       chapters.push({
         curriculumId,

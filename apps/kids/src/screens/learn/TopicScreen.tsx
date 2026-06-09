@@ -9,7 +9,7 @@ import {
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 import {Button} from '../../components/Button';
-import {useTopicContent, type TopicContent} from '../../firebase/study';
+import {useTopicContent, sectionsForCollapsibleList, type TopicContent} from '../../firebase/study';
 import {colors, radius, spacing} from '../../theme';
 import type {StudyStackParamList} from '../../navigation/types';
 import {BrainstormingSection} from './components/BrainstormingSection';
@@ -18,6 +18,7 @@ import {MisconceptionsSection} from './components/MisconceptionsSection';
 import {ActivitiesSection} from './components/ActivitiesSection';
 import {WorkedProblemsSection} from './components/WorkedProblemsSection';
 import {CollapsibleSectionList} from './components/CollapsibleSectionList';
+import {TopicMarkdownContent} from './components/TopicMarkdownContent';
 import {VideoPlayer} from './components/VideoPlayer';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'TopicLearn'>;
@@ -92,7 +93,9 @@ export function TopicScreen({route, navigation}: Props) {
         </View>
 
         {useSections ? (
-          <CollapsibleSectionList sections={topic.sections!} />
+          <CollapsibleSectionList
+            sections={sectionsForCollapsibleList(topic.sections!)}
+          />
         ) : (
           <LegacyTopicBody topic={topic} />
         )}
@@ -123,7 +126,9 @@ function LegacyTopicBody({topic}: {topic: TopicContent}) {
     <>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Explanation</Text>
-        <Text style={styles.explanationText}>{topic.explanation}</Text>
+        <TopicMarkdownContent style={styles.explanationText}>
+          {topic.explanation}
+        </TopicMarkdownContent>
       </View>
 
       <View style={styles.section}>
@@ -131,7 +136,7 @@ function LegacyTopicBody({topic}: {topic: TopicContent}) {
         {topic.examples.map((ex, i) => (
           <View key={i} style={styles.exampleRow}>
             <Text style={styles.bullet}>•</Text>
-            <Text style={styles.exampleText}>{ex}</Text>
+            <TopicMarkdownContent style={styles.exampleText}>{ex}</TopicMarkdownContent>
           </View>
         ))}
       </View>

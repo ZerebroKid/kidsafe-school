@@ -4,6 +4,7 @@ import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 import {colors, radius, spacing} from '../../../theme';
+import {extractYouTubeId} from '../../../lib/youtube';
 import type {StudyStackParamList} from '../../../navigation/types';
 
 type Nav = NativeStackNavigationProp<StudyStackParamList>;
@@ -54,17 +55,6 @@ export function VideoPlayer({url, title}: Props) {
       </View>
     </Pressable>
   );
-}
-
-function extractYouTubeId(url: string): string | null {
-  if (!url) return null;
-  const watchMatch = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-  if (watchMatch) return watchMatch[1];
-  const shortMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-  if (shortMatch) return shortMatch[1];
-  const embedMatch = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
-  if (embedMatch) return embedMatch[1];
-  return null;
 }
 
 const styles = StyleSheet.create({

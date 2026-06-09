@@ -10,7 +10,9 @@ import {
 } from 'react-native';
 
 import type {TopicSection} from '../../../firebase/study';
+import {contentIncludesYouTubeVideo} from '../../../lib/youtube';
 import {colors, radius, spacing} from '../../../theme';
+import {TopicMarkdownContent} from './TopicMarkdownContent';
 import {VideoPlayer} from './VideoPlayer';
 
 if (
@@ -43,25 +45,30 @@ function SectionCard({section}: {section: TopicSection}) {
   }, []);
 
   return (
-    <Pressable
-      onPress={toggle}
-      style={styles.card}
-      android_ripple={{color: 'rgba(0,0,0,0.04)'}}>
-      <View style={styles.headerRow}>
-        <Text style={styles.heading}>{section.heading}</Text>
-        <Text style={styles.chevron}>{expanded ? '▲' : '▼'}</Text>
-      </View>
+    <View style={styles.card}>
+      <Pressable
+        onPress={toggle}
+        style={styles.headerPressable}
+        android_ripple={{color: 'rgba(0,0,0,0.04)'}}>
+        <View style={styles.headerRow}>
+          <Text style={styles.heading}>{section.heading}</Text>
+          <Text style={styles.chevron}>{expanded ? '▲' : '▼'}</Text>
+        </View>
+      </Pressable>
       {expanded ? (
         <View style={styles.body}>
-          <Text style={styles.content}>{section.content}</Text>
-          {section.videoUrl ? (
+          <TopicMarkdownContent style={styles.content}>
+            {section.content}
+          </TopicMarkdownContent>
+          {section.videoUrl &&
+          !contentIncludesYouTubeVideo(section.content, section.videoUrl) ? (
             <View style={styles.videoWrap}>
               <VideoPlayer url={section.videoUrl} />
             </View>
           ) : null}
         </View>
       ) : null}
-    </Pressable>
+    </View>
   );
 }
 
@@ -73,6 +80,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: radius.md,
     padding: spacing.md,
+  },
+  headerPressable: {
+    borderRadius: radius.sm,
+    marginHorizontal: -spacing.xs,
+    paddingHorizontal: spacing.xs,
   },
   headerRow: {
     flexDirection: 'row',

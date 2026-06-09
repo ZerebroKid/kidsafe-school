@@ -18,6 +18,7 @@ import {Button} from '../../components/Button';
 import {useTopicContent} from '../../firebase/study';
 import {colors, radius, spacing} from '../../theme';
 import type {StudyStackParamList} from '../../navigation/types';
+import {TopicMarkdownContent} from './components/TopicMarkdownContent';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'Quiz'>;
 
@@ -172,7 +173,9 @@ export function QuizScreen({route, navigation}: Props) {
         style={styles.scroll}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled">
-        <Text style={styles.question}>{question.question}</Text>
+        <TopicMarkdownContent style={styles.question}>
+          {question.question}
+        </TopicMarkdownContent>
 
         <View style={styles.options}>
           {question.options.map((opt, idx) => {
@@ -190,13 +193,13 @@ export function QuizScreen({route, navigation}: Props) {
                   ]}>
                   {isSelected ? <View style={styles.radioDot} /> : null}
                 </View>
-                <Text
+                <TopicMarkdownContent
                   style={[
                     styles.optionText,
                     isSelected && styles.optionTextSelected,
                   ]}>
                   {opt}
-                </Text>
+                </TopicMarkdownContent>
               </Pressable>
             );
           })}

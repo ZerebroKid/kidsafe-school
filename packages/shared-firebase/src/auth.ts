@@ -61,8 +61,12 @@ export async function signUpWithEmail(input: SignupInput) {
 }
 
 export async function signInWithEmail(email: string, password: string) {
-  const cred = await auth().signInWithEmailAndPassword(email, password);
-  return cred.user;
+  try {
+    const cred = await auth().signInWithEmailAndPassword(email, password);
+    return cred.user;
+  } catch (err) {
+    throw friendlyFirebaseError(err);
+  }
 }
 
 /**
@@ -70,17 +74,25 @@ export async function signInWithEmail(email: string, password: string) {
  * UI routes them to RoleSelectorScreen when the Firestore user doc is missing.
  */
 export async function signInWithGoogle() {
-  await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
-  const result = await GoogleSignin.signIn();
-  const idToken =
-    (result as unknown as {data?: {idToken?: string}}).data?.idToken ??
-    (result as unknown as {idToken?: string}).idToken;
-  if (!idToken) {
-    throw new Error('No Google ID token returned');
+  try {
+    await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+    const result = await GoogleSignin.signIn();
+    const idToken =
+      (result as unknown as {data?: {idToken?: string}}).data?.idToken ??
+      (result as unknown as {idToken?: string}).idToken;
+    if (!idToken) {
+      throw new Error('No Google ID token returned');
+    }
+    const credential = auth.GoogleAuthProvider.credential(idToken);
+    const cred = await auth().signInWithCredential(credential);
+    return cred.user;
+  } catch (err) {
+    const code = (err as {code?: string}).code;
+    if (code === '-5' || code === '12501') {
+      throw new Error('Google sign-in was cancelled.');
+    }
+    throw friendlyFirebaseError(err);
   }
-  const credential = auth.GoogleAuthProvider.credential(idToken);
-  const cred = await auth().signInWithCredential(credential);
-  return cred.user;
 }
 
 export async function signOut() {
@@ -93,7 +105,11 @@ export async function signOut() {
 }
 
 export async function sendPasswordReset(email: string) {
-  await auth().sendPasswordResetEmail(email);
+  try {
+    await auth().sendPasswordResetEmail(email);
+  } catch (err) {
+    throw friendlyFirebaseError(err);
+  }
 }
 
 export async function reloadCurrentUser() {
@@ -288,6 +304,27 @@ async function withFirestoreRetry<T>(fn: () => Promise<T>, attempts = 3): Promis
 
 function friendlyFirebaseError(err: unknown): Error {
   const code = (err as {code?: string}).code;
+  if (code === 'auth/invalid-email') {
+    return new Error('That email address looks invalid.');
+  }
+  if (code === 'auth/user-disabled') {
+    return new Error('This account has been disabled.');
+  }
+  if (code === 'auth/user-not-found' || code === 'auth/wrong-password') {
+    return new Error('Incorrect email or password. Try again.');
+  }
+  if (
+    code === 'auth/invalid-credential' ||
+    code === 'auth/invalid-login-credentials'
+  ) {
+    return new Error('Incorrect email or password. Try again.');
+  }
+  if (code === 'auth/too-many-requests') {
+    return new Error('Too many attempts. Wait a moment and try again.');
+  }
+  if (code === 'auth/network-request-failed') {
+    return new Error('Network error. Check your connection and try again.');
+  }
   if (code === 'firestore/unavailable') {
     return new Error(
       "Can't reach the database. Make sure the Firestore database has been created in " +
