@@ -103,6 +103,15 @@ export const WorkedProblemSchema = z.object({
   commonMistake: z.string().optional(),
 });
 
+export const TopicSectionSchema = z.object({
+  heading: z.string().min(1, 'sections.heading is required'),
+  content: z.string().min(1, 'sections.content is required'),
+  videoUrl: z
+    .string()
+    .regex(HTTPS_URL, 'sections.videoUrl must be https')
+    .optional(),
+});
+
 /**
  * Top-level Topic schema. Note we accept either `'draft'` or `'published'`;
  * the import script defaults `status` to `'published'` when missing AND
@@ -141,6 +150,7 @@ export const TopicContentSchema = z.object({
   realLifeConnections: z.array(RealLifeConnectionItemSchema).min(1).optional(),
   activities: z.array(ActivityItemSchema).min(1).optional(),
   workedProblems: z.array(WorkedProblemSchema).min(1).optional(),
+  sections: z.array(TopicSectionSchema).min(1).optional(),
   quiz: z
     .array(QuizQuestionSchema)
     .min(1, 'quiz needs at least 1 question')

@@ -6,173 +6,201 @@
   "chapterName": "Powers",
   "topicId": "power_of_a_quotient",
   "topicName": "8. Power of a Quotient",
-  "explanation": "When the same exponent applies to a quotient, distribute to numerator and denominator: (m/n)ᵃ = mᵃ/nᵃ. Example: (10/5)⁴ = 10⁴/5⁴ = 2⁴ = 16. This is how we simplify 10⁴/5⁴ without computing huge numbers. It also explains (2/3)³ = 2³/3³ = 8/27. The base must be a quotient of two numbers raised to the same power.",
+  "explanation": "What Happens When A Fraction Is Raised To A Power?\nConsider:\n2 2\n( )\n3\nMany students wonder:\nShould we square only the numerator?\nOr only the denominator?\nOr both?\nLet's understand.\n\nExpand:\n2 2\n( )\n3\nmeans:\n2\n2\n( )×( )\n3\n3\nMultiply numerators:\n2×2=4\nMultiply denominators:\n3×3=9\nResult:\n4\n9\n\n\fRule\n𝑎 𝑛 𝑎𝑛\n( ) = 𝑛\n𝑏\n𝑏\nwhere:\n𝑏≠0\nThis is called:\nPower of a Quotient Rule\n\nExample 1\n3 2\n( )\n5\n32\n= 2\n5\n9\n=\n25\n\nExample 2\n2 3\n( )\n7\n23\n= 3\n7\n8\n=\n343\n\nExample 3\n10 2\n)\n3\n100\n=\n9\n(\n\n\fEasy Shortcut\nThe exponent affects:\nnumerator\nAND\ndenominator\nBoth must receive the exponent.",
   "examples": [
-    "(10/5)⁴ = 2⁴ = 16",
-    "10⁴/5⁴ = 2⁴",
-    "(2/3)³ = 8/27",
-    "m⁵/n¹² × (mn)⁹ needs careful grouping"
+    "Example 1\n3 2\n( )\n5\n32\n= 2\n5\n9\n=\n25",
+    "Example 2\n2 3\n( )\n7\n23\n= 3\n7\n8\n=\n343"
   ],
   "videoUrl": "https://youtu.be/pBQtK3CcpPY",
   "brainstorming": [
     {
-      "question": "Why is 10⁴/5⁴ equal to 2⁴?",
-      "answer": "Each of four factors has 10/5 = 2, so (10/5)⁴ = 2⁴."
+      "question": "Why Does The Exponent Affect Both Numerator And Denominator?",
+      "answer": "Look:\n\n\f2 2\n( )\n3\nmeans:\n2\n2\n( )×( )\n3\n3\nThe numerator appears twice.\nThe denominator also appears twice.\nTherefore both must be squared.\nThat's why:\n22\n32\nappears naturally."
     },
     {
-      "question": "Does (m/n)ᵃ = mᵃ/nᵃ work for negative a?",
-      "answer": "Yes: (2/3)⁻² = 2⁻²/3⁻² = (3/2)²."
+      "question": "Why Can't We Square Only The Numerator?",
+      "answer": "Students often write:\n2 2\n( )\n3\n22\n=\n3\nWrong.\nBecause denominator also repeats.\n\n\fEverything inside the fraction participates."
     },
     {
-      "question": "What is m⁵/n¹² × (mn)⁹?",
-      "answer": "Rewrite (mn)⁹ = m⁹n⁹. Then m⁵⁺⁹/n¹²⁻⁹ = m¹⁴/n³."
+      "question": "What Happens If Exponent Is Zero?",
+      "answer": "Example:\n2 0\n( )\n3\nUsing exponent rule:\nAny non-zero number raised to zero equals:\n1\nTherefore:\n2 0\n( ) =1\n3"
     }
   ],
   "misconceptions": [
     {
-      "wrong": "(10/5)⁴ = 10/5⁴",
-      "correct": "Both numerator and denominator are raised: 10⁴/5⁴."
+      "wrong": "2 2 4 ( ) = 3 3",
+      "correct": ". \fCorrect: 4 9"
     },
     {
-      "wrong": "10⁴/5⁴ = 2",
-      "correct": "2⁴ = 16, not 2. The exponent applies to the quotient."
+      "wrong": "Exponent applies only to numerator.",
+      "correct": ". Applies to both numerator and denominator."
     },
     {
-      "wrong": "(m-n)² = m²-n²",
-      "correct": "Power of a quotient is for division, not subtraction."
+      "wrong": "2 2 22 ( ) = 3 3",
+      "correct": ". Correct: 22 32"
     },
     {
-      "wrong": "aᵐ/bᵐ = (a-b)ᵐ",
-      "correct": "aᵐ/bᵐ = (a/b)ᵐ."
+      "wrong": "Fractions follow different exponent rules.",
+      "correct": ". Exponent laws work consistently."
     }
   ],
   "realLifeConnections": [
     {
-      "title": "Unit conversion ratios",
-      "description": "Comparing 10⁴ metres to 5⁴ metres uses (10/5)⁴ = 2⁴ scaling factor."
+      "title": "Real Life Connection 1 — Image Scaling",
+      "description": "Suppose an image is reduced to:\n\n\f2/3 of original size.\nNow reduced again.\nAnd again.\nFractions repeatedly multiply.\nDesigners and graphic software use such calculations.\n\nVideo Search Query\nimage scaling mathematics animation\nhow image resizing works"
     },
     {
-      "title": "Concentration ratios",
-      "description": "Dilution factors expressed as (1/10)³ show power of a quotient in chemistry."
+      "title": "Real Life Connection 2 — Recipe Adjustments",
+      "description": "Suppose recipe uses:\n2/3 cup milk.\nNow you make:\nhalf quantity.\nFractional quantities get multiplied repeatedly.\nChefs use this often.\n\nVideo Search Query\nrecipe scaling fractions visual explanation\ncooking measurements fractions"
     },
     {
-      "title": "Gear ratios",
-      "description": "Repeated gear pairs (A/B)ⁿ model cumulative rotation ratios."
+      "title": "Real Life Connection 3 — Map Scaling",
+      "description": "Maps often use ratios:\n1/1000\n1/10000\nChanging map scales repeatedly involves powers of fractions.\n\n\fVideo Search Query\nmap scale explained visually\nhow map scaling works"
     },
     {
-      "title": "Probability odds",
-      "description": "(1/2)ⁿ for n coin tosses all heads uses power of a quotient."
+      "title": "Real Life Connection 4 — Video Compression",
+      "description": "Digital images and videos often reduce size repeatedly.\nEngineers model such reductions using fractional powers.\n\nVideo Search Query\nvideo compression animation\ndigital image scaling explained"
     },
     {
-      "title": "Simplifying large fractions",
-      "description": "10⁴/5⁴ avoids computing 10000/625 directly — use 2⁴ = 16."
+      "title": "Real Life Connection 5 — Probability",
+      "description": "Many probability calculations involve repeated fractions.\nExample:\nChance of an event occurring repeatedly.\nFractions raised to powers appear naturally.\n\nVideo Search Query\nprobability and repeated events animation\nfractions in probability explained"
     }
   ],
   "activities": [
     {
-      "title": "Fraction power split",
-      "instructions": "Show (6/2)³ = 6³/2³ = 216/8 = 27. Verify by direct division."
+      "title": "Paper Reduction Activity",
+      "instructions": "Draw a square.\nReduce dimensions to:\n\n\f1/2\nThen reduce again.\nObserve area shrinking rapidly.\nThis demonstrates repeated fractional multiplication."
     },
     {
-      "title": "Simplify 10⁴/5⁴",
-      "instructions": "Use the quotient power law before calculating. Compare effort with direct division."
+      "title": "Fraction Multiplication Activity",
+      "instructions": "Calculate:\n2 2\n×\n3 3\nThen compare with:\n2 2\n( )\n3\nObserve they are identical."
     },
     {
-      "title": "Mixed expression",
-      "instructions": "Simplify m⁵/n¹² × (mn)⁹ step by step. Identify quotient and product laws used."
+      "title": "Recipe Activity",
+      "instructions": "Take a recipe using:\n1 cup flour.\nMake:\n1/2 quantity.\nThen again make:\n1/2 quantity.\nObserve repeated fraction multiplication."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "1. DETAILED EXPLANATION",
+      "content": "What Happens When A Fraction Is Raised To A Power?\nConsider:\n2 2\n( )\n3\nMany students wonder:\nShould we square only the numerator?\nOr only the denominator?\nOr both?\nLet's understand.\n\nExpand:\n2 2\n( )\n3\nmeans:\n2\n2\n( )×( )\n3\n3\nMultiply numerators:\n2×2=4\nMultiply denominators:\n3×3=9\nResult:\n4\n9\n\n\fRule\n𝑎 𝑛 𝑎𝑛\n( ) = 𝑛\n𝑏\n𝑏\nwhere:\n𝑏≠0\nThis is called:\nPower of a Quotient Rule\n\nExample 1\n3 2\n( )\n5\n32\n= 2\n5\n9\n=\n25\n\nExample 2\n2 3\n( )\n7\n23\n= 3\n7\n8\n=\n343\n\nExample 3\n10 2\n)\n3\n100\n=\n9\n(\n\n\fEasy Shortcut\nThe exponent affects:\nnumerator\nAND\ndenominator\nBoth must receive the exponent."
+    },
+    {
+      "heading": "2. MAIN VIDEO SEARCH QUERIES",
+      "content": "Main Video Queries\n1. Power of a quotient explained visually\nhttps://youtu.be/pBQtK3CcpPY?si=5h2Ae42ke96FnKeZ\n\n2. Exponents with fractions animation\n3. Raising fractions to powers class 8\nhttps://youtu.be/Xa95eZ9fCrQ?si=5iNw11ILC3u8LMnH\n\n4. Power of quotient visual proof\nhttps://youtu.be/_jKzmyZngtE?si=EA_2CN-2Q66-59tL",
+      "videoUrl": "https://youtu.be/pBQtK3CcpPY"
+    },
+    {
+      "heading": "3. CURIOSITY LAYER",
+      "content": "Curiosity Question 1\nWhy Does The Exponent Affect Both Numerator And Denominator?\n\nAnswer\nLook:\n\n\f2 2\n( )\n3\nmeans:\n2\n2\n( )×( )\n3\n3\nThe numerator appears twice.\nThe denominator also appears twice.\nTherefore both must be squared.\nThat's why:\n22\n32\nappears naturally.\n\nVideo Search Query\nwhy fractions raised to powers work\npower of quotient visual explanation\n\nCuriosity Question 2\nWhy Can't We Square Only The Numerator?\n\nAnswer\nStudents often write:\n2 2\n( )\n3\n22\n=\n3\nWrong.\nBecause denominator also repeats.\n\n\fEverything inside the fraction participates.\n\nVideo Search Query\nfraction exponent mistakes explained\ncommon mistakes power of quotient\n\nCuriosity Question 3\nWhat Happens If Exponent Is Zero?\n\nAnswer\nExample:\n2 0\n( )\n3\nUsing exponent rule:\nAny non-zero number raised to zero equals:\n1\nTherefore:\n2 0\n( ) =1\n3\n\nVideo Search Query\nfraction power zero explained\nwhy anything power zero equals one"
+    },
+    {
+      "heading": "4. REAL-LIFE CONNECTIONS",
+      "content": "Real Life Connection 1 — Image Scaling\nSuppose an image is reduced to:\n\n\f2/3 of original size.\nNow reduced again.\nAnd again.\nFractions repeatedly multiply.\nDesigners and graphic software use such calculations.\n\nVideo Search Query\nimage scaling mathematics animation\nhow image resizing works\n\nReal Life Connection 2 — Recipe Adjustments\nSuppose recipe uses:\n2/3 cup milk.\nNow you make:\nhalf quantity.\nFractional quantities get multiplied repeatedly.\nChefs use this often.\n\nVideo Search Query\nrecipe scaling fractions visual explanation\ncooking measurements fractions\n\nReal Life Connection 3 — Map Scaling\nMaps often use ratios:\n1/1000\n1/10000\nChanging map scales repeatedly involves powers of fractions.\n\n\fVideo Search Query\nmap scale explained visually\nhow map scaling works\n\nReal Life Connection 4 — Video Compression\nDigital images and videos often reduce size repeatedly.\nEngineers model such reductions using fractional powers.\n\nVideo Search Query\nvideo compression animation\ndigital image scaling explained\n\nReal Life Connection 5 — Probability\nMany probability calculations involve repeated fractions.\nExample:\nChance of an event occurring repeatedly.\nFractions raised to powers appear naturally.\n\nVideo Search Query\nprobability and repeated events animation\nfractions in probability explained"
+    },
+    {
+      "heading": "5. MISCONCEPTIONS",
+      "content": "Misconception 1\n\n2 2 4\n( ) =\n3\n3\nWrong.\n\n\fCorrect:\n4\n9\n\nMisconception 2\nExponent applies only to numerator.\nWrong.\nApplies to both numerator and denominator.\n\nMisconception 3\n\n2 2 22\n( ) =\n3\n3\nWrong.\nCorrect:\n22\n32\n\nMisconception 4\nFractions follow different exponent rules.\nWrong.\nExponent laws work consistently."
+    },
+    {
+      "heading": "6. EXPERIMENT / ACTIVITY",
+      "content": "Paper Reduction Activity\nDraw a square.\nReduce dimensions to:\n\n\f1/2\nThen reduce again.\nObserve area shrinking rapidly.\nThis demonstrates repeated fractional multiplication.\n\nFraction Multiplication Activity\nCalculate:\n2 2\n×\n3 3\nThen compare with:\n2 2\n( )\n3\nObserve they are identical.\n\nRecipe Activity\nTake a recipe using:\n1 cup flour.\nMake:\n1/2 quantity.\nThen again make:\n1/2 quantity.\nObserve repeated fraction multiplication."
+    },
+    {
+      "heading": "7. QUIZ",
+      "content": "Q1\nWhat is:\n2 2\n( )\n3\n\n\fA. 4/3\nB. 4/9\nC. 2/9\nD. 8/9\nAnswer: B\n\nQ2\nWhich rule is correct?\nA.\n𝑎 𝑛 𝑎𝑛\n( ) = 𝑛\n𝑏\n𝑏\nB.\n𝑎 𝑛 𝑎𝑛\n( ) =\n𝑏\n𝑏\nC.\n𝑎 𝑛\n𝑎\n( ) = 𝑛\n𝑏\n𝑏\nAnswer: A\n\nQ3\nWhat is:\n3 2\n( )\n5\nA. 6/25\nB. 9/25\nC. 9/10\n\n\fD. 15/25\nAnswer: B\n\nQ4\nExponent applies to:\nA. Numerator only\nB. Denominator only\nC. Both numerator and denominator\nD. Neither\nAnswer: C\n\nQ5\nWhat is:\n1 3\n( )\n2\nA. 1/6\nB. 1/8\nC. 1/4\nD. 3/8\nAnswer: B\n\nQ6\nWhich profession frequently uses scaling ratios?\nA. Cartographers (map makers)\nB. Designers\nC. Engineers\nD. All of these\n\n\fAnswer: D\n\nQ7\nWhy does exponent affect numerator and denominator?\nA. Because the entire fraction repeats\nB. Because denominator disappears\nC. Because numerator becomes larger\nD. None\nAnswer: A"
     }
   ],
   "quiz": [
     {
-      "questionId": "poq_q1",
+      "questionId": "poquot_q1",
       "type": "mcq",
-      "question": "10⁴ ÷ 5⁴ =",
+      "question": "What is: 2 2 ( ) 3",
       "options": [
-        "2⁴",
-        "5⁴",
-        "2",
-        "10⁴/⁵"
-      ],
-      "correctIndex": 0,
-      "explanation": "(10/5)⁴ = 2⁴ = 16."
-    },
-    {
-      "questionId": "poq_q2",
-      "type": "mcq",
-      "question": "(m/n)ᵃ =",
-      "options": [
-        "mᵃ/nᵃ",
-        "mᵃ-nᵃ",
-        "(m-n)ᵃ",
-        "m/nᵃ"
-      ],
-      "correctIndex": 0,
-      "explanation": "Exponent applies to both numerator and denominator."
-    },
-    {
-      "questionId": "poq_q3",
-      "type": "mcq",
-      "question": "(2/3)³ =",
-      "options": [
-        "8/27",
-        "6/9",
-        "2/27",
+        "4/3",
+        "4/9",
+        "2/9",
         "8/9"
       ],
-      "correctIndex": 0,
-      "explanation": "2³/3³ = 8/27."
+      "correctIndex": 1,
+      "explanation": "Answer: B"
     },
     {
-      "questionId": "poq_q4",
+      "questionId": "poquot_q2",
       "type": "mcq",
-      "question": "(10/5)⁴ =",
+      "question": "Which rule is correct? ( ) = 𝑛 𝑏 𝑏 ( ) = 𝑏 𝑏 𝑎 ( ) = 𝑛 𝑏 𝑏",
       "options": [
-        "16",
-        "2",
-        "10⁴/5",
-        "5⁴/10"
+        "𝑎 𝑛 𝑎𝑛",
+        "𝑎 𝑛 𝑎𝑛",
+        "𝑎 𝑛"
       ],
       "correctIndex": 0,
-      "explanation": "2⁴ = 16."
+      "explanation": "Answer: A"
     },
     {
-      "questionId": "poq_q5",
+      "questionId": "poquot_q3",
       "type": "mcq",
-      "question": "aᵐ/bᵐ simplifies to:",
+      "question": "What is: 3 2 ( ) 5",
       "options": [
-        "(a/b)ᵐ",
-        "(a-b)ᵐ",
-        "aᵐ⁻ᵐ",
-        "a/b"
+        "6/25",
+        "9/25",
+        "9/10",
+        "15/25"
       ],
-      "correctIndex": 0,
-      "explanation": "Same exponent → power of quotient."
+      "correctIndex": 1,
+      "explanation": "Answer: B"
     },
     {
-      "questionId": "poq_q6",
+      "questionId": "poquot_q4",
       "type": "mcq",
-      "question": "m⁵/n¹² × (mn)⁹ =",
+      "question": "Exponent applies to:",
       "options": [
-        "m¹⁴/n³",
-        "m¹⁴n³",
-        "m⁻⁴/n²¹",
-        "(mn)¹⁴"
+        "Numerator only",
+        "Denominator only",
+        "Both numerator and denominator",
+        "Neither"
       ],
-      "correctIndex": 0,
-      "explanation": "m⁵⁺⁹/n¹²⁻⁹ = m¹⁴/n³."
+      "correctIndex": 2,
+      "explanation": "Answer: C"
     },
     {
-      "questionId": "poq_q7",
+      "questionId": "poquot_q5",
       "type": "mcq",
-      "question": "(6/2)³ =",
+      "question": "What is: 1 3 ( ) 2",
       "options": [
-        "27",
-        "3³",
-        "6³/2",
-        "18"
+        "1/6",
+        "1/8",
+        "1/4",
+        "3/8"
+      ],
+      "correctIndex": 1,
+      "explanation": "Answer: B"
+    },
+    {
+      "questionId": "poquot_q6",
+      "type": "mcq",
+      "question": "Which profession frequently uses scaling ratios?",
+      "options": [
+        "Cartographers (map makers)",
+        "Designers",
+        "Engineers",
+        "All of these"
+      ],
+      "correctIndex": 3,
+      "explanation": "Answer: D"
+    },
+    {
+      "questionId": "poquot_q7",
+      "type": "mcq",
+      "question": "Why does exponent affect numerator and denominator?",
+      "options": [
+        "Because the entire fraction repeats",
+        "Because denominator disappears",
+        "Because numerator becomes larger",
+        "None"
       ],
       "correctIndex": 0,
-      "explanation": "6³/2³ = 216/8 = 27."
+      "explanation": "Answer: A"
     }
   ],
   "status": "published",

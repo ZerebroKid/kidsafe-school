@@ -6,248 +6,286 @@
   "chapterName": "Powers",
   "topicId": "exercise_2_3",
   "topicName": "13. Exercise 2.3",
-  "explanation": "Exercise 2.3 tests standard form (scientific notation): a × 10ⁿ where 1 ≤ a < 10. Large numbers: move decimal LEFT, positive exponent. Small numbers: move decimal RIGHT, negative exponent. To convert back: positive exponent → move decimal right; negative → move left.",
+  "explanation": "Question\n6020000000000\nExpress in standard form.\n\nConcepts Used\nStandard Form\n\n\f𝑎 × 10𝑛\nwhere\n1 ≤ 𝑎 < 10\n(No new concept)\n\nStep 1\nMove decimal after first digit.\n6020000000000\n↓\n6.02\n\nStep 2\nCount decimal shifts.\n12 places moved left.\n\nStep 3\nWrite power of 10.\n6.02 × 1012\n\nAnswer\n6.02 × 1012",
   "examples": [
-    "6020000000000 = 6.02 × 10¹²",
-    "0.00000000000942 = 9.42 × 10⁻¹²",
-    "4.83 × 10⁷ = 48300000"
+    "Question\n6020000000000\nExpress in standard form.\n\nConcepts Used\nStandard Form\n\n\f𝑎 × 10𝑛\nwhere\n1 ≤ 𝑎 < 10\n(No new concept)\n\nStep 1\nMove decimal afte"
   ],
   "brainstorming": [
     {
-      "question": "What makes a number standard form?",
-      "answer": "Coefficient between 1 and 10, times a power of 10. Example: 3.5 × 10⁵, not 35 × 10⁴."
-    },
-    {
-      "question": "Positive vs negative exponent when converting back?",
-      "answer": "Positive → move decimal right. Negative → move decimal left."
+      "question": "Review key rules",
+      "answer": "Question\n6020000000000\nExpress in standard form.\n\nConcepts Used\nStandard Form\n\n\f𝑎 × 10𝑛\nwhere\n1 ≤ 𝑎 < 10\n(No new concept)\n\nStep 1\nMove decimal after first digit.\n6020000000000\n↓\n6.02\n\nStep 2\nCount decimal shifts.\n12 places moved left.\n\nStep 3\nWrite power of 10.\n6.02 × 1012\n\nAnswer\n6.02 × 1012"
     }
   ],
   "workedProblems": [
     {
       "problemId": "ex2_3_q1_i",
-      "question": "Express 6020000000000 in standard form.",
-      "steps": [
-        "Move decimal after first digit: 6.02",
-        "12 places left → 10¹²"
+      "question": "6020000000000 Express in standard form.",
+      "conceptsUsed": [
+        "Standard Form",
+        "𝑎 × 10𝑛",
+        "where",
+        "1 ≤ 𝑎 < 10"
       ],
-      "answer": "6.02 × 10¹²"
+      "steps": [
+        "Move decimal after first digit.\n6020000000000\n↓\n6.02",
+        "Count decimal shifts.\n12 places moved left.",
+        "Write power of 10.\n6.02 × 1012"
+      ],
+      "answer": "6.02 × 1012"
     },
     {
       "problemId": "ex2_3_q1_ii",
-      "question": "Express 0.00000000000942 in standard form.",
-      "steps": [
-        "First non-zero digit: 9.42",
-        "12 places right → 10⁻¹²"
+      "question": "0.00000000000942",
+      "conceptsUsed": [
+        "Standard Form"
       ],
-      "answer": "9.42 × 10⁻¹²"
+      "steps": [
+        "Move decimal until first non-zero digit.\n9.42",
+        "Count moves.\n12 places right.",
+        "Small number ⇒ negative exponent.\n9.42 × 10−12"
+      ],
+      "answer": "9.42 × 10−12"
     },
     {
       "problemId": "ex2_3_q1_iii",
-      "question": "Express 0.00000000085 in standard form.",
-      "steps": [
-        "8.5 × 10⁻¹⁰"
+      "question": "0.00000000085 \fConcepts Used Standard Form",
+      "conceptsUsed": [
+        "Standard Form"
       ],
-      "answer": "8.5 × 10⁻¹⁰"
+      "steps": [
+        "Move decimal.\n8.5",
+        "Count shifts.\n10 places.",
+        "8.5 × 10−10"
+      ],
+      "answer": "8.5 × 10−10"
     },
     {
       "problemId": "ex2_3_q1_iv",
-      "question": "Express 846 × 10⁷ in standard form.",
-      "steps": [
-        "846 = 8.46 × 10²",
-        "8.46 × 10² × 10⁷ = 8.46 × 10⁹"
+      "question": "846 × 107",
+      "conceptsUsed": [
+        "Standard Form",
+        "New Skill:",
+        "Coefficient must be between 1 and 10."
       ],
-      "answer": "8.46 × 10⁹"
+      "steps": [
+        "846 is not between 1 and 10.\nRewrite:\n846 = 8.46 × 102",
+        "Substitute.\n8.46 × 102 × 107",
+        "Use Product Law.\n8.46 × 109"
+      ],
+      "answer": "8.46 × 109"
     },
     {
       "problemId": "ex2_3_q1_v",
-      "question": "Express 3759 × 10⁻⁴ in standard form.",
+      "question": "3759 × 10−4",
       "steps": [
-        "3759 = 3.759 × 10³",
-        "3.759 × 10³ × 10⁻⁴ = 3.759 × 10⁻¹"
+        "Substitute.\n3.759 × 103 × 10−4",
+        "Add exponents.\n3.759 × 10−1"
       ],
-      "answer": "3.759 × 10⁻¹"
+      "answer": "3.759 × 10−1"
     },
     {
       "problemId": "ex2_3_q1_vi",
-      "question": "Express 0.00072984 in standard form.",
-      "steps": [
-        "7.2984 × 10⁻⁴"
+      "question": "0.00072984",
+      "conceptsUsed": [
+        "Standard Form"
       ],
-      "answer": "7.2984 × 10⁻⁴"
+      "steps": [
+        "Move decimal.\n7.2984",
+        "Count shifts.\n4 places.",
+        "7.2984 × 10−4"
+      ],
+      "answer": "7.2984 × 10−4"
     },
     {
       "problemId": "ex2_3_q1_vii",
-      "question": "Express 0.000437 × 10⁴ in standard form.",
+      "question": "0.000437 × 104",
+      "conceptsUsed": [
+        "Standard Form"
+      ],
       "steps": [
-        "0.000437 = 4.37 × 10⁻⁴",
-        "4.37 × 10⁻⁴ × 10⁴ = 4.37"
+        "Convert first number.\n0.000437 = 4.37 × 10−4\n\fStep 2\nMultiply by 104 .\n4.37 × 10−4 × 104",
+        "Add exponents.\n4.37 × 100\n= 4.37"
       ],
       "answer": "4.37"
     },
     {
       "problemId": "ex2_3_q1_viii",
-      "question": "Express 4 ÷ 100000 in standard form.",
-      "steps": [
-        "0.00004 = 4 × 10⁻⁵"
+      "question": "4 ÷ 100000",
+      "conceptsUsed": [
+        "Standard Form"
       ],
-      "answer": "4 × 10⁻⁵"
+      "steps": [
+        "Write as decimal.\n0.00004",
+        "Move decimal.\n\f4",
+        "Count shifts.\n5 places."
+      ],
+      "answer": "4 × 10−5 STUDENT SHORTCUT Large Number Move decimal LEFT Exponent = Positive Example: 4500000 = 4.5 × 106 Small Number Move decimal RIGHT Exponent = Negative Example: 0.00045 = 4.5 × 10−4 QUESTION 2 Instruction Write the following numbers in the usual form. \fStudent Shortcut Before Solving If exponent is POSITIVE Move decimal RIGHT. Example: 4.5 × 103 = 4500 If exponent is NEGATIVE Move decimal LEFT. Example: 4.5 × 10−3 = 0.0045"
     },
     {
       "problemId": "ex2_3_q2_i",
-      "question": "Write 4.83 × 10⁷ in usual form.",
+      "question": "4.83 × 107 Write in usual form.",
+      "conceptsUsed": [
+        "Standard Form"
+      ],
       "steps": [
-        "Move decimal 7 places right"
+        "Exponent is +7\nMove decimal 7 places RIGHT.\n4.83\n↓\n\f48300000"
       ],
       "answer": "48300000"
     },
     {
       "problemId": "ex2_3_q2_ii",
-      "question": "Write 3.02 × 10⁻⁶ in usual form.",
+      "question": "3.02 × 10−6",
+      "conceptsUsed": [
+        "Standard Form"
+      ],
       "steps": [
-        "Move decimal 6 places left"
+        "Exponent is negative.\nMove decimal 6 places LEFT.\n3.02\n↓\n0.00000302"
       ],
       "answer": "0.00000302"
     },
     {
       "problemId": "ex2_3_q2_iii",
-      "question": "Write 4.5 × 10⁴ in usual form.",
+      "question": "4.5 × 104",
+      "conceptsUsed": [
+        "Standard Form"
+      ],
       "steps": [
-        "Move decimal 4 places right"
+        "Move decimal 4 places RIGHT.\n4.5\n↓\n45000"
       ],
       "answer": "45000"
     },
     {
       "problemId": "ex2_3_q2_iv",
-      "question": "Write 3 × 10⁻⁸ in usual form.",
+      "question": "3 × 10−8",
+      "conceptsUsed": [
+        "Standard Form"
+      ],
       "steps": [
-        "Move decimal 8 places left"
+        "Move decimal 8 places LEFT.\n\f3\n↓\n0.00000003"
       ],
       "answer": "0.00000003"
     },
     {
       "problemId": "ex2_3_q2_v",
-      "question": "Write 1.0001 × 10⁹ in usual form.",
+      "question": "1.0001 × 109",
+      "conceptsUsed": [
+        "Standard Form"
+      ],
       "steps": [
-        "Move decimal 9 places right"
+        "Move decimal 9 places RIGHT.\n1.0001\n↓\n1000100000"
       ],
       "answer": "1000100000"
     },
     {
       "problemId": "ex2_3_q2_vi",
-      "question": "Write 5.8 × 10² in usual form.",
+      "question": "5.8 × 102",
+      "conceptsUsed": [
+        "Standard Form"
+      ],
       "steps": [
-        "Move decimal 2 places right"
+        "Move decimal 2 places RIGHT.\n5.8\n↓\n580"
       ],
       "answer": "580"
     },
     {
       "problemId": "ex2_3_q2_vii",
-      "question": "Write 3.61492 × 10⁶ in usual form.",
+      "question": "3.61492 × 106",
+      "conceptsUsed": [
+        "Standard Form"
+      ],
       "steps": [
-        "Move decimal 6 places right"
+        "Move decimal 6 places RIGHT.\n3.61492\n↓\n3614920"
       ],
       "answer": "3614920"
     },
     {
       "problemId": "ex2_3_q2_viii",
-      "question": "Write 3.25 × 10⁻⁷ in usual form.",
+      "question": "3.25 × 10−7",
+      "conceptsUsed": [
+        "Standard Form"
+      ],
       "steps": [
-        "Move decimal 7 places left"
+        "Move decimal 7 places LEFT.\n3.25\n↓\n0.000000325"
       ],
       "answer": "0.000000325"
     }
   ],
+  "sections": [
+    {
+      "heading": "QUESTION 1(i)",
+      "content": "Question\n6020000000000\nExpress in standard form.\n\nConcepts Used\nStandard Form\n\n\f𝑎 × 10𝑛\nwhere\n1 ≤ 𝑎 < 10\n(No new concept)\n\nStep 1\nMove decimal after first digit.\n6020000000000\n↓\n6.02\n\nStep 2\nCount decimal shifts.\n12 places moved left.\n\nStep 3\nWrite power of 10.\n6.02 × 1012\n\nAnswer\n6.02 × 1012"
+    },
+    {
+      "heading": "QUESTION 1(ii)",
+      "content": "Question\n\n\f0.00000000000942\n\nConcepts Used\nStandard Form\n(No new concept)\n\nStep 1\nMove decimal until first non-zero digit.\n9.42\n\nStep 2\nCount moves.\n12 places right.\n\nStep 3\nSmall number ⇒ negative exponent.\n9.42 × 10−12\n\nAnswer\n9.42 × 10−12"
+    },
+    {
+      "heading": "QUESTION 1(iii)",
+      "content": "Question\n0.00000000085\n\n\fConcepts Used\nStandard Form\n\nStep 1\nMove decimal.\n8.5\n\nStep 2\nCount shifts.\n10 places.\n\nStep 3\n8.5 × 10−10\n\nAnswer\n8.5 × 10−10"
+    },
+    {
+      "heading": "QUESTION 1(iv)",
+      "content": "Question\n846 × 107\n\nConcepts Used\nStandard Form\n\n\fNew Skill:\nCoefficient must be between 1 and 10.\n\nStep 1\n846 is not between 1 and 10.\nRewrite:\n846 = 8.46 × 102\n\nStep 2\nSubstitute.\n8.46 × 102 × 107\n\nStep 3\nUse Product Law.\n8.46 × 109\n\nAnswer\n8.46 × 109"
+    },
+    {
+      "heading": "QUESTION 1(v)",
+      "content": "Question\n3759 × 10−4\n\nConcepts Used\nStandard Form\n\n\fStep 1\nRewrite 3759.\n3759 = 3.759 × 103\n\nStep 2\nSubstitute.\n3.759 × 103 × 10−4\n\nStep 3\nAdd exponents.\n3.759 × 10−1\n\nAnswer\n3.759 × 10−1"
+    },
+    {
+      "heading": "QUESTION 1(vi)",
+      "content": "Question\n0.00072984\n\nConcepts Used\nStandard Form\n\nStep 1\n\n\fMove decimal.\n7.2984\n\nStep 2\nCount shifts.\n4 places.\n\nStep 3\n7.2984 × 10−4\n\nAnswer\n7.2984 × 10−4"
+    },
+    {
+      "heading": "QUESTION 1(vii)",
+      "content": "Question\n0.000437 × 104\n\nConcepts Used\nStandard Form\n\nStep 1\nConvert first number.\n0.000437 = 4.37 × 10−4\n\n\fStep 2\nMultiply by 104 .\n4.37 × 10−4 × 104\n\nStep 3\nAdd exponents.\n4.37 × 100\n= 4.37\n\nAnswer\n4.37"
+    },
+    {
+      "heading": "QUESTION 1(viii)",
+      "content": "Question\n4 ÷ 100000\n\nConcepts Used\nStandard Form\n\nStep 1\nWrite as decimal.\n0.00004\n\nStep 2\nMove decimal.\n\n\f4\n\nStep 3\nCount shifts.\n5 places.\n\nAnswer\n4 × 10−5\n\nSTUDENT SHORTCUT\nLarge Number\nMove decimal LEFT\nExponent = Positive\nExample:\n4500000 = 4.5 × 106\n\nSmall Number\nMove decimal RIGHT\nExponent = Negative\nExample:\n0.00045 = 4.5 × 10−4\nQUESTION 2\nInstruction\nWrite the following numbers in the usual form.\n\n\fStudent Shortcut Before Solving\nIf exponent is POSITIVE\nMove decimal RIGHT.\nExample:\n4.5 × 103 = 4500\n\nIf exponent is NEGATIVE\nMove decimal LEFT.\nExample:\n4.5 × 10−3 = 0.0045"
+    },
+    {
+      "heading": "QUESTION 2(i)",
+      "content": "Question\n4.83 × 107\nWrite in usual form.\n\nConcepts Used\nStandard Form\n(No new concept)\n\nStep 1\nExponent is +7\nMove decimal 7 places RIGHT.\n4.83\n↓\n\n\f48300000\n\nAnswer\n48300000"
+    },
+    {
+      "heading": "QUESTION 2(ii)",
+      "content": "Question\n3.02 × 10−6\n\nConcepts Used\nStandard Form\n(No new concept)\n\nStep 1\nExponent is negative.\nMove decimal 6 places LEFT.\n3.02\n↓\n0.00000302\n\nAnswer\n0.00000302"
+    },
+    {
+      "heading": "QUESTION 2(iii)",
+      "content": "Question\n4.5 × 104\n\nConcepts Used\nStandard Form\n\nStep 1\nMove decimal 4 places RIGHT.\n4.5\n↓\n45000\n\nAnswer\n45000"
+    },
+    {
+      "heading": "QUESTION 2(iv)",
+      "content": "Question\n3 × 10−8\n\nConcepts Used\nStandard Form\n\nStep 1\nMove decimal 8 places LEFT.\n\n\f3\n↓\n0.00000003\n\nAnswer\n0.00000003"
+    },
+    {
+      "heading": "QUESTION 2(v)",
+      "content": "Question\n1.0001 × 109\n\nConcepts Used\nStandard Form\n\nStep 1\nMove decimal 9 places RIGHT.\n1.0001\n↓\n1000100000\n\nAnswer\n1000100000"
+    },
+    {
+      "heading": "QUESTION 2(vi)",
+      "content": "Question\n5.8 × 102\n\nConcepts Used\nStandard Form\n\nStep 1\nMove decimal 2 places RIGHT.\n5.8\n↓\n580\n\nAnswer\n580"
+    },
+    {
+      "heading": "QUESTION 2(vii)",
+      "content": "Question\n3.61492 × 106\n\nConcepts Used\nStandard Form\n\nStep 1\n\n\fMove decimal 6 places RIGHT.\n3.61492\n↓\n3614920\n\nAnswer\n3614920"
+    },
+    {
+      "heading": "QUESTION 2(viii)",
+      "content": "Question\n3.25 × 10−7\n\nConcepts Used\nStandard Form\n\nStep 1\nMove decimal 7 places LEFT.\n3.25\n↓\n0.000000325\n\nAnswer\n0.000000325"
+    }
+  ],
   "quiz": [
     {
-      "questionId": "ex23_q1",
+      "questionId": "ex2_3_q1",
       "type": "mcq",
-      "question": "5000 in standard form is",
+      "question": "Review exercise",
       "options": [
-        "5 × 10³",
-        "50 × 10²",
-        "500 × 10",
-        "5 × 10⁴"
+        "A",
+        "B"
       ],
-      "correctIndex": 0,
-      "explanation": "5.0 × 10³ — one non-zero digit before decimal."
-    },
-    {
-      "questionId": "ex23_q2",
-      "type": "mcq",
-      "question": "0.0004 in standard form is",
-      "options": [
-        "4 × 10⁻⁴",
-        "4 × 10⁻³",
-        "4 × 10⁴",
-        "40 × 10⁻⁵"
-      ],
-      "correctIndex": 0,
-      "explanation": "4 × 10⁻⁴."
-    },
-    {
-      "questionId": "ex23_q3",
-      "type": "mcq",
-      "question": "Which is in standard form?",
-      "options": [
-        "35 × 10⁴",
-        "3.5 × 10⁵",
-        "350 × 10³",
-        "0.35 × 10⁶"
-      ],
-      "correctIndex": 1,
-      "explanation": "3.5 is between 1 and 10."
-    },
-    {
-      "questionId": "ex23_q4",
-      "type": "mcq",
-      "question": "4.83 × 10⁷ =",
-      "options": [
-        "48300000",
-        "4830000",
-        "483000000",
-        "0.48300000"
-      ],
-      "correctIndex": 0,
-      "explanation": "Move decimal 7 places right."
-    },
-    {
-      "questionId": "ex23_q5",
-      "type": "mcq",
-      "question": "3.02 × 10⁻⁶ =",
-      "options": [
-        "0.00000302",
-        "0.000302",
-        "3020000",
-        "0.302"
-      ],
-      "correctIndex": 0,
-      "explanation": "Move decimal 6 places left."
-    },
-    {
-      "questionId": "ex23_q6",
-      "type": "mcq",
-      "question": "Large numbers have exponent usually",
-      "options": [
-        "Positive",
-        "Negative",
-        "Zero",
-        "Fractional"
-      ],
-      "correctIndex": 0,
-      "explanation": "Decimal moves left → positive exponent."
-    },
-    {
-      "questionId": "ex23_q7",
-      "type": "mcq",
-      "question": "6.02 × 10⁻⁵ =",
-      "options": [
-        "0.0000602",
-        "602000",
-        "0.602",
-        "60200"
-      ],
-      "correctIndex": 0,
-      "explanation": "Negative exponent → move decimal left."
+      "correctIndex": 0
     }
   ],
   "status": "published",

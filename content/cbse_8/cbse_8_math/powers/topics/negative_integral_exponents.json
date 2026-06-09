@@ -6,177 +6,181 @@
   "chapterName": "Powers",
   "topicId": "negative_integral_exponents",
   "topicName": "2. Negative Integral Exponents",
-  "explanation": "When we divide powers with the same base, nᵃ ÷ nᵇ = nᵃ⁻ᵇ. If a < b, the exponent becomes negative. A negative exponent means reciprocal: n⁻ᵃ = 1/nᵃ (n ≠ 0). For example, 2⁻⁴ = 1/2⁴ = 1/16. Similarly, 1/10³ = 10⁻³. Negative exponents do not make the number negative — they move the value to the denominator. The laws of exponents continue to work for negative and zero exponents as long as the base is not zero.",
+  "explanation": "What Problem Are We Solving?\nYou already know:\n103 = 1000\n102 = 100\n101 = 10\n100 = 1\nNow a natural question arises:\nWhat comes after:\n100\nCan exponents become negative?\nYes.\nLet's discover what happens.\n\nObserve the Pattern\nLook carefully:\n103 = 1000\n102 = 100\n101 = 10\n100 = 1\nEvery time exponent decreases by 1,\nthe answer gets divided by 10.\n1000 → 100 → 10 → 1\n\nContinue the pattern:\n\n\f10−1\nmust be:\n1\n10\nbecause:\n1 ÷ 10 =\n\n1\n10\n\nSimilarly:\n10−2\nmust be:\n1\n100\n\nAnd:\n10−3\nmust be:\n1\n1000\n\nGeneral Rule\nFor any non-zero number:\n𝑎−𝑛 =\n\nThis is the most important rule of this topic.\n\n1\n𝑎𝑛\n\n\fExamples\nExample 1\n2−3\nUsing rule:\n1\n23\n1\n=\n8\n=\n\nExample 2\n5−2\n1\n= 2\n5\n1\n=\n25\n\nExample 3\n2 −2\n( )\n3\nWhen exponent becomes negative,\nfraction gets inverted.\n3 2\n=( )\n2\n9\n=\n4\n\nShortcut\nNegative exponent means:\n\n\f\"Take reciprocal\"\nThat's all.\nExample:\n4−2\nStep 1:\nReciprocal of 4\n=\n\n1\n4\n\n=\n\n1\n16\n\nStep 2:\nApply exponent",
   "examples": [
-    "2⁻³ = 1/2³ = 1/8",
-    "10⁻² = 1/100 = 0.01",
-    "5⁻¹ = 1/5",
-    "10³ = 1/10⁻³"
+    "Example 1\n2−3\nUsing rule:\n1\n23\n1\n=\n8\n=",
+    "Example 2\n5−2\n1\n= 2\n5\n1\n=\n25",
+    "Example 3\n2 −2\n( )\n3\nWhen exponent becomes negative,\nfraction gets inverted.\n3 2\n=( )\n2\n9\n=\n4"
   ],
   "videoUrl": "https://youtu.be/QH-QZDJctpw",
   "brainstorming": [
     {
-      "question": "What does 10⁻³ mean in words?",
-      "answer": "One divided by 10 three times, or 1/1000 = 0.001."
+      "question": "Why does a negative exponent move the number to the denominator?",
+      "answer": "Many students think:\nNegative exponent is some magic trick.\nActually it's just a pattern.\nObserve:\n23 = 8\n22 = 4\n21 = 2\n20 = 1\nEvery step divides by 2.\nContinue:\n1\n2\n1\n2−2 =\n4\n1\n2−3 =\n8\n2−1 =\n\nNothing magical happened.\nThe pattern simply continued."
     },
     {
-      "question": "Is (-2)⁻³ positive or negative?",
-      "answer": "(-2)⁻³ = 1/(-2)³ = 1/(-8) = -1/8 — negative because the base is negative and the positive exponent 3 is odd."
+      "question": "Why did mathematicians invent negative exponents?",
+      "answer": "Suppose scientists need:\n1\n1000000\nWriting huge denominators repeatedly becomes difficult.\nInstead:\n10−6\nis much shorter.\nNegative exponents help represent very small numbers efficiently."
     },
     {
-      "question": "Why must the base n not be zero in n⁻ᵃ?",
-      "answer": "0⁻ᵃ = 1/0ᵃ involves division by zero, which is undefined."
+      "question": "Why does a fraction flip when exponent becomes negative?",
+      "answer": "Look:\n2 2\n( )\n3\nmeans:\n4\n9\nNow:\n\n\f2 −2\n( )\n3\nmust become:\n9\n4\nto maintain exponent patterns.\nThe reciprocal keeps mathematical laws consistent."
     }
   ],
   "misconceptions": [
     {
-      "wrong": "A negative exponent makes the answer negative",
-      "correct": "n⁻ᵃ = 1/nᵃ — the sign of the result depends on the base, not the negative sign in the exponent."
+      "wrong": "Negative exponent means answer becomes negative.",
+      "correct": ". Example: 2−2 \f= 1 4 Positive."
     },
     {
-      "wrong": "2⁻³ = -8",
-      "correct": "2⁻³ = 1/2³ = 1/8, which is positive."
+      "wrong": "2−3 means: -8",
+      "correct": ". It means: 1 8"
     },
     {
-      "wrong": "n⁻¹ means n minus 1",
-      "correct": "n⁻¹ = 1/n — it is the reciprocal, not subtraction."
+      "wrong": "Negative exponent changes sign of base.",
+      "correct": ". It changes position. Numerator ↔ Denominator"
     },
     {
-      "wrong": "0⁻⁵ = 0",
-      "correct": "0⁻⁵ = 1/0⁵ = 1/0, which is undefined."
-    },
-    {
-      "wrong": "You cannot multiply terms with negative exponents",
-      "correct": "Laws still hold: 2⁻⁴ × 2⁷ = 2³ = 8."
+      "wrong": "Reciprocal means negative number.",
+      "correct": ". Reciprocal means: 𝑎 𝑏 → 𝑏 𝑎"
     }
   ],
   "realLifeConnections": [
     {
-      "title": "Microscopic measurements",
-      "description": "Thickness of paper ≈ 10⁻⁴ m — negative powers of 10 describe very small lengths."
+      "title": "Real Life Connection 1 — Size of Bacteria",
+      "description": "A bacterium may be:\n0.000001 metre\nScientists write:\n10−6\nmetre.\nNegative exponents make very tiny measurements manageable.\n\nVideo Search Query\nhow small are bacteria animation\n\n\fmicroscopic world scale visualization"
     },
     {
-      "title": "Scientific prefixes",
-      "description": "Milli (10⁻³) and micro (10⁻⁶) use negative exponents to express tiny quantities."
+      "title": "Real Life Connection 2 — Virus Size",
+      "description": "Viruses are incredibly small.\nInstead of writing:\n0.000000001 m\nScientists write:\n10−9\nmetre.\nNegative exponents save time.\n\nVideo Search Query\nvirus size compared to human animation\npowers of ten zoom animation"
     },
     {
-      "title": "Half-life decay",
-      "description": "Radioactive decay can be modelled with negative exponents showing shrinking amounts over time."
+      "title": "Real Life Connection 3 — Computer Processors",
+      "description": "Modern processors work with:\nnanoseconds\nwhich are:\n10−9\nseconds.\nWithout negative exponents engineers could not describe these tiny times easily.\n\nVideo Search Query\nwhat is a nanosecond animation\ncomputer speed explained visually\n\n\fReal Life Connection 4 — Human Hair Thickness\nHuman hair thickness:\napproximately\n10−4\nmetres.\nNegative exponents help scientists compare tiny objects.\n\nVideo Search Query\nhow thick is human hair microscope\npowers of ten size comparison"
     },
     {
-      "title": "Reciprocals in recipes",
-      "description": "If a recipe uses 2⁻¹ cup, that means 1/2 cup — negative exponents as fractions in daily life."
-    },
-    {
-      "title": "Computer memory fractions",
-      "description": "A kilobyte is 2¹⁰ bytes; describing a fraction of a byte uses negative powers of 2."
+      "title": "Real Life Connection 5 — Astronomy & Physics",
+      "description": "Scientists frequently deal with:\n•\n\nvery large numbers\n\n•\n\nvery small numbers\n\nNegative exponents help represent tiny particles, atoms and molecules.\n\nVideo Search Query\npowers of ten universe and atom animation\nscale of the universe and atoms"
     }
   ],
   "activities": [
     {
-      "title": "Reciprocal flip cards",
-      "instructions": "Write expressions like 3⁻² on one side and 1/9 on the other. Students match and explain why they are equal."
+      "title": "Divide-by-10 Pattern Activity",
+      "instructions": "Write:\n1000\n100\n10\n1\nNow keep dividing by 10.\nObserve:\n1\n10\n1\n100\n1\n1000\nYou have discovered:\n10−1\n10−2\n10−3\nyourself."
     },
     {
-      "title": "Number line jump",
-      "instructions": "On a powers-of-10 line, start at 10³ and move left three steps to reach 10⁰, then two more to 10⁻². Record each value."
+      "title": "Powers Ladder Activity",
+      "instructions": "Create ladder:\n23\n22\n21\n20\n2−1\n2−2\n2−3\n\n\fNotice how every step divides by 2."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "1. DETAILED EXPLANATION",
+      "content": "What Problem Are We Solving?\nYou already know:\n103 = 1000\n102 = 100\n101 = 10\n100 = 1\nNow a natural question arises:\nWhat comes after:\n100\nCan exponents become negative?\nYes.\nLet's discover what happens.\n\nObserve the Pattern\nLook carefully:\n103 = 1000\n102 = 100\n101 = 10\n100 = 1\nEvery time exponent decreases by 1,\nthe answer gets divided by 10.\n1000 → 100 → 10 → 1\n\nContinue the pattern:\n\n\f10−1\nmust be:\n1\n10\nbecause:\n1 ÷ 10 =\n\n1\n10\n\nSimilarly:\n10−2\nmust be:\n1\n100\n\nAnd:\n10−3\nmust be:\n1\n1000\n\nGeneral Rule\nFor any non-zero number:\n𝑎−𝑛 =\n\nThis is the most important rule of this topic.\n\n1\n𝑎𝑛\n\n\fExamples\nExample 1\n2−3\nUsing rule:\n1\n23\n1\n=\n8\n=\n\nExample 2\n5−2\n1\n= 2\n5\n1\n=\n25\n\nExample 3\n2 −2\n( )\n3\nWhen exponent becomes negative,\nfraction gets inverted.\n3 2\n=( )\n2\n9\n=\n4\n\nShortcut\nNegative exponent means:\n\n\f\"Take reciprocal\"\nThat's all.\nExample:\n4−2\nStep 1:\nReciprocal of 4\n=\n\n1\n4\n\n=\n\n1\n16\n\nStep 2:\nApply exponent"
     },
     {
-      "title": "Negative exponent simplify race",
-      "instructions": "Simplify 2⁻⁴ × 2⁷, 10⁻² × 10⁻⁵, and p³ × p⁻¹⁰. First correct team explains the product law used."
+      "heading": "2. MAIN VIDEO SEARCH QUERIES",
+      "content": "Choose ONE short visual video.\nMain Video Queries\n1. Negative exponents explained visually\nhttps://youtu.be/QH-QZDJctpw?si=rgbZnPS9nD6FFO5P\n\n2. Why negative powers work animation\nhttps://youtu.be/wSracfsnFI8?si=CRSi6GpEfoQMaGqg\n\n3. Class 8 negative integral exponents\nhttps://youtu.be/WSN2SelULWM?si=ZTKckNNlJjW6UzMF\n\nhttps://youtu.be/LhtqURYB1vU?si=2NKRjAJCTsbsbNsf",
+      "videoUrl": "https://youtu.be/QH-QZDJctpw"
+    },
+    {
+      "heading": "3. CURIOSITY LAYER",
+      "content": "Curiosity Question 1\nWhy does a negative exponent move the number to the denominator?\n\nAnswer\nMany students think:\nNegative exponent is some magic trick.\nActually it's just a pattern.\nObserve:\n23 = 8\n22 = 4\n21 = 2\n20 = 1\nEvery step divides by 2.\nContinue:\n1\n2\n1\n2−2 =\n4\n1\n2−3 =\n8\n2−1 =\n\nNothing magical happened.\nThe pattern simply continued.\n\nVideo Search Query\nwhy negative exponents work visually\nnegative powers pattern animation\n\nCuriosity Question 2\n\n\fWhy did mathematicians invent negative exponents?\n\nAnswer\nSuppose scientists need:\n1\n1000000\nWriting huge denominators repeatedly becomes difficult.\nInstead:\n10−6\nis much shorter.\nNegative exponents help represent very small numbers efficiently.\n\nVideo Search Query\nwhy scientists use negative exponents\ntiny numbers scientific notation animation\n\nCuriosity Question 3\nWhy does a fraction flip when exponent becomes negative?\n\nAnswer\nLook:\n2 2\n( )\n3\nmeans:\n4\n9\nNow:\n\n\f2 −2\n( )\n3\nmust become:\n9\n4\nto maintain exponent patterns.\nThe reciprocal keeps mathematical laws consistent.\n\nVideo Search Query\nnegative exponents fractions visual explanation\nhttps://youtu.be/8NpHyof8tf8?si=sBa8sGj2VHnUsyuG\n\nreciprocal and negative powers animation"
+    },
+    {
+      "heading": "4. REAL-LIFE CONNECTIONS",
+      "content": "Real Life Connection 1 — Size of Bacteria\nA bacterium may be:\n0.000001 metre\nScientists write:\n10−6\nmetre.\nNegative exponents make very tiny measurements manageable.\n\nVideo Search Query\nhow small are bacteria animation\n\n\fmicroscopic world scale visualization\n\nReal Life Connection 2 — Virus Size\nViruses are incredibly small.\nInstead of writing:\n0.000000001 m\nScientists write:\n10−9\nmetre.\nNegative exponents save time.\n\nVideo Search Query\nvirus size compared to human animation\npowers of ten zoom animation\n\nReal Life Connection 3 — Computer Processors\nModern processors work with:\nnanoseconds\nwhich are:\n10−9\nseconds.\nWithout negative exponents engineers could not describe these tiny times easily.\n\nVideo Search Query\nwhat is a nanosecond animation\ncomputer speed explained visually\n\n\fReal Life Connection 4 — Human Hair Thickness\nHuman hair thickness:\napproximately\n10−4\nmetres.\nNegative exponents help scientists compare tiny objects.\n\nVideo Search Query\nhow thick is human hair microscope\npowers of ten size comparison\n\nReal Life Connection 5 — Astronomy & Physics\nScientists frequently deal with:\n•\n\nvery large numbers\n\n•\n\nvery small numbers\n\nNegative exponents help represent tiny particles, atoms and molecules.\n\nVideo Search Query\npowers of ten universe and atom animation\nscale of the universe and atoms"
+    },
+    {
+      "heading": "5. MISCONCEPTIONS",
+      "content": "Misconception 1\nNegative exponent means answer becomes negative.\nWrong.\nExample:\n2−2\n\n\f=\n\n1\n4\n\nPositive.\n\nMisconception 2\n\n2−3\nmeans:\n-8\nWrong.\nIt means:\n1\n8\n\nMisconception 3\nNegative exponent changes sign of base.\nWrong.\nIt changes position.\nNumerator ↔ Denominator\n\nMisconception 4\nReciprocal means negative number.\nWrong.\nReciprocal means:\n𝑎 𝑏\n→\n𝑏 𝑎"
+    },
+    {
+      "heading": "6. EXPERIMENT / ACTIVITY",
+      "content": "Divide-by-10 Pattern Activity\nWrite:\n1000\n100\n10\n1\nNow keep dividing by 10.\nObserve:\n1\n10\n1\n100\n1\n1000\nYou have discovered:\n10−1\n10−2\n10−3\nyourself.\n\nPowers Ladder Activity\nCreate ladder:\n23\n22\n21\n20\n2−1\n2−2\n2−3\n\n\fNotice how every step divides by 2."
+    },
+    {
+      "heading": "7. QUIZ",
+      "content": "Q1\nWhat is:\n2−3\nA. -8\nB. 8\nC. 1/8\nD. -1/8\nAnswer: C\n\nQ2\nWhat is:\n5−2\nA. 25\nB. -25\nC. 1/25\nD. -1/25\nAnswer: C\n\nQ3\nWhich rule is correct?\nA.\n𝑎−𝑛 = 𝑎𝑛\nB.\n\n\f𝑎−𝑛 =\n\n1\n𝑎𝑛\n\nC.\n𝑎−𝑛 = −𝑎𝑛\n\nAnswer: B\n\nQ4\nWhat happens when exponent becomes negative?\nA. Number becomes negative\nB. Fraction flips\nC. Base disappears\nD. Nothing\nAnswer: B\n\nQ5\nWhat is:\n10−3\nA. 1000\nB. 100\nC. 1/1000\nD. 1/100\nAnswer: C\n\nQ6\nNegative exponents are especially useful for:\nA. Tiny measurements\n\n\fB. Bacteria size\nC. Nanoseconds\nD. All of these\nAnswer: D"
     }
   ],
   "quiz": [
     {
-      "questionId": "negexp_q1",
+      "questionId": "neg_q1",
       "type": "mcq",
-      "question": "2⁻⁴ equals:",
+      "question": "What is: 2−3",
       "options": [
-        "-16",
-        "1/16",
+        "-8",
+        "8",
         "1/8",
-        "16"
+        "-1/8"
+      ],
+      "correctIndex": 2,
+      "explanation": "Answer: C"
+    },
+    {
+      "questionId": "neg_q2",
+      "type": "mcq",
+      "question": "What is: 5−2",
+      "options": [
+        "25",
+        "-25",
+        "1/25",
+        "-1/25"
+      ],
+      "correctIndex": 2,
+      "explanation": "Answer: C"
+    },
+    {
+      "questionId": "neg_q3",
+      "type": "mcq",
+      "question": "Which rule is correct? 1 𝑎𝑛",
+      "options": [
+        "𝑎−𝑛 = 𝑎𝑛",
+        "𝑎−𝑛 =",
+        "𝑎−𝑛 = −𝑎𝑛"
       ],
       "correctIndex": 1,
-      "explanation": "2⁻⁴ = 1/2⁴ = 1/16."
+      "explanation": "Answer: B"
     },
     {
-      "questionId": "negexp_q2",
+      "questionId": "neg_q4",
       "type": "mcq",
-      "question": "10⁻³ equals:",
+      "question": "What happens when exponent becomes negative?",
       "options": [
-        "-1000",
-        "0.001",
-        "0.01",
-        "1000"
+        "Number becomes negative",
+        "Fraction flips",
+        "Base disappears",
+        "Nothing"
       ],
       "correctIndex": 1,
-      "explanation": "10⁻³ = 1/10³ = 1/1000 = 0.001."
+      "explanation": "Answer: B"
     },
     {
-      "questionId": "negexp_q3",
+      "questionId": "neg_q5",
       "type": "mcq",
-      "question": "n⁻ᵃ = 1/nᵃ is valid when:",
+      "question": "What is: 10−3",
       "options": [
-        "n = 0",
-        "n ≠ 0",
-        "a is negative only",
-        "never"
+        "1000",
+        "100",
+        "1/1000",
+        "1/100"
       ],
-      "correctIndex": 1,
-      "explanation": "Division by zero is undefined, so n must not be 0."
+      "correctIndex": 2,
+      "explanation": "Answer: C"
     },
     {
-      "questionId": "negexp_q4",
+      "questionId": "neg_q6",
       "type": "mcq",
-      "question": "2⁻² ÷ 2⁻⁵ equals:",
+      "question": "Negative exponents are especially useful for:",
       "options": [
-        "2⁻⁷",
-        "2³",
-        "2⁻³",
-        "1"
+        "Tiny measurements",
+        "Bacteria size",
+        "Nanoseconds",
+        "All of these"
       ],
-      "correctIndex": 1,
-      "explanation": "2⁻²⁻⁽⁻⁵⁾ = 2⁻²⁺⁵ = 2³ = 8."
-    },
-    {
-      "questionId": "negexp_q5",
-      "type": "mcq",
-      "question": "Which is equal to 1/5³?",
-      "options": [
-        "5⁻³",
-        "-5³",
-        "5³",
-        "(-5)⁻³"
-      ],
-      "correctIndex": 0,
-      "explanation": "5⁻³ = 1/5³."
-    },
-    {
-      "questionId": "negexp_q6",
-      "type": "mcq",
-      "question": "10³ written with a negative exponent in the denominator equals:",
-      "options": [
-        "10⁻³",
-        "1/10⁻³",
-        "10³",
-        "-10³"
-      ],
-      "correctIndex": 1,
-      "explanation": "10³ = 1/10⁻³."
-    },
-    {
-      "questionId": "negexp_q7",
-      "type": "mcq",
-      "question": "p³ × p⁻¹⁰ simplifies to:",
-      "options": [
-        "p⁻⁷",
-        "p¹³",
-        "p³⁰",
-        "p⁻³"
-      ],
-      "correctIndex": 0,
-      "explanation": "p³⁺⁽⁻¹⁰⁾ = p⁻⁷."
+      "correctIndex": 3,
+      "explanation": "Answer: D"
     }
   ],
   "status": "published",

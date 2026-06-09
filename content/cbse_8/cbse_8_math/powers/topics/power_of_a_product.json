@@ -6,173 +6,196 @@
   "chapterName": "Powers",
   "topicId": "power_of_a_product",
   "topicName": "7. Power of a Product",
-  "explanation": "When the same exponent applies to a product, distribute it to each factor: (mn)ᵃ = mᵃ × nᵃ. Example: (2×5)³ = 2³ × 5³ = 8 × 125 = 1000. This also works in reverse to simplify: 2⁴ × 3⁴ = (2×3)⁴ = 6⁴. The law connects multiplication inside brackets with adding the same power to each part.",
+  "explanation": "What Happens When A Product Is Raised To A Power?\nConsider:\n(2 × 3)2\nMany students first calculate:\n2×3=6\nThen:\n62 = 36\n\n\fCorrect.\nBut there is another way.\n\nExpand:\n(2 × 3)2\nmeans:\n(2 × 3)(2 × 3)\nRearrange:\n(2 × 2)(3 × 3)\n22 × 32\n4×9\n36\nSame answer.\n\nRule\n( 𝑎𝑏)𝑛 = 𝑎𝑛 𝑏 𝑛\nThis is called:\nPower of a Product Rule\n\nExample 1\n(5 × 2)3\n53 × 23\n125 × 8\n1000\n\nExample 2\n(3 × 4)2\n\n\f32 × 42\n9 × 16\n144\n\nExample 3\n(10 × 5)2\n102 × 52\n100 × 25\n2500\n\nEasy Way To Remember\nIf a bracket contains multiplication:\n(𝑎𝑏)𝑛\n\nthe exponent goes to every factor inside.\nThink:\nThe power is \"distributed\" to all numbers.",
   "examples": [
-    "(2×5)³ = 2³ × 5³ = 1000",
-    "2⁴ × 3⁴ = 6⁴ = 1296",
-    "(ab)² = a²b²",
-    "(-3)² × (-5)² = 9 × 25 = 225"
+    "Example 1\n(5 × 2)3\n53 × 23\n125 × 8\n1000",
+    "Example 2\n(3 × 4)2\n\n\f32 × 42\n9 × 16\n144",
+    "Example 3\n(10 × 5)2\n102 × 52\n100 × 25\n2500"
   ],
-  "videoUrl": "https://youtu.be/0Y4Er1gM2Ew",
   "brainstorming": [
     {
-      "question": "Why does (2×5)³ equal 2³ × 5³?",
-      "answer": "Expanding (2×5)³ = (2×5)(2×5)(2×5) — each bracket picks one 2 and one 5, giving three 2s and three 5s."
+      "question": "Why Does The Exponent Apply To Both Numbers?",
+      "answer": "Look:\n(2 × 3)2\nmeans:\n(2 × 3)(2 × 3)\nBoth 2 and 3 appear twice.\nTherefore:\n2 gets squared.\n3 also gets squared.\nThe exponent affects the entire bracket."
     },
     {
-      "question": "Can (2+3)² = 2² + 3²?",
-      "answer": "No! (2+3)² = 25 but 2²+3² = 13. Power of a product works for multiplication, not addition."
+      "question": "Why Can't We Square Only One Number?",
+      "answer": "Students sometimes do:\n(2 × 3)2\n= 22 × 3\nWrong.\nBecause both numbers are repeated.\nThe exponent belongs to the entire bracket.\nEvery factor must receive the exponent.\n\n\fVideo Search Query\ncommon exponent mistakes explained\npower of product mistakes animation"
     },
     {
-      "question": "How does this help simplify 2⁴ × 3⁴?",
-      "answer": "Same exponent → combine bases: (2×3)⁴ = 6⁴."
+      "question": "Does This Work For Three Numbers Too?",
+      "answer": "Yes.\nExample:\n(2 × 3 × 4)2\nbecomes:\n22 × 32 × 42\nThe exponent reaches every factor."
     }
   ],
   "misconceptions": [
     {
-      "wrong": "(2+3)² = 2² + 3²",
-      "correct": "(2+3)² = 25, but 2²+3² = 13. The law applies to products, not sums."
+      "wrong": "( 𝑎𝑏)2 = 𝑎2 𝑏",
+      "correct": ". Correct: ( 𝑎𝑏)2 = 𝑎2 𝑏 2 \fMisconception 2 Exponent only applies to first number. Wrong. It applies to every factor."
     },
     {
-      "wrong": "(2×5)³ = 2×5³",
-      "correct": "Both factors get the exponent: 2³ × 5³."
+      "wrong": "(2 × 3)2 = 22 × 3",
+      "correct": ". Correct: 22 × 32"
     },
     {
-      "wrong": "2³ × 3⁴ = 6⁷",
-      "correct": "Exponents differ — cannot combine. 2³ × 3⁴ = 8 × 81 = 648."
-    },
-    {
-      "wrong": "(mn)ᵃ = mᵃ + nᵃ",
-      "correct": "It is mᵃ × nᵃ (multiplication), not addition."
+      "wrong": "Brackets do not matter.",
+      "correct": ". Brackets completely change meaning."
     }
   ],
   "realLifeConnections": [
     {
-      "title": "Box dimensions",
-      "description": "Volume of a rectangular box (l×w×h)² for scaling all sides doubles each dimension factor together."
+      "title": "Real Life Connection 1 — Area Scaling",
+      "description": "Suppose:\nLength = 2 m\nWidth = 3 m\nArea:\n2×3\n\n\fNow every dimension doubles.\nBoth dimensions change.\nThe exponent affects all measurements.\nThis idea appears in architecture and construction.\n\nVideo Search Query\narea scaling animation\nhow area changes when dimensions increase"
     },
     {
-      "title": "Team combinations",
-      "description": "(2×3)⁴ patterns appear when independent choices each have the same number of rounds."
+      "title": "Real Life Connection 2 — Manufacturing",
+      "description": "A factory produces:\n2 parts from one machine\n3 machines operate together.\nIf production capacity doubles repeatedly, engineers use exponent laws to estimate output.\n\nVideo Search Query\nfactory production scaling animation\nindustrial growth mathematics"
     },
     {
-      "title": "Engineering stress",
-      "description": "Force on (a×b)² area distributes as a² × b² when each dimension scales equally."
+      "title": "Real Life Connection 3 — Computer Networks",
+      "description": "Suppose:\nSeveral servers work together.\nEach server's capacity increases.\nTotal network performance often involves multiplying multiple growth factors.\n\nVideo Search Query\ncomputer network scaling explained\n\n\fserver growth animation"
     },
     {
-      "title": "Chemistry moles",
-      "description": "(2×3)³ molecule counts split into 2³ and 3³ when counting arrangements."
+      "title": "Real Life Connection 4 — Population Growth Across Regions",
+      "description": "Different cities grow simultaneously.\nGrowth affects multiple groups together.\nScientists use exponent laws to estimate combined growth.\n\nVideo Search Query\nregional population growth animation\ncombined exponential growth"
     },
     {
-      "title": "Currency pairs",
-      "description": "Converting (₹×$)ⁿ transactions splits into ₹ⁿ and $ⁿ factors."
+      "title": "Real Life Connection 5 — Business Expansion",
+      "description": "A company opens branches.\nEach branch increases sales.\nWhen multiple growth factors act together, exponent rules help estimate future scale.\n\nVideo Search Query\nbusiness growth exponential animation\nscaling a business visually"
     }
   ],
   "activities": [
     {
-      "title": "Expand and compare",
-      "instructions": "Compute (2×3)² by expanding brackets and by 2²×3². Show both give 36."
+      "title": "Coin Group Activity",
+      "instructions": "Create:\n2 groups\nEach group contains:\n3 coins.\nNow create another identical set.\n\n\fCount total coins.\nObserve how multiplication repeats."
     },
     {
-      "title": "Sum vs product trap",
-      "instructions": "Test (2+3)² vs 2²+3². Discuss why only multiplication distributes the exponent."
+      "title": "Drawing Activity",
+      "instructions": "Draw:\nRectangle of:\n2 rows × 3 columns.\nNow duplicate the structure.\nNotice how every dimension participates in growth."
     },
     {
-      "title": "Simplify products",
-      "instructions": "Rewrite 2⁴×3⁴, 5²×7², and 2³×a³ in the form (product)ⁿ."
+      "title": "Lego Activity",
+      "instructions": "Build:\n2×3 block rectangle.\nDouble entire structure.\nObserve that every side scales."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "1. DETAILED EXPLANATION",
+      "content": "What Happens When A Product Is Raised To A Power?\nConsider:\n(2 × 3)2\nMany students first calculate:\n2×3=6\nThen:\n62 = 36\n\n\fCorrect.\nBut there is another way.\n\nExpand:\n(2 × 3)2\nmeans:\n(2 × 3)(2 × 3)\nRearrange:\n(2 × 2)(3 × 3)\n22 × 32\n4×9\n36\nSame answer.\n\nRule\n( 𝑎𝑏)𝑛 = 𝑎𝑛 𝑏 𝑛\nThis is called:\nPower of a Product Rule\n\nExample 1\n(5 × 2)3\n53 × 23\n125 × 8\n1000\n\nExample 2\n(3 × 4)2\n\n\f32 × 42\n9 × 16\n144\n\nExample 3\n(10 × 5)2\n102 × 52\n100 × 25\n2500\n\nEasy Way To Remember\nIf a bracket contains multiplication:\n(𝑎𝑏)𝑛\n\nthe exponent goes to every factor inside.\nThink:\nThe power is \"distributed\" to all numbers."
+    },
+    {
+      "heading": "2. MAIN VIDEO SEARCH QUERIES",
+      "content": "Main Video Queries\n1. Power of a product explained visually\n2. Laws of exponents power of product animation\n3. Exponents and brackets explained visually\n4. Why exponent applies to every factor"
+    },
+    {
+      "heading": "3. CURIOSITY LAYER",
+      "content": "Curiosity Question 1\nWhy Does The Exponent Apply To Both Numbers?\n\n\fAnswer\nLook:\n(2 × 3)2\nmeans:\n(2 × 3)(2 × 3)\nBoth 2 and 3 appear twice.\nTherefore:\n2 gets squared.\n3 also gets squared.\nThe exponent affects the entire bracket.\n\nVideo Search Query\nwhy exponent distributes in brackets\npower of a product visual proof\n\nCuriosity Question 2\nWhy Can't We Square Only One Number?\n\nAnswer\nStudents sometimes do:\n(2 × 3)2\n= 22 × 3\nWrong.\nBecause both numbers are repeated.\nThe exponent belongs to the entire bracket.\nEvery factor must receive the exponent.\n\n\fVideo Search Query\ncommon exponent mistakes explained\npower of product mistakes animation\n\nCuriosity Question 3\nDoes This Work For Three Numbers Too?\n\nAnswer\nYes.\nExample:\n(2 × 3 × 4)2\nbecomes:\n22 × 32 × 42\nThe exponent reaches every factor.\n\nVideo Search Query\npower of product multiple factors\nexponents with three variables animation"
+    },
+    {
+      "heading": "4. REAL-LIFE CONNECTIONS",
+      "content": "Real Life Connection 1 — Area Scaling\nSuppose:\nLength = 2 m\nWidth = 3 m\nArea:\n2×3\n\n\fNow every dimension doubles.\nBoth dimensions change.\nThe exponent affects all measurements.\nThis idea appears in architecture and construction.\n\nVideo Search Query\narea scaling animation\nhow area changes when dimensions increase\n\nReal Life Connection 2 — Manufacturing\nA factory produces:\n2 parts from one machine\n3 machines operate together.\nIf production capacity doubles repeatedly, engineers use exponent laws to estimate output.\n\nVideo Search Query\nfactory production scaling animation\nindustrial growth mathematics\n\nReal Life Connection 3 — Computer Networks\nSuppose:\nSeveral servers work together.\nEach server's capacity increases.\nTotal network performance often involves multiplying multiple growth factors.\n\nVideo Search Query\ncomputer network scaling explained\n\n\fserver growth animation\n\nReal Life Connection 4 — Population Growth Across Regions\nDifferent cities grow simultaneously.\nGrowth affects multiple groups together.\nScientists use exponent laws to estimate combined growth.\n\nVideo Search Query\nregional population growth animation\ncombined exponential growth\n\nReal Life Connection 5 — Business Expansion\nA company opens branches.\nEach branch increases sales.\nWhen multiple growth factors act together, exponent rules help estimate future scale.\n\nVideo Search Query\nbusiness growth exponential animation\nscaling a business visually"
+    },
+    {
+      "heading": "5. MISCONCEPTIONS",
+      "content": "Misconception 1\n\n( 𝑎𝑏)2 = 𝑎2 𝑏\nWrong.\nCorrect:\n( 𝑎𝑏)2 = 𝑎2 𝑏 2\n\n\fMisconception 2\nExponent only applies to first number.\nWrong.\nIt applies to every factor.\n\nMisconception 3\n\n(2 × 3)2 = 22 × 3\nWrong.\nCorrect:\n22 × 32\n\nMisconception 4\nBrackets do not matter.\nWrong.\nBrackets completely change meaning."
+    },
+    {
+      "heading": "6. EXPERIMENT / ACTIVITY",
+      "content": "Coin Group Activity\nCreate:\n2 groups\nEach group contains:\n3 coins.\nNow create another identical set.\n\n\fCount total coins.\nObserve how multiplication repeats.\n\nDrawing Activity\nDraw:\nRectangle of:\n2 rows × 3 columns.\nNow duplicate the structure.\nNotice how every dimension participates in growth.\n\nLego Activity\nBuild:\n2×3 block rectangle.\nDouble entire structure.\nObserve that every side scales."
+    },
+    {
+      "heading": "7. QUIZ",
+      "content": "Q1\nWhat is:\n(2 × 3)2\nA. 12\nB. 18\nC. 36\nD. 24\nAnswer: C\n\nQ2\n\n\fWhich rule is correct?\nA.\n( 𝑎𝑏)𝑛 = 𝑎𝑛 𝑏 𝑛\nB.\n(𝑎𝑏)𝑛 = 𝑎𝑛 + 𝑏 𝑛\nC.\n(𝑎𝑏)𝑛 = 𝑎 + 𝑏\n\nAnswer: A\n\nQ3\nWhat is:\n(5 × 2)3\nA. 100\nB. 500\nC. 1000\nD. 2000\nAnswer: C\n\nQ4\nIn Power of a Product, exponent applies to:\nA. First factor only\nB. Last factor only\nC. Every factor\nD. None\nAnswer: C\n\n\fQ5\nWhat is:\n(3 × 4)2\nA. 49\nB. 144\nC. 81\nD. 36\nAnswer: B\n\nQ6\nWhich field frequently uses scaling of multiple dimensions?\nA. Architecture\nB. Engineering\nC. Manufacturing\nD. All of these\nAnswer: D\n\nQ7\nWhy does exponent apply to all factors?\nA. Because entire product repeats\nB. Because base disappears\nC. Because numbers shrink\nD. None\nAnswer: A"
     }
   ],
   "quiz": [
     {
       "questionId": "poprod_q1",
       "type": "mcq",
-      "question": "(2×5)³ =",
+      "question": "What is: (2 × 3)2",
       "options": [
-        "2³×5³",
-        "10³ only",
-        "2+5³",
-        "2³+5³"
+        "12",
+        "18",
+        "36",
+        "24"
       ],
-      "correctIndex": 0,
-      "explanation": "Each factor is cubed: 2³ × 5³."
+      "correctIndex": 2,
+      "explanation": "Answer: C"
     },
     {
       "questionId": "poprod_q2",
       "type": "mcq",
-      "question": "2⁴ × 3⁴ =",
+      "question": "Which rule is correct?",
       "options": [
-        "6⁴",
-        "6⁸",
-        "5⁴",
-        "6⁷"
+        "( 𝑎𝑏)𝑛 = 𝑎𝑛 𝑏 𝑛",
+        "(𝑎𝑏)𝑛 = 𝑎𝑛 + 𝑏 𝑛",
+        "(𝑎𝑏)𝑛 = 𝑎 + 𝑏"
       ],
       "correctIndex": 0,
-      "explanation": "Same exponent: (2×3)⁴ = 6⁴."
+      "explanation": "Answer: A"
     },
     {
       "questionId": "poprod_q3",
       "type": "mcq",
-      "question": "(ab)² =",
+      "question": "What is: (5 × 2)3",
       "options": [
-        "a²b²",
-        "a²+b²",
-        "2ab",
-        "(a+b)²"
+        "100",
+        "500",
+        "1000",
+        "2000"
       ],
-      "correctIndex": 0,
-      "explanation": "Power distributes over multiplication."
+      "correctIndex": 2,
+      "explanation": "Answer: C"
     },
     {
       "questionId": "poprod_q4",
       "type": "mcq",
-      "question": "(2+3)² equals:",
+      "question": "In Power of a Product, exponent applies to:",
       "options": [
-        "25",
-        "13",
-        "10²",
-        "2²+3²"
+        "First factor only",
+        "Last factor only",
+        "Every factor",
+        "None"
       ],
-      "correctIndex": 0,
-      "explanation": "(2+3)² = 5² = 25, not 2²+3²."
+      "correctIndex": 2,
+      "explanation": "Answer: C"
     },
     {
       "questionId": "poprod_q5",
       "type": "mcq",
-      "question": "m⁵ × n⁵ =",
+      "question": "What is: (3 × 4)2",
       "options": [
-        "(mn)⁵",
-        "m⁵⁺⁵",
-        "(m+n)⁵",
-        "m⁵/n⁵"
+        "49",
+        "144",
+        "81",
+        "36"
       ],
-      "correctIndex": 0,
-      "explanation": "Same exponent on different bases → (mn)⁵."
+      "correctIndex": 1,
+      "explanation": "Answer: B"
     },
     {
       "questionId": "poprod_q6",
       "type": "mcq",
-      "question": "(-3)² × (-5)² =",
+      "question": "Which field frequently uses scaling of multiple dimensions?",
       "options": [
-        "225",
-        "-225",
-        "15²",
-        "(-15)²"
+        "Architecture",
+        "Engineering",
+        "Manufacturing",
+        "All of these"
       ],
-      "correctIndex": 0,
-      "explanation": "9 × 25 = 225 — both squares are positive."
+      "correctIndex": 3,
+      "explanation": "Answer: D"
     },
     {
       "questionId": "poprod_q7",
       "type": "mcq",
-      "question": "(2×3)⁴ =",
+      "question": "Why does exponent apply to all factors?",
       "options": [
-        "2⁴×3⁴",
-        "6⁴",
-        "Both A and B",
-        "2⁴+3⁴"
+        "Because entire product repeats",
+        "Because base disappears",
+        "Because numbers shrink",
+        "None"
       ],
-      "correctIndex": 2,
-      "explanation": "2⁴×3⁴ = 6⁴ = 1296."
+      "correctIndex": 0,
+      "explanation": "Answer: A"
     }
   ],
   "status": "published",

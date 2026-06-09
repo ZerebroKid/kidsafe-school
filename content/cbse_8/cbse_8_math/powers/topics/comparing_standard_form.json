@@ -6,177 +6,186 @@
   "chapterName": "Powers",
   "topicId": "comparing_standard_form",
   "topicName": "10. Comparing Large and Small Numbers",
-  "explanation": "To compare numbers in standard form, first compare the exponent n. For large positive numbers, bigger exponent means bigger value. If exponents match, compare the coefficient a. For small numbers (negative exponents), exponent closer to zero is larger: 10⁻² > 10⁻⁵. Example: 3.2×10⁸ > 5.7×10⁷ because 8 > 7.",
+  "explanation": "Why Is Comparing Large Numbers Difficult?\nLook at these numbers:\n•\n\n4,500,000\n\n•\n\n45,000,000\n\n•\n\n450,000,000\n\nMany students make mistakes while counting zeros.\nNow imagine scientists comparing:\n•\n\nDistance to planets\n\n•\n\nNumber of stars\n\n•\n\nSize of bacteria\n\n•\n\nSpeed of light\n\nIt becomes even harder.\nThis is why Standard Form becomes useful.\n\nExample 1: Large Numbers\nCompare:\n3.2 × 108\nand\n5.7 × 107\nFirst compare exponents:\n8>7\nTherefore:\n3.2 × 108\nis larger.\nNo calculation needed.\n\n\fExample 2: Same Exponent\nCompare:\n3.5 × 106\nand\n8.2 × 106\nExponents are same.\nNow compare coefficients:\n3.5 and 8.2\nSince:\n8.2 > 3.5\nTherefore:\n8.2 × 106\nis larger.\n\nExample 3: Very Small Numbers\nCompare:\n5 × 10−4\nand\n5 × 10−6\nRemember:\n10−4\nis larger than:\n10−6\n\n\fTherefore:\n5 × 10−4\nis larger.\n\nQuick Comparison Rule\nFor Large Numbers\nBigger exponent = Bigger number\n\nFor Small Numbers\nExponent closer to zero = Bigger number\nExample:\n10−2\nis bigger than:\n10−5",
   "examples": [
-    "3.2×10⁸ > 5.7×10⁷ (compare exponents: 8 > 7)",
-    "8.2×10⁶ > 3.5×10⁶ (same exponent, compare 8.2 > 3.5)",
-    "5×10⁻⁴ > 5×10⁻⁶ (10⁻⁴ is larger than 10⁻⁶)",
-    "9×10⁵ < 2×10⁶ (exponent 6 beats coefficient 9)"
+    "Why Is Comparing Large Numbers Difficult?\nLook at these numbers:\n•\n\n4,500,000\n\n•\n\n45,000,000\n\n•\n\n450,000,000\n\nMany students make mistakes while counting zeros.\nNow imagine scientists comparing:\n•\n\nDis"
   ],
   "videoUrl": "https://youtu.be/-3dr74TKqrw",
   "brainstorming": [
     {
-      "question": "Which is smaller: 1.49×10¹¹ m or 1.439×10¹² m?",
-      "answer": "1.49×10¹¹ = 1.49×10¹¹ vs 1.439×10¹² = 14.39×10¹¹ — the second is about 10 times larger."
+      "question": "Why Do Astronomers Use Standard Form?",
+      "answer": "Distance between stars can be:\nTrillions of kilometres.\nWriting all digits repeatedly is difficult.\nStandard form allows quick comparison.\nAstronomers can instantly identify which distance is larger."
     },
     {
-      "question": "How do you compare 4³ and 3⁴?",
-      "answer": "Compute: 4³ = 64, 3⁴ = 81. So 3⁴ > 4³ despite smaller base."
+      "question": "Why Is 10⁻² Bigger Than 10⁻⁵?",
+      "answer": "Many students think:\n5 is bigger than 2\nso\n10−5\n\n\fmust be larger.\nWrong.\nThink of money.\n1\n100\nis larger than\n1\n100000\nSimilarly:\n10−2 > 10−5"
     },
     {
-      "question": "Is 2¹⁰⁰ bigger than 100²?",
-      "answer": "100² = 10,000. 2¹⁰⁰ ≈ 1.27×10³⁰ — vastly larger."
+      "question": "Can Standard Form Compare The Universe And An Atom?",
+      "answer": "Yes.\nScientists use powers of ten to compare:\n•\n\ndiameter of atom\n\n•\n\nsize of Earth\n\n•\n\nsize of galaxy\n\nusing the same mathematical language.\nThis is one reason powers are so powerful.\n\n\fVideo Search Query\npowers of ten universe to atom\nscale of universe animation"
     }
   ],
   "misconceptions": [
     {
-      "wrong": "Bigger exponent always means bigger number for all a",
-      "correct": "For 0 < a < 1, higher positive n can mean smaller value. Context matters."
+      "wrong": "Bigger coefficient always means bigger number.",
+      "correct": ". Example: 9 × 105 is smaller than: 2 × 106 because exponent matters more."
     },
     {
-      "wrong": "4³ > 3⁴ because base 4 > 3",
-      "correct": "4³ = 64, 3⁴ = 81 — compare values, not just bases."
+      "wrong": "Bigger negative exponent means bigger number.",
+      "correct": ". 10−6 is smaller than: 10−3"
     },
     {
-      "wrong": "10⁹ + 10⁹ = 10¹⁸",
-      "correct": "10⁹ + 10⁹ = 2×10⁹, not add exponents."
+      "wrong": "Standard form changes number value.",
+      "correct": ". Only representation changes."
     },
     {
-      "wrong": "2¹⁰⁰ and 100² are close",
-      "correct": "100² = 10,000; 2¹⁰⁰ has about 30 digits."
-    },
-    {
-      "wrong": "Scientific notation numbers cannot be compared",
-      "correct": "Align exponents, then compare coefficients."
+      "wrong": "Scientific notation is only for scientists.",
+      "correct": ". Used in: • computers • engineering • economics • medicine • astronomy"
     }
   ],
   "realLifeConnections": [
     {
-      "title": "Planet distances",
-      "description": "Comparing Sun–Saturn vs Sun–Earth distances uses aligned powers of 10."
+      "title": "Real Life Connection 1 — Comparing Mobile Storage",
+      "description": "Suppose:\nPhone A:\n128 GB\nPhone B:\n256 GB\nEngineers often compare much larger storage systems using powers.\n\nVideo Search Query\nhow computer storage works\ngigabyte terabyte explained visually"
     },
     {
-      "title": "Ants per human",
-      "description": "2×10¹⁶ ants ÷ 8×10⁹ people ≈ 2.5×10⁶ ants per person."
+      "title": "Real Life Connection 2 — Comparing Internet Speeds",
+      "description": "Internet companies compare:\n•\n\nMbps\n\n•\n\nGbps\n\n•\n\nTbps\n\nLarge powers help compare network capacities.\n\nVideo Search Query\ninternet speed explained animation\nhow data transfer works\n\n\fReal Life Connection 3 — Comparing Planet Sizes\nScientists compare:\n•\n\nEarth\n\n•\n\nJupiter\n\n•\n\nSun\n\nusing scientific notation.\n\nVideo Search Query\nplanet size comparison animation\nearth vs sun vs jupiter visualization"
     },
     {
-      "title": "Starling flocks",
-      "description": "3.1×10⁸ starlings ÷ 10⁴ per flock = 3.1×10⁴ flocks worldwide."
+      "title": "Real Life Connection 4 — Comparing Bacteria And Viruses",
+      "description": "Viruses are much smaller than bacteria.\nScientists use powers of ten to compare microscopic sizes.\n\nVideo Search Query\nvirus vs bacteria size comparison\nmicroscopic world scale animation"
     },
     {
-      "title": "Paper to the Moon",
-      "description": "3.84×10⁸ m ÷ 10⁻⁴ m per sheet = 3.84×10¹² sheets."
-    },
-    {
-      "title": "Sheep and goats",
-      "description": "10⁹ + 10⁹ = 2×10⁹ total — not 10¹⁸."
+      "title": "Real Life Connection 5 — Comparing Populations",
+      "description": "Countries have populations in:\n•\n\nmillions\n\n•\n\nbillions\n\nStandard form makes comparisons easier.\n\nVideo Search Query\nworld population visualization\n\n\funderstanding millions and billions"
     }
   ],
   "activities": [
     {
-      "title": "Order the distances",
-      "instructions": "Rank Sun–Earth, Sun–Saturn, and Saturn–Uranus distances given in standard form. Show alignment steps."
+      "title": "Large Number Comparison Activity",
+      "instructions": "Compare:\n3 × 105\nand\n8 × 106\nwithout converting.\nObserve how exponents help."
     },
     {
-      "title": "Greater or lesser",
-      "instructions": "Decide which is greater: 4³ or 3⁴, 2⁸ or 8², 100² or 2¹⁰⁰. Calculate before answering."
+      "title": "Tiny Number Comparison Activity",
+      "instructions": "Compare:\n10−2\nand\n10−5\nConvert to decimals.\nNotice which is larger.\n\n\fPopulation Activity\nSearch populations of:\n•\n\nIndia\n\n•\n\nUSA\n\n•\n\nJapan\n\nConvert into standard form and compare."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "1. DETAILED EXPLANATION",
+      "content": "Why Is Comparing Large Numbers Difficult?\nLook at these numbers:\n•\n\n4,500,000\n\n•\n\n45,000,000\n\n•\n\n450,000,000\n\nMany students make mistakes while counting zeros.\nNow imagine scientists comparing:\n•\n\nDistance to planets\n\n•\n\nNumber of stars\n\n•\n\nSize of bacteria\n\n•\n\nSpeed of light\n\nIt becomes even harder.\nThis is why Standard Form becomes useful.\n\nExample 1: Large Numbers\nCompare:\n3.2 × 108\nand\n5.7 × 107\nFirst compare exponents:\n8>7\nTherefore:\n3.2 × 108\nis larger.\nNo calculation needed.\n\n\fExample 2: Same Exponent\nCompare:\n3.5 × 106\nand\n8.2 × 106\nExponents are same.\nNow compare coefficients:\n3.5 and 8.2\nSince:\n8.2 > 3.5\nTherefore:\n8.2 × 106\nis larger.\n\nExample 3: Very Small Numbers\nCompare:\n5 × 10−4\nand\n5 × 10−6\nRemember:\n10−4\nis larger than:\n10−6\n\n\fTherefore:\n5 × 10−4\nis larger.\n\nQuick Comparison Rule\nFor Large Numbers\nBigger exponent = Bigger number\n\nFor Small Numbers\nExponent closer to zero = Bigger number\nExample:\n10−2\nis bigger than:\n10−5"
     },
     {
-      "title": "Ratio calculator",
-      "instructions": "Compute humans per elephant (8×10⁹ ÷ 4×10⁵) and express in scientific notation."
+      "heading": "2. MAIN VIDEO SEARCH QUERIES",
+      "content": "Main Video Queries\n1. Comparing numbers in scientific notation\nhttps://youtu.be/-3dr74TKqrw?si=h4UGhb9vj3p3__cA\n\n2. Standard form comparison explained visually\nhttps://youtu.be/J6fIfoZgzqA?si=Q53JBMlTGLaA_2Pz\nhttps://youtu.be/jdLqBAmoG3Y?si=0gN9MGf4hcalazqf\n\n3. Large and small numbers scientific notation\nhttps://youtu.be/LHv2Edk1Y6Q?si=0W2WndRAS3SPO8ly\n\n\f4. Scientific notation comparison tricks\nhttps://youtu.be/-3dr74TKqrw?si=VqF7uZW6BfggkEwS",
+      "videoUrl": "https://youtu.be/-3dr74TKqrw"
+    },
+    {
+      "heading": "3. CURIOSITY LAYER",
+      "content": "Curiosity Question 1\nWhy Do Astronomers Use Standard Form?\n\nAnswer\nDistance between stars can be:\nTrillions of kilometres.\nWriting all digits repeatedly is difficult.\nStandard form allows quick comparison.\nAstronomers can instantly identify which distance is larger.\n\nVideo Search Query\nhow astronomers measure distances\ndistance between stars visualization\n\nCuriosity Question 2\nWhy Is 10⁻² Bigger Than 10⁻⁵?\n\nAnswer\nMany students think:\n5 is bigger than 2\nso\n10−5\n\n\fmust be larger.\nWrong.\nThink of money.\n1\n100\nis larger than\n1\n100000\nSimilarly:\n10−2 > 10−5\n\nVideo Search Query\nnegative powers comparison visual explanation\nunderstanding tiny numbers animation\n\nCuriosity Question 3\nCan Standard Form Compare The Universe And An Atom?\n\nAnswer\nYes.\nScientists use powers of ten to compare:\n•\n\ndiameter of atom\n\n•\n\nsize of Earth\n\n•\n\nsize of galaxy\n\nusing the same mathematical language.\nThis is one reason powers are so powerful.\n\n\fVideo Search Query\npowers of ten universe to atom\nscale of universe animation"
+    },
+    {
+      "heading": "4. REAL-LIFE CONNECTIONS",
+      "content": "Real Life Connection 1 — Comparing Mobile Storage\nSuppose:\nPhone A:\n128 GB\nPhone B:\n256 GB\nEngineers often compare much larger storage systems using powers.\n\nVideo Search Query\nhow computer storage works\ngigabyte terabyte explained visually\n\nReal Life Connection 2 — Comparing Internet Speeds\nInternet companies compare:\n•\n\nMbps\n\n•\n\nGbps\n\n•\n\nTbps\n\nLarge powers help compare network capacities.\n\nVideo Search Query\ninternet speed explained animation\nhow data transfer works\n\n\fReal Life Connection 3 — Comparing Planet Sizes\nScientists compare:\n•\n\nEarth\n\n•\n\nJupiter\n\n•\n\nSun\n\nusing scientific notation.\n\nVideo Search Query\nplanet size comparison animation\nearth vs sun vs jupiter visualization\n\nReal Life Connection 4 — Comparing Bacteria And Viruses\nViruses are much smaller than bacteria.\nScientists use powers of ten to compare microscopic sizes.\n\nVideo Search Query\nvirus vs bacteria size comparison\nmicroscopic world scale animation\n\nReal Life Connection 5 — Comparing Populations\nCountries have populations in:\n•\n\nmillions\n\n•\n\nbillions\n\nStandard form makes comparisons easier.\n\nVideo Search Query\nworld population visualization\n\n\funderstanding millions and billions"
+    },
+    {
+      "heading": "5. MISCONCEPTIONS",
+      "content": "Misconception 1\nBigger coefficient always means bigger number.\nWrong.\nExample:\n9 × 105\nis smaller than:\n2 × 106\nbecause exponent matters more.\n\nMisconception 2\nBigger negative exponent means bigger number.\nWrong.\n10−6\nis smaller than:\n10−3\n\nMisconception 3\nStandard form changes number value.\nWrong.\nOnly representation changes.\n\nMisconception 4\n\n\fScientific notation is only for scientists.\nWrong.\nUsed in:\n•\n\ncomputers\n\n•\n\nengineering\n\n•\n\neconomics\n\n•\n\nmedicine\n\n•\n\nastronomy"
+    },
+    {
+      "heading": "6. EXPERIMENT / ACTIVITY",
+      "content": "Large Number Comparison Activity\nCompare:\n3 × 105\nand\n8 × 106\nwithout converting.\nObserve how exponents help.\n\nTiny Number Comparison Activity\nCompare:\n10−2\nand\n10−5\nConvert to decimals.\nNotice which is larger.\n\n\fPopulation Activity\nSearch populations of:\n•\n\nIndia\n\n•\n\nUSA\n\n•\n\nJapan\n\nConvert into standard form and compare."
+    },
+    {
+      "heading": "7. QUIZ",
+      "content": "Q1\nWhich is larger?\n3 × 108\nor\n4 × 107\nA. First\nB. Second\nAnswer: A\n\nQ2\nWhich is larger?\n10−2\nor\n10−5\nA. 10⁻²\nB. 10⁻⁵\n\n\fAnswer: A\n\nQ3\nCompare:\n5 × 106\nand\n8 × 106\nWhich is larger?\nA. First\nB. Second\nAnswer: B\n\nQ4\nWhat should be compared first?\nA. Coefficient\nB. Exponent\nC. Decimal\nD. Fraction\nAnswer: B\n\nQ5\nWhich field regularly compares extremely large numbers?\nA. Astronomy\nB. Engineering\nC. Computer Science\nD. All of these\n\n\fAnswer: D\n\nQ6\nWhich is smallest?\n10−2\n10−4\n10−6\nA. 10⁻²\nB. 10⁻⁴\nC. 10⁻⁶\nAnswer: C\n\nQ7\nWhy is standard form useful?\nA. Easier comparison\nB. Fewer writing mistakes\nC. Faster calculations\nD. All of these\nAnswer: D"
     }
   ],
   "quiz": [
     {
       "questionId": "cmp_q1",
       "type": "mcq",
-      "question": "Which is greater: 4³ or 3⁴?",
+      "question": "Which is larger? 3 × 108 or 4 × 107",
       "options": [
-        "4³",
-        "3⁴",
-        "Equal",
-        "Cannot tell"
+        "First",
+        "Second"
       ],
-      "correctIndex": 1,
-      "explanation": "4³ = 64, 3⁴ = 81."
+      "correctIndex": 0,
+      "explanation": "Answer: A"
     },
     {
       "questionId": "cmp_q2",
       "type": "mcq",
-      "question": "2⁸ vs 8²:",
+      "question": "Which is larger? 10−2 or 10−5",
       "options": [
-        "2⁸ is greater",
-        "8² is greater",
-        "Equal",
-        "2⁸ = 64, 8² = 64"
+        "10⁻²",
+        "10⁻⁵"
       ],
       "correctIndex": 0,
-      "explanation": "2⁸ = 256, 8² = 64."
+      "explanation": "Answer: A"
     },
     {
       "questionId": "cmp_q3",
       "type": "mcq",
-      "question": "100² vs 2¹⁰⁰:",
+      "question": "Compare: 5 × 106 and 8 × 106 Which is larger?",
       "options": [
-        "100²",
-        "2¹⁰⁰",
-        "Equal",
-        "100² by a little"
+        "First",
+        "Second"
       ],
       "correctIndex": 1,
-      "explanation": "2¹⁰⁰ is astronomically larger than 10,000."
+      "explanation": "Answer: B"
     },
     {
       "questionId": "cmp_q4",
       "type": "mcq",
-      "question": "10⁹ + 10⁹ equals:",
+      "question": "What should be compared first?",
       "options": [
-        "2×10⁹",
-        "10¹⁸",
-        "10¹⁰",
-        "20⁹"
+        "Coefficient",
+        "Exponent",
+        "Decimal",
+        "Fraction"
       ],
-      "correctIndex": 0,
-      "explanation": "Same term twice → 2×10⁹."
+      "correctIndex": 1,
+      "explanation": "Answer: B"
     },
     {
       "questionId": "cmp_q5",
       "type": "mcq",
-      "question": "Smallest distance: 1.4335×10¹², 1.439×10¹², 1.496×10¹¹ m:",
+      "question": "Which field regularly compares extremely large numbers?",
       "options": [
-        "1.496×10¹¹",
-        "1.4335×10¹²",
-        "1.439×10¹²",
-        "All equal"
+        "Astronomy",
+        "Engineering",
+        "Computer Science",
+        "All of these"
       ],
-      "correctIndex": 0,
-      "explanation": "1.496×10¹¹ = 0.1496×10¹² — smallest."
+      "correctIndex": 3,
+      "explanation": "Answer: D"
     },
     {
       "questionId": "cmp_q6",
       "type": "mcq",
-      "question": "8×10⁹ ÷ 4×10⁵ =",
+      "question": "Which is smallest? 10−2 10−4 10−6",
       "options": [
-        "2×10⁴",
-        "2×10⁹",
-        "4×10⁴",
-        "2×10⁵"
+        "10⁻²",
+        "10⁻⁴",
+        "10⁻⁶"
       ],
-      "correctIndex": 0,
-      "explanation": "8/4 = 2; 10⁹⁻⁵ = 10⁴."
+      "correctIndex": 2,
+      "explanation": "Answer: C"
     },
     {
       "questionId": "cmp_q7",
       "type": "mcq",
-      "question": "To compare a₁×10ⁿ and a₂×10ᵐ, first:",
+      "question": "Why is standard form useful?",
       "options": [
-        "Add exponents",
-        "Align to same power of 10",
-        "Multiply coefficients",
-        "Ignore exponents"
+        "Easier comparison",
+        "Fewer writing mistakes",
+        "Faster calculations",
+        "All of these"
       ],
-      "correctIndex": 1,
-      "explanation": "Convert to the same 10ᵏ to compare coefficients."
+      "correctIndex": 3,
+      "explanation": "Answer: D"
     }
   ],
   "status": "published",

@@ -331,6 +331,13 @@ export interface ActivityItem {
   videoUrl?: string;
 }
 
+/** Collapsible PDF section (heading + verbatim body). */
+export interface TopicSection {
+  heading: string;
+  content: string;
+  videoUrl?: string;
+}
+
 /** Step-by-step worked problem (used heavily in exercise topics). */
 export interface WorkedProblem {
   problemId: string;
@@ -370,6 +377,8 @@ export interface TopicContent {
   realLifeConnections?: RealLifeConnectionItem[];
   activities?: ActivityItem[];
   workedProblems?: WorkedProblem[];
+  /** Optional PDF-structured sections for collapsible topic display. */
+  sections?: TopicSection[];
   quiz: QuizQuestion[];
   status: 'draft' | 'published';
   /** UID of the human content curator who wrote this topic. */

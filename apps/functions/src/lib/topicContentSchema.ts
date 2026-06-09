@@ -68,6 +68,12 @@ export const WorkedProblemSchema = z.object({
   commonMistake: z.string().optional(),
 });
 
+export const TopicSectionSchema = z.object({
+  heading: z.string().min(1),
+  content: z.string().min(1),
+  videoUrl: z.string().regex(HTTPS_URL).optional(),
+});
+
 export const TopicContentSchema = z.object({
   curriculumId: z.string().min(1).regex(/^[a-z0-9_]+$/),
   grade: z.number().int().min(1).max(12),
@@ -84,6 +90,7 @@ export const TopicContentSchema = z.object({
   realLifeConnections: z.array(RealLifeConnectionItemSchema).min(1).optional(),
   activities: z.array(ActivityItemSchema).min(1).optional(),
   workedProblems: z.array(WorkedProblemSchema).min(1).optional(),
+  sections: z.array(TopicSectionSchema).min(1).optional(),
   quiz: z.array(QuizQuestionSchema).min(1).max(20),
   status: z.enum(['draft', 'published']).default('published'),
   curatedBy: z.string().min(1),

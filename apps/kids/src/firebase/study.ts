@@ -257,6 +257,12 @@ export interface WorkedProblem {
   commonMistake?: string;
 }
 
+export interface TopicSection {
+  heading: string;
+  content: string;
+  videoUrl?: string;
+}
+
 export interface QuizQuestion {
   questionId: string;
   type: 'mcq';
@@ -282,6 +288,7 @@ export interface TopicContent {
   realLifeConnections?: RealLifeConnectionItem[];
   activities?: ActivityItem[];
   workedProblems?: WorkedProblem[];
+  sections?: TopicSection[];
   quiz: QuizQuestion[];
   status: 'draft' | 'published';
 }

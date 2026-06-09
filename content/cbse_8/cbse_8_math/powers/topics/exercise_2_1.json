@@ -6,365 +6,465 @@
   "chapterName": "Powers",
   "topicId": "exercise_2_1",
   "topicName": "11. Exercise 2.1",
-  "explanation": "Exercise 2.1 focuses on negative integral exponents. Key rules: a⁻ⁿ = 1/aⁿ; (a/b)⁻ⁿ = (b/a)ⁿ; a⁰ = 1 for a ≠ 0; a⁻¹ = 1/a. When adding fractions from negative exponents, find a common denominator. Exponents cannot be combined across addition — only across multiplication (product law) or division (quotient law).",
+  "explanation": "Question\nExpress\n2−3\n𝑝\n\nas a rational number 𝑞.\n\n\fConcept Used\nNegative Exponent Rule\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\nSolution\n2−3\nUsing rule:\n1\n23\n1\n=\n8\n=\n\nAnswer\n1\n8\n\nCommon Mistake\n\n2−3 = −8\nWrong.\nNegative exponent does NOT mean negative number.",
   "examples": [
-    "2⁻³ = 1/2³ = 1/8",
-    "(2/3)⁻² = (3/2)² = 9/4",
-    "3⁻¹ + 4⁻¹ = 1/3 + 1/4 = 7/12"
+    "Question\nExpress\n2−3\n𝑝\n\nas a rational number 𝑞.\n\n\fConcept Used\nNegative Exponent Rule\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\nSolution\n2−3\nUsing rule:\n1\n23\n1\n=\n8\n=\n\nAnswer"
   ],
   "brainstorming": [
     {
-      "question": "What does a negative exponent mean?",
-      "answer": "It means take the reciprocal: a⁻ⁿ = 1/aⁿ. It does NOT make the answer negative."
-    },
-    {
-      "question": "Can you add exponents when adding terms like 3⁻¹ + 4⁻¹?",
-      "answer": "No. Convert to fractions first, then add. You cannot write 7⁻¹."
+      "question": "Review key rules",
+      "answer": "Question\nExpress\n2−3\n𝑝\n\nas a rational number 𝑞.\n\n\fConcept Used\nNegative Exponent Rule\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\nSolution\n2−3\nUsing rule:\n1\n23\n1\n=\n8\n=\n\nAnswer\n1\n8\n\nCommon Mistake\n\n2−3 = −8\nWrong.\nNegative exponent does NOT mean negative number."
     }
   ],
   "workedProblems": [
     {
       "problemId": "ex2_1_q1_i",
-      "question": "Express 2⁻³ as a rational number p/q.",
+      "question": "Express 2−3 𝑝 as a rational number 𝑞. \fConcept Used Negative Exponent Rule 𝑎−𝑛 = 1 𝑎𝑛",
       "conceptsUsed": [
-        "Negative Exponent Rule"
+        "Negative Exponent Rule",
+        "𝑎−𝑛 =",
+        "𝑎𝑛"
       ],
       "steps": [
-        "Apply a⁻ⁿ = 1/aⁿ",
-        "2⁻³ = 1/2³ = 1/8"
+        "2−3\nUsing rule:\n1\n23\n1\n=\n8\n="
       ],
-      "answer": "1/8",
-      "commonMistake": "2⁻³ = −8 — negative exponent does NOT mean negative number."
+      "answer": "1 8",
+      "commonMistake": "2−3 = −8\nWrong.\nNegative exponent does NOT mean negative number."
     },
     {
       "problemId": "ex2_1_q1_ii",
-      "question": "Evaluate (−4)⁻².",
-      "steps": [
-        "(−4)⁻² = 1/(−4)²",
-        "(−4)² = 16",
-        "Answer = 1/16"
+      "question": "(−4)−2 \fConcept Used 𝑎−𝑛 = 1 𝑎𝑛",
+      "conceptsUsed": [
+        "𝑎−𝑛 =",
+        "𝑎𝑛"
       ],
-      "answer": "1/16",
-      "commonMistake": "Writing 1/(−16) — squaring removes the sign first."
+      "steps": [
+        "(−4)−2\n1\n=\n(−4)2\n1\n=\n16"
+      ],
+      "answer": "1 16",
+      "commonMistake": "1\n−16\nWrong.\nBecause:\n(−4)2 = 16"
     },
     {
       "problemId": "ex2_1_q1_iii",
-      "question": "Evaluate 1/3⁻².",
+      "question": "1 3−2",
+      "conceptsUsed": [
+        "3−2 =",
+        "3−2 ="
+      ],
       "steps": [
-        "3⁻² = 1/9",
-        "1/(1/9) = 9"
+        "First:\nTherefore:\n1\n1\n=\n3−2 1\n9\n=9"
       ],
       "answer": "9",
-      "commonMistake": "Stopping at 1/9 and forgetting the outer denominator."
+      "commonMistake": "Many students stop at:\n1\n9\nand forget the outer denominator."
     },
     {
       "problemId": "ex2_1_q1_iv",
-      "question": "Evaluate (1/2)⁻⁵.",
+      "question": "1 −5 ( ) 2",
+      "conceptsUsed": [
+        "Negative exponent means reciprocal."
+      ],
       "steps": [
-        "Negative exponent flips fraction: (2/1)⁵",
-        "2⁵ = 32"
+        "Invert fraction:\n2 5\n( )\n1\n= 25\n= 32"
       ],
       "answer": "32",
-      "commonMistake": "Writing 1/32 — flip the fraction before applying the exponent."
+      "commonMistake": "1\n32\nWrong.\nNegative exponent flips the fraction first."
     },
     {
       "problemId": "ex2_1_q1_v",
-      "question": "Evaluate (2/3)⁻².",
-      "steps": [
-        "Flip fraction: (3/2)²",
-        "3²/2² = 9/4"
+      "question": "2 −2 ( ) 3",
+      "conceptsUsed": [
+        "Negative exponent ⇒ reciprocal."
       ],
-      "answer": "9/4",
-      "commonMistake": "Writing 4/9 — remember to flip the fraction first."
+      "steps": [
+        "2 −2\n3 2\n( ) =( )\n3\n2\n2\n3\n= 2\n2\n9\n=\n4"
+      ],
+      "answer": "9 4",
+      "commonMistake": "4\n9\nWrong.\nStudents forget to flip the fraction."
     },
     {
       "problemId": "ex2_1_q2_i",
-      "question": "Find the value of 3⁻¹ + 4⁻¹.",
+      "question": "Question 2(i)",
       "steps": [
-        "3⁻¹ = 1/3, 4⁻¹ = 1/4",
-        "LCM of 3 and 4 is 12",
-        "4/12 + 3/12 = 7/12"
+        "Convert each term:\n1\n3\n1\n4−1 =\n4\n3−1 =\nNow add:\n1 1\n+\n3 4\nLCM of 3 and 4 = 12\n4\n3\n+\n12 12\n7\n=\n12\n="
       ],
-      "answer": "7/12",
-      "commonMistake": "3⁻¹ + 4⁻¹ = 7⁻¹ — exponents cannot combine across addition."
+      "answer": "7 12 \fWhy This Works Negative exponent simply means reciprocal. So: 3−1 means: \"1 divided by 3\" and 4−1 means: \"1 divided by 4\"",
+      "commonMistake": "3−1 + 4−1 = 7−1\nWrong.\nExponents cannot be combined across addition."
     },
     {
       "problemId": "ex2_1_q2_ii",
-      "question": "Find the value of (3⁰ + 4⁻¹) × 2².",
+      "question": "Question 2(ii)",
       "steps": [
-        "3⁰ = 1, 4⁻¹ = 1/4",
-        "(1 + 1/4) × 4 = 5/4 × 4 = 5"
+        "First solve powers:\n30 = 1\n1\n4−1 =\n4\nSubstitute:\n1\n(1+ 4) × 22\n5\n×4\n4\n=5\n="
       ],
-      "answer": "5",
-      "commonMistake": "3⁰ = 0 — remember a⁰ = 1 for a ≠ 0."
+      "answer": "5 Why This Works Any non-zero number raised to power zero becomes 1.",
+      "commonMistake": "30 = 0\nWrong.\nRemember:\n𝑎0 = 1"
     },
     {
       "problemId": "ex2_1_q2_iii",
-      "question": "Find the value of (3⁻¹ + 4⁻¹ + 5⁻¹)⁰.",
+      "question": "Question 2(iii)",
       "steps": [
-        "Sum inside bracket is non-zero",
-        "Any non-zero number to power 0 equals 1"
+        "First check the bracket.\n1\n3\n1\n4−1 =\n4\n1\n5−1 =\n5\n3−1 =\nTheir sum is clearly not zero.\nTherefore:\n1 1 1 0\n(3 + 4 + )\n5\nUsing rule:\n𝑎0 = 1"
       ],
-      "answer": "1",
-      "commonMistake": "Calculating the entire LCM sum — only check the bracket is non-zero."
+      "answer": "1 Why This Works \fThe actual value inside the bracket does not matter. As long as it is not zero: 𝑎0 = 1",
+      "commonMistake": "Students start finding LCM and calculating the entire bracket.\nNot needed.\nJust verify the bracket is non-zero."
     },
     {
       "problemId": "ex2_1_q2_iv",
-      "question": "Find the value of [(1/3)⁻¹ − (1/4)⁻¹]⁻¹.",
+      "question": "Question 2(iv)",
       "steps": [
-        "(1/3)⁻¹ = 3, (1/4)⁻¹ = 4",
-        "(3 − 4)⁻¹ = (−1)⁻¹ = 1/(−1) = −1"
+        "First solve:\n1 −1\n( ) =3\n3\nand\n1 −1\n( ) =4\n4\n−1\n\fSubstitute:\n(3 − 4)−1\n= (−1)−1\nApply rule:\n𝑎−1 =\n1\n𝑎\n1\n−1\n= −1\n="
       ],
-      "answer": "−1",
-      "commonMistake": "(−1)⁻¹ = 1 — reciprocal of −1 is still −1."
-    },
-    {
-      "problemId": "ex2_1_q3_i",
-      "question": "Find the value of (1/2)⁻¹ + (1/3)⁻¹ + (1/4)⁻¹.",
-      "steps": [
-        "(1/2)⁻¹ = 2, (1/3)⁻¹ = 3, (1/4)⁻¹ = 4",
-        "2 + 3 + 4 = 9"
-      ],
-      "answer": "9"
+      "answer": "−1 Why This Works The exponent -1 means reciprocal. The reciprocal of -1 is still -1.",
+      "commonMistake": "(−1)−1 = 1\nWrong.\nReciprocal of -1 remains -1.\n\nQUICK REVISION TABLE\nExpression Value\n𝑎−1\n\n1\n𝑎\n\n\fExpression Value\n1\n𝑎2\n\n𝑎−2\n𝑎0\n\n1\n\n𝑎 −1\n( )\n𝑏\n\n𝑏\n𝑎"
     },
     {
       "problemId": "ex2_1_q3_ii",
-      "question": "Find the value of (1/2)⁻² + (1/3)⁻² + (1/4)⁻².",
+      "question": "Question 3(ii)",
       "steps": [
-        "(1/2)⁻² = 2² = 4",
-        "(1/3)⁻² = 3² = 9",
-        "(1/4)⁻² = 4² = 16",
-        "4 + 9 + 16 = 29"
+        "First term:\n1 −2\n( ) = 22 = 4\n2\n\fSecond term:\n1 −2\n( ) = 32 = 9\n3\nThird term:\n1 −2\n( ) = 42 = 16\n4\nAdd:\n4 + 9 + 16\n= 29"
       ],
-      "answer": "29"
-    },
-    {
-      "problemId": "ex2_1_q3_iii",
-      "question": "Find the value of (2⁻¹ × 4⁻¹) ÷ 2⁻².",
-      "steps": [
-        "2⁻¹ = 1/2, 4⁻¹ = 1/4",
-        "Product: 1/2 × 1/4 = 1/8",
-        "2⁻² = 1/4",
-        "1/8 ÷ 1/4 = 1/8 × 4 = 1/2"
-      ],
-      "answer": "1/2",
-      "commonMistake": "Reading ÷ as + — check the operator carefully."
+      "answer": "29 Why This Works Negative exponent flips the fraction. Then square normally.",
+      "commonMistake": "1 −2 1\n( ) =\n2\n4\nWrong.\nFirst flip:\n2\n1\n\n\fthen square:\n4"
     },
     {
       "problemId": "ex2_1_q3_iv",
-      "question": "Find the value of (5⁻¹ × 2⁻¹) ÷ 6⁻¹.",
+      "question": "Question 3(iv)",
       "steps": [
-        "5⁻¹ = 1/5, 2⁻¹ = 1/2, 6⁻¹ = 1/6",
-        "1/5 × 1/2 = 1/10",
-        "1/10 ÷ 1/6 = 1/10 × 6 = 6/10 = 3/5"
+        "1\n5\n1\n2−1 =\n2\n5−1 =\nMultiply:\n\f1 1\n1\n× =\n5 2 10\nNow:\n6−1 =\n1\n6\nDivide:\n1 1\n÷\n10 6\nConvert division to multiplication:\n1\n×6\n10\n6\n=\n10\n3\n=\n5"
       ],
-      "answer": "3/5"
+      "answer": "3 5 Why This Works Division of fractions means: Multiply by reciprocal.",
+      "commonMistake": "1 1\n1\n÷ =\n10 6 60\n\n\fWrong.\nWhen dividing fractions, flip the second fraction.\n\nQUICK REVISION TABLE\nExpression Value\n(1/2)−1 2\n(1/2)−2 4\n2−1\n\n1/2\n\n4−1\n\n1/4\n\n6−1\n\n1/6"
     },
     {
       "problemId": "ex2_1_q4_i",
-      "question": "Simplify (4⁻¹ × 3⁻¹)².",
-      "conceptsUsed": [
-        "Negative Exponent",
-        "Power of a Product"
-      ],
+      "question": "Question 4(i)",
       "steps": [
-        "4⁻¹ = 1/4, 3⁻¹ = 1/3",
-        "(1/4 × 1/3)² = (1/12)² = 1/144"
+        "Convert negative exponents:\n1\n4\n1\n3−1 =\n3\n4−1 =\nSubstitute:\n1 1 2\n( × )\n4 3\n1 2\n=( )\n12\nSquare numerator and denominator:\n=\n1\n144"
       ],
-      "answer": "1/144"
+      "answer": "1 144 Why This Works The exponent 2 affects the entire bracket.",
+      "commonMistake": "(4−1 × 3−1 )2 = 4−2 × 3−1\nWrong.\nExponent must apply to BOTH factors."
     },
     {
       "problemId": "ex2_1_q4_ii",
-      "question": "Simplify (5⁻¹ ÷ 6⁻¹)³.",
+      "question": "Question 4(ii)",
       "steps": [
-        "5⁻¹ = 1/5, 6⁻¹ = 1/6",
-        "1/5 ÷ 1/6 = 1/5 × 6 = 6/5",
-        "(6/5)³ = 216/125"
+        "Convert exponents:\n1\n5\n1\n6−1 =\n6\n5−1 =\nSubstitute:\n1 1 3\n( ÷ 6)\n5\nConvert division into multiplication:\n3\n1\n( × 6)\n5\n6 3\n=( )\n5\nCube numerator and denominator:\n63\n= 3\n5\n216\n=\n125"
       ],
-      "answer": "216/125"
+      "answer": "216 125 Why This Works Dividing by a fraction means multiplying by its reciprocal.",
+      "commonMistake": "1 1\n1\n÷ =\n5 6 30\nWrong.\nFractions are divided by multiplying by reciprocal."
     },
     {
       "problemId": "ex2_1_q4_iii",
-      "question": "Simplify (2⁻¹ + 3⁻¹)⁻¹.",
+      "question": "Question 4(iii)",
       "steps": [
-        "2⁻¹ = 1/2, 3⁻¹ = 1/3",
-        "1/2 + 1/3 = 5/6",
-        "(5/6)⁻¹ = 6/5"
+        "Convert exponents:\n1\n2\n1\n3−1 =\n3\n2−1 =\n\fAdd:\n1 1\n+\n2 3\nLCM = 6\n3 2\n+\n6 6\n5\n=\n6\n=\nNow apply exponent:\n5 −1\n( )\n6\nReciprocal:\n=\n6\n5"
       ],
-      "answer": "6/5"
+      "answer": "6 5 Why This Works Exponent -1 means: Take reciprocal of the entire bracket.",
+      "commonMistake": "5 −1 5\n( ) =\n6\n6\n\n\fWrong.\nNegative exponent flips the fraction."
     },
     {
       "problemId": "ex2_1_q4_iv",
-      "question": "Simplify (3⁻¹ × 4⁻¹)⁻¹ × 5⁻¹.",
+      "question": "Question 4(iv)",
       "steps": [
-        "3⁻¹ × 4⁻¹ = 1/12",
-        "(1/12)⁻¹ = 12",
-        "5⁻¹ = 1/5",
-        "12 × 1/5 = 12/5"
+        "First bracket:\n1\n3\n1\n4−1 =\n4\n3−1 =\nMultiply:\n1 1\n1\n× =\n3 4 12\nApply exponent:\n1 −1\n( ) = 12\n12\nNow:\n5−1 =\n1\n5\n\fMultiply:\n12 ×\n1 12\n=\n5\n5"
       ],
-      "answer": "12/5"
+      "answer": "12 5 Why This Works Negative exponent converts: 1 12 into: 12 by taking reciprocal.",
+      "commonMistake": "1 −1\n1\n( ) =\n12\n12\nWrong.\nNegative exponent flips the fraction.\n\nQUICK REVISION\n\n\fExpression Result\n4−1\n\n1/4\n\n3−1\n\n1/3\n\n5−1\n\n1/5\n\n(1/12)−1 12\n(5/6)−1\n\n6/5\n\nQUESTION 5 — SIMPLIFY\nThis question is important because it combines:\n•\n\nNegative exponents\n\n•\n\nPower of a power\n\n•\n\nPower of a quotient\n\n•\n\nOrder of operations\n\nThese are the kinds of questions students often fear in exams."
     },
     {
       "problemId": "ex2_1_q5_i",
-      "question": "Simplify (3² + 2²) × (1/2)³.",
+      "question": "Question 5(i)",
       "steps": [
-        "3² = 9, 2² = 4, sum = 13",
-        "(1/2)³ = 1/8",
-        "13 × 1/8 = 13/8"
+        "Calculate:\n32 = 9\n22 = 4\n\fAdd:\n9 + 4 = 13\nNow:\n1 3 1\n( ) =\n2\n8\nMultiply:\n13 ×\n=\n1\n8\n13\n8"
       ],
-      "answer": "13/8"
+      "answer": "13 8 Why This Works Powers are always evaluated before addition and multiplication.",
+      "commonMistake": "(3 + 2)2\nWrong.\nThe square applies separately to each number."
     },
     {
       "problemId": "ex2_1_q5_ii",
-      "question": "Simplify (3² − 2²) × (2/3)⁻³.",
+      "question": "Question 5(ii)",
       "steps": [
-        "9 − 4 = 5",
-        "(2/3)⁻³ = (3/2)³ = 27/8",
-        "5 × 27/8 = 135/8"
+        "First:\n32 = 9\n22 = 4\nSubtract:\n9−4= 5\nNow:\n2 −3\n3 3\n( ) =( )\n3\n2\n27\n=\n8\nMultiply:\n27\n8\n135\n=\n8\n5×"
       ],
-      "answer": "135/8"
+      "answer": "135 8 \fWhy This Works Negative exponent flips the fraction first.",
+      "commonMistake": "2 −3\n8\n( ) =\n3\n27\nWrong.\nStudents often forget to flip before cubing."
     },
     {
       "problemId": "ex2_1_q5_iii",
-      "question": "Simplify [(1/3)⁻³ − (1/2)⁻³] ÷ (1/4)⁻³.",
+      "question": "Question 5(iii)",
       "steps": [
-        "(1/3)⁻³ = 27, (1/2)⁻³ = 8",
-        "27 − 8 = 19",
-        "(1/4)⁻³ = 64",
-        "19 ÷ 64 = 19/64"
+        "First term:\n1 −3\n( ) = 33 = 27\n3\nSecond term:\n1 −3\n( ) = 23 = 8\n2\nSubtract:\n\f27 − 8 = 19\nNow denominator:\n1 −3\n( ) = 43 = 64\n4\nTherefore:\n19 ÷ 64 =\n19\n64"
       ],
-      "answer": "19/64"
+      "answer": "19 64 Why This Works Negative exponent converts fractions into whole-number powers.",
+      "commonMistake": "1 −3\n1\n( ) =\n4\n64\nWrong.\nNegative exponent flips first."
     },
     {
       "problemId": "ex2_1_q5_iv",
-      "question": "Simplify (2² + 3² − 4²) ÷ (3/2)².",
+      "question": "By what number should 5−1 be multiplied so that the product may be equal to \f( −7)−1?",
       "steps": [
-        "4 + 9 − 16 = −3",
-        "(3/2)² = 9/4",
-        "−3 ÷ 9/4 = −3 × 4/9 = −12/9 = −4/3"
+        "Calculate:\n22 = 4\n32 = 9\n42 = 16\nSubstitute:\n4 + 9 − 16\n= 13 − 16\n= −3\nNow:\n3 2 9\n( ) =\n2\n4\nTherefore:\n−3 ÷\n9\n4\nConvert division into multiplication:\n4\n9\n−12\n=\n9\n4\n=−\n3\n−3 ×",
+        "Let required number be:\n𝑥\nThen:\n5−1 × 𝑥 = (−7)−1\nConvert exponents:\n1\n1\n×𝑥 =\n5\n−7\n1\n1\n×𝑥 = −\n5\n7\nMultiply both sides by 5:\n1\n𝑥 = − ×5\n7\n5\n𝑥=−\n7",
+        "Let required number be:\n𝑥\nThen:\n1 −1\n4 −1\n( ) 𝑥=( − )\n7\n2\nConvert exponents:\n2𝑥 = −\n7\n4\nNow divide by 2:\n7 1\n𝑥=− ×\n4 2\n7\n=−\n8",
+        "Let required number be:\n𝑥\nThen:\n(−15)−1 ÷ 𝑥 = (−5)−1\n\fConvert exponents:\n−\n1\n1\n÷𝑥 =−\n15\n5\nUsing:\n𝐴\n𝐵\n−1/15\n𝑥=\n−1/5\n𝑥=\nNegative signs cancel:\n𝑥=\n1\n×5\n15\n5\n15\n1\n=\n3\n="
       ],
-      "answer": "−4/3"
+      "answer": "− 4 3 Why This Works Dividing by a fraction means multiplying by its reciprocal.",
+      "commonMistake": "−3 ÷\n\n9\n3\n=−\n4\n9\n\nWrong.\nAlways multiply by reciprocal.\n\nQUICK REVISION\nExpression Value\n(1/2)3\n\n1/8\n\n(2/3)−3 27/8\n(1/3)−3 27\n(1/4)−3 64\n(3/2)2\n\n9/4\n\nQUESTION 6\nQuestion\nBy what number should\n5−1\nbe multiplied so that the product may be equal to\n\n\f( −7)−1?\n\nConcept Used\nIf:\n𝐴×𝑥 =𝐵\nthen:\n𝑥=\n\n𝐵\n𝐴\n\nStep-by-Step Solution\nLet required number be:\n𝑥\nThen:\n5−1 × 𝑥 = (−7)−1\nConvert exponents:\n1\n1\n×𝑥 =\n5\n−7\n1\n1\n×𝑥 = −\n5\n7\nMultiply both sides by 5:\n1\n𝑥 = − ×5\n7\n5\n𝑥=−\n7\n\nAnswer\n\n\f−\n\n5\n7\n\nVerification\n1\n5\n× ( − 7)\n5\n1\n=−\n7\nCorrect.\n\nCommon Mistake\n\n5\n7\nWrong.\nStudents forget the negative sign.\n\nQUESTION 7\nQuestion\nBy what number should\n1 −1\n( )\n2\nbe multiplied so that the product may be equal to\n4 −1\n( − 7) ?\n\nConcept Used\n\n\fNegative exponent means reciprocal.\n\nStep-by-Step Solution\nLet required number be:\n𝑥\nThen:\n1 −1\n4 −1\n( ) 𝑥=( − )\n7\n2\nConvert exponents:\n2𝑥 = −\n\n7\n4\n\nNow divide by 2:\n7 1\n𝑥=− ×\n4 2\n7\n=−\n8\n\nAnswer\n−\n\n7\n8\n\nVerification\n7\n7\n2 × ( − 8) = −\n4\nCorrect.\n\nCommon Mistake\n\n\f4\n4 −1\n( − 7) = −\n7\nWrong.\nNegative exponent flips the fraction.\n\nQUESTION 8\nQuestion\nBy what number should\n(−15)−1\n\nbe divided so that the quotient may be equal to\n( −5)−1?\n\nConcept Used\nIf:\n𝐴÷𝑥 =𝐵\nthen:\n𝑥=\n\n𝐴\n𝐵\n\nStep-by-Step Solution\nLet required number be:\n𝑥\nThen:\n(−15)−1 ÷ 𝑥 = (−5)−1\n\n\fConvert exponents:\n−\n\n1\n1\n÷𝑥 =−\n15\n5\n\nUsing:\n𝐴\n𝐵\n−1/15\n𝑥=\n−1/5\n𝑥=\n\nNegative signs cancel:\n𝑥=\n\n1\n×5\n15\n\n5\n15\n1\n=\n3\n=\n\nAnswer\n1\n3\n\nVerification\n1 1\n÷\n15 3\n1\n=− ×3\n15\n1\n=−\n5\n−\n\nCorrect.\n\nCommon Mistake\n\n\f−\n\n1 1\n1\n÷ =−\n15 3\n45\n\nWrong.\nDivision by a fraction means multiply by its reciprocal."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "Question 1(i)",
+      "content": "Question\nExpress\n2−3\n𝑝\n\nas a rational number 𝑞.\n\n\fConcept Used\nNegative Exponent Rule\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\nSolution\n2−3\nUsing rule:\n1\n23\n1\n=\n8\n=\n\nAnswer\n1\n8\n\nCommon Mistake\n\n2−3 = −8\nWrong.\nNegative exponent does NOT mean negative number."
     },
     {
-      "problemId": "ex2_1_q6",
-      "question": "By what number should 5⁻¹ be multiplied so that the product equals (−7)⁻¹?",
-      "steps": [
-        "5⁻¹ × x = (−7)⁻¹",
-        "1/5 × x = −1/7",
-        "x = −1/7 × 5 = −5/7"
-      ],
-      "answer": "−5/7"
+      "heading": "Question 1(ii)",
+      "content": "Question\n(−4)−2\n\n\fConcept Used\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\nSolution\n(−4)−2\n1\n=\n(−4)2\n1\n=\n16\n\nAnswer\n1\n16\n\nCommon Mistake\n\n1\n−16\nWrong.\nBecause:\n(−4)2 = 16"
     },
     {
-      "problemId": "ex2_1_q7",
-      "question": "By what number should (1/2)⁻¹ be multiplied so that the product equals (−4/7)⁻¹?",
-      "steps": [
-        "2 × x = (−4/7)⁻¹ = −7/4",
-        "x = −7/4 ÷ 2 = −7/8"
-      ],
-      "answer": "−7/8"
+      "heading": "Question 1(iii)",
+      "content": "Question\n\n\f1\n3−2\n\nConcept Used\n3−2 =\n\n1\n32\n\n3−2 =\n\n1\n9\n\nSolution\nFirst:\n\nTherefore:\n1\n1\n=\n3−2 1\n9\n=9\n\nAnswer\n9\n\nCommon Mistake\nMany students stop at:\n1\n9\nand forget the outer denominator."
     },
     {
-      "problemId": "ex2_1_q8",
-      "question": "By what number should (−15)⁻¹ be divided so that the quotient equals (−5)⁻¹?",
-      "steps": [
-        "(−1/15) ÷ x = −1/5",
-        "x = (−1/15) / (−1/5) = 1/15 × 5 = 1/3"
-      ],
-      "answer": "1/3"
+      "heading": "Question 1(iv)",
+      "content": "Question\n1 −5\n( )\n2\n\nConcept Used\nNegative exponent means reciprocal.\n\nSolution\nInvert fraction:\n2 5\n( )\n1\n= 25\n= 32\n\nAnswer\n32\n\nCommon Mistake\n\n1\n32\nWrong.\nNegative exponent flips the fraction first."
+    },
+    {
+      "heading": "Question 1(v)",
+      "content": "Question\n\n\f2 −2\n( )\n3\n\nConcept Used\nNegative exponent ⇒ reciprocal.\n\nSolution\n2 −2\n3 2\n( ) =( )\n3\n2\n2\n3\n= 2\n2\n9\n=\n4\n\nAnswer\n9\n4\n\nCommon Mistake\n\n4\n9\nWrong.\nStudents forget to flip the fraction."
+    },
+    {
+      "heading": "QUICK QUIZ FOR APP",
+      "content": "Q1\n5−2\n\n\fAnswer:\n1\n25\n\nQ2\n3 −1\n( )\n4\nAnswer:\n4\n3\n\nQ3\n10−3\nAnswer:\n1\n1000\n\nQ4\n1 −2\n( )\n5\nAnswer:\n25"
+    },
+    {
+      "heading": "Question 2(i)",
+      "content": "Find the value of:\n3−1 + 4−1\n\nConcept Used\nNegative Exponent Rule:\n𝑎−1 =\n\n1\n𝑎\n\nStep-by-Step Solution\nConvert each term:\n1\n3\n1\n4−1 =\n4\n3−1 =\n\nNow add:\n1 1\n+\n3 4\nLCM of 3 and 4 = 12\n4\n3\n+\n12 12\n7\n=\n12\n=\n\nAnswer\n7\n12\n\n\fWhy This Works\nNegative exponent simply means reciprocal.\nSo:\n3−1\nmeans:\n\"1 divided by 3\"\nand\n4−1\nmeans:\n\"1 divided by 4\"\n\nCommon Mistake\n\n3−1 + 4−1 = 7−1\nWrong.\nExponents cannot be combined across addition."
+    },
+    {
+      "heading": "Question 2(ii)",
+      "content": "Find the value of:\n(30 + 4−1 ) × 22\n\nConcept Used\n1.\n𝑎0 = 1\n2.\n\n\f𝑎−1 =\n\n1\n𝑎\n\nStep-by-Step Solution\nFirst solve powers:\n30 = 1\n1\n4−1 =\n4\nSubstitute:\n1\n(1+ 4) × 22\n5\n×4\n4\n=5\n=\n\nAnswer\n5\n\nWhy This Works\nAny non-zero number raised to power zero becomes 1.\n\nCommon Mistake\n\n30 = 0\nWrong.\nRemember:\n𝑎0 = 1"
+    },
+    {
+      "heading": "Question 2(iii)",
+      "content": "Find the value of:\n(3−1 + 4−1 + 5−1 )0\n\nConcept Used\nAny non-zero number raised to power 0 equals 1.\n\nStep-by-Step Solution\nFirst check the bracket.\n1\n3\n1\n4−1 =\n4\n1\n5−1 =\n5\n3−1 =\n\nTheir sum is clearly not zero.\nTherefore:\n1 1 1 0\n(3 + 4 + )\n5\nUsing rule:\n𝑎0 = 1\n\nAnswer\n1\n\nWhy This Works\n\n\fThe actual value inside the bracket does not matter.\nAs long as it is not zero:\n𝑎0 = 1\n\nCommon Mistake\nStudents start finding LCM and calculating the entire bracket.\nNot needed.\nJust verify the bracket is non-zero."
+    },
+    {
+      "heading": "Question 2(iv)",
+      "content": "Find the value of:\n1 −1\n1 −1\n[( ) − ( ) ]\n3\n4\n\nConcept Used\nNegative exponent on fraction:\n𝑎 −1 𝑏\n( ) =\n𝑏\n𝑎\n\nStep-by-Step Solution\nFirst solve:\n1 −1\n( ) =3\n3\nand\n1 −1\n( ) =4\n4\n\n−1\n\n\fSubstitute:\n(3 − 4)−1\n= (−1)−1\nApply rule:\n𝑎−1 =\n\n1\n𝑎\n\n1\n−1\n= −1\n=\n\nAnswer\n−1\n\nWhy This Works\nThe exponent -1 means reciprocal.\nThe reciprocal of -1 is still -1.\n\nCommon Mistake\n\n(−1)−1 = 1\nWrong.\nReciprocal of -1 remains -1.\n\nQUICK REVISION TABLE\nExpression Value\n𝑎−1\n\n1\n𝑎\n\n\fExpression Value\n1\n𝑎2\n\n𝑎−2\n𝑎0\n\n1\n\n𝑎 −1\n( )\n𝑏\n\n𝑏\n𝑎"
+    },
+    {
+      "heading": "EXTRA QUIZ",
+      "content": "Q1\n5−1 + 2−1\nAnswer:\n1 1\n7\n+ =\n5 2 10\n\nQ2\n(70 + 2−1 ) × 2\nAnswer:\n1\n(1+ ) × 2 = 3\n2\n\nQ3\n2 −1\n( )\n5\nAnswer:\n5\n2\n\n\fQ4\n(100)0\n\nAnswer:\n1\nQUESTION 3"
+    },
+    {
+      "heading": "Question 3(i)",
+      "content": "Find the value of:\n1 −1\n1 −1\n1 −1\n( ) +( ) +( )\n2\n3\n4\n\nConcept Used\nNegative exponent of a fraction:\n𝑎 −1 𝑏\n( ) =\n𝑏\n𝑎\n\nStep-by-Step Solution\n1 −1\n( ) =2\n2\n1 −1\n( ) =3\n3\n1 −1\n( ) =4\n4\nAdd:\n2+3+4\n=9\n\n\fAnswer\n9\n\nWhy This Works\nExponent -1 simply flips the fraction.\n\nCommon Mistake\n\n1 −1 1\n( ) =\n2\n2\nWrong.\nNegative exponent means reciprocal."
+    },
+    {
+      "heading": "Question 3(ii)",
+      "content": "Find the value of:\n1 −2\n1 −2\n1 −2\n( ) +( ) +( )\n2\n3\n4\n\nConcept Used\n𝑎 −𝑛\n𝑏 𝑛\n( ) =( )\n𝑏\n𝑎\n\nStep-by-Step Solution\nFirst term:\n1 −2\n( ) = 22 = 4\n2\n\n\fSecond term:\n1 −2\n( ) = 32 = 9\n3\nThird term:\n1 −2\n( ) = 42 = 16\n4\nAdd:\n4 + 9 + 16\n= 29\n\nAnswer\n29\n\nWhy This Works\nNegative exponent flips the fraction.\nThen square normally.\n\nCommon Mistake\n\n1 −2 1\n( ) =\n2\n4\nWrong.\nFirst flip:\n2\n1\n\n\fthen square:\n4"
+    },
+    {
+      "heading": "Question 3(iii)",
+      "content": "Find the value of:\n(2−1 × 4−1 ) + 2−2\n\nConcept Used\nNegative exponent rule:\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\nStep-by-Step Solution\n1\n2\n1\n4−1 =\n4\n2−1 =\n\nMultiply:\n1 1 1\n× =\n2 4 8\nNow:\n2−2 =\n\n1\n1\n=\n22 4\n\nAdd:\n1 1\n+\n8 4\nLCM = 8\n\n\f1 2\n+\n8 8\n3\n=\n8\n=\n\nWait!\nThe NCERT answer given is:\n1\n2\nLet's carefully recheck the question from the image.\nThe actual question is:\n(2−1 × 4−1 ) ÷ 2−2\nnot plus.\n\nCorrect Solution\n1\n2\n1\n4−1 =\n4\n2−1 =\n\nMultiply:\n1 1 1\n× =\n2 4 8\nNow divide by:\n2−2 =\n\n1\n4\n\n1 1\n÷\n8 4\n1\n= ×4\n8\n1\n=\n2\n\n\fAnswer\n1\n2\n\nCommon Mistake\nStudents often read:\n÷\nas\n•\n\nand get wrong answer."
+    },
+    {
+      "heading": "Question 3(iv)",
+      "content": "Find the value of:\n(5−1 × 2−1 ) ÷ 6−1\n\nConcept Used\n𝑎−1 =\n\n1\n𝑎\n\nStep-by-Step Solution\n1\n5\n1\n2−1 =\n2\n5−1 =\n\nMultiply:\n\n\f1 1\n1\n× =\n5 2 10\nNow:\n6−1 =\n\n1\n6\n\nDivide:\n1 1\n÷\n10 6\nConvert division to multiplication:\n1\n×6\n10\n6\n=\n10\n3\n=\n5\n\nAnswer\n3\n5\n\nWhy This Works\nDivision of fractions means:\nMultiply by reciprocal.\n\nCommon Mistake\n\n1 1\n1\n÷ =\n10 6 60\n\n\fWrong.\nWhen dividing fractions, flip the second fraction.\n\nQUICK REVISION TABLE\nExpression Value\n(1/2)−1 2\n(1/2)−2 4\n2−1\n\n1/2\n\n4−1\n\n1/4\n\n6−1\n\n1/6"
+    },
+    {
+      "heading": "EXTRA QUIZ",
+      "content": "Q1\n1 −1\n( )\n5\nAnswer:\n5\n\nQ2\n1 −2\n( )\n3\nAnswer:\n9\n\nQ3\n(2−1 × 3−1)\n\n\fAnswer:\n1\n6\n\nQ4\n2−1\n4−1\nAnswer:\n1/2\n=2\n1/4\nQUESTION 4 — SIMPLIFY\nThis question is important because it teaches students how to combine multiple exponent\nrules together."
+    },
+    {
+      "heading": "Question 4(i)",
+      "content": "Simplify:\n(4−1 × 3−1 )2\n\nConcept Used\nNegative Exponent\n𝑎−1 =\n\n1\n𝑎\n\nPower of Product\n( 𝑎𝑏)𝑛 = 𝑎𝑛 𝑏 𝑛\n\nStep-by-Step Solution\n\n\fConvert negative exponents:\n1\n4\n1\n3−1 =\n3\n4−1 =\n\nSubstitute:\n1 1 2\n( × )\n4 3\n1 2\n=( )\n12\nSquare numerator and denominator:\n=\n\n1\n144\n\nAnswer\n1\n144\n\nWhy This Works\nThe exponent 2 affects the entire bracket.\n\nCommon Mistake\n\n(4−1 × 3−1 )2 = 4−2 × 3−1\nWrong.\nExponent must apply to BOTH factors."
+    },
+    {
+      "heading": "Question 4(ii)",
+      "content": "Simplify:\n(5−1 ÷ 6−1 )3\n\nConcept Used\nNegative exponent\nDivision of fractions\nPower of a quotient\n\nStep-by-Step Solution\nConvert exponents:\n1\n5\n1\n6−1 =\n6\n5−1 =\n\nSubstitute:\n1 1 3\n( ÷ 6)\n5\nConvert division into multiplication:\n3\n1\n( × 6)\n5\n6 3\n=( )\n5\n\nCube numerator and denominator:\n63\n= 3\n5\n216\n=\n125\n\nAnswer\n\n\f216\n125\n\nWhy This Works\nDividing by a fraction means multiplying by its reciprocal.\n\nCommon Mistake\n\n1 1\n1\n÷ =\n5 6 30\nWrong.\nFractions are divided by multiplying by reciprocal."
+    },
+    {
+      "heading": "Question 4(iii)",
+      "content": "Simplify:\n(2−1 + 3−1 )−1\n\nConcept Used\nNegative exponent\nAddition of fractions\nReciprocal\n\nStep-by-Step Solution\nConvert exponents:\n1\n2\n1\n3−1 =\n3\n2−1 =\n\n\fAdd:\n1 1\n+\n2 3\nLCM = 6\n3 2\n+\n6 6\n5\n=\n6\n=\n\nNow apply exponent:\n5 −1\n( )\n6\nReciprocal:\n=\n\n6\n5\n\nAnswer\n6\n5\n\nWhy This Works\nExponent -1 means:\nTake reciprocal of the entire bracket.\n\nCommon Mistake\n\n5 −1 5\n( ) =\n6\n6\n\n\fWrong.\nNegative exponent flips the fraction."
+    },
+    {
+      "heading": "Question 4(iv)",
+      "content": "Simplify:\n(3−1 × 4−1 )−1 × 5−1\n\nConcept Used\nNegative exponent\nReciprocal\nMultiplication of fractions\n\nStep-by-Step Solution\nFirst bracket:\n1\n3\n1\n4−1 =\n4\n3−1 =\n\nMultiply:\n1 1\n1\n× =\n3 4 12\nApply exponent:\n1 −1\n( ) = 12\n12\nNow:\n5−1 =\n\n1\n5\n\n\fMultiply:\n12 ×\n\n1 12\n=\n5\n5\n\nAnswer\n12\n5\n\nWhy This Works\nNegative exponent converts:\n1\n12\ninto:\n12\nby taking reciprocal.\n\nCommon Mistake\n\n1 −1\n1\n( ) =\n12\n12\nWrong.\nNegative exponent flips the fraction.\n\nQUICK REVISION\n\n\fExpression Result\n4−1\n\n1/4\n\n3−1\n\n1/3\n\n5−1\n\n1/5\n\n(1/12)−1 12\n(5/6)−1\n\n6/5\n\nQUESTION 5 — SIMPLIFY\nThis question is important because it combines:\n•\n\nNegative exponents\n\n•\n\nPower of a power\n\n•\n\nPower of a quotient\n\n•\n\nOrder of operations\n\nThese are the kinds of questions students often fear in exams."
+    },
+    {
+      "heading": "Question 5(i)",
+      "content": "Simplify\n1 3\n(32 + 22 ) × ( )\n2\n\nConcept Used\nEvaluate powers first.\n\nStep-by-Step Solution\nCalculate:\n32 = 9\n22 = 4\n\n\fAdd:\n9 + 4 = 13\nNow:\n1 3 1\n( ) =\n2\n8\nMultiply:\n13 ×\n=\n\n1\n8\n\n13\n8\n\nAnswer\n13\n8\n\nWhy This Works\nPowers are always evaluated before addition and multiplication.\n\nCommon Mistake\n\n(3 + 2)2\nWrong.\nThe square applies separately to each number."
+    },
+    {
+      "heading": "Question 5(ii)",
+      "content": "Simplify\n\n\f2 −3\n(3 − 2 ) × ( )\n3\n2\n\n2\n\nConcept Used\nNegative exponent means reciprocal.\n\nStep-by-Step Solution\nFirst:\n32 = 9\n22 = 4\nSubtract:\n9−4= 5\nNow:\n2 −3\n3 3\n( ) =( )\n3\n2\n27\n=\n8\nMultiply:\n27\n8\n135\n=\n8\n5×\n\nAnswer\n135\n8\n\n\fWhy This Works\nNegative exponent flips the fraction first.\n\nCommon Mistake\n\n2 −3\n8\n( ) =\n3\n27\nWrong.\nStudents often forget to flip before cubing."
+    },
+    {
+      "heading": "Question 5(iii)",
+      "content": "Simplify\n1 −3\n1 −3\n1 −3\n[(3) − (2) ] ÷ ( )\n4\n\nConcept Used\nNegative exponents\nDivision of fractions\n\nStep-by-Step Solution\nFirst term:\n1 −3\n( ) = 33 = 27\n3\nSecond term:\n1 −3\n( ) = 23 = 8\n2\nSubtract:\n\n\f27 − 8 = 19\nNow denominator:\n1 −3\n( ) = 43 = 64\n4\nTherefore:\n19 ÷ 64 =\n\n19\n64\n\nAnswer\n19\n64\n\nWhy This Works\nNegative exponent converts fractions into whole-number powers.\n\nCommon Mistake\n\n1 −3\n1\n( ) =\n4\n64\nWrong.\nNegative exponent flips first."
+    },
+    {
+      "heading": "Question 5(iv)",
+      "content": "Simplify\n3 2\n(22 + 32 − 42 ) ÷ ( )\n2\n\n\fConcept Used\nEvaluate powers first.\n\nStep-by-Step Solution\nCalculate:\n22 = 4\n32 = 9\n42 = 16\nSubstitute:\n4 + 9 − 16\n= 13 − 16\n= −3\nNow:\n3 2 9\n( ) =\n2\n4\nTherefore:\n−3 ÷\n\n9\n4\n\nConvert division into multiplication:\n4\n9\n−12\n=\n9\n4\n=−\n3\n−3 ×\n\nAnswer\n\n\f−\n\n4\n3\n\nWhy This Works\nDividing by a fraction means multiplying by its reciprocal.\n\nCommon Mistake\n\n−3 ÷\n\n9\n3\n=−\n4\n9\n\nWrong.\nAlways multiply by reciprocal.\n\nQUICK REVISION\nExpression Value\n(1/2)3\n\n1/8\n\n(2/3)−3 27/8\n(1/3)−3 27\n(1/4)−3 64\n(3/2)2\n\n9/4\n\nQUESTION 6\nQuestion\nBy what number should\n5−1\nbe multiplied so that the product may be equal to\n\n\f( −7)−1?\n\nConcept Used\nIf:\n𝐴×𝑥 =𝐵\nthen:\n𝑥=\n\n𝐵\n𝐴\n\nStep-by-Step Solution\nLet required number be:\n𝑥\nThen:\n5−1 × 𝑥 = (−7)−1\nConvert exponents:\n1\n1\n×𝑥 =\n5\n−7\n1\n1\n×𝑥 = −\n5\n7\nMultiply both sides by 5:\n1\n𝑥 = − ×5\n7\n5\n𝑥=−\n7\n\nAnswer\n\n\f−\n\n5\n7\n\nVerification\n1\n5\n× ( − 7)\n5\n1\n=−\n7\nCorrect.\n\nCommon Mistake\n\n5\n7\nWrong.\nStudents forget the negative sign.\n\nQUESTION 7\nQuestion\nBy what number should\n1 −1\n( )\n2\nbe multiplied so that the product may be equal to\n4 −1\n( − 7) ?\n\nConcept Used\n\n\fNegative exponent means reciprocal.\n\nStep-by-Step Solution\nLet required number be:\n𝑥\nThen:\n1 −1\n4 −1\n( ) 𝑥=( − )\n7\n2\nConvert exponents:\n2𝑥 = −\n\n7\n4\n\nNow divide by 2:\n7 1\n𝑥=− ×\n4 2\n7\n=−\n8\n\nAnswer\n−\n\n7\n8\n\nVerification\n7\n7\n2 × ( − 8) = −\n4\nCorrect.\n\nCommon Mistake\n\n\f4\n4 −1\n( − 7) = −\n7\nWrong.\nNegative exponent flips the fraction.\n\nQUESTION 8\nQuestion\nBy what number should\n(−15)−1\n\nbe divided so that the quotient may be equal to\n( −5)−1?\n\nConcept Used\nIf:\n𝐴÷𝑥 =𝐵\nthen:\n𝑥=\n\n𝐴\n𝐵\n\nStep-by-Step Solution\nLet required number be:\n𝑥\nThen:\n(−15)−1 ÷ 𝑥 = (−5)−1\n\n\fConvert exponents:\n−\n\n1\n1\n÷𝑥 =−\n15\n5\n\nUsing:\n𝐴\n𝐵\n−1/15\n𝑥=\n−1/5\n𝑥=\n\nNegative signs cancel:\n𝑥=\n\n1\n×5\n15\n\n5\n15\n1\n=\n3\n=\n\nAnswer\n1\n3\n\nVerification\n1 1\n÷\n15 3\n1\n=− ×3\n15\n1\n=−\n5\n−\n\nCorrect.\n\nCommon Mistake\n\n\f−\n\n1 1\n1\n÷ =−\n15 3\n45\n\nWrong.\nDivision by a fraction means multiply by its reciprocal."
     }
   ],
   "quiz": [
     {
-      "questionId": "ex21_q1",
+      "questionId": "ex2_1_q1",
       "type": "mcq",
-      "question": "5⁻² =",
+      "question": "5−2",
       "options": [
-        "1/25",
-        "−25",
+        "1 25",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
+      ],
+      "correctIndex": 0,
+      "explanation": "Answer: 1 25"
+    },
+    {
+      "questionId": "ex2_1_q2",
+      "type": "mcq",
+      "question": "3 −1 ( ) 4",
+      "options": [
+        "4 3",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
+      ],
+      "correctIndex": 0,
+      "explanation": "Answer: 4 3"
+    },
+    {
+      "questionId": "ex2_1_q3",
+      "type": "mcq",
+      "question": "10−3",
+      "options": [
+        "1 1000",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
+      ],
+      "correctIndex": 0,
+      "explanation": "Answer: 1 1000"
+    },
+    {
+      "questionId": "ex2_1_q4",
+      "type": "mcq",
+      "question": "1 −2 ( ) 5",
+      "options": [
         "25",
-        "−1/25"
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
       ],
       "correctIndex": 0,
-      "explanation": "5⁻² = 1/5² = 1/25."
+      "explanation": "Answer: 25"
     },
     {
-      "questionId": "ex21_q2",
+      "questionId": "ex2_1_q1",
       "type": "mcq",
-      "question": "(3/4)⁻¹ =",
+      "question": "5−1 + 2−1",
       "options": [
-        "4/3",
-        "3/4",
-        "−4/3",
-        "1/12"
+        "1 1 7 + = 5 2 10",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
       ],
       "correctIndex": 0,
-      "explanation": "Negative exponent flips the fraction."
+      "explanation": "Answer: 1 1 7 + = 5 2 10"
     },
     {
-      "questionId": "ex21_q3",
+      "questionId": "ex2_1_q2",
       "type": "mcq",
-      "question": "10⁻³ =",
+      "question": "(70 + 2−1 ) × 2",
       "options": [
-        "1/1000",
-        "1000",
-        "−1000",
-        "0.001 with wrong sign"
+        "1 (1+ ) × 2 = 3 2",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
       ],
       "correctIndex": 0,
-      "explanation": "10⁻³ = 1/10³ = 1/1000."
+      "explanation": "Answer: 1 (1+ ) × 2 = 3 2"
     },
     {
-      "questionId": "ex21_q4",
+      "questionId": "ex2_1_q3",
       "type": "mcq",
-      "question": "(1/5)⁻² =",
+      "question": "2 −1 ( ) 5",
       "options": [
-        "25",
-        "1/25",
+        "5 2",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
+      ],
+      "correctIndex": 0,
+      "explanation": "Answer: 5 2"
+    },
+    {
+      "questionId": "ex2_1_q4",
+      "type": "mcq",
+      "question": "(100)0",
+      "options": [
+        "1 QUESTION 3",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
+      ],
+      "correctIndex": 0,
+      "explanation": "Answer: 1 QUESTION 3"
+    },
+    {
+      "questionId": "ex2_1_q1",
+      "type": "mcq",
+      "question": "1 −1 ( ) 5",
+      "options": [
         "5",
-        "−25"
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
       ],
       "correctIndex": 0,
-      "explanation": "Flip to 5, then square: 25."
+      "explanation": "Answer: 5"
     },
     {
-      "questionId": "ex21_q5",
+      "questionId": "ex2_1_q2",
       "type": "mcq",
-      "question": "5⁻¹ + 2⁻¹ =",
+      "question": "1 −2 ( ) 3",
       "options": [
-        "7/10",
-        "7⁻¹",
-        "3/10",
-        "1/7"
+        "9",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
       ],
       "correctIndex": 0,
-      "explanation": "1/5 + 1/2 = 7/10."
+      "explanation": "Answer: 9"
     },
     {
-      "questionId": "ex21_q6",
+      "questionId": "ex2_1_q3",
       "type": "mcq",
-      "question": "(7⁰ + 2⁻¹) × 2 =",
+      "question": "(2−1 × 3−1)",
       "options": [
-        "3",
-        "2",
-        "4",
-        "1"
+        "1 6",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
       ],
       "correctIndex": 0,
-      "explanation": "(1 + 1/2) × 2 = 3."
+      "explanation": "Answer: 1 6"
     },
     {
-      "questionId": "ex21_q7",
+      "questionId": "ex2_1_q4",
       "type": "mcq",
-      "question": "(2/5)⁻¹ =",
+      "question": "2−1 4−1",
       "options": [
-        "5/2",
-        "2/5",
-        "−5/2",
-        "5⁻²"
+        "1/2 =2 1/4 QUESTION 4 — SIMPLIFY This question is important because it teaches students how to combine multiple exponent rules together.",
+        "Review the worked solution above",
+        "Check the concept used",
+        "Try again with the rule"
       ],
       "correctIndex": 0,
-      "explanation": "Reciprocal of 2/5 is 5/2."
+      "explanation": "Answer: 1/2 =2 1/4 QUESTION 4 — SIMPLIFY This question is important because it teaches students how to combine multiple exponent rules together."
     }
   ],
   "status": "published",

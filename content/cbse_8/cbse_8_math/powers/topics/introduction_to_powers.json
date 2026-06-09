@@ -6,90 +6,116 @@
   "chapterName": "Powers",
   "topicId": "introduction_to_powers",
   "topicName": "1. Introduction to Powers",
-  "explanation": "A power (or exponent) is a compact way to write repeated multiplication. In aⁿ, a is the base and n is the exponent — meaning a is multiplied by itself n times. Instead of writing 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2, we write 2⁸. Powers are mathematical shorthand, like \"kg\" is shorter than \"kilogram\". Special cases: a¹ = a (exponent 1 changes nothing), and a⁰ = 1 for any non-zero a.",
+  "explanation": "Why Were Powers Invented?\nImagine I ask you to write:\n2×2×2×2×2×2×2×2\nNot too difficult.\nNow imagine:\n2 multiplied by itself 100 times.\nWriting this becomes annoying.\nMathematicians wanted a shorter way.\nSo they invented:\n28\ninstead of\n2×2×2×2×2×2×2×2\nThis shorter form is called a power or exponent.\n\nWhat Does 2⁸ Mean?\n28\nmeans:\n2×2×2×2×2×2×2×2\nHere:\nBase\n\n\f2\nThe number being multiplied repeatedly.\n\nExponent (Power)\n8\nTells us how many times the base is multiplied by itself.\n\nAnother Example\n53\nmeans:\n5×5×5\n= 125\n\nImportant Terms\nBase\nThe repeated number.\nExample:\nIn\n74\nBase = 7\n\nExponent\nNumber written above.\nExample:\nIn\n74\n\n\fExponent = 4\n\nPower\nThe complete expression.\nExample:\n74\nis called a power.\n\nWhy Is This Useful?\nInstead of writing:\n10 × 10 × 10 × 10 × 10 × 10\nwe write:\n106\nMuch shorter.\nMuch cleaner.\nScientists, engineers, programmers and calculators use this every day.\n\nSpecial Cases\nAny Number Raised to Power 1\n51 = 5\nExponent 1 changes nothing.\n\nAny Non-Zero Number Raised to Power 0\n50 = 1\n1000 = 1\n\n\f1 0\n( ) =1\n2\nThis looks strange but we'll understand WHY later.",
   "examples": [
-    "2⁸ = 2 × 2 × 2 × 2 × 2 × 2 × 2 × 2",
-    "5³ = 5 × 5 × 5 = 125",
-    "10⁶ = 10 × 10 × 10 × 10 × 10 × 10 (much shorter than writing all factors)",
-    "7⁴: base = 7, exponent = 4"
+    "Why Were Powers Invented?\nImagine I ask you to write:\n2×2×2×2×2×2×2×2\nNot too difficult.\nNow imagine:\n2 multiplied by itself 100 times.\nWriting this becomes annoying.\nMathematicians wanted a shorter w"
   ],
   "videoUrl": "https://youtu.be/NS4vHqJIPiE",
   "brainstorming": [
     {
       "question": "Why do we write powers at all?",
-      "answer": "Because numbers can become enormous. 10¹⁰⁰ would require writing 10 one hundred times — powers save time and space.",
-      "videoUrl": "https://youtu.be/uB4HlQW_siE"
+      "answer": "Because numbers can become enormous.\nImagine:\n\n\f10100\nWriting:\n10 × 10 × 10 × 10 ...\n100 times\nwould waste time and space.\nPowers are mathematical shorthand.\nJust like:\n\"kg\" is shorter than \"kilogram\"\nPowers are shorter than repeated multiplication."
     },
     {
       "question": "Why is 2³ called \"2 cubed\"?",
-      "answer": "2³ = 8 can represent the volume of a cube with side 2. Similarly 2² represents area of a square — hence \"squared\"."
+      "answer": "Ancient mathematicians noticed:\n23 = 8\ncan represent the volume of a cube with side length 2.\nThat's why power 3 became known as:\n\"Cubed\"\nSimilarly:\n22\n\n\frepresents area of a square.\nSo it became known as:\n\"Squared\""
     },
     {
       "question": "Why is any number raised to power 0 equal to 1?",
-      "answer": "Observe: 2⁴=16, 2³=8, 2²=4, 2¹=2. Each step divides by 2, so 2⁰=1. The pattern demands it.",
-      "videoUrl": "https://youtu.be/mYtmSx_dN_I"
+      "answer": "Observe pattern:\n24 = 16\n23 = 8\n22 = 4\n21 = 2\nEvery time exponent decreases by 1,\nvalue divides by 2.\nSo:\n20 = 1\nThe pattern demands it."
     }
   ],
   "misconceptions": [
     {
-      "wrong": "2³ = 2×3 = 6",
-      "correct": "2³ = 2 × 2 × 2 = 8. Exponent means repeated multiplication, not multiplication by the exponent."
+      "wrong": "2³ = 2×3",
+      "correct": "23 = 2 × 2 × 2 = 8"
     },
     {
       "wrong": "5² = 10",
-      "correct": "5² = 25, not 5×2."
+      "correct": "52 = 25"
     },
     {
-      "wrong": "Bigger exponent means addition",
-      "correct": "Exponent means repeated multiplication, not addition."
+      "wrong": "Bigger exponent means addition.",
+      "correct": "Exponent means repeated multiplication."
     },
     {
-      "wrong": "Power and multiplication are unrelated",
+      "wrong": "Power and multiplication are unrelated.",
       "correct": "Powers are simply repeated multiplication."
     },
     {
-      "wrong": "Any number raised to power 0 equals 0",
-      "correct": "5⁰ = 1 (for any non-zero base)."
+      "wrong": "Any number raised to power 0 equals 0.",
+      "correct": "50 = 1"
     }
   ],
   "realLifeConnections": [
     {
-      "title": "Computer storage",
-      "description": "Computers use powers of 2: 2¹⁰ = 1024 bytes, 2²⁰ ≈ 1 MB, 2³⁰ ≈ 1 GB.",
+      "title": "Real Life Connection 1 — Computer Storage",
+      "description": "Computers work using powers of 2.\nExamples:\n•\n\n2¹⁰ = 1024 bytes\n\n•\n\n2²⁰ = 1 MB (approximately)\n\n•\n\n2³⁰ = 1 GB (approximately)\n\nEvery phone and computer uses powers.\n\nVideo Search Query\nwhy computers use powers of 2\nbinary numbers and computer memory\n\nhttps://youtu.be/A0uhRjFS05A?si=PLf8sOZ9xeQpBY6F",
       "videoUrl": "https://youtu.be/A0uhRjFS05A"
     },
     {
-      "title": "Viral social media growth",
-      "description": "One person shares with 2 friends, each shares with 2 more: Day 1→2, Day 2→4, Day 3→8 — powers in action."
+      "title": "Real Life Connection 2 — Viral Social Media Growth",
+      "description": "Suppose:\nOne person shares a video with 2 friends.\nEach friend shares with 2 more.\nThen:\nDay 1 → 2 people\nDay 2 → 4 people\nDay 3 → 8 people\nDay 4 → 16 people\nThis follows powers.\n\n\fVideo Search Query\nexponential growth explained visually\nviral growth animation"
     },
     {
-      "title": "Chessboard rice problem",
-      "description": "Legend: 1 grain on first square, 2 on second, 4 on third — numbers explode rapidly through powers."
+      "title": "Real Life Connection 3 — Chessboard Rice Problem",
+      "description": "Legend:\n1 grain on first square\n2 on second\n4 on third\n8 on fourth\nNumbers explode rapidly.\nThis is powers in action.\n\nVideo Search Query\nrice on chessboard exponential growth\nchessboard powers animation"
     },
     {
-      "title": "Population growth",
-      "description": "Bacteria doubling: 1, 2, 4, 8, 16, 32… is repeated multiplication."
+      "title": "Real Life Connection 4 — Population Growth",
+      "description": "Many populations grow exponentially.\nExample:\nBacteria:\n1\n2\n4\n8\n16\n32\n\n\fThis is repeated multiplication.\n\nVideo Search Query\nbacteria growth exponential animation\npopulation growth powers"
     },
     {
-      "title": "Compound interest",
-      "description": "Money grows through repeated multiplication — banks and investors care about exponents."
+      "title": "Real Life Connection 5 — Compound Interest",
+      "description": "Money grows through repeated multiplication.\nThis is why banks and investors care about exponents.\n\nVideo Search Query\ncompound interest animation\npower of compounding explained"
     }
   ],
   "activities": [
     {
-      "title": "Paper folding activity",
-      "instructions": "Fold a paper 1, 2, 3, 4 times. Observe layers: 2, 4, 8, 16 — this demonstrates powers."
+      "title": "Paper Folding Activity",
+      "instructions": "Take a paper.\nFold:\n1 time\n2 times\n3 times\n4 times\nObserve:\nNumber of layers grows rapidly.\nApproximate pattern:\n2\n4\n\n\f8\n16\nThis demonstrates powers."
     },
     {
-      "title": "Rice grain activity",
-      "instructions": "Draw 8 chessboard squares. Place 1, 2, 4, 8 grains on successive squares. Observe how quickly powers grow."
+      "title": "Rice Grain Activity",
+      "instructions": "Draw 8 chessboard squares.\nPlace:\nSquare 1 → 1 grain\nSquare 2 → 2 grains\nSquare 3 → 4 grains\nSquare 4 → 8 grains\nContinue.\nObserve how quickly powers grow."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "1. DETAILED EXPLANATION",
+      "content": "Why Were Powers Invented?\nImagine I ask you to write:\n2×2×2×2×2×2×2×2\nNot too difficult.\nNow imagine:\n2 multiplied by itself 100 times.\nWriting this becomes annoying.\nMathematicians wanted a shorter way.\nSo they invented:\n28\ninstead of\n2×2×2×2×2×2×2×2\nThis shorter form is called a power or exponent.\n\nWhat Does 2⁸ Mean?\n28\nmeans:\n2×2×2×2×2×2×2×2\nHere:\nBase\n\n\f2\nThe number being multiplied repeatedly.\n\nExponent (Power)\n8\nTells us how many times the base is multiplied by itself.\n\nAnother Example\n53\nmeans:\n5×5×5\n= 125\n\nImportant Terms\nBase\nThe repeated number.\nExample:\nIn\n74\nBase = 7\n\nExponent\nNumber written above.\nExample:\nIn\n74\n\n\fExponent = 4\n\nPower\nThe complete expression.\nExample:\n74\nis called a power.\n\nWhy Is This Useful?\nInstead of writing:\n10 × 10 × 10 × 10 × 10 × 10\nwe write:\n106\nMuch shorter.\nMuch cleaner.\nScientists, engineers, programmers and calculators use this every day.\n\nSpecial Cases\nAny Number Raised to Power 1\n51 = 5\nExponent 1 changes nothing.\n\nAny Non-Zero Number Raised to Power 0\n50 = 1\n1000 = 1\n\n\f1 0\n( ) =1\n2\nThis looks strange but we'll understand WHY later."
+    },
+    {
+      "heading": "2. MAIN VIDEO SEARCH QUERIES",
+      "content": "Choose ONE short visual video.\nMain Video Queries\n1. Exponents explained visually for beginners\nhttps://youtu.be/NS4vHqJIPiE?si=73PxMzWZWTi2Wmzn\n\n2. Powers and exponents class 8 animation\nhttps://youtu.be/USXYW64eg4s?si=XcSc3buo8jQAWoD_\n\n3. What does 2 power 5 actually mean\nhttps://youtu.be/RGOvqsYlh-c?si=Wy_BD0E5lM8lfJAR\n\n4. Introduction to powers visual explanation\nhttps://youtu.be/b6lRQzyzEEI?si=njE8WX5-dm-dS-xo",
+      "videoUrl": "https://youtu.be/NS4vHqJIPiE"
+    },
+    {
+      "heading": "3. CURIOSITY LAYER",
+      "content": "Curiosity Question 1\nWhy do we write powers at all?\nWhy not simply write multiplication?\n\nAnswer\nBecause numbers can become enormous.\nImagine:\n\n\f10100\nWriting:\n10 × 10 × 10 × 10 ...\n100 times\nwould waste time and space.\nPowers are mathematical shorthand.\nJust like:\n\"kg\" is shorter than \"kilogram\"\nPowers are shorter than repeated multiplication.\n\nVideo Search Query\nwhy exponents were invented\nhistory of exponents animation\nhttps://youtu.be/uB4HlQW_siE?si=Uu0hqJ6HYgPjHZdS\n\nCuriosity Question 2\nWhy is 2³ called \"2 cubed\"?\n\nAnswer\nAncient mathematicians noticed:\n23 = 8\ncan represent the volume of a cube with side length 2.\nThat's why power 3 became known as:\n\"Cubed\"\nSimilarly:\n22\n\n\frepresents area of a square.\nSo it became known as:\n\"Squared\"\n\nVideo Search Query\nwhy squared and cubed explained visually\narea square and volume cube exponents\n\nCuriosity Question 3\nWhy is any number raised to power 0 equal to 1?\n\nAnswer\nObserve pattern:\n24 = 16\n23 = 8\n22 = 4\n21 = 2\nEvery time exponent decreases by 1,\nvalue divides by 2.\nSo:\n20 = 1\nThe pattern demands it.\n\nVideo Search Query\nwhy anything power zero equals one\npower zero visual explanation\nhttps://youtu.be/mYtmSx_dN_I?si=WnqYclEiynJ2QNaY"
+    },
+    {
+      "heading": "4. REAL-LIFE CONNECTIONS",
+      "content": "Real Life Connection 1 — Computer Storage\nComputers work using powers of 2.\nExamples:\n•\n\n2¹⁰ = 1024 bytes\n\n•\n\n2²⁰ = 1 MB (approximately)\n\n•\n\n2³⁰ = 1 GB (approximately)\n\nEvery phone and computer uses powers.\n\nVideo Search Query\nwhy computers use powers of 2\nbinary numbers and computer memory\n\nhttps://youtu.be/A0uhRjFS05A?si=PLf8sOZ9xeQpBY6F\n\nReal Life Connection 2 — Viral Social Media Growth\nSuppose:\nOne person shares a video with 2 friends.\nEach friend shares with 2 more.\nThen:\nDay 1 → 2 people\nDay 2 → 4 people\nDay 3 → 8 people\nDay 4 → 16 people\nThis follows powers.\n\n\fVideo Search Query\nexponential growth explained visually\nviral growth animation\n\nReal Life Connection 3 — Chessboard Rice Problem\nLegend:\n1 grain on first square\n2 on second\n4 on third\n8 on fourth\nNumbers explode rapidly.\nThis is powers in action.\n\nVideo Search Query\nrice on chessboard exponential growth\nchessboard powers animation\n\nReal Life Connection 4 — Population Growth\nMany populations grow exponentially.\nExample:\nBacteria:\n1\n2\n4\n8\n16\n32\n\n\fThis is repeated multiplication.\n\nVideo Search Query\nbacteria growth exponential animation\npopulation growth powers\n\nReal Life Connection 5 — Compound Interest\nMoney grows through repeated multiplication.\nThis is why banks and investors care about exponents.\n\nVideo Search Query\ncompound interest animation\npower of compounding explained"
+    },
+    {
+      "heading": "5. MISCONCEPTIONS",
+      "content": "Misconception 1\n2³ = 2×3\nWrong\n23 = 2 × 2 × 2 = 8\n\nMisconception 2\n5² = 10\nWrong\n52 = 25\n\nMisconception 3\n\n\fBigger exponent means addition.\nWrong\nExponent means repeated multiplication.\n\nMisconception 4\nPower and multiplication are unrelated.\nWrong\nPowers are simply repeated multiplication.\n\nMisconception 5\nAny number raised to power 0 equals 0.\nWrong\n50 = 1"
+    },
+    {
+      "heading": "6. EXPERIMENT / ACTIVITY",
+      "content": "Paper Folding Activity\nTake a paper.\nFold:\n1 time\n2 times\n3 times\n4 times\nObserve:\nNumber of layers grows rapidly.\nApproximate pattern:\n2\n4\n\n\f8\n16\nThis demonstrates powers.\n\nRice Grain Activity\nDraw 8 chessboard squares.\nPlace:\nSquare 1 → 1 grain\nSquare 2 → 2 grains\nSquare 3 → 4 grains\nSquare 4 → 8 grains\nContinue.\nObserve how quickly powers grow."
+    },
+    {
+      "heading": "7. QUIZ",
+      "content": "Q1\nWhat does:\n34\nmean?\nA. 3×4\nB. 3+3+3+3\nC. 3×3×3×3\nD. 12\nAnswer: C\n\nQ2\nIn:\n\n\f53\nthe base is:\nA. 3\nB. 5\nC. 15\nD. 125\nAnswer: B\n\nQ3\nIn:\n53\nthe exponent is:\nA. 5\nB. 15\nC. 125\nD. 3\nAnswer: D\n\nQ4\nWhat is:\n25\nA. 10\nB. 25\nC. 32\nD. 64\nAnswer: C\n\n\fQ5\nWhat is:\n103\nA. 30\nB. 100\nC. 1000\nD. 10000\nAnswer: C\n\nQ6\nWhat is:\n70\nA. 0\nB. 1\nC. 7\nD. 70\nAnswer: B\n\nQ7\nWhy do mathematicians use powers?\nA. To make numbers longer\nB. To shorten repeated multiplication\nC. To avoid calculations\nD. None\nAnswer: B"
     }
   ],
   "quiz": [
     {
       "questionId": "intro_q1",
       "type": "mcq",
-      "question": "What does 3⁴ mean?",
+      "question": "What does: 34 mean?",
       "options": [
         "3×4",
         "3+3+3+3",
@@ -97,12 +123,12 @@
         "12"
       ],
       "correctIndex": 2,
-      "explanation": "3⁴ = 3 × 3 × 3 × 3."
+      "explanation": "Answer: C"
     },
     {
       "questionId": "intro_q2",
       "type": "mcq",
-      "question": "In 5³, the base is:",
+      "question": "In: 53 the base is:",
       "options": [
         "3",
         "5",
@@ -110,12 +136,12 @@
         "125"
       ],
       "correctIndex": 1,
-      "explanation": "The base is the repeated number: 5."
+      "explanation": "Answer: B"
     },
     {
       "questionId": "intro_q3",
       "type": "mcq",
-      "question": "In 5³, the exponent is:",
+      "question": "In: 53 the exponent is:",
       "options": [
         "5",
         "15",
@@ -123,12 +149,12 @@
         "3"
       ],
       "correctIndex": 3,
-      "explanation": "The exponent is 3."
+      "explanation": "Answer: D"
     },
     {
       "questionId": "intro_q4",
       "type": "mcq",
-      "question": "What is 2⁵?",
+      "question": "What is: 25",
       "options": [
         "10",
         "25",
@@ -136,12 +162,12 @@
         "64"
       ],
       "correctIndex": 2,
-      "explanation": "2⁵ = 32."
+      "explanation": "Answer: C"
     },
     {
       "questionId": "intro_q5",
       "type": "mcq",
-      "question": "What is 10³?",
+      "question": "What is: 103",
       "options": [
         "30",
         "100",
@@ -149,12 +175,12 @@
         "10000"
       ],
       "correctIndex": 2,
-      "explanation": "10³ = 1000."
+      "explanation": "Answer: C"
     },
     {
       "questionId": "intro_q6",
       "type": "mcq",
-      "question": "What is 7⁰?",
+      "question": "What is: 70",
       "options": [
         "0",
         "1",
@@ -162,7 +188,7 @@
         "70"
       ],
       "correctIndex": 1,
-      "explanation": "Any non-zero number to power 0 equals 1."
+      "explanation": "Answer: B"
     },
     {
       "questionId": "intro_q7",
@@ -175,7 +201,7 @@
         "None"
       ],
       "correctIndex": 1,
-      "explanation": "Powers are shorthand for repeated multiplication."
+      "explanation": "Answer: B"
     }
   ],
   "status": "published",

@@ -106,6 +106,16 @@ const TopicContentSchema = z.object({
     )
     .min(1)
     .optional(),
+  sections: z
+    .array(
+      z.object({
+        heading: z.string().min(1),
+        content: z.string().min(1),
+        videoUrl: z.string().regex(HTTPS_URL).optional(),
+      }),
+    )
+    .min(1)
+    .optional(),
   quiz: z.array(QuizQuestionSchema).min(1).max(20),
   status: z.enum(['draft', 'published']).default('published'),
   curatedBy: z.string().min(1),

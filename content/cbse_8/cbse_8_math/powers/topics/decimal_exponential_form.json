@@ -6,173 +6,205 @@
   "chapterName": "Powers",
   "topicId": "decimal_exponential_form",
   "topicName": "3. Decimal Numbers in Exponential Form",
-  "explanation": "Decimals can be written using negative exponents of 10. Moving the decimal point one place left multiplies by 10⁻¹. Since 12² = 144, we can find powers of decimal numbers by adjusting place value: (1.2)² = (12/10)² = 144/100 = 1.44; (0.12)² = 144/10000 = 0.0144; (0.012)² = 0.000144; and 120² = 144 × 100 = 14400. The exponent on 10 tracks how many places the decimal shifted. This links ordinary decimals to the laws of exponents.",
+  "explanation": "Why Do We Need Exponential Form?\nImagine writing:\n1000000000\nHow many zeros are there?\nYou have to count carefully.\nNow imagine scientists working with:\n•\n\ndistance to planets\n\n•\n\nnumber of bacteria\n\n•\n\nnumber of stars\n\nWriting huge numbers repeatedly becomes annoying.\nMathematicians invented a shorter way.\n\nWriting Large Numbers Using Powers of 10\nObserve:\n10 = 101\n100 = 102\n1000 = 103\n10000 = 104\n\n\fPattern:\nExponent = Number of zeros\n\nExample\n100000\nhas 5 zeros.\nTherefore:\n100000 = 105\n\nWriting Small Numbers Using Powers of 10\nObserve:\n1\n= 10−1\n10\n1\n0.01 =\n= 10−2\n100\n1\n0.001 =\n= 10−3\n1000\n0.1 =\n\nPattern:\nNegative exponent tells us how many places decimal moved.\n\nExample\n0.00001\n= 10−5\n\nConverting Decimal Numbers\nExample 1\n0.01\nMove decimal 2 places.\n\n\f0.01 = 10−2\n\nExample 2\n0.0001\nMove decimal 4 places.\n0.0001 = 10−4\n\nExample 3\n1000000\n6 zeros.\n1000000 = 106\n\nKey Idea\nPositive exponents:\nLarge numbers\nNegative exponents:\nSmall numbers",
   "examples": [
-    "(1.2)² = 1.44",
-    "(0.12)² = 0.0144",
-    "172 = 1×10² + 7×10¹ + 2×10⁰",
-    "0.001 = 1×10⁻³"
+    "Example\n100000\nhas 5 zeros.\nTherefore:\n100000 = 105",
+    "Example\n0.00001\n= 10−5",
+    "Example 1\n0.01\nMove decimal 2 places.\n\n\f0.01 = 10−2",
+    "Example 2\n0.0001\nMove decimal 4 places.\n0.0001 = 10−4",
+    "Example 3\n1000000\n6 zeros.\n1000000 = 106"
   ],
   "videoUrl": "https://youtu.be/0fKBhvDjuy0",
   "brainstorming": [
     {
-      "question": "If 12² = 144, why is (0.12)² much smaller than 1.44?",
-      "answer": "0.12 = 12/100, so squaring gives 144/10000 — dividing by 100 twice makes the result 100 times smaller than (1.2)²."
+      "question": "Why is 1000 written as 10³?",
+      "answer": "Because:\n10 × 10 × 10 = 1000\nExponent simply tells us:\nHow many times 10 was multiplied.\nThe exponent is acting like a shortcut."
     },
     {
-      "question": "How does 10⁻¹ relate to the decimal 0.1?",
-      "answer": "10⁻¹ = 1/10 = 0.1 — each negative step on the power of 10 moves the decimal point left."
+      "question": "Why does moving the decimal create negative powers?",
+      "answer": "Look:\n1\nDivide by 10:\n0.1\nDivide by 10 again:\n0.01\nDivide again:\n0.001\nEach division introduces a negative exponent.\nNegative powers are simply repeated division."
     },
     {
-      "question": "Can every decimal be written with powers of 10?",
-      "answer": "Many can, especially those with finitely many digits after the decimal point, by expressing each place as a power of 10."
+      "question": "Why do scientists love powers of 10?",
+      "answer": "Because some numbers are enormous.\nDistance from Earth to Sun:\nabout\n150,000,000 km\n\n\fWriting this repeatedly is inconvenient.\nInstead scientists use powers.\nIt makes calculations easier."
     }
   ],
   "misconceptions": [
     {
-      "wrong": "(0.12)² = 0.144",
-      "correct": "(0.12)² = 0.0144 — squaring 0.12 means 0.12 × 0.12, not just moving the decimal one place."
+      "wrong": "103 = 30",
+      "correct": ". 103 = 1000 Exponent means repeated multiplication."
     },
     {
-      "wrong": "10⁻² = -100",
-      "correct": "10⁻² = 1/100 = 0.01 — negative exponent means reciprocal, not a negative number."
+      "wrong": "10−3 = −1000",
+      "correct": ". \f10−3 = 1 1000"
     },
     {
-      "wrong": "120² = 144",
-      "correct": "120² = (12×10)² = 144×100 = 14400."
+      "wrong": "Negative exponent means negative number.",
+      "correct": ". 10−2 = 0.01 Still positive."
     },
     {
-      "wrong": "Decimals cannot use exponent laws",
-      "correct": "Rewrite decimals as fractions with powers of 10, then apply the same laws."
+      "wrong": "Number of digits equals exponent.",
+      "correct": ". Exponent equals number of zeros only for powers of 10."
     }
   ],
   "realLifeConnections": [
     {
-      "title": "Currency and cents",
-      "description": "₹1.20 = 1.2 × 10⁰ rupees; small price differences use decimal powers implicitly."
+      "title": "Real Life Connection 1 — Population of Cities",
+      "description": "A city may have:\n1,000,000 people\nInstead of counting six zeros every time,\ndata scientists often think in powers.\n106\nhelps represent one million.\n\nVideo Search Query\npopulation numbers visualization\nunderstanding millions and billions animation"
     },
     {
-      "title": "Scientific measurements",
-      "description": "A cell width of 0.00001 m is written as 1×10⁻⁵ m — decimals become clean powers of 10."
+      "title": "Real Life Connection 2 — Distance in Space",
+      "description": "Distance between planets is huge.\nFor example:\nMillions of kilometres.\nAstronomers use powers of ten because normal writing becomes cumbersome.\n\n\fVideo Search Query\nsolar system distances animation\npowers of ten universe scale"
     },
     {
-      "title": "Engineering tolerances",
-      "description": "Machine parts specified to 0.001 cm precision use negative powers of 10 for accuracy."
+      "title": "Real Life Connection 3 — Size of Bacteria",
+      "description": "Bacteria are extremely tiny.\nTheir size may be:\n0.000001 m\nwhich is:\n10−6\nScientists use exponential form every day.\n\nVideo Search Query\nsize of bacteria animation\npowers of ten microscopic world"
     },
     {
-      "title": "Digital displays",
-      "description": "Multiplying a decimal reading by 10² shifts two places right — like converting metres to centimetres."
+      "title": "Real Life Connection 4 — Internet Storage",
+      "description": "Computer storage uses:\n•\n\nKB\n\n•\n\nMB\n\n•\n\nGB\n\n•\n\nTB\n\nThese are all related to powers.\nHuge amounts of information become manageable using exponents.\n\nVideo Search Query\ncomputer storage explained visually\n\n\fhow gigabytes work animation"
     },
     {
-      "title": "Medicine dosages",
-      "description": "A dose of 0.25 mg can be expressed as 2.5×10⁻¹ mg for scientific calculation."
+      "title": "Real Life Connection 5 — Money and National Budgets",
+      "description": "Governments deal with:\n•\n\ncrores\n\n•\n\nbillions\n\n•\n\ntrillions\n\nExponential notation helps economists handle such large numbers efficiently.\n\nVideo Search Query\nunderstanding billion trillion animation\nlarge numbers explained visually"
     }
   ],
   "activities": [
     {
-      "title": "Decimal square table",
-      "instructions": "Given 12² = 144, complete a table for (1.2)², (0.12)², (0.012)², and 120² by tracking powers of 10."
+      "title": "Zero Counting Activity",
+      "instructions": "Write:\n10\n100\n1000\n10000\n100000\nCount zeros.\nObserve:\nExponent = number of zeros."
     },
     {
-      "title": "Place-value expansion",
-      "instructions": "Expand 5642 and 0.0056 as sums of terms like a×10ⁿ. Identify each digit's place using exponents."
+      "title": "Decimal Movement Activity",
+      "instructions": "Start with:\n1\nDivide repeatedly by 10.\nObserve:\n1\n0.1\n0.01\n0.001\n0.0001\nNotice:\nExponents become:\n0\n-1\n-2\n-3\n-4"
     },
     {
-      "title": "Calculator check",
-      "instructions": "Compute (0.12)² on a calculator and verify it matches 144/10000 from exponent reasoning."
+      "title": "Calculator Activity",
+      "instructions": "Use calculator.\nEnter:\n10²\n10³\n10⁴\n10⁵\nObserve how rapidly numbers grow."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "1. DETAILED EXPLANATION",
+      "content": "Why Do We Need Exponential Form?\nImagine writing:\n1000000000\nHow many zeros are there?\nYou have to count carefully.\nNow imagine scientists working with:\n•\n\ndistance to planets\n\n•\n\nnumber of bacteria\n\n•\n\nnumber of stars\n\nWriting huge numbers repeatedly becomes annoying.\nMathematicians invented a shorter way.\n\nWriting Large Numbers Using Powers of 10\nObserve:\n10 = 101\n100 = 102\n1000 = 103\n10000 = 104\n\n\fPattern:\nExponent = Number of zeros\n\nExample\n100000\nhas 5 zeros.\nTherefore:\n100000 = 105\n\nWriting Small Numbers Using Powers of 10\nObserve:\n1\n= 10−1\n10\n1\n0.01 =\n= 10−2\n100\n1\n0.001 =\n= 10−3\n1000\n0.1 =\n\nPattern:\nNegative exponent tells us how many places decimal moved.\n\nExample\n0.00001\n= 10−5\n\nConverting Decimal Numbers\nExample 1\n0.01\nMove decimal 2 places.\n\n\f0.01 = 10−2\n\nExample 2\n0.0001\nMove decimal 4 places.\n0.0001 = 10−4\n\nExample 3\n1000000\n6 zeros.\n1000000 = 106\n\nKey Idea\nPositive exponents:\nLarge numbers\nNegative exponents:\nSmall numbers"
+    },
+    {
+      "heading": "2. MAIN VIDEO SEARCH QUERIES",
+      "content": "Choose ONE short visual video.\nMain Video Queries\n1. Powers of ten explained visually\nhttps://youtu.be/0fKBhvDjuy0?si=oExoPNnJb9FdF4zf\n\n2. Decimal numbers in exponential form class 8\nhttps://youtu.be/MP3viJTn-e4?si=eu6bdeABkDv3k00f\n\n\fhttps://youtu.be/zimEigRDvEo?si=3i22HWeCqmtpGYJx\nhttps://youtu.be/Gj9QVQ3mjHI?si=2PPFcG_KArFKDq5X\n\n3. Understanding powers of 10 animation\n4. Large and small numbers using exponents\nhttps://youtu.be/g79uPGTwyzs?si=1IHnCzs4KgnEWGnP",
+      "videoUrl": "https://youtu.be/0fKBhvDjuy0"
+    },
+    {
+      "heading": "3. CURIOSITY LAYER",
+      "content": "Curiosity Question 1\nWhy is 1000 written as 10³?\n\nAnswer\nBecause:\n10 × 10 × 10 = 1000\nExponent simply tells us:\nHow many times 10 was multiplied.\nThe exponent is acting like a shortcut.\n\nVideo Search Query\npowers of ten explained visually\nhow powers of ten work animation\n\nCuriosity Question 2\nWhy does moving the decimal create negative powers?\n\nAnswer\n\n\fLook:\n1\nDivide by 10:\n0.1\nDivide by 10 again:\n0.01\nDivide again:\n0.001\nEach division introduces a negative exponent.\nNegative powers are simply repeated division.\n\nVideo Search Query\ndecimal movement and powers of ten animation\nnegative powers of ten visual explanation\nhttps://youtu.be/FhJkzdfIZVY?si=rwr58kc0Nc6b8RlJ\n\nCuriosity Question 3\nWhy do scientists love powers of 10?\n\nAnswer\nBecause some numbers are enormous.\nDistance from Earth to Sun:\nabout\n150,000,000 km\n\n\fWriting this repeatedly is inconvenient.\nInstead scientists use powers.\nIt makes calculations easier.\n\nVideo Search Query\nwhy scientists use powers of ten\nscientific notation for beginners"
+    },
+    {
+      "heading": "4. REAL-LIFE CONNECTIONS",
+      "content": "Real Life Connection 1 — Population of Cities\nA city may have:\n1,000,000 people\nInstead of counting six zeros every time,\ndata scientists often think in powers.\n106\nhelps represent one million.\n\nVideo Search Query\npopulation numbers visualization\nunderstanding millions and billions animation\n\nReal Life Connection 2 — Distance in Space\nDistance between planets is huge.\nFor example:\nMillions of kilometres.\nAstronomers use powers of ten because normal writing becomes cumbersome.\n\n\fVideo Search Query\nsolar system distances animation\npowers of ten universe scale\n\nReal Life Connection 3 — Size of Bacteria\nBacteria are extremely tiny.\nTheir size may be:\n0.000001 m\nwhich is:\n10−6\nScientists use exponential form every day.\n\nVideo Search Query\nsize of bacteria animation\npowers of ten microscopic world\n\nReal Life Connection 4 — Internet Storage\nComputer storage uses:\n•\n\nKB\n\n•\n\nMB\n\n•\n\nGB\n\n•\n\nTB\n\nThese are all related to powers.\nHuge amounts of information become manageable using exponents.\n\nVideo Search Query\ncomputer storage explained visually\n\n\fhow gigabytes work animation\n\nReal Life Connection 5 — Money and National Budgets\nGovernments deal with:\n•\n\ncrores\n\n•\n\nbillions\n\n•\n\ntrillions\n\nExponential notation helps economists handle such large numbers efficiently.\n\nVideo Search Query\nunderstanding billion trillion animation\nlarge numbers explained visually"
+    },
+    {
+      "heading": "5. MISCONCEPTIONS",
+      "content": "Misconception 1\n\n103 = 30\nWrong.\n103 = 1000\nExponent means repeated multiplication.\n\nMisconception 2\n\n10−3 = −1000\nWrong.\n\n\f10−3 =\n\n1\n1000\n\nMisconception 3\nNegative exponent means negative number.\nWrong.\n10−2 = 0.01\nStill positive.\n\nMisconception 4\nNumber of digits equals exponent.\nWrong.\nExponent equals number of zeros only for powers of 10."
+    },
+    {
+      "heading": "6. EXPERIMENT / ACTIVITY",
+      "content": "Zero Counting Activity\nWrite:\n10\n100\n1000\n10000\n100000\nCount zeros.\nObserve:\nExponent = number of zeros.\n\nDecimal Movement Activity\n\n\fStart with:\n1\nDivide repeatedly by 10.\nObserve:\n1\n0.1\n0.01\n0.001\n0.0001\nNotice:\nExponents become:\n0\n-1\n-2\n-3\n-4\n\nCalculator Activity\nUse calculator.\nEnter:\n10²\n10³\n10⁴\n10⁵\nObserve how rapidly numbers grow."
+    },
+    {
+      "heading": "7. QUIZ",
+      "content": "Q1\n\n\fWrite:\n1000\nin exponential form.\nA. 10²\nB. 10³\nC. 10⁴\nD. 10⁵\nAnswer: B\n\nQ2\nWhat is:\n10−2\nA. 100\nB. 0.1\nC. 0.01\nD. 0.001\nAnswer: C\n\nQ3\nWrite:\n0.001\nin exponential form.\nA. 10³\nB. 10⁻³\nC. 10⁻²\nD. 10⁻¹\nAnswer: B\n\n\fQ4\nWhich field frequently uses powers of ten?\nA. Astronomy\nB. Biology\nC. Computer Science\nD. All of these\nAnswer: D\n\nQ5\nWhy was exponential form invented?\nA. To make numbers longer\nB. To represent large and small numbers efficiently\nC. To avoid mathematics\nD. None\nAnswer: B\n\nQ6\nWhich is equal to:\n105\nA. 10000\nB. 100000\nC. 1000000\nD. 1000\nAnswer: B\n\nQ7\n\n\fWhich is equal to:\n10−4\nA. 0.0001\nB. 0.001\nC. 0.01\nD. 10000\nAnswer: A"
     }
   ],
   "quiz": [
     {
-      "questionId": "decexp_q1",
+      "questionId": "dec_q1",
       "type": "mcq",
-      "question": "If 12² = 144, then (1.2)² =",
+      "question": "Write: 1000 in exponential form.",
       "options": [
-        "14.4",
-        "1.44",
-        "0.144",
-        "1440"
+        "10²",
+        "10³",
+        "10⁴",
+        "10⁵"
       ],
       "correctIndex": 1,
-      "explanation": "(12/10)² = 144/100 = 1.44."
+      "explanation": "Answer: B"
     },
     {
-      "questionId": "decexp_q2",
+      "questionId": "dec_q2",
       "type": "mcq",
-      "question": "(0.12)² equals:",
+      "question": "What is: 10−2",
       "options": [
-        "0.144",
-        "0.0144",
-        "1.44",
-        "0.00144"
-      ],
-      "correctIndex": 1,
-      "explanation": "(12/100)² = 144/10000 = 0.0144."
-    },
-    {
-      "questionId": "decexp_q3",
-      "type": "mcq",
-      "question": "120² equals:",
-      "options": [
-        "144",
-        "1440",
-        "14400",
-        "1.44"
+        "100",
+        "0.1",
+        "0.01",
+        "0.001"
       ],
       "correctIndex": 2,
-      "explanation": "(12×10)² = 144×100 = 14400."
+      "explanation": "Answer: C"
     },
     {
-      "questionId": "decexp_q4",
+      "questionId": "dec_q3",
       "type": "mcq",
-      "question": "0.001 as a power of 10 is:",
+      "question": "Write: 0.001 in exponential form.",
       "options": [
         "10³",
         "10⁻³",
-        "10⁻¹",
-        "10¹"
-      ],
-      "correctIndex": 1,
-      "explanation": "0.001 = 1/1000 = 10⁻³."
-    },
-    {
-      "questionId": "decexp_q5",
-      "type": "mcq",
-      "question": "172 = 1×10² + 7×10¹ + 2×10⁰ shows:",
-      "options": [
-        "Prime factorisation",
-        "Place-value with exponents",
-        "Negative exponents only",
-        "Standard form"
-      ],
-      "correctIndex": 1,
-      "explanation": "Each digit is multiplied by a power of 10 matching its place."
-    },
-    {
-      "questionId": "decexp_q6",
-      "type": "mcq",
-      "question": "(0.012)² equals:",
-      "options": [
-        "0.000144",
-        "0.00144",
-        "0.0144",
-        "1.44"
-      ],
-      "correctIndex": 0,
-      "explanation": "(12/1000)² = 144/1000000 = 0.000144."
-    },
-    {
-      "questionId": "decexp_q7",
-      "type": "mcq",
-      "question": "Moving decimal 2 places left divides by:",
-      "options": [
-        "10²",
         "10⁻²",
-        "2",
-        "100²"
+        "10⁻¹"
+      ],
+      "correctIndex": 1,
+      "explanation": "Answer: B"
+    },
+    {
+      "questionId": "dec_q4",
+      "type": "mcq",
+      "question": "Which field frequently uses powers of ten?",
+      "options": [
+        "Astronomy",
+        "Biology",
+        "Computer Science",
+        "All of these"
+      ],
+      "correctIndex": 3,
+      "explanation": "Answer: D"
+    },
+    {
+      "questionId": "dec_q5",
+      "type": "mcq",
+      "question": "Why was exponential form invented?",
+      "options": [
+        "To make numbers longer",
+        "To represent large and small numbers efficiently",
+        "To avoid mathematics",
+        "None"
+      ],
+      "correctIndex": 1,
+      "explanation": "Answer: B"
+    },
+    {
+      "questionId": "dec_q6",
+      "type": "mcq",
+      "question": "Which is equal to: 105",
+      "options": [
+        "10000",
+        "100000",
+        "1000000",
+        "1000"
+      ],
+      "correctIndex": 1,
+      "explanation": "Answer: B"
+    },
+    {
+      "questionId": "dec_q7",
+      "type": "mcq",
+      "question": "Which is equal to: 10−4",
+      "options": [
+        "0.0001",
+        "0.001",
+        "0.01",
+        "10000"
       ],
       "correctIndex": 0,
-      "explanation": "Each place left divides by 10; two places divides by 10²."
+      "explanation": "Answer: A"
     }
   ],
   "status": "published",

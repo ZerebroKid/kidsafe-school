@@ -6,508 +6,640 @@
   "chapterName": "Powers",
   "topicId": "exercise_2_2",
   "topicName": "12. Exercise 2.2",
-  "explanation": "Exercise 2.2 applies all laws of integral exponents: product law (add exponents), quotient law (subtract), power of a power (multiply exponents), negative exponents (reciprocal), and finding unknown exponents by equating bases. When bases match on both sides, compare exponents directly.",
+  "explanation": "Question\n3 −1\n3 −1\n3 −1\n3 −1\n( ) ×( ) ×( ) ×( )\n2\n2\n2\n2\nWrite in exponential form.\n\nConcepts Used\nProduct Law\n𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛\n\nNegative Exponents\n(No new concept)\n\nStep 1\nAll bases are same.\n3 −1\n3 −1\n3 −1\n3 −1\n( ) ×( ) ×( ) ×( )\n2\n2\n2\n2\nAdd exponents:\n= (−1) + (−1) + (−1) + (−1)\n= −4\n\n\fAnswer\n3 −4\n( )\n2",
   "examples": [
-    "(3/2)⁻¹ × (3/2)⁻¹ × (3/2)⁻¹ × (3/2)⁻¹ = (3/2)⁻⁴",
-    "5⁻² = 1/25",
-    "If 5²ˣ ÷ 5⁻³ = 5⁵, then 2x + 3 = 5, so x = 1"
+    "Question\n3 −1\n3 −1\n3 −1\n3 −1\n( ) ×( ) ×( ) ×( )\n2\n2\n2\n2\nWrite in exponential form.\n\nConcepts Used\nProduct Law\n𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛\n\nNegative Exponent"
   ],
   "brainstorming": [
     {
-      "question": "When can you compare exponents directly?",
-      "answer": "When both sides have the same base: if aᵐ = aⁿ then m = n."
-    },
-    {
-      "question": "How do you convert to positive exponent?",
-      "answer": "Negative exponent → take reciprocal: a⁻ⁿ = 1/aⁿ or (a/b)⁻ⁿ = (b/a)ⁿ."
+      "question": "Review key rules",
+      "answer": "Question\n3 −1\n3 −1\n3 −1\n3 −1\n( ) ×( ) ×( ) ×( )\n2\n2\n2\n2\nWrite in exponential form.\n\nConcepts Used\nProduct Law\n𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛\n\nNegative Exponents\n(No new concept)\n\nStep 1\nAll bases are same.\n3 −1\n3 −1\n3 −1\n3 −1\n( ) ×( ) ×( ) ×( )\n2\n2\n2\n2\nAdd exponents:\n= (−1) + (−1) + (−1) + (−1)\n= −4\n\n\fAnswer"
     }
   ],
   "workedProblems": [
     {
-      "problemId": "ex2_2_q1_i",
-      "question": "Write in exponential form: (3/2)⁻¹ × (3/2)⁻¹ × (3/2)⁻¹ × (3/2)⁻¹.",
-      "conceptsUsed": [
-        "Product Law"
-      ],
-      "steps": [
-        "Same base — add exponents",
-        "(−1) + (−1) + (−1) + (−1) = −4"
-      ],
-      "answer": "(3/2)⁻⁴"
-    },
-    {
       "problemId": "ex2_2_q1_ii",
-      "question": "Write in exponential form: (2/5)⁻² × (2/5)⁻² × (2/5)⁻².",
-      "steps": [
-        "Add exponents: (−2) + (−2) + (−2) = −6"
+      "question": "2 −2 2 −2 2 −2 ( ) ×( ) ×( ) 5 5 5 Write in exponential form.",
+      "conceptsUsed": [
+        "Product Law",
+        "𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛"
       ],
-      "answer": "(2/5)⁻⁶"
+      "steps": [
+        "Add exponents.\n(−2) + (−2) + (−2)\n= −6"
+      ],
+      "answer": "2 −6 ( ) 5"
     },
     {
       "problemId": "ex2_2_q2_i",
-      "question": "Evaluate 5⁻².",
-      "steps": [
-        "5⁻² = 1/5² = 1/25"
+      "question": "5−2 Evaluate.",
+      "conceptsUsed": [
+        "Negative Exponent Rule",
+        "𝑎−𝑛 =",
+        "𝑎𝑛",
+        "5−2 ="
       ],
-      "answer": "1/25"
+      "steps": [
+        "Apply Negative Exponent Rule",
+        "Calculate power\n=\n1\n25"
+      ],
+      "answer": "1 25"
     },
     {
       "problemId": "ex2_2_q2_ii",
-      "question": "Evaluate (−3)⁻².",
-      "steps": [
-        "(−3)⁻² = 1/(−3)² = 1/9"
+      "question": "(−3)−2",
+      "conceptsUsed": [
+        "Negative Exponent Rule"
       ],
-      "answer": "1/9"
+      "steps": [
+        "(−3)−2 =\n1\n(−3)2",
+        "=\n1\n9"
+      ],
+      "answer": "1 9"
     },
     {
       "problemId": "ex2_2_q2_iii",
-      "question": "Evaluate (1/3)⁻⁴.",
+      "question": "1 −4 ( ) 3",
+      "conceptsUsed": [
+        "Fraction With Negative Exponent",
+        "𝑎 −𝑛",
+        "𝑏 𝑛"
+      ],
       "steps": [
-        "Flip fraction: 3⁴ = 81"
+        "Flip fraction.\n= 34",
+        "Calculate power.\n= 81"
       ],
       "answer": "81"
     },
     {
       "problemId": "ex2_2_q2_iv",
-      "question": "Evaluate (−1/2)⁻¹.",
+      "question": "−1 −1 ( ) 2",
+      "conceptsUsed": [
+        "Fraction With Negative Exponent"
+      ],
       "steps": [
-        "Flip: −2/1"
+        "Flip fraction.\n=\n−2\n1"
       ],
       "answer": "−2"
     },
     {
-      "problemId": "ex2_2_q3_i",
-      "question": "Express 6⁻¹ as p/q.",
-      "steps": [
-        "6⁻¹ = 1/6"
-      ],
-      "answer": "1/6"
-    },
-    {
       "problemId": "ex2_2_q3_ii",
-      "question": "Express (−7)⁻¹ as p/q.",
-      "steps": [
-        "(−7)⁻¹ = −1/7"
+      "question": "(−7)−1",
+      "conceptsUsed": [
+        "Negative Exponent Rule"
       ],
-      "answer": "−1/7"
+      "steps": [
+        "(−7)−1 =",
+        "=−\n1\n7"
+      ],
+      "answer": "−"
     },
     {
       "problemId": "ex2_2_q3_iii",
-      "question": "Express (1/4)⁻¹.",
+      "question": "1 7 1 −7 \f1 −1 ( ) 4",
+      "conceptsUsed": [
+        "Fraction With Negative Exponent",
+        "𝑎 −1 𝑏"
+      ],
       "steps": [
-        "Flip: 4/1"
+        "Flip fraction.\n=\n4\n1"
       ],
       "answer": "4"
     },
     {
       "problemId": "ex2_2_q3_iv",
-      "question": "Evaluate (−4)⁻¹ × (−3/2)⁻¹.",
+      "question": "(−4)−1 × (",
       "steps": [
-        "(−4)⁻¹ = −1/4",
-        "(−3/2)⁻¹ = −2/3",
-        "(−1/4) × (−2/3) = 2/12 = 1/6"
+        "Convert second term:\n−3 −1\n2\n( ) =−\n2\n3",
+        "Multiply fractions.\n1\n2\n− ×−\n4\n3\n2\n=\n12\n1\n=\n6"
       ],
-      "answer": "1/6"
+      "answer": "1 6"
     },
     {
       "problemId": "ex2_2_q3_v",
-      "question": "Evaluate (3/5)⁻¹ × (5/2)⁻¹.",
-      "steps": [
-        "Flip: 5/3 × 2/5 = 10/15 = 2/3"
+      "question": "3 −1 5 −1 ( ) ×( ) 5 2 \fConcepts Used Fraction With Negative Exponent Multiplication of Fractions (No new concept)",
+      "conceptsUsed": [
+        "Fraction With Negative Exponent",
+        "Multiplication of Fractions"
       ],
-      "answer": "2/3"
-    },
-    {
-      "problemId": "ex2_2_q4_i",
-      "question": "Simplify (4⁻¹ × 3⁻¹)².",
       "steps": [
-        "(1/4 × 1/3)² = (1/12)² = 1/144"
+        "Flip both fractions.\n=\n5 2\n×\n3 5",
+        "Multiply.\n=\n10\n15\n=\n2\n3",
+        "Simplify."
       ],
-      "answer": "1/144"
+      "answer": "2 3"
     },
     {
       "problemId": "ex2_2_q4_ii",
-      "question": "Simplify (5⁻¹ + 6⁻¹)³.",
-      "steps": [
-        "1/5 + 1/6 = 11/30",
-        "(11/30)³ = 1331/27000"
+      "question": "(5−1 +6−1)3",
+      "conceptsUsed": [
+        "Negative Exponent Rule",
+        "New Concept Used:",
+        "Addition of fractions before applying exponent."
       ],
-      "answer": "1331/27000"
+      "steps": [
+        "Convert exponents.\n1 1 3\n= ( + 6)\n5",
+        "Add fractions.\nLCM = 30\n6\n5 3\n= (30 + 30)\n11 3\n=( )\n30\n\fStep 3\nCube numerator and denominator.\n113\n303\n1331\n=\n27000\n="
+      ],
+      "answer": "1331 27000"
     },
     {
       "problemId": "ex2_2_q4_iii",
-      "question": "Simplify (2⁻¹ + 3⁻¹)⁻¹.",
-      "steps": [
-        "1/2 + 1/3 = 5/6",
-        "(5/6)⁻¹ = 6/5"
+      "question": "(2−1 + 3−1 )−1",
+      "conceptsUsed": [
+        "Negative Exponent Rule",
+        "Reciprocal Rule"
       ],
-      "answer": "6/5"
+      "steps": [
+        "Convert exponents.\n1 1 −1\n= (2 + 3)",
+        "Add fractions.\n\f5 −1\n=( )\n6",
+        "Take reciprocal.\n=\n6\n5"
+      ],
+      "answer": "6 5"
     },
     {
       "problemId": "ex2_2_q4_iv",
-      "question": "Simplify (3⁻¹ × 4⁻¹)⁻¹ × 5⁻¹.",
-      "steps": [
-        "(1/12)⁻¹ = 12",
-        "12 × 1/5 = 12/5"
+      "question": "(3−1 × 4−1 )−1 × 5−1",
+      "conceptsUsed": [
+        "Negative Exponent Rule",
+        "Reciprocal Rule"
       ],
-      "answer": "12/5"
+      "steps": [
+        "Convert exponents.\n1 1 −1 1\n= (3 × 4) ×\n5\n\fStep 2\nMultiply inside bracket.\n1 −1 1\n=( ) ×\n12\n5",
+        "Take reciprocal.\n= 12 ×\n1\n5",
+        "Multiply.\n=\n12\n5"
+      ],
+      "answer": "12 5"
     },
     {
       "problemId": "ex2_2_q4_v",
-      "question": "Simplify (4⁻¹ − 5⁻¹) ÷ 3⁻¹.",
-      "steps": [
-        "1/4 − 1/5 = 1/20",
-        "1/20 ÷ 1/3 = 1/20 × 3 = 3/20"
+      "question": "(4−1 − 5−1 ) ÷ 3−1",
+      "conceptsUsed": [
+        "Negative Exponent Rule",
+        "Division of Fractions"
       ],
-      "answer": "3/20"
-    },
-    {
-      "problemId": "ex2_2_q5_i",
-      "question": "Express (1/4)³ with negative exponent.",
       "steps": [
-        "Reciprocal: 4⁻³"
+        "Convert exponents.\n1\n1 1\n= (4 − ) ÷\n5\n3",
+        "Subtract fractions.\n=\n1 1\n÷\n20 3",
+        "Multiply by reciprocal.\n1\n×3\n20\n3\n=\n20\n="
       ],
-      "answer": "4⁻³"
+      "answer": "3 20 Next comes Question 5, which is important because it introduces a new skill: Converting a positive exponent into a negative exponent For example: 1 −5 35 = ( ) 3 \fQUESTION 5 Instruction: Express each of the following rational numbers with a negative exponent."
     },
     {
       "problemId": "ex2_2_q5_ii",
-      "question": "Express 3⁵ with negative exponent.",
-      "steps": [
-        "(1/3)⁻⁵"
+      "question": "35",
+      "conceptsUsed": [
+        "Negative Exponent Rule",
+        "1 −𝑛",
+        "𝑎𝑛 = ( )",
+        "New Skill:",
+        "Introducing negative exponent."
       ],
-      "answer": "(1/3)⁻⁵"
+      "steps": [
+        "Write reciprocal.\n1\n3",
+        "Change exponent sign.\n\f1 −5\n3 =( )\n3\n5"
+      ],
+      "answer": "1 −5 ( ) 3"
     },
     {
       "problemId": "ex2_2_q5_iii",
-      "question": "Express (3/5)⁴ with negative exponent.",
-      "steps": [
-        "(5/3)⁻⁴"
+      "question": "3 4 ( ) 5",
+      "conceptsUsed": [
+        "Reciprocal Rule"
       ],
-      "answer": "(5/3)⁻⁴"
+      "steps": [
+        "Take reciprocal.\n5\n3",
+        "Change exponent sign.\n3 4\n5 −4\n( ) =( )\n5\n3"
+      ],
+      "answer": "5 −4 ( ) 3"
     },
     {
       "problemId": "ex2_2_q5_iv",
-      "question": "Express [(3/2)⁴]⁻³.",
-      "steps": [
-        "Power of power: (3/2)⁻¹²"
+      "question": "−3 3 4 [( ) ] 2",
+      "conceptsUsed": [
+        "Power of a Power",
+        "Negative Exponents"
       ],
-      "answer": "(3/2)⁻¹²"
+      "steps": [
+        "Apply Power of a Power.\n3 4×(−3)\n=( )\n2\n3 −12\n=( )\n2"
+      ],
+      "answer": "3 −12 ( ) 2 Alternative Form \f2 12 ( ) 3 also correct."
     },
     {
       "problemId": "ex2_2_q5_v",
-      "question": "Express [(7/3)⁴]⁻³.",
-      "steps": [
-        "(7/3)⁻¹²"
+      "question": "−3 7 4 [( ) ] 3",
+      "conceptsUsed": [
+        "Power of a Power"
       ],
-      "answer": "(7/3)⁻¹²"
-    },
-    {
-      "problemId": "ex2_2_q6_i",
-      "question": "Express (3/4)⁻² with positive exponent.",
       "steps": [
-        "Flip: (4/3)²"
+        "Multiply exponents.\n7 4×(−3)\n=( )\n3\n7 −12\n=( )\n3"
       ],
-      "answer": "(4/3)²"
+      "answer": "7 −12 ( ) 3 Alternative Form \f3 12 ( ) 7 also correct."
     },
     {
       "problemId": "ex2_2_q6_ii",
-      "question": "Express (5/4)⁻³ with positive exponent.",
-      "steps": [
-        "(4/5)³"
+      "question": "5 −3 ( ) 4",
+      "conceptsUsed": [
+        "Negative Exponent Rule"
       ],
-      "answer": "(4/5)³"
+      "steps": [
+        "Take reciprocal.\n4\n5",
+        "Make exponent positive.\n5 −3\n4 3\n( ) =( )\n4\n5"
+      ],
+      "answer": "4 3 ( ) 5"
     },
     {
       "problemId": "ex2_2_q6_iii",
-      "question": "Express 4³ × 4⁻⁹ with positive exponent.",
-      "steps": [
-        "4³⁻⁹ = 4⁻⁶ = 1/4⁶"
+      "question": "43 × 4−9 Express with positive exponent.",
+      "conceptsUsed": [
+        "Product Law",
+        "𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛",
+        "Negative Exponent Rule"
       ],
-      "answer": "1/4⁶"
+      "steps": [
+        "Add exponents.\n43+(−9)\n= 4−6",
+        "Convert to positive exponent.\n4−6 ="
+      ],
+      "answer": "1 46 1 46"
     },
     {
       "problemId": "ex2_2_q6_iv",
-      "question": "Express [(4/3)⁻³]⁻⁴.",
-      "steps": [
-        "(−3)×(−4)=12 → (4/3)¹²"
+      "question": "−4 4 −3 [( ) ] 3",
+      "conceptsUsed": [
+        "Power of a Power"
       ],
-      "answer": "(4/3)¹²"
+      "steps": [
+        "Multiply exponents.\n(−3) × (−4)\n= 12",
+        "Apply rule.\n4 12\n( )\n3"
+      ],
+      "answer": "4 12 ( ) 3"
     },
     {
       "problemId": "ex2_2_q6_v",
-      "question": "Express [(3/2)⁴]⁻² with positive exponent.",
-      "steps": [
-        "(3/2)⁻⁸ = (2/3)⁸"
+      "question": "−2 3 4 [( ) ] 2",
+      "conceptsUsed": [
+        "Power of a Power"
       ],
-      "answer": "(2/3)⁸"
+      "steps": [
+        "Multiply exponents.\n4 × (−2)\n= −8",
+        "3 −8\n( )\n2",
+        "Convert to positive exponent.\n2 8\n=( )\n3"
+      ],
+      "answer": "2 8 ( ) 3 \fCONCEPT CONNECTION Question Concept Used 6(i) Negative Exponent 6(ii) Negative Exponent 6(iii) Product Law + Negative Exponent 6(iv) Power of Power 6(v) Power of Power + Negative Exponent Important Observation for Students Whenever NCERT says: \"Express with positive exponent\" You should immediately think: Negative exponent → reciprocal 𝑎−𝑛 = 1 𝑎𝑛 or 𝑎 −𝑛 𝑏 𝑛 ( ) =( ) 𝑏 𝑎 This single idea solves almost every question of Exercise 2.2 Question 6. QUESTION 7 — SIMPLIFY These questions are important because they combine multiple concepts together. While solving, always identify: 1. Negative exponent? 2. Product law? 3. Division of fractions? 4. Power of a power?"
     },
     {
       "problemId": "ex2_2_q7_i",
-      "question": "Simplify [(1/3)⁻³ − (1/2)⁻³] ÷ (1/4)⁻³.",
-      "steps": [
-        "27 − 8 = 19",
-        "19 ÷ 64 = 19/64"
+      "question": "1 −3 1 −3 1 −3 [(3) − (2) ] ÷ ( ) 4",
+      "conceptsUsed": [
+        "Negative Exponents",
+        "Division of Fractions"
       ],
-      "answer": "19/64"
+      "steps": [
+        "Convert negative exponents.\n1 −3\n( ) = 33 = 27\n3\n1 −3\n( ) = 23 = 8\n2\n1 −3\n( ) = 43 = 64\n4",
+        "Solve bracket.\n27 − 8 = 19\nSo:\n19 ÷ 64"
+      ],
+      "answer": "19 64"
     },
     {
       "problemId": "ex2_2_q7_ii",
-      "question": "Simplify (3² − 2²) × (2/3)⁻³.",
-      "steps": [
-        "5 × 27/8 = 135/8"
+      "question": "2 −3 (3 − 2 ) × ( ) 3 2 2",
+      "conceptsUsed": [
+        "Powers",
+        "Negative Exponents"
       ],
-      "answer": "135/8"
+      "steps": [
+        "Calculate powers.\n32 = 9\n22 = 4\n9−4= 5",
+        "Convert exponent.\n2 −3\n3 3\n( ) =( )\n3\n2\n27\n=\n8",
+        "Multiply.\n\f27\n8\n135\n=\n8\n5×"
+      ],
+      "answer": "135 8"
     },
     {
       "problemId": "ex2_2_q7_iii",
-      "question": "Simplify {(1/2)⁻¹ × (−4)⁻¹}⁻¹.",
+      "question": "1 −1 {( ) × (−4)−1 } 2",
+      "conceptsUsed": [
+        "Negative Exponents",
+        "Reciprocal Rule"
+      ],
       "steps": [
-        "2 × (−1/4) = −1/2",
-        "(−1/2)⁻¹ = −2"
+        "Convert exponents.\n1 −1\n( ) =2\n2\n(−4)−1 = −",
+        "Multiply.\n1\n4\n−1\n\f1\n1\n2 × ( − 4) = −\n2",
+        "Apply exponent -1.\n1 −1\n( − 2) = −2"
       ],
       "answer": "−2"
     },
     {
       "problemId": "ex2_2_q7_iv",
-      "question": "Simplify [(−1/4)²]⁻¹.",
+      "question": "1 2 [( − 4) ] −1",
+      "conceptsUsed": [
+        "Power of a Power",
+        "Negative Exponents"
+      ],
       "steps": [
-        "(1/16)⁻¹ = 16"
+        "Square fraction.\n1\n1 2\n( − 4) =\n16\n\fStep 2\nApply exponent -1.\n1 −1\n( ) = 16\n16"
       ],
       "answer": "16"
     },
     {
       "problemId": "ex2_2_q7_v",
-      "question": "Simplify {(2/3)²}³ × (1/3)⁻⁴ × 3⁻¹ × 6⁻¹.",
-      "steps": [
-        "(2/3)⁶ = 64/729",
-        "(1/3)⁻⁴ = 81",
-        "3⁻¹ = 1/3",
-        "6⁻¹ = 1/6",
-        "64/729 × 81 × 1/3 × 1/6 = 32/81"
+      "question": "3 2 2 1 −4 {( ) } × ( ) × 3−1 × 6−1 3 3",
+      "conceptsUsed": [
+        "Power of a Power",
+        "Negative Exponents"
       ],
-      "answer": "32/81"
-    },
-    {
-      "problemId": "ex2_2_q8",
-      "question": "By what number should 5⁻¹ be multiplied so that the product equals (−7)⁻¹?",
       "steps": [
-        "x = −5/7"
+        "Apply power of power.\n2 6\n64\n( ) =\n3\n729",
+        "Convert negative exponents.\n\f1 −4\n( ) = 34 = 81\n3\n1\n3−1 =\n3\n1\n6−1 =\n6",
+        "Multiply.\n64\n1 1\n× 81 × ×\n729\n3 6\nSince\n81 ×\n1\n= 27\n3\nand\n27 ×\n1 27 9\n=\n=\n6\n6\n2\nNow:\n64 9\n×\n729 2\n576\n=\n1458\n32\n=\n81",
+        "Convert exponents.\n5−1 =\n1\n5\n(−7)−1 = −",
+        "Let required number be 𝑥.\n1\n7\n\f1\n1\n×𝑥 = −\n5\n7",
+        "1\nDivide by 5.\n1 1\n𝑥=− ÷\n7 5",
+        "Multiply by reciprocal.\n1\n= − ×5\n7\n5\n=−\n7",
+        "Convert exponents.\n1 −1\n( ) =2\n2\n7\n4 −1\n( − 7) = −\n4",
+        "Let required number be 𝑥.\n2𝑥 = −\n7\n4",
+        "Divide by 2.\n7 1\n𝑥=− ×\n4 2\n7\n=−\n8",
+        "Convert exponents.\n1\n15\n1\n(−5)−1 = −\n5\n(−15)−1 = −",
+        "Let required number be 𝑥.\n−",
+        "1\n1\n÷𝑥 =−\n15\n5\n\fUse:\n𝑥=\n−1/15\n−1/5",
+        "Negative signs cancel.\n1\n×5\n15\n1\n=\n3\n=",
+        "Convert exponents.\n5 −2\n3 2\n9\n( ) =( ) =\n3\n5\n25",
+        "Convert RHS.\n7 −1 3\n( ) =\n3\n7",
+        "Let required number be 𝑥.\n9\n3\n×𝑥 =\n25\n7",
+        "9\nDivide by 25.\n𝑥=\n3 9\n÷\n7 25",
+        "Multiply by reciprocal.\n3 25\n×\n7 9\n75\n=\n63\n=\n\fStep 6\nSimplify.\n=\n25\n21"
       ],
-      "answer": "−5/7"
-    },
-    {
-      "problemId": "ex2_2_q9",
-      "question": "By what number should (1/2)⁻¹ be multiplied so that the product equals (−4/7)⁻¹?",
-      "steps": [
-        "x = −7/8"
-      ],
-      "answer": "−7/8"
-    },
-    {
-      "problemId": "ex2_2_q10",
-      "question": "By what number should (−15)⁻¹ be divided so that the quotient equals (−5)⁻¹?",
-      "steps": [
-        "x = 1/3"
-      ],
-      "answer": "1/3"
-    },
-    {
-      "problemId": "ex2_2_q11",
-      "question": "By what number should (5/3)⁻² be multiplied so that the product equals (7/3)⁻¹?",
-      "steps": [
-        "(3/5)² = 9/25",
-        "9/25 × x = 3/7",
-        "x = 25/21"
-      ],
-      "answer": "25/21"
+      "answer": "32 81 QUESTION 8 Question \fBy what number should 5−1 be multiplied so that the product may be equal to ( −7)−1? Concepts Used Negative Exponent Rule 𝑎−1 = 1 𝑎 Finding Unknown Number If: 𝐴×𝑥 =𝐵 then: 𝑥= 𝐵 𝐴 (No new concept) Step 1 Convert exponents. 5−1 = 1 5 (−7)−1 = − Step 2 Let required number be 𝑥. 1 7 \f1 1 ×𝑥 = − 5 7 Step 3 1 Divide by 5. 1 1 𝑥=− ÷ 7 5 Step 4 Multiply by reciprocal. 1 = − ×5 7 5 =− 7 Answer − 5 7 QUESTION 9 Question By what number should 1 −1 ( ) 2 be multiplied so that the product may be equal to 4 −1 ( − 7) ? \fConcepts Used Fraction With Negative Exponent 𝑎 −1 𝑏 ( ) = 𝑏 𝑎 (No new concept) Step 1 Convert exponents. 1 −1 ( ) =2 2 7 4 −1 ( − 7) = − 4 Step 2 Let required number be 𝑥. 2𝑥 = − 7 4 Step 3 Divide by 2. 7 1 𝑥=− × 4 2 7 =− 8 Answer − 7 8 \fQUESTION 10 Question By what number should (−15)−1 be divided so that the quotient may be equal to ( −5)−1? Concepts Used Negative Exponent Rule Division of Fractions (No new concept) Step 1 Convert exponents. 1 15 1 (−5)−1 = − 5 (−15)−1 = − Step 2 Let required number be 𝑥. − Step 3 1 1 ÷𝑥 =− 15 5 \fUse: 𝑥= −1/15 −1/5 Step 4 Negative signs cancel. 1 ×5 15 1 = 3 = Answer 1 3 QUESTION 11 Question By what number should 5 −2 ( ) 3 be multiplied so that the product may be equal to 7 −1 ( ) ? 3 Concepts Used Fraction With Negative Exponent Finding Unknown Number \f(No new concept) Step 1 Convert exponents. 5 −2 3 2 9 ( ) =( ) = 3 5 25 Step 2 Convert RHS. 7 −1 3 ( ) = 3 7 Step 3 Let required number be 𝑥. 9 3 ×𝑥 = 25 7 Step 4 9 Divide by 25. 𝑥= 3 9 ÷ 7 25 Step 5 Multiply by reciprocal. 3 25 × 7 9 75 = 63 = \fStep 6 Simplify. = 25 21 Answer 25 21 CONCEPT MAP Question Concept Tested 8 Negative Exponents 9 Reciprocal Rule 10 Division of Fractions 11 Negative Exponents + Finding Unknown Pattern Students Should Notice Questions 8–11 all follow the same structure: Product Question 𝐴×𝑥 =𝐵 Solve: 𝑥= 𝐵 𝐴 \fDivision Question 𝐴÷𝑥 =𝐵 Solve: 𝑥= 𝐴 𝐵 QUESTION 12 — FIND 𝒙 This is the first place where students use exponent laws to find an unknown exponent. Strategy: 1. Convert everything to the same base. 2. Apply exponent laws. 3. Compare exponents."
     },
     {
       "problemId": "ex2_2_q12_i",
-      "question": "If (1/4)⁻⁴ × (1/4)⁻⁸ = (1/4)⁻⁴ˣ, find x.",
+      "question": "1 −4 1 −8 1 −4𝑥 ( ) ×( ) =( ) 4 4 4 Find 𝑥.",
+      "conceptsUsed": [
+        "Product Law",
+        "𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛",
+        "Equal Bases Rule",
+        "𝑎𝑚 = 𝑎𝑛",
+        "then"
+      ],
+      "steps": [
+        "Apply Product Law.\n1 −4+(−8)\n( )\n4\n1 −12\n=( )\n4",
+        "Compare exponents.\n−12 = −4𝑥",
+        "Solve.\n𝑥=3"
+      ],
+      "answer": "𝑥=3"
+    },
+    {
+      "problemId": "ex2_2_q12_ii",
+      "question": "1 −19 1 8 1 −2𝑥+1 ( − 2) ÷ ( − 2) = ( − 2) \fFind 𝑥.",
+      "conceptsUsed": [
+        "Quotient Law",
+        "𝑎𝑚 ÷ 𝑎𝑛 = 𝑎𝑚−𝑛",
+        "Equal Bases Rule"
+      ],
+      "steps": [
+        "Subtract exponents.\n(−19) − 8\n= −27\nThus,\n1 −27\n1 −2𝑥+1\n( − 2)\n= ( − 2)",
+        "Compare exponents.\n−27 = −2𝑥 + 1",
+        "Solve.\n−28 = −2𝑥\n𝑥 = 14"
+      ],
+      "answer": "𝑥 = 14"
+    },
+    {
+      "problemId": "ex2_2_q12_iv",
+      "question": "2 −3 2 15 2 2+3𝑥 ( ) ×( ) =( ) 5 5 5 Find 𝑥.",
+      "conceptsUsed": [
+        "Product Law"
+      ],
+      "steps": [
+        "Add exponents.\n−3 + 15 = 12\nThus,\n2 12\n2 2+3𝑥\n( ) =( )\n5\n5",
+        "Compare exponents.\n12 = 2 + 3𝑥\n\fStep 3\nSolve.\n10 = 3𝑥\n10\n𝑥=\n3"
+      ],
+      "answer": "𝑥= 10 3"
+    },
+    {
+      "problemId": "ex2_2_q12_v",
+      "question": "5 −𝑥 5 −4 5 5 ( ) ÷( ) =( ) 4 4 4 Find 𝑥.",
+      "conceptsUsed": [
+        "Quotient Law"
+      ],
+      "steps": [
+        "Subtract exponents.\n−𝑥 − (−4)\n= −𝑥 + 4\nThus,\n5 −𝑥+4\n5 5\n( )\n=( )\n4\n4\n\fStep 2\nCompare exponents.\n−𝑥 + 4 = 5",
+        "Solve.\n−𝑥 = 1\n𝑥 = −1"
+      ],
+      "answer": "𝑥 = −1"
+    },
+    {
+      "problemId": "ex2_2_q12_vi",
+      "question": "8 2𝑥+1 8 5 8 𝑥+2 ( ) ×( ) =( ) 3 3 3 Find 𝑥.",
       "conceptsUsed": [
         "Product Law",
         "Equal Bases Rule"
       ],
       "steps": [
-        "−4 + (−8) = −12",
-        "−12 = −4x",
-        "x = 3"
+        "Add exponents.\n(2𝑥 + 1) + 5 = 2𝑥 + 6\n\fThus,\n8 2𝑥+6\n8 𝑥+2\n( )\n=( )\n3\n3",
+        "Compare exponents.\n2𝑥 + 6 = 𝑥 + 2",
+        "Solve.\n𝑥 = −4"
       ],
-      "answer": "x = 3"
-    },
-    {
-      "problemId": "ex2_2_q12_ii",
-      "question": "If (−1/2)⁻¹⁹ ÷ (−1/2)⁸ = (−1/2)⁻²ˣ⁺¹, find x.",
-      "steps": [
-        "−19 − 8 = −27",
-        "−27 = −2x + 1",
-        "x = 14"
-      ],
-      "answer": "x = 14"
-    },
-    {
-      "problemId": "ex2_2_q12_iii",
-      "question": "If (3/2)⁻³ × (3/2)⁵ = (3/2)²ˣ⁺¹, find x.",
-      "steps": [
-        "−3 + 5 = 2",
-        "2 = 2x + 1",
-        "x = 1/2"
-      ],
-      "answer": "x = 1/2"
-    },
-    {
-      "problemId": "ex2_2_q12_iv",
-      "question": "If (2/5)⁻³ × (2/5)¹⁵ = (2/5)²⁺³ˣ, find x.",
-      "steps": [
-        "12 = 2 + 3x",
-        "x = 10/3"
-      ],
-      "answer": "x = 10/3"
-    },
-    {
-      "problemId": "ex2_2_q12_v",
-      "question": "If (5/4)⁻ˣ ÷ (5/4)⁻⁴ = (5/4)⁵, find x.",
-      "steps": [
-        "−x − (−4) = 5",
-        "−x + 4 = 5",
-        "x = −1"
-      ],
-      "answer": "x = −1"
-    },
-    {
-      "problemId": "ex2_2_q12_vi",
-      "question": "If (8/3)²ˣ⁺¹ × (8/3)⁵ = (8/3)ˣ⁺², find x.",
-      "steps": [
-        "2x + 1 + 5 = x + 2",
-        "2x + 6 = x + 2",
-        "x = −4"
-      ],
-      "answer": "x = −4"
+      "answer": "𝑥 = −4 MOST IMPORTANT LESSON FROM QUESTION 12 Whenever you see: 𝑎 𝑠𝑜𝑚𝑒𝑡ℎ𝑖𝑛𝑔 = 𝑎 𝑠𝑜𝑚𝑒𝑡ℎ𝑖𝑛𝑔 𝑒𝑙𝑠𝑒 your brain should immediately think: Compare exponents 𝑠𝑜𝑚𝑒𝑡ℎ𝑖𝑛𝑔 = 𝑠𝑜𝑚𝑒𝑡ℎ𝑖𝑛𝑔 𝑒𝑙𝑠𝑒 This single idea solves almost every exponent-equation question in Classes 8, 9, and 10. QUESTION 13 This question is different from Question 12. \fIn Question 12, we found x. Here we are first given x, then we must calculate: 𝑥 −2 or 𝑥 −1"
     },
     {
       "problemId": "ex2_2_q13_i",
-      "question": "If x = (3/2)² × (2/3)⁻⁴, find x⁻².",
+      "question": "If 3 2 2 −4 𝑥 =( ) ×( ) 2 3 find 𝑥 −2",
       "steps": [
-        "(2/3)⁻⁴ = (3/2)⁴",
-        "x = (3/2)⁶",
-        "x⁻² = (3/2)⁻¹² = (2/3)¹²"
+        "Substitute.\n3 2\n3 4\n𝑥 =( ) ×( )\n2\n2",
+        "Apply Product Law.\n3 6\n𝑥=( )\n2",
+        "Find\n𝑥 −2\nSubstitute x.\n−2\n3 6\n= [( ) ]\n2",
+        "Apply Power of Power.\n3 −12\n=( )\n2",
+        "Convert to positive exponent.\n2 12\n=( )\n3"
       ],
-      "answer": "(2/3)¹²"
+      "answer": "2 12 ( ) 3"
     },
     {
       "problemId": "ex2_2_q13_ii",
-      "question": "If x = (4/5)⁻² + (1/4)², find x⁻¹.",
-      "steps": [
-        "(4/5)⁻² = 25/16",
-        "(1/4)² = 1/16",
-        "x = 26/16 = 13/8",
-        "x⁻¹ = 8/13"
+      "question": "If 4 −2 1 2 𝑥 =( ) +( ) 5 4 find 𝑥 −1",
+      "conceptsUsed": [
+        "Negative Exponents",
+        "Addition of Fractions",
+        "Reciprocal Rule",
+        "Step 1",
+        "Simplify first term."
       ],
-      "answer": "8/13"
+      "steps": [
+        "Simplify second term.\n1 2\n1\n( ) =\n4\n16",
+        "Find x.\n25 1\n+\n16 16\n26\n=\n16\n13\n=\n8\n𝑥=",
+        "Find\n𝑥 −1\nTake reciprocal.\n=\n8\n13\n\fAnswer\n8\n13\nQUESTION 14\nQuestion\nFind the value of 𝑥for which\n52𝑥 ÷ 5−3 = 55\nConcepts Used\nQuotient Law\n𝑎𝑚 ÷ 𝑎𝑛 = 𝑎𝑚−𝑛\nEqual Bases Rule\n(No new concept)",
+        "Apply Quotient Law.\n52𝑥−(−3) = 55\n52𝑥+3 = 55",
+        "Compare exponents.\n2𝑥 + 3 = 5",
+        "Solve.\n2𝑥 = 2\n𝑥=1"
+      ],
+      "answer": "𝑥=1 This chapter's goal is: \"Can the student move the decimal correctly?\" Every question is basically testing one of these two concepts: Concept A: Convert Normal Number → Standard Form 𝑎 × 10𝑛 where 1 ≤ 𝑎 < 10 Concept B: Convert Standard Form → Normal Number Move decimal left or right."
+    }
+  ],
+  "sections": [
+    {
+      "heading": "QUESTION 1(i)",
+      "content": "Question\n3 −1\n3 −1\n3 −1\n3 −1\n( ) ×( ) ×( ) ×( )\n2\n2\n2\n2\nWrite in exponential form.\n\nConcepts Used\nProduct Law\n𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛\n\nNegative Exponents\n(No new concept)\n\nStep 1\nAll bases are same.\n3 −1\n3 −1\n3 −1\n3 −1\n( ) ×( ) ×( ) ×( )\n2\n2\n2\n2\nAdd exponents:\n= (−1) + (−1) + (−1) + (−1)\n= −4\n\n\fAnswer\n3 −4\n( )\n2"
     },
     {
-      "problemId": "ex2_2_q14",
-      "question": "Find x for which 5²ˣ ÷ 5⁻³ = 5⁵.",
-      "steps": [
-        "2x − (−3) = 5",
-        "2x + 3 = 5",
-        "2x = 2",
-        "x = 1"
-      ],
-      "answer": "x = 1"
+      "heading": "QUESTION 1(ii)",
+      "content": "Question\n2 −2\n2 −2\n2 −2\n( ) ×( ) ×( )\n5\n5\n5\nWrite in exponential form.\n\nConcepts Used\nProduct Law\n𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛\n(No new concept)\n\nStep 1\nAdd exponents.\n(−2) + (−2) + (−2)\n= −6\n\nAnswer\n2 −6\n( )\n5"
+    },
+    {
+      "heading": "QUESTION 2(i)",
+      "content": "Question\n5−2\nEvaluate.\n\nConcepts Used\nNegative Exponent Rule\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\n5−2 =\n\n1\n52\n\n(No new concept)\n\nStep 1\nApply Negative Exponent Rule\n\nStep 2\nCalculate power\n=\n\n1\n25\n\nAnswer\n1\n25"
+    },
+    {
+      "heading": "QUESTION 2(ii)",
+      "content": "Question\n\n\f(−3)−2\n\nConcepts Used\nNegative Exponent Rule\n(No new concept)\n\nStep 1\n(−3)−2 =\n\n1\n(−3)2\n\nStep 2\n=\n\n1\n9\n\nAnswer\n1\n9"
+    },
+    {
+      "heading": "QUESTION 2(iii)",
+      "content": "Question\n1 −4\n( )\n3\n\nConcepts Used\nFraction With Negative Exponent\n\n\f𝑎 −𝑛\n𝑏 𝑛\n( ) =( )\n𝑏\n𝑎\n(No new concept)\n\nStep 1\nFlip fraction.\n= 34\n\nStep 2\nCalculate power.\n= 81\n\nAnswer\n81"
+    },
+    {
+      "heading": "QUESTION 2(iv)",
+      "content": "Question\n−1 −1\n( )\n2\n\nConcepts Used\nFraction With Negative Exponent\n(No new concept)\n\nStep 1\n\n\fFlip fraction.\n=\n\n−2\n1\n\nAnswer\n−2"
+    },
+    {
+      "heading": "QUESTION 3(i)",
+      "content": "Question\n6−1\n𝑝\n\nExpress as a rational number 𝑞.\n\nConcepts Used\nNegative Exponent Rule\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\n6−1 =\n\n1\n6\n\n(No new concept)\n\nStep 1\nApply Negative Exponent Rule\n\n\fAnswer\n1\n6"
+    },
+    {
+      "heading": "QUESTION 3(ii)",
+      "content": "Question\n(−7)−1\n\nConcepts Used\nNegative Exponent Rule\n(No new concept)\n\nStep 1\n(−7)−1 =\n\nStep 2\n=−\n\n1\n7\n\nAnswer\n−"
+    },
+    {
+      "heading": "QUESTION 3(iii)",
+      "content": "Question\n\n1\n7\n\n1\n−7\n\n\f1 −1\n( )\n4\n\nConcepts Used\nFraction With Negative Exponent\n𝑎 −1 𝑏\n( ) =\n𝑏\n𝑎\n(No new concept)\n\nStep 1\nFlip fraction.\n=\n\n4\n1\n\nAnswer\n4"
+    },
+    {
+      "heading": "QUESTION 3(iv)",
+      "content": "Question\n(−4)−1 × (\n\nConcepts Used\nNegative Exponent Rule\nFraction With Negative Exponent\n(No new concept)\n\n−3 −1\n)\n2\n\n\fStep 1\nConvert first term:\n(−4)−1 = −\n\n1\n4\n\nStep 2\nConvert second term:\n−3 −1\n2\n( ) =−\n2\n3\n\nStep 3\nMultiply fractions.\n1\n2\n− ×−\n4\n3\n2\n=\n12\n1\n=\n6\n\nAnswer\n1\n6"
+    },
+    {
+      "heading": "QUESTION 3(v)",
+      "content": "Question\n3 −1\n5 −1\n( ) ×( )\n5\n2\n\n\fConcepts Used\nFraction With Negative Exponent\nMultiplication of Fractions\n(No new concept)\n\nStep 1\nFlip both fractions.\n=\n\n5 2\n×\n3 5\n\nStep 2\nMultiply.\n=\n\n10\n15\n\n=\n\n2\n3\n\nStep 3\nSimplify.\n\nAnswer\n2\n3"
+    },
+    {
+      "heading": "QUESTION 4(i)",
+      "content": "Question\n(4−1 × 3−1 )2\n\nConcepts Used\nNegative Exponent Rule\nPower of a Product\n( 𝑎𝑏)𝑛 = 𝑎𝑛 𝑏 𝑛\n(No new concept)\n\nStep 1\nConvert exponents.\n1 1 2\n= (4 × 3)\n\nStep 2\nMultiply inside bracket.\n=(\n\n1 2\n)\n12\n\nStep 3\nSquare.\n=\n\n1\n144\n\n\fAnswer\n1\n144"
+    },
+    {
+      "heading": "QUESTION 4(ii)",
+      "content": "Question\n(5−1 +6−1)3\n\nConcepts Used\nNegative Exponent Rule\nNew Concept Used:\nAddition of fractions before applying exponent.\n\nStep 1\nConvert exponents.\n1 1 3\n= ( + 6)\n5\n\nStep 2\nAdd fractions.\nLCM = 30\n6\n5 3\n= (30 + 30)\n11 3\n=( )\n30\n\n\fStep 3\nCube numerator and denominator.\n113\n303\n1331\n=\n27000\n=\n\nAnswer\n1331\n27000"
+    },
+    {
+      "heading": "QUESTION 4(iii)",
+      "content": "Question\n(2−1 + 3−1 )−1\n\nConcepts Used\nNegative Exponent Rule\nReciprocal Rule\n(No new concept)\n\nStep 1\nConvert exponents.\n1 1 −1\n= (2 + 3)\n\nStep 2\nAdd fractions.\n\n\f5 −1\n=( )\n6\n\nStep 3\nTake reciprocal.\n=\n\n6\n5\n\nAnswer\n6\n5"
+    },
+    {
+      "heading": "QUESTION 4(iv)",
+      "content": "Question\n(3−1 × 4−1 )−1 × 5−1\n\nConcepts Used\nNegative Exponent Rule\nReciprocal Rule\n(No new concept)\n\nStep 1\nConvert exponents.\n1 1 −1 1\n= (3 × 4) ×\n5\n\n\fStep 2\nMultiply inside bracket.\n1 −1 1\n=( ) ×\n12\n5\n\nStep 3\nTake reciprocal.\n= 12 ×\n\n1\n5\n\nStep 4\nMultiply.\n=\n\n12\n5\n\nAnswer\n12\n5"
+    },
+    {
+      "heading": "QUESTION 4(v)",
+      "content": "Question\n(4−1 − 5−1 ) ÷ 3−1\n\nConcepts Used\nNegative Exponent Rule\nDivision of Fractions\n\n\f(No new concept)\n\nStep 1\nConvert exponents.\n1\n1 1\n= (4 − ) ÷\n5\n3\n\nStep 2\nSubtract fractions.\n=\n\n1 1\n÷\n20 3\n\nStep 3\nMultiply by reciprocal.\n1\n×3\n20\n3\n=\n20\n=\n\nAnswer\n3\n20\n\nNext comes Question 5, which is important because it introduces a new skill:\nConverting a positive exponent into a negative exponent\nFor example:\n1 −5\n35 = ( )\n3\n\n\fQUESTION 5\nInstruction:\nExpress each of the following rational numbers with a negative exponent."
+    },
+    {
+      "heading": "QUESTION 5(i)",
+      "content": "Question\n1 3\n( )\n4\n\nConcepts Used\nFraction With Negative Exponent\n𝑎 −𝑛\n𝑏 𝑛\n( ) =( )\n𝑏\n𝑎\nNew Skill:\nConverting positive exponent into negative exponent.\n\nStep 1\nTake reciprocal of fraction.\n1 4\n→\n4 1\n\nStep 2\nChange exponent sign.\n1 3\n4 −3\n( ) =( )\n4\n1\n\n\fAnswer\n4−3\nor\n4 −3\n( )\n1\n\nBoth are correct."
+    },
+    {
+      "heading": "QUESTION 5(ii)",
+      "content": "Question\n35\n\nConcepts Used\nNegative Exponent Rule\n1 −𝑛\n𝑎𝑛 = ( )\n𝑎\nNew Skill:\nIntroducing negative exponent.\n\nStep 1\nWrite reciprocal.\n1\n3\n\nStep 2\nChange exponent sign.\n\n\f1 −5\n3 =( )\n3\n5\n\nAnswer\n1 −5\n( )\n3"
+    },
+    {
+      "heading": "QUESTION 5(iii)",
+      "content": "Question\n3 4\n( )\n5\n\nConcepts Used\nReciprocal Rule\n\nStep 1\nTake reciprocal.\n5\n3\n\nStep 2\nChange exponent sign.\n3 4\n5 −4\n( ) =( )\n5\n3\n\nAnswer\n\n\f5 −4\n( )\n3"
+    },
+    {
+      "heading": "QUESTION 5(iv)",
+      "content": "Question\n−3\n\n3 4\n[( ) ]\n2\n\nConcepts Used\nPower of a Power\n( 𝑎𝑚 )𝑛 = 𝑎𝑚𝑛\n\nNegative Exponents\n(No new concept)\n\nStep 1\nApply Power of a Power.\n3 4×(−3)\n=( )\n2\n3 −12\n=( )\n2\n\nAnswer\n3 −12\n( )\n2\n\nAlternative Form\n\n\f2 12\n( )\n3\n\nalso correct."
+    },
+    {
+      "heading": "QUESTION 5(v)",
+      "content": "Question\n−3\n\n7 4\n[( ) ]\n3\n\nConcepts Used\nPower of a Power\n( 𝑎𝑚 )𝑛 = 𝑎𝑚𝑛\n\nStep 1\nMultiply exponents.\n7 4×(−3)\n=( )\n3\n7 −12\n=( )\n3\n\nAnswer\n7 −12\n( )\n3\n\nAlternative Form\n\n\f3 12\n( )\n7\n\nalso correct."
+    },
+    {
+      "heading": "QUESTION 6(i)",
+      "content": "Question\n3 −2\n( )\n4\nExpress with a positive exponent.\n\nConcepts Used\nNegative Exponent Rule\n𝑎 −𝑛\n𝑏 𝑛\n( ) =( )\n𝑏\n𝑎\n(No new concept)\n\nStep 1\nTake reciprocal.\n3 4\n→\n4 3\n\nStep 2\nMake exponent positive.\n3 −2\n4 2\n( ) =( )\n4\n3\n\n\fAnswer\n4 2\n( )\n3"
+    },
+    {
+      "heading": "QUESTION 6(ii)",
+      "content": "Question\n5 −3\n( )\n4\n\nConcepts Used\nNegative Exponent Rule\n(No new concept)\n\nStep 1\nTake reciprocal.\n4\n5\n\nStep 2\nMake exponent positive.\n5 −3\n4 3\n( ) =( )\n4\n5\n\nAnswer\n4 3\n( )\n5"
+    },
+    {
+      "heading": "QUESTION 6(iii)",
+      "content": "Question\n43 × 4−9\nExpress with positive exponent.\n\nConcepts Used\nProduct Law\n𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛\n\nNegative Exponent Rule\n(No new concept)\n\nStep 1\nAdd exponents.\n43+(−9)\n= 4−6\n\nStep 2\nConvert to positive exponent.\n4−6 =\n\nAnswer\n1\n46\n\n1\n46"
+    },
+    {
+      "heading": "QUESTION 6(iv)",
+      "content": "Question\n−4\n\n4 −3\n[( ) ]\n3\n\nConcepts Used\nPower of a Power\n( 𝑎𝑚 )𝑛 = 𝑎𝑚𝑛\n(No new concept)\n\nStep 1\nMultiply exponents.\n(−3) × (−4)\n= 12\n\nStep 2\nApply rule.\n4 12\n( )\n3\n\nAnswer\n4 12\n( )\n3"
+    },
+    {
+      "heading": "QUESTION 6(v)",
+      "content": "Question\n\n\f−2\n\n3 4\n[( ) ]\n2\n\nConcepts Used\nPower of a Power\n( 𝑎𝑚 )𝑛 = 𝑎𝑚𝑛\n\nStep 1\nMultiply exponents.\n4 × (−2)\n= −8\n\nStep 2\n3 −8\n( )\n2\n\nStep 3\nConvert to positive exponent.\n2 8\n=( )\n3\n\nAnswer\n2 8\n( )\n3\n\n\fCONCEPT CONNECTION\nQuestion Concept Used\n6(i)\n\nNegative Exponent\n\n6(ii)\n\nNegative Exponent\n\n6(iii)\n\nProduct Law + Negative Exponent\n\n6(iv)\n\nPower of Power\n\n6(v)\n\nPower of Power + Negative Exponent\n\nImportant Observation for Students\nWhenever NCERT says:\n\"Express with positive exponent\"\nYou should immediately think:\nNegative exponent → reciprocal\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\nor\n𝑎 −𝑛\n𝑏 𝑛\n( ) =( )\n𝑏\n𝑎\nThis single idea solves almost every question of Exercise 2.2 Question 6.\n\nQUESTION 7 — SIMPLIFY\nThese questions are important because they combine multiple concepts together. While\nsolving, always identify:\n1. Negative exponent?\n2. Product law?\n3. Division of fractions?\n4. Power of a power?"
+    },
+    {
+      "heading": "QUESTION 7(i)",
+      "content": "Question\n1 −3\n1 −3\n1 −3\n[(3) − (2) ] ÷ ( )\n4\n\nConcepts Used\nNegative Exponents\nDivision of Fractions\n(No new concept)\n\nStep 1\nConvert negative exponents.\n1 −3\n( ) = 33 = 27\n3\n1 −3\n( ) = 23 = 8\n2\n1 −3\n( ) = 43 = 64\n4\n\nStep 2\nSolve bracket.\n27 − 8 = 19\nSo:\n19 ÷ 64\n\nAnswer\n\n\f19\n64"
+    },
+    {
+      "heading": "QUESTION 7(ii)",
+      "content": "Question\n2 −3\n(3 − 2 ) × ( )\n3\n2\n\n2\n\nConcepts Used\nPowers\nNegative Exponents\n(No new concept)\n\nStep 1\nCalculate powers.\n32 = 9\n22 = 4\n9−4= 5\n\nStep 2\nConvert exponent.\n2 −3\n3 3\n( ) =( )\n3\n2\n27\n=\n8\n\nStep 3\nMultiply.\n\n\f27\n8\n135\n=\n8\n5×\n\nAnswer\n135\n8"
+    },
+    {
+      "heading": "QUESTION 7(iii)",
+      "content": "Question\n1 −1\n{( ) × (−4)−1 }\n2\n\nConcepts Used\nNegative Exponents\nReciprocal Rule\n(No new concept)\n\nStep 1\nConvert exponents.\n1 −1\n( ) =2\n2\n(−4)−1 = −\n\nStep 2\nMultiply.\n\n1\n4\n\n−1\n\n\f1\n1\n2 × ( − 4) = −\n2\n\nStep 3\nApply exponent -1.\n1 −1\n( − 2) = −2\n\nAnswer\n−2"
+    },
+    {
+      "heading": "QUESTION 7(iv)",
+      "content": "Question\n1 2\n[( − 4) ]\n\n−1\n\nConcepts Used\nPower of a Power\nNegative Exponents\n(No new concept)\n\nStep 1\nSquare fraction.\n1\n1 2\n( − 4) =\n16\n\n\fStep 2\nApply exponent -1.\n1 −1\n( ) = 16\n16\n\nAnswer\n16"
+    },
+    {
+      "heading": "QUESTION 7(v)",
+      "content": "Question\n3\n\n2 2\n1 −4\n{( ) } × ( ) × 3−1 × 6−1\n3\n3\n\nConcepts Used\nPower of a Power\n( 𝑎𝑚 )𝑛 = 𝑎𝑚𝑛\n\nNegative Exponents\n\nStep 1\nApply power of power.\n2 6\n64\n( ) =\n3\n729\n\nStep 2\nConvert negative exponents.\n\n\f1 −4\n( ) = 34 = 81\n3\n1\n3−1 =\n3\n1\n6−1 =\n6\n\nStep 3\nMultiply.\n64\n1 1\n× 81 × ×\n729\n3 6\nSince\n81 ×\n\n1\n= 27\n3\n\nand\n27 ×\n\n1 27 9\n=\n=\n6\n6\n2\n\nNow:\n64 9\n×\n729 2\n576\n=\n1458\n32\n=\n81\n\nAnswer\n32\n81\nQUESTION 8\nQuestion\n\n\fBy what number should\n5−1\nbe multiplied so that the product may be equal to\n( −7)−1?\n\nConcepts Used\nNegative Exponent Rule\n𝑎−1 =\n\n1\n𝑎\n\nFinding Unknown Number\nIf:\n𝐴×𝑥 =𝐵\nthen:\n𝑥=\n\n𝐵\n𝐴\n\n(No new concept)\n\nStep 1\nConvert exponents.\n5−1 =\n\n1\n5\n\n(−7)−1 = −\n\nStep 2\nLet required number be 𝑥.\n\n1\n7\n\n\f1\n1\n×𝑥 = −\n5\n7\n\nStep 3\n1\n\nDivide by 5.\n1 1\n𝑥=− ÷\n7 5\n\nStep 4\nMultiply by reciprocal.\n1\n= − ×5\n7\n5\n=−\n7\n\nAnswer\n−\n\n5\n7\n\nQUESTION 9\nQuestion\nBy what number should\n1 −1\n( )\n2\nbe multiplied so that the product may be equal to\n4 −1\n( − 7) ?\n\n\fConcepts Used\nFraction With Negative Exponent\n𝑎 −1 𝑏\n( ) =\n𝑏\n𝑎\n(No new concept)\n\nStep 1\nConvert exponents.\n1 −1\n( ) =2\n2\n7\n4 −1\n( − 7) = −\n4\n\nStep 2\nLet required number be 𝑥.\n2𝑥 = −\n\n7\n4\n\nStep 3\nDivide by 2.\n7 1\n𝑥=− ×\n4 2\n7\n=−\n8\n\nAnswer\n−\n\n7\n8\n\n\fQUESTION 10\nQuestion\nBy what number should\n(−15)−1\n\nbe divided so that the quotient may be equal to\n( −5)−1?\n\nConcepts Used\nNegative Exponent Rule\nDivision of Fractions\n(No new concept)\n\nStep 1\nConvert exponents.\n1\n15\n1\n(−5)−1 = −\n5\n(−15)−1 = −\n\nStep 2\nLet required number be 𝑥.\n−\n\nStep 3\n\n1\n1\n÷𝑥 =−\n15\n5\n\n\fUse:\n𝑥=\n\n−1/15\n−1/5\n\nStep 4\nNegative signs cancel.\n1\n×5\n15\n1\n=\n3\n=\n\nAnswer\n1\n3\n\nQUESTION 11\nQuestion\nBy what number should\n5 −2\n( )\n3\nbe multiplied so that the product may be equal to\n7 −1\n( ) ?\n3\n\nConcepts Used\nFraction With Negative Exponent\nFinding Unknown Number\n\n\f(No new concept)\n\nStep 1\nConvert exponents.\n5 −2\n3 2\n9\n( ) =( ) =\n3\n5\n25\n\nStep 2\nConvert RHS.\n7 −1 3\n( ) =\n3\n7\n\nStep 3\nLet required number be 𝑥.\n9\n3\n×𝑥 =\n25\n7\n\nStep 4\n9\n\nDivide by 25.\n𝑥=\n\n3 9\n÷\n7 25\n\nStep 5\nMultiply by reciprocal.\n3 25\n×\n7 9\n75\n=\n63\n=\n\n\fStep 6\nSimplify.\n=\n\n25\n21\n\nAnswer\n25\n21\n\nCONCEPT MAP\nQuestion Concept Tested\n8\n\nNegative Exponents\n\n9\n\nReciprocal Rule\n\n10\n\nDivision of Fractions\n\n11\n\nNegative Exponents + Finding Unknown\n\nPattern Students Should Notice\nQuestions 8–11 all follow the same structure:\nProduct Question\n𝐴×𝑥 =𝐵\nSolve:\n𝑥=\n\n𝐵\n𝐴\n\n\fDivision Question\n𝐴÷𝑥 =𝐵\nSolve:\n𝑥=\n\n𝐴\n𝐵\n\nQUESTION 12 — FIND 𝒙\nThis is the first place where students use exponent laws to find an unknown exponent.\nStrategy:\n1. Convert everything to the same base.\n2. Apply exponent laws.\n3. Compare exponents."
+    },
+    {
+      "heading": "QUESTION 12(i)",
+      "content": "Question\n1 −4\n1 −8\n1 −4𝑥\n( ) ×( ) =( )\n4\n4\n4\nFind 𝑥.\n\nConcepts Used\nProduct Law\n𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛\n\nEqual Bases Rule\nIf\n𝑎𝑚 = 𝑎𝑛\nthen\n\n\f𝑚=𝑛\n\nNew Concept:\nEqual Bases ⇒ Equal Exponents\n\nStep 1\nApply Product Law.\n1 −4+(−8)\n( )\n4\n1 −12\n=( )\n4\n\nStep 2\nCompare exponents.\n−12 = −4𝑥\n\nStep 3\nSolve.\n𝑥=3\n\nAnswer\n𝑥=3"
+    },
+    {
+      "heading": "QUESTION 12(ii)",
+      "content": "Question\n1 −19\n1 8\n1 −2𝑥+1\n( − 2)\n÷ ( − 2) = ( − 2)\n\n\fFind 𝑥.\n\nConcepts Used\nQuotient Law\n𝑎𝑚 ÷ 𝑎𝑛 = 𝑎𝑚−𝑛\n\nEqual Bases Rule\n\nStep 1\nSubtract exponents.\n(−19) − 8\n= −27\nThus,\n1 −27\n1 −2𝑥+1\n( − 2)\n= ( − 2)\n\nStep 2\nCompare exponents.\n−27 = −2𝑥 + 1\n\nStep 3\nSolve.\n−28 = −2𝑥\n𝑥 = 14\n\nAnswer\n𝑥 = 14"
+    },
+    {
+      "heading": "QUESTION 12(iii)",
+      "content": "Question\n3 −3\n3 5\n3 2𝑥+1\n( ) ×( ) = ( )\n2\n2\n2\nFind 𝑥.\n\nConcepts Used\nProduct Law\n\nStep 1\nAdd exponents.\n−3 + 5 = 2\nThus,\n3 2\n3 2𝑥+1\n( ) =( )\n2\n2\n\nStep 2\nCompare exponents.\n2 = 2𝑥 + 1\n\nStep 3\nSolve.\n1 = 2𝑥\n1\n𝑥=\n2\n\n\fAnswer\n𝑥=\n\n1\n2"
+    },
+    {
+      "heading": "QUESTION 12(iv)",
+      "content": "Question\n2 −3\n2 15\n2 2+3𝑥\n( ) ×( ) =( )\n5\n5\n5\nFind 𝑥.\n\nConcepts Used\nProduct Law\n\nStep 1\nAdd exponents.\n−3 + 15 = 12\nThus,\n2 12\n2 2+3𝑥\n( ) =( )\n5\n5\n\nStep 2\nCompare exponents.\n12 = 2 + 3𝑥\n\n\fStep 3\nSolve.\n10 = 3𝑥\n10\n𝑥=\n3\n\nAnswer\n𝑥=\n\n10\n3"
+    },
+    {
+      "heading": "QUESTION 12(v)",
+      "content": "Question\n5 −𝑥\n5 −4\n5 5\n( ) ÷( ) =( )\n4\n4\n4\nFind 𝑥.\n\nConcepts Used\nQuotient Law\n\nStep 1\nSubtract exponents.\n−𝑥 − (−4)\n= −𝑥 + 4\nThus,\n5 −𝑥+4\n5 5\n( )\n=( )\n4\n4\n\n\fStep 2\nCompare exponents.\n−𝑥 + 4 = 5\n\nStep 3\nSolve.\n−𝑥 = 1\n𝑥 = −1\n\nAnswer\n𝑥 = −1"
+    },
+    {
+      "heading": "QUESTION 12(vi)",
+      "content": "Question\n8 2𝑥+1\n8 5\n8 𝑥+2\n( )\n×( ) =( )\n3\n3\n3\nFind 𝑥.\n\nConcepts Used\nProduct Law\nEqual Bases Rule\n\nStep 1\nAdd exponents.\n(2𝑥 + 1) + 5 = 2𝑥 + 6\n\n\fThus,\n8 2𝑥+6\n8 𝑥+2\n( )\n=( )\n3\n3\n\nStep 2\nCompare exponents.\n2𝑥 + 6 = 𝑥 + 2\n\nStep 3\nSolve.\n𝑥 = −4\n\nAnswer\n𝑥 = −4\n\nMOST IMPORTANT LESSON FROM QUESTION 12\nWhenever you see:\n𝑎 𝑠𝑜𝑚𝑒𝑡ℎ𝑖𝑛𝑔 = 𝑎 𝑠𝑜𝑚𝑒𝑡ℎ𝑖𝑛𝑔 𝑒𝑙𝑠𝑒\nyour brain should immediately think:\nCompare exponents\n𝑠𝑜𝑚𝑒𝑡ℎ𝑖𝑛𝑔 = 𝑠𝑜𝑚𝑒𝑡ℎ𝑖𝑛𝑔 𝑒𝑙𝑠𝑒\nThis single idea solves almost every exponent-equation question in Classes 8, 9, and 10.\nQUESTION 13\nThis question is different from Question 12.\n\n\fIn Question 12, we found x.\nHere we are first given x, then we must calculate:\n𝑥 −2\nor\n𝑥 −1"
+    },
+    {
+      "heading": "QUESTION 13(i)",
+      "content": "Question\nIf\n3 2\n2 −4\n𝑥 =( ) ×( )\n2\n3\nfind\n𝑥 −2\n\nConcepts Used\nNegative Exponent Rule\n𝑎−𝑛 =\n\n1\n𝑎𝑛\n\nPower of a Power\n( 𝑎𝑚 )𝑛 = 𝑎𝑚𝑛\n\nProduct Law\n𝑎𝑚 × 𝑎𝑛 = 𝑎𝑚+𝑛\n(No new concept)\n\n\fStep 1\nSimplify:\n2 −4\n( )\n3\nFlip fraction:\n3 4\n=( )\n2\n\nStep 2\nSubstitute.\n3 2\n3 4\n𝑥 =( ) ×( )\n2\n2\n\nStep 3\nApply Product Law.\n3 6\n𝑥=( )\n2\n\nStep 4\nFind\n𝑥 −2\nSubstitute x.\n−2\n\n3 6\n= [( ) ]\n2\n\nStep 5\n\n\fApply Power of Power.\n3 −12\n=( )\n2\n\nStep 6\nConvert to positive exponent.\n2 12\n=( )\n3\n\nAnswer\n2 12\n( )\n3"
+    },
+    {
+      "heading": "QUESTION 13(ii)",
+      "content": "Question\nIf\n4 −2\n1 2\n𝑥 =( ) +( )\n5\n4\nfind\n𝑥 −1\n\nConcepts Used\nNegative Exponents\nAddition of Fractions\nReciprocal Rule\n(No new concept)\n\n\fStep 1\nSimplify first term.\n4 −2\n5 2\n( ) =( )\n5\n4\n25\n=\n16\n\nStep 2\nSimplify second term.\n1 2\n1\n( ) =\n4\n16\n\nStep 3\nFind x.\n25 1\n+\n16 16\n26\n=\n16\n13\n=\n8\n𝑥=\n\nStep 4\nFind\n𝑥 −1\nTake reciprocal.\n=\n\n8\n13\n\n\fAnswer\n8\n13\n\nQUESTION 14\nQuestion\nFind the value of 𝑥for which\n52𝑥 ÷ 5−3 = 55\n\nConcepts Used\nQuotient Law\n𝑎𝑚 ÷ 𝑎𝑛 = 𝑎𝑚−𝑛\n\nEqual Bases Rule\n(No new concept)\n\nStep 1\nApply Quotient Law.\n52𝑥−(−3) = 55\n52𝑥+3 = 55\n\nStep 2\nCompare exponents.\n2𝑥 + 3 = 5\n\nStep 3\n\n\fSolve.\n2𝑥 = 2\n𝑥=1\n\nAnswer\n𝑥=1\nThis chapter's goal is:\n\"Can the student move the decimal correctly?\"\nEvery question is basically testing one of these two concepts:\nConcept A: Convert Normal Number → Standard Form\n𝑎 × 10𝑛\nwhere\n1 ≤ 𝑎 < 10\n\nConcept B: Convert Standard Form → Normal Number\nMove decimal left or right."
     }
   ],
   "quiz": [
     {
-      "questionId": "ex22_q1",
+      "questionId": "ex2_2_q1",
       "type": "mcq",
-      "question": "5⁻² =",
+      "question": "Review exercise",
       "options": [
-        "1/25",
-        "25",
-        "−25",
-        "10"
+        "A",
+        "B"
       ],
-      "correctIndex": 0,
-      "explanation": "1/5² = 1/25."
-    },
-    {
-      "questionId": "ex22_q2",
-      "type": "mcq",
-      "question": "(1/3)⁻⁴ =",
-      "options": [
-        "81",
-        "1/81",
-        "−81",
-        "12"
-      ],
-      "correctIndex": 0,
-      "explanation": "Flip then power: 3⁴ = 81."
-    },
-    {
-      "questionId": "ex22_q3",
-      "type": "mcq",
-      "question": "(4⁻¹ × 3⁻¹)² =",
-      "options": [
-        "1/144",
-        "1/12",
-        "1/7",
-        "12²"
-      ],
-      "correctIndex": 0,
-      "explanation": "(1/12)² = 1/144."
-    },
-    {
-      "questionId": "ex22_q4",
-      "type": "mcq",
-      "question": "3⁵ = (1/3)⁻ⁿ when n =",
-      "options": [
-        "5",
-        "−5",
-        "3",
-        "15"
-      ],
-      "correctIndex": 0,
-      "explanation": "3⁵ = (1/3)⁻⁵."
-    },
-    {
-      "questionId": "ex22_q5",
-      "type": "mcq",
-      "question": "If aᵐ = aⁿ then",
-      "options": [
-        "m = n",
-        "m + n = 0",
-        "m × n = 1",
-        "m = −n"
-      ],
-      "correctIndex": 0,
-      "explanation": "Equal bases → equal exponents."
-    },
-    {
-      "questionId": "ex22_q6",
-      "type": "mcq",
-      "question": "5²ˣ ÷ 5⁻³ = 5⁵ gives x =",
-      "options": [
-        "1",
-        "2",
-        "4",
-        "−1"
-      ],
-      "correctIndex": 0,
-      "explanation": "2x + 3 = 5 → x = 1."
-    },
-    {
-      "questionId": "ex22_q7",
-      "type": "mcq",
-      "question": "(2/5)⁻¹ =",
-      "options": [
-        "5/2",
-        "2/5",
-        "−5/2",
-        "25"
-      ],
-      "correctIndex": 0,
-      "explanation": "Reciprocal of 2/5."
+      "correctIndex": 0
     }
   ],
   "status": "published",
