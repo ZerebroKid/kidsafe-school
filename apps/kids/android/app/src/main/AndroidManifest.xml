@@ -16,6 +16,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Zumi voice "Fun" feature: on-device speech-to-text needs the mic. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- Notifications (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -54,6 +57,18 @@
       `PermissionsAndroid.check` returns false forever, stalling onboarding on the activity step.
     -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+    <!--
+      Android 11+ package visibility. QUERY_ALL_PACKAGES above already makes the
+      speech recognizer resolvable, but declare the RecognitionService intent
+      explicitly so @react-native-voice keeps working if QUERY_ALL_PACKAGES is
+      ever dropped for Play Store compliance.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
 
     <application
         android:name=".MainApplication"

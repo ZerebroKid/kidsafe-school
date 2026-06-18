@@ -1,0 +1,2195 @@
+{
+  "meta": {
+    "class": 3,
+    "subject": "science",
+    "book": "Wow Science Book 3 (Eupheus Learning)",
+    "framework": "10-stage discovery learning",
+    "language": "Hinglish",
+    "ai_character": "Zumi",
+    "stages": [
+      "1:hook(realtime_ai)",
+      "2:predict(realtime_ai)",
+      "3:wrong_answer_trap(prestored_tts)",
+      "4:experiment(prestored_tts+wait)",
+      "5:visualization(prestored_tts+lottie)",
+      "6:discovery(hybrid_stt)",
+      "7:concept_reveal(prestored_tts+rive)",
+      "8:exam_mode(prestored_tts)",
+      "9:quiz(hybrid)",
+      "10:closing(realtime_ai)"
+    ]
+  },
+
+  "chapters": [
+
+    {
+      "chapter_number": 1,
+      "chapter_title": "Classifying Things",
+      "unit": "Unit 1: Diversity",
+      "ncert_topics": [
+        "What is classification",
+        "Classifying things in different ways — colour, size, shape, use, purpose",
+        "Separating objects to arrange them in groups",
+        "Showing classification using tables, diagrams, flowcharts"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "sorting categories objects organize",
+          "trigger": "when Zumi starts the 10-item memory test",
+          "show": "random items flying around → chaos visual"
+        },
+        "stage_5_lottie": {
+          "search_query": "library books shelf organize sorting",
+          "trigger": "during library visualization script",
+          "show": "books self-sorting onto shelves"
+        },
+        "stage_7_rive": {
+          "state_name": "concept_zoom",
+          "trigger": "when Zumi says the word CLASSIFICATION",
+          "description": "Word CLASSIFICATION zooms into screen with sparkles"
+        },
+        "stage_8_lottie": {
+          "search_query": "flashcard flip learning card",
+          "trigger": "start of exam mode",
+          "show": "flashcard flipping from story word to NCERT word"
+        },
+        "rive_interaction_1": {
+          "state_name": "sort_game",
+          "trigger": "during stage 4 experiment",
+          "description": "Child can drag items on screen into two groups — writing things vs eating things"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "zumi_avatar_state": "talking",
+        "ai_system_context": "Zumi greets child warmly by name. Says she went to a new grocery shop today and everything was mixed up — soap next to banana, shampoo next to potato. Mummy got upset because it took forever. Ask child if they've ever been somewhere confusing like that. Be genuinely curious. 2-3 sentences max."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "zumi_avatar_state": "thinking",
+        "ai_system_context": "Ask child: if their own bag had books, tiffin, toys, stationery all jumbled together, could they find their pencil in 5 seconds? Genuinely wait for answer. React naturally. Say 'interesting! chalo ek cheez try karte hain'"
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek baar mere ek dost ne bola — main bahut smart hoon, mujhe kuch arrange karne ki zarurat nahi, sab yaad rakhta hoon. Toh maine usse test kiya. Maine bola — suno, main 10 cheezein bolunga, ek baar, aur tumhe yaad rakhna hai. Ready? Ball, kitaab, apple, kursi, pencil, kela, toy car, scale, mango, rubber. Ab bolo — kaun si fruits thi list mein? Mushkil laga na? Lekin ab main phir bolunga — fruits mein sirf teen hain: apple, kela, mango. Stationery mein: pencil, scale, rubber. Toys mein: ball, toy car. Ab kaun si fruits batao? Aasaan ho gaya na! Yaad rakhna — jab cheezein groups mein hoti hain toh dhundhna bahut aasaan ho jaata hai!",
+        "pause_after_first_list_seconds": 4
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "rive_trigger": "sort_game",
+        "instruction_script": "Accha {child_name}, ab ek chhota sa experiment karte hain. Apni pencil case ya school bag dekho abhi. Jo cheezein likhne ke kaam aati hain — pencil, pen, scale, rubber — unhe ek taraf rakho mentally. Aur jo cheezein khane ke kaam aati hain — tiffin, water bottle — unhe doosri taraf. 30 seconds mein karo. Main wait karta hoon — GO!",
+        "wait_seconds": 30,
+        "zumi_avatar_during_wait": "listening",
+        "follow_up_script": "Ho gaya? Kitni likhne wali cheezein mili? Aur kitni khane wali? Batao!",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_5_lottie",
+        "script": "Ab school ki library soch — agar saari books ek badi pile mein hoti toh? Science book dhundhni hai — poori pile paltani padti! Lekin librarian aunty ne kya kiya? Science books ek shelf pe, story books ek shelf pe, dictionaries ek shelf pe. Ab agar mujhe science ki book chahiye toh seedha kahan jaunga? Science shelf! Ek second mein! Bas groups ki wajah se. Aur ghar mein bhi na — mummy ne kitchen mein daals ek jagah rakhte hain, masale ek jagah — isliye jaldi khaana ban jaata hai. Groups se sab kuch fast hota hai!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name}... samajh aa raha hai kya ho raha hai? Jab hum cheezein unki kisi quality ke basis pe alag alag groups mein rakhte hain — toh kya hota hai? Tu batao apne shabdon mein!",
+        "stt_listen": true,
+        "celebration_script": "HAAAAAN! Bilkul yehi hai! Tu khud samajh gaya! Dhundhna aasaan ho jaata hai, sab organized rehta hai — EXACTLY!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "concept_zoom",
+        "script": "Aur {child_name}, is kaam ko — cheezein groups mein rakhna — scientists ne ek special naam diya hai. Sunna chahoge? Isse kehte hain... CLASSIFICATION! Classify karna matlab — cheezein unki qualities dekh ke alag alag groups mein rakhna. Quality matlab cheez ki koi bhi khaasiyat — jaise uska rang, size, shape, ya use! Aur ye classification sirf ghar ya school mein nahi hoti — duniya ki saari cheezein do bade groups mein classified hain — living things aur non-living things!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "Acha {child_name}, ab school wali language mein pakka kar lete hain. Ye sab board exam mein aata hai — dhyan se suno.",
+        "ncert_definition": "Classification ka matlab hai: arranging things into groups on the basis of their characteristics. Characteristics matlab — kisi cheez ki quality, jaise uska shape, size, colour, use, aur purpose.",
+        "key_points": [
+          "Hum cheezein classify kar sakte hain — colour ke basis pe, size ke basis pe, shape ke basis pe, use ke basis pe, purpose ke basis pe",
+          "Classification se diversity samajhna aasaan hota hai",
+          "Duniya ki saari cheezein do groups mein hain — living things aur non-living things",
+          "Classification ko tables, diagrams, aur flowcharts se show karte hain"
+        ],
+        "keywords": ["classification", "characteristics", "diversity", "living", "non-living"],
+        "memory_trick": "CLASS-ification yaad rakhna! Class mein sab log alag alag rows mein baithte hain na — waise hi cheezein alag groups mein! CLASS mein order hota hai, usi tarah classification mein bhi order hota hai!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "recall",
+            "question_text": "Accha {child_name}, cheezein groups mein rakhne ko kya kehte hain? Woh special word jo abhi seekha!",
+            "expected_concepts": ["classification"],
+            "correct_indicator": "child says classification",
+            "response_correct": "Waah! Classification! Bilkul sahi! Tu toh bahut smart hai!",
+            "response_incorrect": "Isse kehte hain classification! CLASS-ification — yaad rakhna apni class ki tarah!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Library mein story books, textbooks, aur dictionaries alag alag shelves pe hain. Ye kaunsa example hai? Classification hai ya kuch aur?",
+            "expected_concepts": ["classification", "haan"],
+            "correct_indicator": "child says yes or classification",
+            "response_correct": "Bilkul! Ye perfect classification ka example hai! Books unke purpose ke basis pe classify ki gayi hain!",
+            "response_incorrect": "Ye classification hi hai! Books unke type ke basis pe groups mein rakhi gayi hain — story books ek group, textbooks doosra group!"
+          },
+          {
+            "order": 3,
+            "type": "mcq_spoken",
+            "question_text": "Butterfly — living hai ya non-living? Aur wooden table — living hai ya non-living? Dono ke baare mein batao!",
+            "expected_concepts": ["butterfly living", "table non-living"],
+            "correct_indicator": "child correctly identifies both",
+            "response_correct": "Excellent! Butterfly living hai — wo udti hai, khana khati hai, badhti hai! Aur table non-living — wo kuch nahi karta khud se!",
+            "response_partial": "Ek sahi! Butterfly living hai kyunki wo move karti hai, khana khati hai. Table non-living hai kyunki wo apne aap kuch nahi karta!",
+            "response_incorrect": "Butterfly living hai — wo udti hai, khana khati hai, badhti hai! Table non-living hai — wo apne aap move nahi karta, badhta nahi!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Last aur sabse interesting wala! Ek toy seller ne toys ko teen shelves pe rakha — pehli shelf pe 25 rupaye wale, doosri pe 50 rupaye wale, teesri pe 75 rupaye wale. Usne toys kaise classify kiye?",
+            "expected_concepts": ["price", "cost", "daam", "rupaye"],
+            "correct_indicator": "child mentions price or cost",
+            "response_correct": "Zabardast! Price ke basis pe! Daam ke basis pe classify kiya! Tu toh classification expert ban gaya!",
+            "response_incorrect": "Usne price ke basis pe classify kiya — daam ke basis pe! Saste sab ek shelf pe, mehengle doosri pe! Ye bhi classification hai!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "zumi_avatar_state": "celebrating",
+        "ai_context_high_score": "Child scored 75%+. Celebrate enthusiastically. Say they discovered classification like a real scientist. Give cliffhanger: 'Kal ek aur mystery hai — kya ek teddy bear aur ek live rabbit mein koi similarity hai? Sochna!'",
+        "ai_context_mid_score": "Child scored 50-74%. Encourage warmly. Say they're getting it. Remind of library example. Cliffhanger same as above.",
+        "ai_context_low_score": "Child scored below 50%. Very encouraging, never discouraging. Say 'tu bahut brave hai jo try kiya!' Remind: CLASS-ification = class ki rows. Cliffhanger same.",
+        "parent_try_tonight": "Aaj raat {child_name} se pucho: ghar mein 10 cheezein lo (toys, books, fruits, kitchen items — kuch bhi) aur unhe 2-3 groups mein batao. Wo khud decide kare kis basis pe! Iska photo lena na bhoolna."
+      }
+    },
+
+    {
+      "chapter_number": 2,
+      "chapter_title": "Living and Non-living Things",
+      "unit": "Unit 1: Diversity",
+      "ncert_topics": [
+        "Living things vs non-living things",
+        "Living things need air, water, food",
+        "Living things grow",
+        "Living things move by themselves",
+        "Living things respond to changes in environment",
+        "Living things reproduce"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "plant growing time lapse seed sprout",
+          "trigger": "when comparing puppy growth vs stone",
+          "show": "seed sprouting into plant vs stone staying same"
+        },
+        "stage_5_lottie": {
+          "search_query": "sunflower turning towards sun movement",
+          "trigger": "during visualization of plant responses",
+          "show": "sunflower rotating to face sun"
+        },
+        "stage_5_lottie_2": {
+          "search_query": "mimosa touch me not plant closing leaves",
+          "trigger": "when Zumi describes touch-me-not",
+          "show": "plant leaves folding closed on touch"
+        },
+        "stage_7_rive": {
+          "state_name": "living_nonliving_sort",
+          "trigger": "concept reveal",
+          "description": "Interactive — items appear on screen, child taps to sort into LIVING or NON-LIVING bucket. Zumi cheers on correct taps."
+        },
+        "stage_8_lottie": {
+          "search_query": "human growth stages baby to adult",
+          "trigger": "exam mode — growth characteristic",
+          "show": "stages of human growth from baby to adult"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi tells child she bought a fluffy teddy bear AND a real hamster named Golu today. She's confused — both are soft, both are cute, both are small. She can't figure out the difference. Ask child what they think makes them different. Genuinely curious tone. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: if both the teddy bear and the hamster were kept in a box for one week — what would happen to each? Would they be the same? Genuinely wait and react to answer. Keep it conversational."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacchi ne boli — football mein hawa bharein toh wo bada ho jaata hai. Iska matlab football zinda hai aur grow karta hai! Kya sahi hai? Nahi na! Football bada sirf isliye hua kyunki usme hawa daali — hawa nikalo toh wapas chhota. Real growing alag hota hai. Jab tu bada hota hai toh kya koi tujhme kuch daalta hai? Nahi! Tu khud badhta hai — khana khake, paani peekey! Aur ek aur trap — mere dost ne kaha ki plants non-living hain kyunki wo move nahi karte. Lekin kya ye sahi hai? Bilkul galat! Plants move karte hain! Touch-me-not plant ko touch karo — uski pattiyan band ho jaati hain! Aur sunflower ka muh hamesha sun ki taraf ghoom jaata hai! Plants bhi living hain!",
+        "pause_for_child_reaction": true
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Abhi ek kaam karo — ghar mein ya apne paas koi bhi plant dekho — ya khidki se bahar ped dekho. Usse dhyan se dekho. Ab apni pencil box dekho. Dono ko compare karo — ek minute tak. Kya fark dikh raha hai dono mein?",
+        "wait_seconds": 60,
+        "follow_up_script": "Kya dikh raha hai? Plant mein aur pencil box mein kya alag hai?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_5_lottie",
+        "script": "Imagine karo — ek bada sunflower field. Subah sun east mein hota hai — saare flowers east ki taraf munh karte hain! Shaam ko sun west mein — saare flowers west ki taraf! Ye plants respond kar rahe hain apne environment mein hone wale changes ko! Aur Touch-me-not plant — ek haath se touch karo — pattiyan turat band! Ye living cheezein hain! Aur woh chalk box jo sealed hai, usme chalks hain — koi hawa nahi jaati — kya chalks beemar ho jaenge? Nahi! Kyunki chalk non-living hai — usse hawa ki zarurat nahi! Living cheezein hi hawa, paani, aur khana maangti hain!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name}... teddy bear aur real bunny mein kya fark hai? Aur plant aur pencil box mein? Kya koi cheez hai jo sab living things mein common hai aur non-living mein nahi?",
+        "stt_listen": true,
+        "celebration_script": "HAAAAN! Tu bahut smart hai! Living things grow karte hain, move karte hain, respond karte hain, reproduce karte hain — aur non-living kuch nahi karte khud se!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "living_nonliving_sort",
+        "script": "Toh duniya mein saari cheezein do groups mein hain — LIVING THINGS aur NON-LIVING THINGS! Living things — jo zinda hain — jaise birds, animals, fish, insects, plants, aur hum humans. Non-living things — jo zinda nahi hain — jaise table, water bottle, stone, toy. Aur kuch non-living things pehle living thi — jaise wood, jo ped se aayi! Ek interesting baat — kuch non-living cheezein kabhi living nahi thi — jaise glass, plastic. Aur kuch pehle living thi — jaise wood, cotton!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "Ab school wali language mein pakka karte hain — ye sab board mein aata hai.",
+        "ncert_definition": "Living things are things that are alive. They need air, water, and food to survive. Non-living things are not alive and do not need air, water, or food.",
+        "key_points": [
+          "Living things ki characteristics: grow karte hain, khud move karte hain, saas lete hain, khana khate hain, reproduce karte hain, respond karte hain",
+          "Non-living things mein ye sab nahi hota",
+          "Sense organs — eyes, ears, nose, tongue, skin — living things ko respond karne mein help karte hain",
+          "Reproduction — living things apne jaise naye organisms produce karte hain — isse reproduction kehte hain"
+        ],
+        "keywords": ["living things", "non-living things", "characteristics", "reproduction", "respond", "germinate"],
+        "memory_trick": "GROW-MOVE-EAT-BREATHE-REPRODUCE — 5 cheezein yaad karo! Agar koi cheez ye 5 kaam karti hai — wo living hai! Ek bhi nahi karti — non-living!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "recall",
+            "question_text": "Ek simple wala — puppy grow karta hai kya? Haan ya nahi?",
+            "expected_concepts": ["haan", "yes", "grow karta hai"],
+            "correct_indicator": "child says yes",
+            "response_correct": "Haan! Puppy bada hokar dog ban jaata hai! Kyunki wo living thing hai!",
+            "response_incorrect": "Puppy toh bada hota hai na! Chhota puppy bada hokar dog ban jaata hai — kyunki wo living thing hai!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Football mein hawa bhari toh bada ho gaya — kya football living hai? Kyun ya kyun nahi?",
+            "expected_concepts": ["no", "nahi", "non-living", "hawa ki wajah se"],
+            "correct_indicator": "child says no and gives reason",
+            "response_correct": "Bahut smart! Football non-living hai! Hawa bhar ke bada hona real growing nahi hai — hawa nikalo toh wapas chhota! Real growing khud se hoti hai!",
+            "response_partial": "Sahi! Football non-living hai! Hawa bhar ke bada hona alag hai — agar hawa nikaal do toh wapas chhota ho jaata hai. Real growing khud se hoti hai!",
+            "response_incorrect": "Football non-living hai! Hawa bhar ke bada hona growing nahi hai. Hawa nikalo — wapas chhota. Living things khud se badhte hain — jaise tu bada ho raha hai!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Touch-me-not plant ko touch karo toh pattiyan band ho jaati hain — kya ye plant living hai? Iska kya proof hai?",
+            "expected_concepts": ["haan living", "respond karti hai", "move karti hai"],
+            "correct_indicator": "child says yes and mentions response/movement",
+            "response_correct": "Perfect! Plant living hai — wo touch ko respond karti hai! Non-living cheezein kabhi respond nahi karti!",
+            "response_incorrect": "Haan! Touch-me-not plant living hai — wo respond karti hai! Ye uski living characteristic hai. Non-living cheezein kabhi respond nahi karti!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Last wala tricky question! Mangoes on a tree — living ya non-living? Aur mangoes in a bowl — living ya non-living? Dono alag alag batao!",
+            "expected_concepts": ["tree mango living", "bowl mango non-living or once living"],
+            "correct_indicator": "child identifies difference between the two",
+            "response_correct": "Waah brilliant! Tree pe mangoes living hain — wo tree ka part hain jo zinda hai! Bowl mein mangoes non-living hain — tree se alag ho gayi hain ab wo grow nahi karengi!",
+            "response_incorrect": "Tree pe mangoes living hain — tree ka part hain, zinda hain! Bowl mein mangoes non-living hain — tree se tod li gayi hain, ab badhti nahi. Same mangoes — alag situation — alag answer!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Celebrate loudly! Say child is amazing scientist. Cliffhanger: 'Kal ek bahut bada garden explore karenge — aur pata chalega ki plants ek hi family mein kitne alag alag hote hain!'",
+        "ai_context_mid_score": "Warm encouragement. Remind GROW-MOVE-EAT-BREATHE-REPRODUCE trick. Cliffhanger same.",
+        "ai_context_low_score": "Very gentle. Say 'tu bahut acha try kar raha hai!' Remind just 2 things: living things grow, non-living don't. Cliffhanger same.",
+        "parent_try_tonight": "Aaj {child_name} se pucho: ghar mein jo bhi hai — 5 living aur 5 non-living cheezein list karo. Ek twist: koi ek cheez dhundho jo pehle living thi aur ab non-living hai (jaise wood, cotton, leather)."
+      }
+    },
+
+    {
+      "chapter_number": 3,
+      "chapter_title": "Plants",
+      "unit": "Unit 1: Diversity",
+      "ncert_topics": [
+        "Different parts of a plant — root, stem, leaf, flower, fruit",
+        "Characteristics of plants — all plants need air, water, sunlight, food",
+        "How plants are similar yet different — shape, size, colour, flowering/non-flowering",
+        "Types of stems — trunk (trees), climbers, creepers",
+        "Aerial roots — banyan, mangrove",
+        "Flowering and non-flowering plants"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "plant parts diagram root stem leaf flower fruit labeled",
+          "trigger": "stage 3 — when exposing wrong answer about plants having no parts",
+          "show": "labeled plant diagram appearing"
+        },
+        "stage_5_lottie": {
+          "search_query": "plant growth roots stem leaves animated",
+          "trigger": "visualization of plant system",
+          "show": "full plant growing from seed showing each part"
+        },
+        "stage_7_rive": {
+          "state_name": "plant_parts_tap",
+          "trigger": "concept reveal",
+          "description": "Interactive plant on screen. Child taps each part (root, stem, leaf, flower, fruit) and Zumi tells its function. Zumi avatar celebrates each correct tap."
+        },
+        "stage_5_lottie_2": {
+          "search_query": "climbing vine wall creeper plant",
+          "trigger": "when explaining climbers and creepers",
+          "show": "plant climbing a wall"
+        },
+        "stage_8_lottie": {
+          "search_query": "flowering non-flowering plants comparison fern moss",
+          "trigger": "exam mode — flowering vs non-flowering",
+          "show": "side by side flowering plant with flowers vs fern without"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi visited a huge garden today — saw creepers on walls, tall trees, tiny moss on rocks, giant sunflowers, ferns with no flowers. She's amazed and confused — why are some plants so different? Some climb, some creep, some are huge. Ask child if they've noticed plants that look very different from each other. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: do all plants have the same parts? Like does every plant have flowers? Genuinely wait. React to their answer. Say 'interesting! chalo discover karte hain!'"
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne kaha — plants mein koi special parts nahi hote, bas patta hota hai aur thoda sa danda. Lekin kya ye sahi hai? Bilkul galat! Har plant mein kuch special parts hote hain. Aur ek aur galat cheez — maine socha tha roots hamesha zameen ke andar hoti hain. Lekin banyan tree dekha? Uski roots upar se ltak rahi thi hawa mein! Aerial roots kehte hain unhe. Aur mangrove ke ped ki roots to keechad ke upar hoti hain! Aur ek interesting trap — maine socha tha jo plant flowers nahi laata wo living nahi — lekin fern aur moss bhi living plants hain even though inme flowers nahi aate!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Abhi ghar mein ya bahar koi bhi plant dhundho — ghar ka potted plant bhi chalega. Usse pakad ke dekho — uska stem touch karo. Strong hai ya soft? Ab uski ek patti pakdo — kya wo lambi hai, chhoti hai, chauri hai? Aur kya usme flowers hain? 1 minute dhyan se observe karo!",
+        "wait_seconds": 60,
+        "follow_up_script": "Kya dikh raha hai? Stem strong tha ya weak? Flowers the kya?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_5_lottie",
+        "script": "Imagine karo ek bada mango tree. Sabse neeche, zameen ke andar — roots hain. Ye roots do kaam karti hain — paani aur minerals kheenchna zameen se, aur tree ko mazbooti se pakad ke rakhna. Phir upar trunk hai — wo strong stem jo tree ko seedha rakhta hai. Trunk pe branches hain. Branches pe kya? Pattiyan! Pattiyan sunlight se khana banati hain — isse photosynthesis kehte hain. Isliye pattiyan green hoti hain. Phir flowers aate hain — aur flowers se fruits bante hain! Fruits mein seeds hote hain — aur seeds se naye plants! Kitna amazing system hai — har part apna kaam karta hai!",
+        "lottie_trigger_2": "stage_5_lottie_2"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name}, soch — plant ke har part ka ek kaam hai. Root ka kaam kya hai? Stem ka? Patti ka? Aur agar ek bhi part hata do — kya hoga plant ko?",
+        "stt_listen": true,
+        "celebration_script": "EXACTLY! Tu ne discover kar liya! Ek bhi part missing ho toh plant nahi reh sakta — sab milke ek system banate hain!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "plant_parts_tap",
+        "script": "Plants living things hain — aur unke parts ek system ki tarah kaam karte hain! Plants teen types mein hote hain based on stem — Trees jinke strong trunk hota hai, Climbers jinke weak stem hote hain aur jo support se climb karte hain, aur Creepers jo zameen pe failte hain. Aur flowers ke basis pe — Flowering plants jinme flowers aur fruits aate hain, aur Non-flowering plants jaise fern aur moss jinme flowers nahi aate. Flowering plants hamesha fruits bhi laate hain — kyunki fruits flowers ke baad hi bante hain!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "Ab NCERT language mein pakka karte hain.",
+        "ncert_definition": "Roots absorb water and mineral salts from soil and hold the plant firmly in the ground. Stem holds the plant upright, supports leaves and branches, and transports water, mineral salts and food. Leaf makes food for the plant through photosynthesis. Flower allows the plant to bear fruits and seeds. Fruit contains and protects the seeds.",
+        "key_points": [
+          "Trees — strong stem called trunk — mango, neem, banyan",
+          "Climbers — weak stem, use support to climb — money plant, pea plant",
+          "Creepers — weak stem, spread on ground — pumpkin, watermelon",
+          "Aerial roots — roots above ground — banyan (for support), mangrove (for air)",
+          "Flowering plants bear fruits — non-flowering plants do NOT bear fruits",
+          "Fern and moss are non-flowering plants"
+        ],
+        "keywords": ["roots", "stem", "leaves", "flowers", "fruits", "photosynthesis", "climbers", "creepers", "aerial roots", "flowering", "non-flowering"],
+        "memory_trick": "ROOT-STEM-LEAF-FLOWER-FRUIT — RSL FF — Remember: 'Really Smart Leaves Find Food'! Roots, Stem, Leaves, Find (flowers), Food (fruits)!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "recall",
+            "question_text": "{child_name}, plant ka khana kaunsa part banata hai? Hint — wo green hoti hai!",
+            "expected_concepts": ["leaf", "leaves", "patti"],
+            "correct_indicator": "child says leaf/leaves/patti",
+            "response_correct": "Bilkul! Pattiyan! Leaves sunlight se plant ka khana banati hain — photosynthesis! Isliye pattiyan green hoti hain!",
+            "response_incorrect": "Leaves! Pattiyan! Wo green hoti hain aur sunlight se plant ka khana banati hain — isse photosynthesis kehte hain!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Money plant deewar pe chadta hai. Uska stem strong hai ya weak? Aur aise plants ko kya kehte hain?",
+            "expected_concepts": ["weak", "climber"],
+            "correct_indicator": "child says weak and/or climber",
+            "response_correct": "Perfect! Weak stem hai — isliye deewar ka support leta hai. Aise plants ko climbers kehte hain!",
+            "response_partial": "Haan stem weak hai! Aise plants jo support lekar climb karte hain unhe climbers kehte hain!",
+            "response_incorrect": "Money plant ka stem weak hai — wo apne aap khada nahi reh sakta. Isliye deewar pe chadta hai. Aise plants ko climbers kehte hain!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Banyan tree ki wo roots jo hawa mein ltakti hain — unhe kya kehte hain?",
+            "expected_concepts": ["aerial roots"],
+            "correct_indicator": "child says aerial roots or hawa mein roots",
+            "response_correct": "Waah! Aerial roots! Ye roots zameen ke upar hoti hain — banyan mein ye tree ko support deti hain!",
+            "response_incorrect": "Unhe aerial roots kehte hain! Aerial matlab hawa mein — ye roots zameen ke upar hoti hain! Banyan mein ye support ke liye hain, mangrove mein hawa lene ke liye!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Fern mein flowers aate hain kya? Aur iska kya matlab hai — kya fern mein fruits bhi aayenge?",
+            "expected_concepts": ["no flowers", "no fruits", "non-flowering"],
+            "correct_indicator": "child says no flowers and no fruits",
+            "response_correct": "Brilliant! Fern non-flowering plant hai — na flowers na fruits! Fruits sirf flowering plants mein aate hain!",
+            "response_incorrect": "Fern mein flowers nahi aate — ye non-flowering plant hai! Aur kyunki flowers nahi hain toh fruits bhi nahi honge. Non-flowering plants mein na flowers na fruits!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Big celebration! Say child knows more about plants than many adults. Cliffhanger: 'Kal ek zoo safari pe chalenge — aur dekhen kaun kaun se amazing animals hain aur unke coats kaise hote hain!'",
+        "ai_context_mid_score": "Encouragement. Remind RSL-FF trick. Cliffhanger same.",
+        "ai_context_low_score": "Gentle encouragement. Focus on one thing: leaves make food. Cliffhanger same.",
+        "parent_try_tonight": "Aaj dinner mein jo sabzi hai — {child_name} se pucho: ye plant ka kaunsa part hai? Aloo = root, palak = leaf, gobhi = flower, matar = fruit, ganna = stem. Ye bhi classification hai!"
+      }
+    },
+
+    {
+      "chapter_number": 4,
+      "chapter_title": "Animals",
+      "unit": "Unit 1: Diversity",
+      "ncert_topics": [
+        "Characteristics of animals based on physical appearance — size, shape, colour",
+        "Body coverings — feathers, fur/hair, scales, shells, spines",
+        "Food habits — herbivorous, carnivorous, omnivorous",
+        "Types of movement — legs, wings, fins, flippers, whole body"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "chameleon color change camouflage",
+          "trigger": "wrong answer trap about colour",
+          "show": "chameleon changing colour on different backgrounds"
+        },
+        "stage_5_lottie": {
+          "search_query": "animal body covering feather fur scales shell",
+          "trigger": "visualization of body coverings",
+          "show": "different animals showing their body coverings"
+        },
+        "stage_7_rive": {
+          "state_name": "animal_sort_game",
+          "trigger": "concept reveal",
+          "description": "Interactive game — animal images appear, child taps to sort by body covering OR food habit. Zumi celebrates."
+        },
+        "stage_5_lottie_2": {
+          "search_query": "fish swimming fins dolphin flippers bird flying wings",
+          "trigger": "explaining animal movement",
+          "show": "different animals moving in different ways"
+        },
+        "stage_8_lottie": {
+          "search_query": "herbivore carnivore omnivore food chain animals",
+          "trigger": "exam mode food habits",
+          "show": "cow eating grass, lion eating meat, bear eating both"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi went to a safari today and is amazed — saw an elephant next to a tiny mouse, a peacock with colorful feathers, a crocodile with scaly skin, and a tortoise hiding in shell. She's confused about how they're all animals but so different. Ask child which animal they'd love to see on a safari. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: a fish and a parrot — what's one thing they have in common and one thing different? Genuinely wait. React. Move to experiment."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne bola — jo animal tez bhaag sake wo carnivorous hota hai — matlab meat khaata hai. Kya ye sahi hai? Bilkul galat! Cheetah tez bhaagta hai aur carnivorous hai — lekin rabbit bhi tez bhaagta hai aur wo herbivorous hai — sirf grass khata hai! Toh speed se food habit pata nahi chalti. Aur ek aur trap — maine socha tha chameleon non-living hai kyunki wo stone jaisa dikhta hai! Lekin wo living hai — wo sirf apna colour badal leta hai apne aas paas ke environment se match karne ke liye — isse camouflage kehte hain! Ye uski living characteristic hai — respond karna environment ko!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Abhi ghar mein ya phone pe 3 animals ke photos dekho — koi bhi. Har animal ke baare mein ye 3 cheezein note karo — uske body pe kya covering hai, wo kya khata hai, aur wo kaise move karta hai? 2 minutes time hai!",
+        "wait_seconds": 120,
+        "follow_up_script": "Kya dikh raha hai? Kaunse animals dekhe? Unki covering kya thi?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_5_lottie",
+        "script": "Zoo mein sab animals alag alag the! Peacock — uske body pe beautiful feathers — blue, green, golden! Birds ke body pe feathers hoti hain jo unhe colour deti hain. Lion — uske body pe fur — ghane baal — jo body temperature control karte hain — thand mein warm rakhte hain! Fish — chhote chhote scales — jaise plastic ki chhoti chhoti plates — jo protect karte hain aur swim karne mein help karte hain! Tortoise — hard shell — jab danger ho toh andar chala jaata hai! Kuch animals ke spines hote hain — needle jaisi structures — jaise hedgehog! Har covering ek kaam karti hai!",
+        "lottie_trigger_2": "stage_5_lottie_2"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name}, animals ko hum kaise alag alag classify kar sakte hain? Kaunse kaunse basis pe? Body covering, khana, movement — soch ke batao!",
+        "stt_listen": true,
+        "celebration_script": "Perfect! Tu ne sab discover kar liya! Body covering, food habits, movement — teen alag alag ways se animals classify hote hain!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "animal_sort_game",
+        "script": "Animals ko teen tarike se classify karte hain! Ek — body covering ke basis pe: feathers (birds), fur (lion, rabbit), scales (fish, snake), shells (tortoise, snail). Do — food habits ke basis pe: Herbivorous — sirf plants khate hain (cow, rabbit, deer — flat teeth grinding ke liye), Carnivorous — doosre animals khate hain (lion, tiger — pointed teeth meat todne ke liye), Omnivorous — dono khate hain (bear, crow, humans). Teen — movement ke basis pe: legs se (dogs, humans), wings se (birds), fins se (fish), flippers se (dolphins, penguins, seals), pure body se (snake, earthworm)!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "Ab NCERT language mein pakka karte hain.",
+        "ncert_definition": "Herbivorous animals eat only plants. They have flat teeth for grinding. Carnivorous animals eat other animals. They have pointed teeth for tearing flesh. Omnivorous animals eat both plants and animals.",
+        "key_points": [
+          "Body coverings: feathers (birds), fur/hair (mammals), scales (fish, reptiles), shells (snail, tortoise, lobster), spines (hedgehog, porcupine)",
+          "Fins help fish swim; Flippers help dolphins, penguins, seals move in water; Wings help birds fly",
+          "Birds can fly because their bones are hollow and they have feathers",
+          "Some animals move using entire body — snake, earthworm, leech",
+          "Animals differ in size, shape, colour, body covering, food habits, and movement"
+        ],
+        "keywords": ["herbivorous", "carnivorous", "omnivorous", "feathers", "fur", "scales", "shells", "fins", "flippers", "limbs"],
+        "memory_trick": "HERBI-CARNI-OMNI — H-C-O — Haath se Chaawal aur Oats! Herbivore = plants (haath se grass pakdo), Carnivore = meat (claw se), Omnivore = both (open hands for everything)!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "recall",
+            "question_text": "Ek game! Main animal bolunga, tu batao uske body pe kya covering hai — Parrot!",
+            "expected_concepts": ["feathers", "pankh"],
+            "correct_indicator": "child says feathers",
+            "response_correct": "Right! Parrot bird hai aur birds ke body pe feathers hote hain!",
+            "response_incorrect": "Parrot bird hai na! Aur birds ke body pe feathers hote hain — colourful feathers!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Cow kya khati hai? Aur aise animals ko kya kehte hain?",
+            "expected_concepts": ["grass", "plants", "herbivorous"],
+            "correct_indicator": "child says grass/plants and herbivorous",
+            "response_correct": "Sahi! Cow ghaas khati hai — sirf plants! Aise animals ko herbivorous kehte hain!",
+            "response_partial": "Haan cow plants khati hai! Jo sirf plants khate hain unhe herbivorous kehte hain!",
+            "response_incorrect": "Cow ghaas khati hai — sirf plants! Aise animals jo sirf plants khate hain unhe herbivorous kehte hain!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Fish kaise move karti hai? Kaunsa body part use karti hai?",
+            "expected_concepts": ["fins", "pankh"],
+            "correct_indicator": "child says fins",
+            "response_correct": "Perfect! Fish apne fins se swim karti hai! Fins usse paani mein move karne mein help karte hain!",
+            "response_incorrect": "Fish apne fins se swim karti hai! Fins woh chhote structures hain fish ke body pe!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Ek tricky wala — spider, ant, aur crab — ek group mein hain. Housefly, mosquito, aur bird — doosre group mein. Kis basis pe classify hue hain ye dono groups?",
+            "expected_concepts": ["legs", "movement", "number of legs", "wings"],
+            "correct_indicator": "child mentions legs or wings or movement",
+            "response_correct": "Bahut smart! Spider-ant-crab ke 6-8 legs hain, zameen pe chalte hain. Housefly-mosquito-bird ke wings hain, uda sakte hain! Movement ke basis pe classify hue!",
+            "response_incorrect": "Movement ke basis pe classify hue! Spider, ant, crab legs se chalte hain. Housefly, mosquito, bird wings se udte hain! Ek group walks, doosra flies!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Huge celebration! Say child is a wildlife expert now. Cliffhanger: 'Kal ek magic trick sikhaunga — solid ko liquid mein badal denge — aur liquid ko gas mein! Sach mein!'",
+        "ai_context_mid_score": "Warm encouragement. Remind HCO memory trick. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Focus on one: herbivore=plants, carnivore=meat. Cliffhanger same.",
+        "parent_try_tonight": "Aaj raat {child_name} ke saath ek game — naam batao, wo bataye herbivorous/carnivorous/omnivorous! Tiger, rabbit, crow, elephant, shark, bear — try karo!"
+      }
+    },
+
+    {
+      "chapter_number": 5,
+      "chapter_title": "Matter",
+      "unit": "Unit 2: Cycles",
+      "ncert_topics": [
+        "What is matter — anything that has mass and occupies space",
+        "Three states of matter — solid, liquid, gas",
+        "Characteristics of solids — fixed shape and volume",
+        "Characteristics of liquids — no fixed shape, fixed volume, flows downward",
+        "Characteristics of gases — no fixed shape, no fixed volume, fills container",
+        "Air and water are matter"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "ice melting water liquid animation",
+          "trigger": "ice cream melting story",
+          "show": "ice cream melting into liquid puddle"
+        },
+        "stage_5_rive": {
+          "state_name": "molecule_states",
+          "trigger": "visualization of molecules in different states",
+          "description": "Interactive — shows molecules as dots. In solid: tightly packed vibrating. Tap to heat → liquid: flowing apart. Tap again → gas: flying everywhere. Child can control the heating."
+        },
+        "stage_7_lottie": {
+          "search_query": "states of matter solid liquid gas transformation",
+          "trigger": "concept reveal",
+          "show": "water converting between ice, liquid water, and steam"
+        },
+        "stage_8_lottie": {
+          "search_query": "kitchen smell spreading gas diffusion",
+          "trigger": "exam mode — gas fills space",
+          "show": "smell particles spreading from kitchen to whole house"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi bought ice cream but left it on the table by mistake. Came back and it had turned into a liquid puddle! She's sad but also confused — where did the ice cream go? Why did it change? Ask child if they've ever seen something solid become liquid or liquid become gas. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: if they put an ice cube on a plate and leave it for 10 minutes, what will happen? Can they guess HOW MUCH of the plate will be covered with water? Make them predict the size. React naturally."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacchi ne bola — perfume bottle solid hai, toh smell bhi solid hogi! Kya ye sahi hai? Nahi! Smell hawa mein failti hai — wo gas ki form mein hoti hai! Aur ek aur trap — koi bola ki hawa matter nahi hai kyunki hum use dekh nahi sakte. Lekin kya ye sahi hai? Bilkul nahi! Hawa bhi matter hai! Proof — balloon lao, hawa bharo — wo bada ho jaata hai! Hawa jagah leti hai — isliye balloon bada hota hai! Aur hawa ka weight bhi hota hai — scientists ne prove kiya hai. Toh matter woh hota hai jo jagah le aur jiska weight ho — chahe dikh na dikh!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Ek experiment karte hain! Apna haath bhigo lo thode paani mein — ya thoda paani haath pe rakho. Ab apne haath ko hawa mein hilao — blow karo. Kya feel ho raha hai? Thanda? Ye kya ho raha hai? Dhyan se observe karo — 30 seconds!",
+        "wait_seconds": 30,
+        "follow_up_script": "Kya feel hua? Thanda laga? Kya idea hai kyun thanda laga?",
+        "follow_up_type": "realtime_ai_response",
+        "science_explanation_after": "Ye evaporation hai! Haath pe paani tha — liquid state mein. Hawa lagyi — paani gas ban ke ud gaya — aur jaate jaate thakaan leke gaya — isliye haath thanda laga!"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "molecule_states",
+        "script": "Imagine karo aurat duniya bahut chhoti ho gayi aur hum ek ice cube ke andar ghus gaye. Andar bahut saare chhote chhote particles hain — unhe molecules keh lete hain. Ice mein — sab molecules ek saath chipke hue hain, thodi thodi hilte hain but kahin nahi jaate. Isliye ice ka ek fixed shape hota hai! Ab ice ko garam karo — molecules energy milti hai, tez hilne lagte hain, doosron se alag ho jaate hain — paani ban jaata hai! Ab molecules freely move karte hain — isliye paani behta hai aur jis bartan mein daalo usi ka shape le leta hai. Aur aur garam karo — molecules itne tez ho jaate hain ki ek dusre ko chhod ke hawa mein ud jaate hain — steam! Gas! Gas mein molecules poore room mein fail jaate hain — isliye kitchen ki smell poori ghar mein aa jaati hai!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — solid, liquid, gas mein kya fark hai? Soch ke batao apne shabdon mein — shape ke basis pe!",
+        "stt_listen": true,
+        "celebration_script": "WAAH! Tu ne discover kar liya! Solid ka fixed shape, liquid ka no fixed shape but behta hai, gas ka koi shape nahi — poori jagah fill karta hai!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_7_lottie",
+        "script": "Duniya mein jo kuch bhi hai — table, paani, hawa, tu khud — sab MATTER hai! Matter kya hota hai? Jo space leta hai aur jiska weight hota hai! Aur matter teen states mein milta hai — SOLID — fixed shape hota hai, jaise ice, stone, book. LIQUID — no fixed shape, behta hai, jaise paani, doodh, juice. GAS — no fixed shape, poora space fill karta hai, jaise hawa, steam. Aur sabse amazing baat — same cheez teen forms mein! Paani — solid (ice), liquid (paani), gas (steam)! Same molecules — alag alag state!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "NCERT language mein ab.",
+        "ncert_definition": "Matter is anything that has mass and occupies space. Matter exists in three states: solid, liquid, and gas.",
+        "key_points": [
+          "Solid — definite shape and definite volume — example: ice, stone, book",
+          "Liquid — no definite shape (takes shape of container), definite volume — flows downward — example: water, milk, juice",
+          "Gas — no definite shape, no definite volume — fills the entire container — example: air, steam",
+          "Water is matter — exists in all three states: ice (solid), water (liquid), steam (gas)",
+          "Air is matter — even though invisible, it occupies space and has weight"
+        ],
+        "keywords": ["matter", "solid", "liquid", "gas", "states of matter", "volume", "shape"],
+        "memory_trick": "Soldiers-Liquid-Gas — SLG! Soldiers stand together stiffly (solid), Liquid moves freely, Gas goes everywhere! S-L-G — Sab Log Gaye!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "recall",
+            "question_text": "Quick one — doodh kya hai? Solid, liquid, ya gas?",
+            "expected_concepts": ["liquid"],
+            "correct_indicator": "child says liquid",
+            "response_correct": "Sahi! Doodh liquid hai — behta hai, jis bartan mein daalo usi ka shape le leta hai!",
+            "response_incorrect": "Doodh liquid hai! Wo behta hai na — aur glass mein daalo toh glass ka shape, bowl mein daalo toh bowl ka shape!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Ice cube plastic glass mein rakho — toh ice cube ka shape glass jaisa ho jaayega kya?",
+            "expected_concepts": ["no", "nahi", "solid fixed shape"],
+            "correct_indicator": "child says no",
+            "response_correct": "Bilkul nahi! Ice cube solid hai — uska apna fixed shape hai! Liquid hota toh glass ka shape le leta — solid nahi leta!",
+            "response_incorrect": "Nahi! Ice cube solid hai — uska fixed shape hai — cube! Liquid cheezein container ka shape leti hain, solid nahi!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Jab mummy kitchen mein chai banati hain toh smell poore ghar mein kaise aati hai?",
+            "expected_concepts": ["gas", "hawa mein failta hai", "gas spreads"],
+            "correct_indicator": "child mentions gas or spreading or hawa",
+            "response_correct": "Smart answer! Chai ki smell gas form mein hoti hai — aur gas ki property hai ki wo poori jagah mein fail jaati hai! Isliye poore ghar mein aa jaati hai!",
+            "response_incorrect": "Ye gas ki property hai! Smell gas form mein hoti hai — aur gas poori jagah mein fail jaati hai — poore room mein, poore ghar mein! Isliye kitchen se smell baahir aati hai!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Paani kitni forms mein milta hai? Naam batao teenon ke!",
+            "expected_concepts": ["ice/solid", "water/liquid", "steam/gas"],
+            "correct_indicator": "child mentions at least 2 of 3 forms",
+            "response_correct": "Brilliant! Ice — solid! Normal paani — liquid! Steam — gas! Same cheez — teen forms — teen states of matter!",
+            "response_partial": "Haan! Aur ek aur bhi hai — Paani teen forms mein hai: ice jo solid hai, normal paani jo liquid hai, aur steam jo gas hai!",
+            "response_incorrect": "Paani teen forms mein hai — Ice jo solid hai — fixed shape! Normal paani jo liquid hai — behta hai! Steam jo gas hai — poori jagah failti hai!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Excited celebration! Say child understands matter better than many big people! Cliffhanger: 'Kal ek magical journey pe chalenge — paani kahan se aata hai aur kahan jaata hai — ek complete cycle hai!'",
+        "ai_context_mid_score": "Warm encouragement. Remind SLG — Sab Log Gaye. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Focus on: solid=fixed shape, liquid=flows. Cliffhanger same.",
+        "parent_try_tonight": "Kitchen mein {child_name} ke saath game — 3 solids, 2 liquids, 1 gas dhundho. Bonus: paani ko ice banana aur wapas liquid banana — fridge mein rakhna aur nikalna!"
+      }
+    },
+
+    {
+      "chapter_number": 6,
+      "chapter_title": "Water — A Precious Resource",
+      "unit": "Unit 2: Cycles",
+      "ncert_topics": [
+        "Water exists in three forms",
+        "Water cycle — evaporation, condensation, precipitation",
+        "Why water is precious — fresh vs salt water",
+        "How to conserve water"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "cotton cloud fluffy white cloud",
+          "trigger": "wrong answer trap about clouds being cotton",
+          "show": "cloud with question mark"
+        },
+        "stage_5_rive": {
+          "state_name": "water_cycle_interactive",
+          "trigger": "visualization of water cycle",
+          "description": "Interactive water cycle. Child taps sun → water evaporates. Tap cloud → rain falls. Tap ground → water flows to river. Tap river → cycle restarts. Full interactive water cycle."
+        },
+        "stage_7_lottie": {
+          "search_query": "water cycle rain evaporation condensation animation",
+          "trigger": "concept reveal",
+          "show": "complete water cycle animation with labels"
+        },
+        "stage_8_lottie": {
+          "search_query": "save water tap off conservation water drop",
+          "trigger": "exam mode — water conservation",
+          "show": "water conservation tips animation"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi noticed the bathroom floor was wet but after some time the water disappeared! She can't find where it went. Is it magic? Ask child if they've noticed water disappearing from wet surfaces — like clothes drying or wet floor drying. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: when mummy dries clothes in the sun, where does the water go? Do they think it goes into the sun? Into the sky? Disappears completely? Genuinely wait for answer."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacchi ne bola — clouds mein cotton hota hai, isliye white fluffy hote hain! Kya ye sahi hai? Bilkul nahi! Clouds water droplets se bane hote hain — bahut bahut chhote chhote paani ke zing! Aur ek aur trap — kisi ne bola — baarish aati hai isliye samundar mein paani aata hai. Lekin reality mein seedha ulta hai! Samundar ka paani sun ki garmi se upar jaata hai — phir clouds bante hain — phir baarish hoti hai — phir wapas samundar mein aata hai! Ye ek cycle hai! Aur ek interesting fact — agar poori duniya ka paani ek bucket mein bharo toh peene layak fresh water sirf ek chammach hogi! Itna kam!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Ek quick experiment! Apna haath geela karo — thoda paani haath pe rakho. Ab apni haath ko open rakho. 1 minute baad dekho — kitna paani hai? Aur jab haath pe blow karo toh kya alag feel hota hai? Observe karo!",
+        "wait_seconds": 60,
+        "follow_up_script": "Kya hua paani ke saath? Gaya ya raha? Aur jab blow kiya toh?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "water_cycle_interactive",
+        "script": "Imagine karo ek movie — Water ki kahani! Sun dekho — uski garmi se nadi, taalab, samundar ka paani garam hota hai. Paani ke molecules tez ho jaate hain — upar ud jaate hain — bhap ban jaate hain — gas! Ye bhap upar aasmaan mein jaati hai. Wahan bahut thanda hota hai — bhap wapas chhote chhote paani ke droplets ban jaati hai — isse condensation kehte hain. Ye droplets milke clouds banate hain! Aur jab clouds mein bahut zyada paani ho jaata hai — wo neeche girta hai — baarish! Baarish ka paani nadiyon mein, zameen mein jaata hai — aur phir sun ki garmi se wapas upar! Ye cycle kabhil nahi rukta — isliye paani kabhi khatam nahi hota — wo sirf form badalta rehta hai!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — bathroom ka paani kahan gaya tha? Ab samajh aa raha hai? Aur agar paani never runs out through the cycle — toh humein usse bachana kyun chahiye?",
+        "stt_listen": true,
+        "celebration_script": "Ekdum sahi! Paani bhap ban ke ud gaya — evaporation! Aur bachana isliye chahiye kyunki peene layak fresh paani bahut kam hai!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_7_lottie",
+        "script": "Ye amazing process jisme paani ek form se doosre form mein badalta rehta hai — isse WATER CYCLE kehte hain! Teen steps hain — EVAPORATION — paani liquid se gas banta hai, upar jaata hai. CONDENSATION — gas se wapas liquid droplets banti hain, clouds bante hain. PRECIPITATION — baarish, snow, hail ke form mein paani neeche girta hai. Aur ye cycle — forever! Duniya mein jo paani hai wo actually billions saalon se same paani hai — cycling karta hua! Dinosaurs ne jo paani piya tha, wo same paani aaj bhi kisi form mein hai!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "NCERT language mein pakka karte hain — ye exam mein zaroor aata hai.",
+        "ncert_definition": "The water cycle is the continuous movement of water from the earth's surface to the atmosphere and back. It involves evaporation, condensation, and precipitation.",
+        "key_points": [
+          "Evaporation — liquid water converts to water vapour (gas) due to heat of the sun",
+          "Condensation — water vapour cools and converts to tiny water droplets forming clouds",
+          "Precipitation — water falls from clouds as rain, snow, or hail",
+          "Ocean water is salty — cannot be drunk. Only fresh water from rivers, lakes, groundwater is drinkable",
+          "Fresh water is only 3% of all water on Earth — and most of it is frozen in glaciers!"
+        ],
+        "keywords": ["water cycle", "evaporation", "condensation", "precipitation", "fresh water", "conservation"],
+        "memory_trick": "ECP — Every Cloud Precipitates! E=Evaporation (water goes up), C=Condensation (cloud forms), P=Precipitation (rain comes down)! ECP!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "recall",
+            "question_text": "Jab mummy kapde bahar sukhaati hain toh paani kahaan jaata hai?",
+            "expected_concepts": ["evaporation", "bhap", "hawa mein", "gas"],
+            "correct_indicator": "child mentions evaporation or water going into air",
+            "response_correct": "Sahi! Sun ki garmi se paani bhap ban ke hawa mein ud gaya — evaporation! Isliye kapde sookh jaate hain!",
+            "response_incorrect": "Sun ki garmi se paani bhap ban gaya — gas ban gaya — hawa mein ud gaya! Isse evaporation kehte hain! Isliye kapde sookh jaate hain!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Clouds kaise bante hain? 2 steps mein batao!",
+            "expected_concepts": ["bhap upar jaati hai", "thanda hokar droplets", "condensation"],
+            "correct_indicator": "child mentions water going up and cooling",
+            "response_correct": "Perfect! Paani bhap ban ke upar gaya — wahan thanda hua — droplets bane — clouds! Evaporation phir Condensation!",
+            "response_partial": "Haan! Step 1 — paani bhap ban ke upar gaya (evaporation). Step 2 — wahan thanda hua, water droplets bane (condensation). Ye droplets milke clouds banate hain!",
+            "response_incorrect": "Pehle paani bhap ban ke upar jaata hai — evaporation. Phir upar thanda hoke chhote droplets ban jaate hain — condensation. Ye droplets milke clouds banate hain!"
+          },
+          {
+            "order": 3,
+            "type": "recall",
+            "question_text": "Samundar ka paani pee sakte hain kya? Kyun ya kyun nahi?",
+            "expected_concepts": ["no", "nahi", "namkeen", "salty"],
+            "correct_indicator": "child says no and mentions salty",
+            "response_correct": "Sahi! Samundar ka paani namkeen hai — pee nahi sakte! Isliye fresh paani bahut precious hai!",
+            "response_incorrect": "Nahi! Samundar ka paani bahut namkeen hota hai — pee nahi sakte! Sirf rivers, lakes, aur ground water fresh hota hai — aur wo bahut kam hai!"
+          },
+          {
+            "order": 4,
+            "type": "application",
+            "question_text": "Brush karte time paani kaise bacha sakte hain? 2 ideas batao!",
+            "expected_concepts": ["tap band karna", "kam paani use karna"],
+            "correct_indicator": "child mentions closing tap",
+            "response_correct": "Bahut accha! Tap band karo jab zarurat na ho — aur sirf zaruri paani use karo. Tu environment ka hero hai!",
+            "response_partial": "Haan! Aur ye bhi — brush karte time tap bilkul band kar do! Har baar 5 litre paani bachega! Ek din mein — ek mahine mein — bahut paani bachega!",
+            "response_incorrect": "Brush karte time jab paani ki zarurat na ho — TAP BAND! Bahut simple — bahut effective! Ye paani bachao ki sabse easy habit hai!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Celebrate! Say child is a water conservation champion. Cliffhanger: 'Kal ek bahut amazing machine ke baare mein baat karenge — duniya ki sabse best machine jo never stops working — even when you sleep!'",
+        "ai_context_mid_score": "Warm encouragement. Remind ECP. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Focus on: water cycle = water goes up and comes back down as rain. Cliffhanger same.",
+        "parent_try_tonight": "Aaj shaam {child_name} ke saath — ek glass paani bahar rakh do. Kal subah dekho — kya paani kam hua? Kitna? Ye evaporation hai! Record karo!"
+      }
+    },
+
+    {
+      "chapter_number": 7,
+      "chapter_title": "Human Body Systems",
+      "unit": "Unit 3: Systems",
+      "ncert_topics": [
+        "What are organs",
+        "Organ systems — circulatory, respiratory, digestive, nervous",
+        "Functions of different organ systems",
+        "How organ systems work together"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "heart beating pulse animation",
+          "trigger": "wrong answer trap about heart",
+          "show": "animated heart beating"
+        },
+        "stage_5_rive": {
+          "state_name": "body_systems_interactive",
+          "trigger": "visualization — organ systems",
+          "description": "Interactive body outline. Child taps heart → circulatory system highlights. Taps lungs → respiratory highlights. Taps stomach → digestive highlights. Taps brain → nervous highlights. Each shows a simple animation of that system working."
+        },
+        "stage_7_lottie": {
+          "search_query": "human body organs diagram simple",
+          "trigger": "concept reveal",
+          "show": "body outline with main organs labeled"
+        },
+        "stage_8_lottie": {
+          "search_query": "breathing lungs animation inhale exhale",
+          "trigger": "exam mode — respiratory system",
+          "show": "animated lungs breathing in and out"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi tried to run very fast today and noticed something amazing — heart started beating faster, breathing got heavier, felt warm. She wonders — who controls all these things happening automatically? She didn't tell her heart to beat faster! Ask child if they've noticed their body doing things automatically. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: when they play football, what happens inside their body? Can they feel anything change? Genuinely wait and discuss their answer for a moment."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne kaha — heart ek muscle hai, toh jaise hum haath ko control karte hain waise heart ko bhi control kar sakte hain — rokna shuru karna. Kya ye sahi hai? Bilkul nahi! Heart involuntary muscle hai — wo khud apne aap kaam karta hai — sote mein bhi, khelte mein bhi, 24/7! Agar heart ek second ke liye bhi ruk jaaye — body mein khoon jaana band ho jaaye — bahut badi problem! Aur ek aur galat baat — kisi ne bola ki hamare paas ek hi organ system hai. Nahi! Multiple systems hain — sab alag alag kaam karte hain lekin sab milke kaam karte hain — jaise ek cricket team mein alag alag players alag positions pe hote hain lekin sab milke match jitte hain!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Ek fun experiment! Apna haath apni chest pe rakho — feel karo heartbeat. Ab count karo — 10 seconds mein kitni baar dhak dhak hoti hai? Count karo! Phir uthke 10 jumps karo! Phir wapas count karo 10 seconds mein. Difference batao!",
+        "wait_seconds": 45,
+        "follow_up_script": "Kitni baar normal mein? Aur jumping ke baad? Zyada tha ya kam?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "body_systems_interactive",
+        "script": "Imagine karo tum football khelne jaa rahe ho. BRAIN ne decide kiya — kick maaro! Brain ek signal bhejta hai — ek electric signal — nerves ke through — pair ko. Nervous system! Pair ka muscle contract karta hai — KICK! Ab pair mein muscles ko energy chahiye — HEART tez pump karta hai — zyada khoon bhejne ke liye muscles ko — khoon oxygen laata hai. Circulatory system! LUNGS tez kaam karte hain — zyada oxygen absorb karne ke liye — carbon dioxide bahar. Respiratory system! Aur wo energy jo pair ne use ki — wo khaane se aayi — STOMACH ne khana digest karke energy diya! Digestive system! Sab ek team ki tarah kaam karte hain — football mein ek kick ke liye!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — ye sab systems — heart, lungs, stomach, brain — agar ek bhi kaam karna band kar de — kya hoga? Aur inka naam kya rakhein — jo milke kaam karte hain?",
+        "stt_listen": true,
+        "celebration_script": "Exactly! Inhe ORGAN SYSTEMS kehte hain! Aur sab milke ek perfect machine banate hain — our body!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_7_lottie",
+        "script": "Hamare body mein specific organs hain — heart, lungs, brain, stomach, kidneys, liver — aur ye organs milke ORGAN SYSTEMS banate hain! Circulatory System — heart + blood vessels — khoon poore body mein pumps karta hai. Respiratory System — lungs + airways — oxygen lete hain, carbon dioxide bahar. Digestive System — mouth, stomach, intestines — khana todte hain, energy lete hain. Nervous System — brain + nerves — poore body ko control karta hai — decisions, movements, feelings sab! Aur ye sab systems ek dusre pe depend karte hain — ek bhi fail ho toh problems start!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "NCERT ke liye — ye sab yaad rakhna hai.",
+        "ncert_definition": "Organs are body parts that perform specific functions. Organs work together to form organ systems. Different organ systems perform different functions but work together to keep the body alive.",
+        "key_points": [
+          "Circulatory System — heart pumps blood — blood carries oxygen and food to all body parts",
+          "Respiratory System — lungs take in oxygen — breathe out carbon dioxide",
+          "Digestive System — breaks down food into simple substances — provides energy to body",
+          "Nervous System — brain controls all body functions — thinking, memory, movement, senses"
+        ],
+        "keywords": ["organs", "organ systems", "circulatory", "respiratory", "digestive", "nervous system"],
+        "memory_trick": "CRDN — Can Really Do Nothing alone! Circulatory, Respiratory, Digestive, Nervous — sab milke hi kaam karte hain! C-R-D-N!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "physical_then_recall",
+            "question_text": "Abhi apna haath chest pe rakh — feel karo dhak dhak. Ye kya hai aur kya kaam karta hai?",
+            "expected_concepts": ["heart", "blood pump karta hai"],
+            "correct_indicator": "child identifies heart and its pumping function",
+            "response_correct": "Perfect! Heart hai jo dhak dhak karta hai! Wo khoon ko poore body mein pump karta hai — din raat — kabhi nahi rukta!",
+            "response_incorrect": "Wo tera heart hai! Heart blood pump karta hai — poore body mein — din raat bina ruke — even when you sleep!"
+          },
+          {
+            "order": 2,
+            "type": "recall",
+            "question_text": "Jab tu saas leta hai toh hawa kahan jaati hai? Kaun absorb karta hai oxygen?",
+            "expected_concepts": ["lungs", "phephde"],
+            "correct_indicator": "child says lungs",
+            "response_correct": "Sahi! Lungs mein! Lungs oxygen absorb karte hain jo blood ko chahiye — aur carbon dioxide bahar nikalte hain!",
+            "response_incorrect": "Lungs mein! Chest mein dono sides pe lungs hain — wo oxygen absorb karte hain aur waste gas bahar nikalte hain!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Jab tu roti khata hai toh energy kaise milti hai? Kaunsa organ khaana todta hai?",
+            "expected_concepts": ["stomach", "digestive system", "pet"],
+            "correct_indicator": "child says stomach or digestive system",
+            "response_correct": "Right! Stomach aur intestines milke khaana todte hain — usse simple substances mein — toh body energy le sakti hai!",
+            "response_incorrect": "Stomach! Digestive system! Stomach aur intestines milke khaana chhote pieces mein todte hain taki body energy le sake!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Last wala — jab tu football khelta hai — ek saath kitne organ systems kaam karte hain? Naam batao!",
+            "expected_concepts": ["nervous", "circulatory", "muscular", "respiratory"],
+            "correct_indicator": "child names at least 2 systems",
+            "response_correct": "Wah! Sab systems saath mein kaam karte hain — nervous system think karta hai, circulatory blood pumps karta hai, respiratory oxygen leta hai, digestive energy deta hai!",
+            "response_partial": "Haan! Aur bhi hain — nervous (brain), circulatory (heart), respiratory (lungs), digestive (energy) — sab ek team hai!",
+            "response_incorrect": "Ek saath 4+ systems kaam karte hain! Nervous system — brain decide karta hai kick maaro. Circulatory — heart tez pump karta hai. Respiratory — lungs tez breathe karte hain. Digestive — energy deta hai!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Big celebration! Say body is an amazing machine and child understands it now. Cliffhanger: 'Kal plants ke baare mein baat karenge — plants bhi ek system ki tarah kaam karte hain — aur unka ek part hum roz khaate hain!'",
+        "ai_context_mid_score": "Warm encouragement. Remind CRDN. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Focus on: heart pumps blood, lungs breathe. Cliffhanger same.",
+        "parent_try_tonight": "{child_name} ke saath — resting heartbeat count karo (10 sec × 6 = 1 min). Phir 20 jumping jacks. Phir count karo again. Difference note karo — kyun hua? Exercise ke liye zyada oxygen chahiye!"
+      }
+    },
+
+    {
+      "chapter_number": 8,
+      "chapter_title": "Plant Body Systems",
+      "unit": "Unit 3: Systems",
+      "ncert_topics": [
+        "How plant parts help them grow well",
+        "Different types of roots — taproot and fibrous root",
+        "Functions of each part of the plant in detail",
+        "How parts work together like a system"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "straw drinking juice suction",
+          "trigger": "wrong answer trap about roots",
+          "show": "straw sucking up juice — comparison to roots"
+        },
+        "stage_5_rive": {
+          "state_name": "plant_water_flow",
+          "trigger": "visualization — water flow through plant",
+          "description": "Interactive animated plant. Child taps water drops near roots — water travels UP the stem (animated blue line) to leaves. Then leaves glow green showing food production. Food travels back down (animated yellow line). Child can control water flow."
+        },
+        "stage_7_lottie": {
+          "search_query": "taproot fibrous root carrot radish grass comparison",
+          "trigger": "concept reveal — types of roots",
+          "show": "carrot taproot vs grass fibrous roots side by side"
+        },
+        "stage_8_lottie": {
+          "search_query": "photosynthesis plant sunlight chlorophyll food",
+          "trigger": "exam mode — photosynthesis",
+          "show": "simple photosynthesis animation — sunlight + CO2 + water → food"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi is sitting in a garden imagining the sunflower is talking to her — saying 'I am a system too! Every part of me has a job!' Zumi is amazed. Ask child: if a plant could talk, what do they think it would say about itself? 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: if we remove the roots of a plant — what would happen? Just the roots — everything else stays. Wait for prediction genuinely."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne bola — roots mitti khaati hain — isliye roots mitti mein hoti hain. Kya ye sahi hai? Bilkul galat! Plants mitti nahi khaate — plants paani aur minerals absorb karte hain mitti se — minerals matlab nutrients, vitamins jo mitti mein hote hain. Mitti nahi — sirf usme ghule nutrients! Aur ek aur interesting cheez — maine socha tha ki jo carrot hum khaate hain wo fruit hai. Lekin nahi — carrot plant ka root hai! Jo zameen ke andar hota hai, usse khichte hain, wo root hai! Aur pata hai kya? Humne roots bahut baar khaaye hain — carrot, radish, sweet potato — sab roots hain!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Ek quick experiment — straw lo ya ek pen ki cap. Us mein se juice pi — feel karo kaise juice upar aata hai straw mein. Ye exactly waise hi hota hai jaise roots paani kheenchti hain! Straw ki tarah roots zameen se paani kheenchti hain. 30 seconds tak feel karo!",
+        "wait_seconds": 30,
+        "follow_up_script": "Feel hua? Kaise ata hai juice upar?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "plant_water_flow",
+        "script": "Ab sunflower ki kahani suno — jo wo mujhe bata rahi thi! Meri roots — ye mera straw hai — zameen se paani aur minerals kheenchti hain. Aur mujhe mazbooti se zameen mein pakad ke rakhti hain — taki hawa mujhe uda na le jaaye! Ye paani aur minerals phir meri stem se upar jaate hain — stem mera highway hai! Highway pe dono directions mein traffic — paani upar, khana neeche! Phir pattiyon tak paani pahunchta hai. Mere pattiyan — ye mera kitchen hai — sunlight, CO2 from air, aur ye paani — teen ingredients — aur banata hai mera khana — glucose! Isse photosynthesis kehte hain! Ye khana stem se neeche jaata hai roots tak bhi — sab parts ko energy milti hai!",
+        "lottie_trigger": "stage_5_lottie"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — agar roots paani nahi kheench payein — kya hoga leaves ko? Aur agar leaves khana na banayein — kya hoga roots ko? Sab connected hain — ye kya banate hain?",
+        "stt_listen": true,
+        "celebration_script": "Exactly! Ye sab milke ek system banate hain — plant body system! Ek bhi part fail — poora system fail!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_7_lottie",
+        "script": "Plants ka bhi apna body system hota hai! Aur roots do types ki hoti hain — TAPROOT — ek bada mota root seedha neeche — jaise carrot, radish, beet. Ek hi main root hota hai. FIBROUS ROOTS — bahut saari chhoti chhoti roots charon taraf — jaise ghaas mein, pyaaz mein. Aur har part ka kaam yaad hai? Roots — absorb water, anchor plant. Stem — transport highway, support. Leaves — food factory (photosynthesis). Flower — reproduction ke liye, fruit aur seeds banata hai. Fruit — seeds protect karta hai. Seeds — naye plants!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "NCERT language mein — exam ke liye.",
+        "ncert_definition": "Photosynthesis is the process by which green plants make their food using sunlight, carbon dioxide, and water. Chlorophyll in leaves absorbs sunlight for this process.",
+        "key_points": [
+          "Taproot — one main thick root going straight down — carrot, radish, turnip, beetroot",
+          "Fibrous roots — many thin roots spreading in all directions — grass, wheat, onion",
+          "Roots: absorb water + mineral salts, anchor plant in soil",
+          "Stem: transports water up and food down, supports plant",
+          "Leaves: make food by photosynthesis using sunlight + CO2 + water → glucose + oxygen",
+          "Flower: allows plant to reproduce (produce fruits and seeds)"
+        ],
+        "keywords": ["taproot", "fibrous root", "photosynthesis", "chlorophyll", "stem", "transport"],
+        "memory_trick": "Taproot = Ek — Taproot mein ek hi main root. Fibrous = Fibres = Bahut saare! Jaise ek sturdy rope vs. loose fibres!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "recall",
+            "question_text": "{child_name}, plant ka kitchen kaun hai? Yaani khana kaun banata hai?",
+            "expected_concepts": ["leaves", "patti"],
+            "correct_indicator": "child says leaves",
+            "response_correct": "Sahi! Pattiyan plant ka kitchen hain! Sunlight se khana banati hain — photosynthesis!",
+            "response_incorrect": "Pattiyan! Leaves! Wo sunlight + paani + CO2 se plant ka khana banati hain — isse photosynthesis kehte hain!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Carrot ka root — taproot hai ya fibrous? Aur dono mein kya fark hai?",
+            "expected_concepts": ["taproot", "ek bada root", "fibrous = bahut saare"],
+            "correct_indicator": "child says taproot and describes difference",
+            "response_correct": "Perfect! Carrot taproot hai — ek bada mota root seedha neeche! Fibrous roots mein bahut saari chhoti chhoti roots hoti hain!",
+            "response_partial": "Sahi taproot hai! Taproot = ek bada mota root, Fibrous = bahut saari thin roots!",
+            "response_incorrect": "Carrot taproot hai — ek hi bada mota root seedha neeche! Fibrous roots mein bahut saare chhote chhote roots hote hain charon taraf — jaise ghaas mein!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Stem ko highway kyun kaha? Kya transport karta hai wo?",
+            "expected_concepts": ["paani upar", "khana neeche", "transport"],
+            "correct_indicator": "child mentions transport function",
+            "response_correct": "Right! Stem highway hai — paani roots se upar pattiyon tak, aur pattiyon ka banaya khana neeche roots tak! Dono directions mein traffic!",
+            "response_incorrect": "Stem highway hai kyunki wo transport karta hai — paani roots se upar pattiyon tak, aur leaves ka banaya khana neeche roots tak! Dono direction mein!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Ek interesting question — agar hum ek plant ko andheron mein rakh dein — sunlight na mile — kya hoga? Aur kyun?",
+            "expected_concepts": ["photosynthesis nahi hoga", "khana nahi banega", "plant mar jayega"],
+            "correct_indicator": "child connects no sunlight to no food production",
+            "response_correct": "Bahut smart! Bina sunlight ke photosynthesis nahi hogi! Leaves khana nahi bana payengi! Plant ko energy nahi milegi — plant mar jaayega!",
+            "response_incorrect": "Bina sunlight ke photosynthesis nahi hogi — leaves ko sunlight chahiye khana banane ke liye! Khana nahi → energy nahi → plant mar jaayega!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Big celebration! Say child understands plant systems. Cliffhanger: 'Kal ek magical pathar milega jiske paas ek superpower hai — wo cheezein kheench leta hai bina touch kiye!'",
+        "ai_context_mid_score": "Warm encouragement. Remind: leaves=kitchen, stem=highway, roots=straw. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Just remember: leaves make food. Cliffhanger same.",
+        "parent_try_tonight": "{child_name} ke saath — aaj jo khana khao usme se plant ka kaunsa part hai pehchano! Daal (seed), roti (seed/grain), sabzi (leaf/root/fruit). Ek list banao!"
+      }
+    },
+
+    {
+      "chapter_number": 9,
+      "chapter_title": "Magnet and Force",
+      "unit": "Unit 4: Interactions",
+      "ncert_topics": [
+        "What is a magnet",
+        "Characteristics of magnets — attracts iron and steel, poles",
+        "North-south poles — like poles repel, unlike attract",
+        "Force — push and pull",
+        "Friction — opposes motion",
+        "Gravity — earth's pull"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "magnet attract iron metal objects clip pin",
+          "trigger": "when exposing wrong answer about gold",
+          "show": "magnet pulling iron clips but gold ring not attracted"
+        },
+        "stage_5_rive": {
+          "state_name": "magnet_poles_interactive",
+          "trigger": "visualization — magnetic poles",
+          "description": "Interactive magnets on screen. Child drags North pole near North pole — they repel (bounce away). Drag North near South — they attract (snap together). Visual arrows show force direction."
+        },
+        "stage_7_lottie": {
+          "search_query": "gravity falling objects earth pull",
+          "trigger": "concept reveal — gravity",
+          "show": "ball thrown up coming back down — gravity arrow"
+        },
+        "stage_8_lottie": {
+          "search_query": "friction rough surface sliding slow",
+          "trigger": "exam mode — friction",
+          "show": "shoe sliding on floor with friction shown"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi found a strange stone in a science shop — she put it near a paper clip and the clip flew and stuck to it! She was shocked! Then put it near a plastic pen — nothing happened. She's confused about this magic stone. Ask child if they've ever used a magnet before. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: if they had a magnet at home, which things do they think would stick to it? Can they guess 3 things that would and 3 that wouldn't? Genuinely wait."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne bola — magnet gold ko bhi kheenchta hai kyunki gold ek metal hai aur metals attract hoti hain. Kya ye sahi hai? Bilkul galat! Magnet sirf iron aur steel ko kheenchta hai! Gold, silver, copper, aluminium — ye metals hain lekin magnet inhe nahi kheenchta! Proof — gold ring ke paas magnet lo — kuch nahi hoga! Aur ek aur trap — kisi ne bola ki magnet ka sirf ek pole hota hai — south. Lekin magnet ke hamesha DO poles hote hain — North aur South. Aur interesting baat — agar magnet ko todi do — kya ab ek piece mein sirf North aur doosre mein sirf South? Nahi! Dono pieces ke dono poles ho jayenge — North aur South! Magnet kabhi ek pole ka nahi hota!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Ghar mein fridge magnet hai? Haan? Perfect! Nahi hai toh koi baat nahi — imagine karo. Fridge magnet lo aur test karo — steel spoon, plastic ka scale, paper clip, tin ka dabba, wooden pencil, rubber — kaun se stick karte hain? List banao! 2 minutes time hai!",
+        "wait_seconds": 120,
+        "follow_up_script": "Kya kya stick hua? Kya common tha jo stick hua?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "magnet_poles_interactive",
+        "script": "Imagine karo do magnets ko actors ki tarah! Magnet A ke North pole aur Magnet B ke North pole — dono ek dusre ke paas laao — WOOSH — dono ek dusre se door bhaag jaate hain! Same poles REPEL karte hain — dhakelte hain! Lekin Magnet A ka North aur Magnet B ka South pole — SNAP — chipak jaate hain! Opposite poles ATTRACT karte hain! Aur force ka game dekho — jab tu ball ko kick karta hai — PUSH force! Jab tu apne paas pull karta hai kuch — PULL force! Ball zameen pe roll ki — kuch time baad rukti hai — kyunki zameen aur ball ke beech FRICTION hai — ye force movement ko slow karta hai! Aur ball upar phenko — wapas neeche — kyunki GRAVITY — dharti ki pulling force — sab kuch apni taraf kheenchti hai!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — push, pull, friction, gravity — in sab mein kya common hai? Ye sab kya hain?",
+        "stt_listen": true,
+        "celebration_script": "YES! Ye sab FORCES hain! Force wo cheez hai jo kisi object ko move kare, rok le, ya iska shape badal de!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_7_lottie",
+        "script": "Magnet — ek special material jo iron aur steel ko attract karta hai — ye magnetic force hai! Magnets ke do poles hote hain — North aur South. Like poles repel, unlike poles attract! Force kya hai? Force wo push ya pull hai jo cheezein move karti hain ya rokti hain ya shape badal deti hain! Types of force — Push force (dhakkelna), Pull force (kheenchna), Magnetic force (magnet ka kheenchna), Friction (movement ko rokna — isliye tyres mein pattern hota hai, soles rough hoti hain), Gravity (earth ki pull jo sab kuch neeche rakhti hai — isliye hum zameen pe hain, paani neeche behta hai, baarish neeche girti hai)!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "NCERT ke liye important definitions.",
+        "ncert_definition": "A magnet is a material that attracts iron and steel. Force is a push or pull that can make an object move, stop, or change its shape. Friction is a force that opposes motion. Gravity is the force by which the Earth pulls all objects towards it.",
+        "key_points": [
+          "Magnets attract iron and steel only — not gold, silver, copper, aluminium, plastic, wood",
+          "Every magnet has two poles — North (N) and South (S)",
+          "Like poles repel (N-N or S-S), Unlike poles attract (N-S)",
+          "Friction slows down moving objects — rough surfaces have more friction, smooth have less",
+          "Gravity pulls everything towards Earth — that's why objects fall down",
+          "Friction is useful — without friction we can't walk or hold objects!"
+        ],
+        "keywords": ["magnet", "magnetic force", "poles", "attract", "repel", "force", "friction", "gravity"],
+        "memory_trick": "LIKE REPEL UNLIKE ATTRACT — Yaadon ke dost opposite hote hain! Jaise dost mein differences achhe lagte hain — opposite poles attract! Same wale push karte hain — like poles repel!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "application",
+            "question_text": "Ek game — main kehta hoon koi cheez — tu batao magnet attract karega ya nahi — Steel ki kainchi!",
+            "expected_concepts": ["haan", "yes", "attract karega"],
+            "correct_indicator": "child says yes",
+            "response_correct": "Sahi! Steel ki kainchi iron aur steel ki hai — magnet attract karega!",
+            "response_incorrect": "Haan! Kainchi steel ki hoti hai — aur magnet steel ko kheenchta hai!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Do magnets ke North poles ek doosre ke paas laao — kya hoga?",
+            "expected_concepts": ["repel", "door bhaagenge", "nahi chipkenge"],
+            "correct_indicator": "child says repel or push away",
+            "response_correct": "Bilkul! North-North — like poles — repel karengi — door bhaagenge! Unlike hoti toh attract hote!",
+            "response_incorrect": "Wo ek dusre ko dhakelengi — repel! Like poles always repel. N-N repel, S-S repel. N-S attract!"
+          },
+          {
+            "order": 3,
+            "type": "recall",
+            "question_text": "Ball zameen pe roll ki toh kuch time baad ruk gayi. Kaunsi force ne rokha?",
+            "expected_concepts": ["friction"],
+            "correct_indicator": "child says friction",
+            "response_correct": "Friction! Ball aur zameen ke beech friction tha jo movement ko slow kiya aur rokha!",
+            "response_incorrect": "Friction! Zameen aur ball ke beech friction force hoti hai — ye movement ko oppose karti hai — isliye ball ruk gayi!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Last wala interesting — astronaut space mein ja kar jump kare toh kya wo wapas neeche aayega? Kyun ya kyun nahi?",
+            "expected_concepts": ["gravity kam hoti hai space mein", "nahi aayega or kam gravity"],
+            "correct_indicator": "child mentions less gravity in space",
+            "response_correct": "Brilliant! Space mein Earth ki gravity nahi hoti — astronaut wapas neeche nahi aata! Isliye space mein sab kuch float karta hai!",
+            "response_incorrect": "Space mein Earth ki gravity nahi pahunchti theek se — isliye astronaut float karta hai! Zameen pe gravity hai isliye hum neeche hain!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Big celebration! Cliffhanger: 'Kal ek interesting problem solve karenge — mera aur Golu ka kamra exactly same size hai ya nahi? Kaise pata karein? Measurement seekhenge!'",
+        "ai_context_mid_score": "Warm encouragement. Remind like repels, unlike attracts. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Focus on: magnet attracts iron/steel. Cliffhanger same.",
+        "parent_try_tonight": "{child_name} ke saath fridge magnet experiment — ghar ki 10 cheezein test karo — kaun stick karti hai. List banao: iron/steel cheezein vs baaki. Kya common hai jo stick karti hain?"
+      }
+    },
+
+    {
+      "chapter_number": 10,
+      "chapter_title": "Measurement",
+      "unit": "Unit 4: Interactions",
+      "ncert_topics": [
+        "What is measurement and why we need standard units",
+        "Length — centimetre (cm), metre (m)",
+        "Mass/Weight — gram (g), kilogram (kg)",
+        "Volume of liquids — millilitre (ml), litre (l)",
+        "Time — seconds, minutes, hours"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "ruler measuring length centimeter scale",
+          "trigger": "concept of standard units",
+          "show": "ruler measuring object accurately"
+        },
+        "stage_5_lottie": {
+          "search_query": "weighing scale balance measurement grams kilograms",
+          "trigger": "visualization — mass measurement",
+          "show": "weighing scale with items being measured"
+        },
+        "stage_7_rive": {
+          "state_name": "units_explorer",
+          "trigger": "concept reveal",
+          "description": "Interactive unit explorer. Child taps LENGTH → sees ruler with cm/m. Taps MASS → sees weighing scale with g/kg. Taps VOLUME → sees measuring cup with ml/l. Taps TIME → sees clock with seconds/minutes/hours. Each shows real-life example."
+        },
+        "stage_8_lottie": {
+          "search_query": "clock timer countdown seconds minutes",
+          "trigger": "exam mode — time units",
+          "show": "clock with seconds, minutes, hours labeled"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi and her friend both measured their room using footsteps — both got '10 footsteps'. But when they visited, one room was much bigger! They're arguing about whose room is bigger. Ask child why they think the rooms were different sizes even though both measured 10 footsteps. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: if they measured their height using their hand span (haath ki phaili ungliyon ki chaurai), and their friend did the same — would the measurements be the same? Why or why not? Genuinely wait."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne bola — har cheez ko gram mein measure kar sakte hain. Doodh ka weight bhi gram mein, pencil ka length bhi gram mein, time bhi gram mein! Kya ye sahi hai? Bilkul nahi! Alag alag cheezein alag alag units mein measure hoti hain! Length — centimetre ya metre. Weight — gram ya kilogram. Liquid — litre. Time — seconds, minutes, hours. Ek aur mistake — kisi ne kaha 1 metre = 10 centimetre. Lekin ye bilkul galat hai! 1 metre = 100 centimetre! Ek kadam approximately 1 metre ka hota hai — aur usmein 100 centimetre hote hain! Aur 1 kilogram = 1000 gram — ek kilo mein hazaar gram!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Ek fun experiment — apni pencil ka length teen alag tarike se measure karo! Pehla — apni ungli se (kitni ungliyan). Doosra — apni haath se (kitne haath). Teesra — scale ya ruler se (centimetre mein). Teeno answers alag honge — same pencil, teen alag answers! 3 minute time hai!",
+        "wait_seconds": 180,
+        "follow_up_script": "Teen alag answers mile? Sabse sahi konsa tha — ungliyan, haath, ya scale?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_5_lottie",
+        "script": "Soch — doctor ko pata karna hai dawai ki dose — ek gram dena hai. Agar wo apni haath se measure kare — kisi ki haath badi, kisi ki chhoti — sab ko alag dose milegi! Isliye scientists ne standard units banaye — sab ke liye same! Length ke liye ruler ya scale — centimetre aur metre. Weight ke liye weighing machine — gram aur kilogram. Liquid ke liye measuring jug — millilitre aur litre. Mummy kehti hain — ek litre doodh le aao — sirf litre se pata chalta hai exactly kitna. Time ke liye clock — seconds, minutes, hours. Ek minute = 60 seconds. Ek hour = 60 minutes. Ek din = 24 hours. Measurement se sab exact hota hai!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — mera aur mere dost ka room — dono ne 10 footsteps measure kiya — lekin size alag kyun tha? Ab samajh aa gaya?",
+        "stt_listen": true,
+        "celebration_script": "Exactly! Hamare footsteps alag alag size ke hain! Isliye standard units chahiye — jo sab ke liye same hon!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "units_explorer",
+        "script": "Measurement ka matlab hai — kisi cheez ki exact size, weight, ya amount jaanna! Aur standard units — jo sab ke liye same hain! LENGTH — centimetre (cm) aur metre (m). 100 cm = 1 m. MASS — gram (g) aur kilogram (kg). 1000 g = 1 kg. VOLUME of liquid — millilitre (ml) aur litre (l). 1000 ml = 1 l. TIME — seconds (sec), minutes (min), hours (hr). 60 sec = 1 min. 60 min = 1 hr. Yaad karo 100-1000 pattern! Length = 100 cm in 1 m. Weight = 1000 g in 1 kg. Volume = 1000 ml in 1 l!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "Board exam ke liye — ye numbers yaad rakhna zaroori hai.",
+        "ncert_definition": "Measurement is finding the size, weight, or amount of something using standard units. Standard units are the same everywhere in the world.",
+        "key_points": [
+          "Length: centimetre (cm) and metre (m) — 100 cm = 1 m — measured with ruler/scale",
+          "Mass: gram (g) and kilogram (kg) — 1000 g = 1 kg — measured with weighing scale",
+          "Volume (liquid): millilitre (ml) and litre (l) — 1000 ml = 1 l — measured with measuring jug",
+          "Time: seconds (s), minutes (min), hours (hr) — 60 s = 1 min, 60 min = 1 hr"
+        ],
+        "keywords": ["measurement", "standard units", "centimetre", "metre", "gram", "kilogram", "litre", "millilitre"],
+        "memory_trick": "100 aur 1000 yaad karo! 100 cm = 1 m (short hop). 1000 g = 1 kg (big jump!). 1000 ml = 1 l (big jump!). 100 is for length — chhoti cheez! 1000 is for weight and liquid — badi!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "application",
+            "question_text": "Apni pencil ka size kaise measure karoge — kaun sa tool use karoge?",
+            "expected_concepts": ["scale", "ruler"],
+            "correct_indicator": "child says scale or ruler",
+            "response_correct": "Sahi! Scale ya ruler se! Answer centimetre mein aayega!",
+            "response_incorrect": "Scale se! Ruler se! Pencil pe scale rakho aur centimetre mein dekho — ye length measurement hai!"
+          },
+          {
+            "order": 2,
+            "type": "recall",
+            "question_text": "Mummy ne bola — 2 kg aloo le aao. 2 kilogram mein kitne gram hote hain?",
+            "expected_concepts": ["2000"],
+            "correct_indicator": "child says 2000",
+            "response_correct": "Smart! 2 kg = 2000 gram! Kyunki 1 kg = 1000 gram!",
+            "response_incorrect": "2 kg = 2000 gram! Kyunki 1 kg = 1000 gram — toh 2 kg = 2 × 1000 = 2000 gram!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Doodh aur paani — liquid hai — kaunsi unit se measure karenge?",
+            "expected_concepts": ["litre", "millilitre"],
+            "correct_indicator": "child says litre or millilitre",
+            "response_correct": "Sahi! Litre ya millilitre se! Liquids ko volume mein measure karte hain — litre ya ml mein!",
+            "response_incorrect": "Litre ya millilitre se! Liquids ka volume measure karte hain — doodh, paani, juice — sab litre mein!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Ek doctor doctor ko tablet dose dena hai. Unhe 500 milligrams dena hai. 500 mg kitne gram ke barabar hai?",
+            "expected_concepts": ["half gram", "0.5 gram", "aadha gram"],
+            "correct_indicator": "child says half gram or 0.5",
+            "response_correct": "Brilliant! 500 mg = 0.5 gram = aadha gram! Kyunki 1000 mg = 1 gram. Doctors bahut chhoti matra mein medicine dete hain!",
+            "response_incorrect": "500 mg = half gram — aadha gram! Kyunki 1000 mg = 1 gram. Toh 500 mg = 1/2 gram. Doctors bahut precise measurement use karte hain!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Big celebration! Cliffhanger: 'Kal ek sad story sunaaunga — ek beautiful park ki — aur ek hero jo use bachata hai! Environment ke baare mein baat karenge!'",
+        "ai_context_mid_score": "Warm encouragement. Remind 100-1000 trick. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Focus on: length=cm/m, weight=g/kg. Cliffhanger same.",
+        "parent_try_tonight": "{child_name} ke saath measurement game! Glass mein doodh measure karo — exactly 200 ml. Apple ka weight — roughly kitna gram? Time karo kitne seconds mein tu 10 baar name likh sakta hai!"
+      }
+    },
+
+    {
+      "chapter_number": 11,
+      "chapter_title": "Our Environment",
+      "unit": "Unit 4: Interactions",
+      "ncert_topics": [
+        "Organism, population, community, habitat",
+        "Food chain",
+        "Components of environment — air, water, land",
+        "Pollution — air, water, land pollution",
+        "How to save the environment"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "plastic pollution decompose years thousand",
+          "trigger": "wrong answer trap about plastic",
+          "show": "plastic in ground not decomposing vs natural leaf decomposing"
+        },
+        "stage_5_rive": {
+          "state_name": "food_chain_interactive",
+          "trigger": "visualization of food chain",
+          "description": "Interactive food chain. Child taps grass → grasshopper eats it → frog eats grasshopper → snake eats frog → eagle eats snake. If child removes one level (taps to remove), chain collapses. Shows how all are connected."
+        },
+        "stage_7_lottie": {
+          "search_query": "pollution types air water land factory smoke",
+          "trigger": "concept reveal — types of pollution",
+          "show": "three scenes: factory smoke (air), dirty river (water), plastic on ground (land)"
+        },
+        "stage_8_lottie": {
+          "search_query": "tree planting environment conservation save nature",
+          "trigger": "exam mode — save environment",
+          "show": "person planting tree, child picking up trash, tap being closed"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi visited a beautiful park — huge trees, colorful butterflies, a pond with fish, birds singing. But then she saw plastic bags, chip packets, cola bottles all over one corner. She felt very sad. Ask child if they've seen pollution anywhere — in their area or city. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: if someone throws a plastic bag in the park, how long do they think it will take to decompose (gal jaana)? 1 day? 1 month? 1 year? Let them guess. React with surprise at the real answer."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne bola — plastic toh thodi der mein gal jaata hai zameen mein — jaise leaves gal jaati hain! Kya ye sahi hai? Bilkul nahi! Plastic ko galne mein 400 se 1000 saal lagte hain! Mera poora khaandan aa jaayega aur jayega — lekin wo plastic packet wahi padhi rahegi! Aur ek aur galat baat — kisi ne bola ki factories ka ganda paani nadi mein daalna nuksaandeh nahi kyunki nadi ka paani toh bahut zyada hai — thoda ganda paani kya karega. Lekin ye bahut badi galti hai! Ek factory se nikla ganda paani poori nadi ko pollute kar sakta hai — lakhon machliyaan mar sakti hain!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Abhi apni khidki se bahar dekho ya ghar ke bahar jaao. 2 minutes mein 5 living things aur 5 non-living things dhundho. Phir batao — kaun se natural hain aur kaun se man-made? Living natural hain ya man-made bhi hote hain? 2 minute time!",
+        "wait_seconds": 120,
+        "follow_up_script": "Kya dikh raha hai? Kya dhundha? Natural ya man-made mein se zyada kya tha?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "food_chain_interactive",
+        "script": "Park mein ek amazing connection hai — sab ek dusre pe depend karte hain! Ghaas ugti hai — grasshopper ghaas khata hai — frog grasshopper ko khata hai — snake frog ko khata hai — eagle snake ko khata hai! Ye ek FOOD CHAIN hai! Aur ab soch — agar sab snakes maar dein — kya hoga? Frogs bahut zyada ho jaayenge — wo itne grasshoppers khaayenge — grasshoppers khatam — ghaas bahut badh jaayegi! Ek chain nikalo — poori system mein chaos! Isliye har janwar zaroori hai — chahe kitna bhi chota ho! Har organism apni jagah important hai!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — agar hum plastic use karte rehte hain, factories ganda paani nadiyon mein dalti rehti hain, sab kuch pollute hota rehta hai — food chain par kya asar hoga? Aur phir humpar?",
+        "stt_listen": true,
+        "celebration_script": "Exactly! Ek cheez pollute ho toh sab affected hota hai — aur end mein hum bhi! Isliye environment bachana hai!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_7_lottie",
+        "script": "ENVIRONMENT matlab — hamare aas paas ki saari cheezein — living bhi aur non-living bhi! Habitat matlab — kisi organism ka ghar — machli ka habitat paani hai, eagle ka habitat ped aur khule aasmaan. FOOD CHAIN — organisms ki series jahan ek doosre ko khaate hain. POLLUTION teen types ki hoti hai — AIR POLLUTION — factories aur gaadiyaan dhuan daalti hain hawa mein — log beemar hote hain, asthma, lung problems. WATER POLLUTION — ganda paani nadiyon mein jaata hai — machliyaan marti hain, log beemar hote hain. LAND POLLUTION — plastic aur kachra zameen pe — mitti kharab hoti hai, animals kha lete hain plastic — mar jaate hain!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "Environment chapter bahut important hai — board mein bahut kuch aata hai isse.",
+        "ncert_definition": "Environment includes everything around us — living and non-living things. Habitat is the natural place where an organism lives. A food chain shows how energy passes from one organism to another.",
+        "key_points": [
+          "Pollution — harmful substances added to environment",
+          "Air pollution — burning of fuels, factories, vehicles — causes respiratory diseases",
+          "Water pollution — industrial waste, sewage in water bodies — harms aquatic life",
+          "Land pollution — plastics, chemicals in soil — plastic takes 400-1000 years to decompose",
+          "Conservation — plant trees, reduce plastic, save water, use renewable energy"
+        ],
+        "keywords": ["environment", "habitat", "food chain", "pollution", "air pollution", "water pollution", "land pollution", "conservation"],
+        "memory_trick": "AWL Pollution! Air-Water-Land! AWL — Aur Woh Log (jo pollute karte hain) zaroor pakde jaayenge! A-W-L — Air, Water, Land!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "recall",
+            "question_text": "Machli ka ghar kahaan hai? Uska habitat kya hai?",
+            "expected_concepts": ["paani", "pond", "nadi", "water"],
+            "correct_indicator": "child says water/paani/pond/nadi",
+            "response_correct": "Sahi! Machli ka habitat paani hai — pond, nadi, samundar! Paani ke bina machli nahi reh sakti!",
+            "response_incorrect": "Machli ka habitat paani hai — pond, nadi, samundar! Har organism ka ek specific habitat hota hai jahan wo comfortable hota hai!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Ek food chain banao — ghaas se start karo — aage batao!",
+            "expected_concepts": ["grasshopper/rabbit", "frog", "snake/eagle"],
+            "correct_indicator": "child names any sequence starting with plant-eater",
+            "response_correct": "Perfect! Ye food chain hai! Producers (ghaas) → Herbivores → Carnivores! Energy transfer hoti hai!",
+            "response_partial": "Sahi start! Aage bhi ek aur level hota hai — grasshopper ko kaun khaata hai?",
+            "response_incorrect": "Food chain — ghaas → grasshopper (ghaas khata hai) → frog (grasshopper khata hai) → snake (frog khata hai) → eagle (snake khata hai)!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Factory ka ganda paani nadi mein daala — kaunsi pollution hai? Aur kya nuksaan hoga?",
+            "expected_concepts": ["water pollution", "machliyan mar jaengi"],
+            "correct_indicator": "child says water pollution and mentions harm",
+            "response_correct": "Sahi! Water pollution! Machliyaan aur doosre water organisms mar jaate hain — aur nadi ka paani peene layak nahi rehta!",
+            "response_incorrect": "Ye water pollution hai! Ganda paani nadi mein — machliyaan marti hain, paani peene layak nahi rehta — poora water ecosystem disturb ho jaata hai!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Tu personally environment bachane ke liye kya kar sakta hai — 3 cheezein batao!",
+            "expected_concepts": ["plastic reduce", "trees plant", "water save", "dustbin mein kachra"],
+            "correct_indicator": "child mentions at least 2 concrete actions",
+            "response_correct": "Waah! Tu environment ka hero hai! Har chhota action matter karta hai — ek bacha agar roz ek plastic bag refuse kare — ek saal mein 365 bags bachenge!",
+            "response_partial": "Bilkul! Aur bhi hain — ped lagao, plastic refuse karo, paani waste mat karo, dustbin mein kachra daalo!",
+            "response_incorrect": "Tu ye kar sakta hai — plastic bags refuse karo, dustbin use karo, paani waste mat karo, ped lagao, electric appliances off karo jab zarurat na ho!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Big celebration! Say child is an environment champion. Cliffhanger: 'Kal ek superhero ki story — energy ke baare mein — jo duniya ka sab kuch chalaata hai!'",
+        "ai_context_mid_score": "Warm encouragement. Remind AWL pollution. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Focus on: plastic = bad, plant trees = good. Cliffhanger same.",
+        "parent_try_tonight": "Ek week ka challenge — {child_name} ke saath track karo ghar mein kitna plastic use hota hai. Soap wrapper, shampoo bottle, chips packet — sab count karo. Week ke end mein plan banao reduce karne ka!"
+      }
+    },
+
+    {
+      "chapter_number": 12,
+      "chapter_title": "Energy",
+      "unit": "Unit 5: Energy",
+      "ncert_topics": [
+        "What is energy",
+        "Why we need energy",
+        "Sources of energy",
+        "Different forms of energy — heat, light, sound, electrical, mechanical"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "food energy body fuel eating running",
+          "trigger": "wrong answer trap about energy sources",
+          "show": "food → body → running (energy transfer)"
+        },
+        "stage_5_rive": {
+          "state_name": "energy_transform",
+          "trigger": "energy transformation visualization",
+          "description": "Interactive energy flow. Child taps sun → light energy → plant absorbs → chemical energy (food). Tap food → body eats → chemical energy → run (kinetic/mechanical). Tap bulb → electrical to light. Shows energy transformation chain."
+        },
+        "stage_7_lottie": {
+          "search_query": "energy forms electrical sound heat light mechanical",
+          "trigger": "concept reveal",
+          "show": "icons of different energy forms with examples"
+        },
+        "stage_8_lottie": {
+          "search_query": "sun solar energy renewable resource",
+          "trigger": "exam mode — energy sources",
+          "show": "sun, coal, wind, food as energy sources"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi's friend played cricket all day and then said 'I'm exhausted — my energy is completely finished!' Zumi was confused — where did the energy go? Where did it come from in the first place? Ask child if they've felt 'out of energy' after playing. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: if they don't eat breakfast tomorrow, how will they feel in school? Will they be able to run and play normally? Why or why not? Genuinely wait."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne bola — energy sirf bijli se milti hai — fan bijli se chalta hai, TV bijli se, sab bijli se! Kya ye sahi hai? Nahi! Bijli ek form of energy hai — lekin energy bahut jagahon se milti hai! Khaane se — body ko energy milti hai. Sun se — plants ko energy milti hai — aur hum plants khaate hain toh us energy ka ek hissa humein milta hai! Hawa se — wind energy. Coal, petrol se — chemical energy. Aur ek aur galat baat — koi bola ki energy kabhi khatam nahi hoti toh hum paanch din bina khaaye chal sakte hain! Lekin nahi! Energy kabhi nahi banayi ya nasht nahi hoti — lekin body ko constant supply chahiye khane se! Bina khaaye body mein stored energy khatam ho jaati hai!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Ek quick experiment! Apne dono haath tez tez 20 baar ek doosre ke saath ragdo — rub karo! Ab feel karo haathon mein kya ho raha hai? Garm ho gaye? Ye mechanical energy se heat energy bann gayi! Ek form se doosri form! 30 seconds try karo!",
+        "wait_seconds": 30,
+        "follow_up_script": "Kya garm hua? Kitna warm feel hua?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "energy_transform",
+        "script": "Ab ek amazing journey dekho — sun ki energy ki! Sun se LIGHT energy aati hai. Patte is light ko pakad ke khana banate hain — light energy → CHEMICAL energy (food mein stored). Tu khana khaata hai — chemical energy teri body mein aati hai. Tu run karta hai — chemical energy → MECHANICAL energy (movement). Tu thoda sweat karta hai — chemical energy → HEAT energy! Tu bol ta hai — chemical energy → SOUND energy! Aur bijli ka bulb — ELECTRICAL energy → LIGHT energy + HEAT energy! Energy ek form se doosri mein badal sakti hai — never created, never destroyed — just transformed!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — haath ragde, garm hua — mechanical energy heat mein badli. Tu bol ta hai — chemical energy sound mein. Toh energy kya hai exactly? Apne shabdon mein bolo!",
+        "stt_listen": true,
+        "celebration_script": "Exactly! Energy wo capacity hai jisse kaam hota hai — kuch bhi kaam karo — energy chahiye! Aur ye ek form se doosre mein badal sakti hai!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_7_lottie",
+        "script": "ENERGY wo capacity hai jisse kaam hota hai! Bina energy ke kuch bhi nahi hota — seedha khade rehna bhi energy leta hai! Energy ke different forms hain — HEAT energy — aag ki garmi, sun ki garmi. LIGHT energy — sun ki roshni, bulb ki roshni. SOUND energy — awaaz, music, conversation mein. ELECTRICAL energy — bijli se — fan, TV, fridge. MECHANICAL energy — movement — cycle, ball, haath hilana. Aur energy kabhi destroy nahi hoti — sirf ek form se doosri form mein change hoti hai! Ye LAW OF CONSERVATION OF ENERGY hai!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "NCERT ke liye important points.",
+        "ncert_definition": "Energy is the ability to do work. Energy can neither be created nor destroyed — it can only be converted from one form to another. This is the Law of Conservation of Energy.",
+        "key_points": [
+          "Heat energy — from sun, fire, friction (rubbing hands) — causes temperature change",
+          "Light energy — from sun (natural), bulb/torch (artificial)",
+          "Sound energy — produced by vibrations — music, talking, clapping",
+          "Electrical energy — from power stations through wires — powers appliances",
+          "Mechanical energy — energy of moving objects — running, cycling, football"
+        ],
+        "keywords": ["energy", "heat", "light", "sound", "electrical", "mechanical", "conservation of energy"],
+        "memory_trick": "HLSEM — Har Lamp Shines Electrically Mechanically! Heat-Light-Sound-Electrical-Mechanical! H-L-S-E-M!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "application",
+            "question_text": "Subah ka khana nahi khaya — school mein kya feel hoga? Kyun?",
+            "expected_concepts": ["thakaan", "energy nahi milegi", "weak"],
+            "correct_indicator": "child says tired or weak or no energy",
+            "response_correct": "Sahi! Bina khane ke body ko energy nahi milti! Khaana body ka fuel hai — jaise car ko petrol chahiye!",
+            "response_incorrect": "Bina khane ke energy nahi milti — thakaan lagegi, concentrate nahi hoga! Khaana body ka fuel hai!"
+          },
+          {
+            "order": 2,
+            "type": "recall",
+            "question_text": "Fan kaunsi energy se chalta hai?",
+            "expected_concepts": ["electrical energy", "bijli"],
+            "correct_indicator": "child says bijli or electrical energy",
+            "response_correct": "Sahi! Electrical energy se — bijli se! Plug lagao, switch on — fan chalu!",
+            "response_incorrect": "Fan bijli se chalta hai — electrical energy! Jo wires ke through power station se aati hai!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Jab tu taali bajata hai — kaunsi energy produce hoti hai?",
+            "expected_concepts": ["sound energy"],
+            "correct_indicator": "child says sound energy",
+            "response_correct": "Right! Sound energy! Haath milaane se vibration — vibration se sound — sound energy!",
+            "response_incorrect": "Sound energy! Haath milaane se vibration hoti hai — vibration se sound aata hai — ye sound energy hai!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Tere haath ragde — garm ho gaye. Mechanical energy heat mein badli. Ab ek aur soch — bulb jalao — kaunsi energy kaunsi mein badli?",
+            "expected_concepts": ["electrical to light", "electrical to heat", "bijli se roshni"],
+            "correct_indicator": "child says electrical to light or heat",
+            "response_correct": "Brilliant! Electrical energy → Light energy + Heat energy! (Bulb touch karo — garm bhi hota hai na!) Energy dono forms mein convert hoti hai!",
+            "response_incorrect": "Bulb mein electrical energy → light energy (roshni) + heat energy (garm bhi hota hai bulb)! Ek cheez se do forms mein energy convert hoti hai!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Big celebration! Cliffhanger: 'Kal ek andheri raat ki kahani — aur roshni ka jaadu — light ke baare mein baat karenge!'",
+        "ai_context_mid_score": "Warm encouragement. Remind HLSEM. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Focus on: food=energy, sun=energy. Cliffhanger same.",
+        "parent_try_tonight": "Ghar mein {child_name} ke saath — ek din mein kitni alag alag energy forms use ki? Subah alarm (sound), light (light energy), cooking gas (heat), TV (electrical+light+sound), running outside (mechanical). List banao!"
+      }
+    },
+
+    {
+      "chapter_number": 13,
+      "chapter_title": "Light — A Form of Energy",
+      "unit": "Unit 5: Energy",
+      "ncert_topics": [
+        "Sources of light — natural and artificial",
+        "Light helps us see",
+        "Light travels in a straight line",
+        "Shadow formation",
+        "Transparent, translucent and opaque objects"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "light beam straight line ray torch",
+          "trigger": "wrong answer trap — light travels straight",
+          "show": "torch beam going straight — not curving"
+        },
+        "stage_5_rive": {
+          "state_name": "shadow_experiment",
+          "trigger": "shadow formation visualization",
+          "description": "Interactive shadow experiment. Child moves hand closer to light source — shadow gets bigger. Move farther — shadow smaller. Also: tap glass → light passes through (transparent, no shadow). Tap book → shadow forms (opaque). Tap butter paper → partial shadow (translucent)."
+        },
+        "stage_7_lottie": {
+          "search_query": "transparent glass opaque book translucent frosted light",
+          "trigger": "concept reveal — three categories",
+          "show": "three objects side by side showing different light transmission"
+        },
+        "stage_8_lottie": {
+          "search_query": "natural light sources sun star moon artificial bulb",
+          "trigger": "exam mode — sources of light",
+          "show": "natural vs artificial light sources labeled"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi was at home when the power went out at night. Suddenly everything was pitch dark — she couldn't see anything! She waved her hand right in front of her face and couldn't see it. She realized we completely depend on light for vision. Ask child what they do when power goes out at their house. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: if the sun suddenly disappeared for one day, what would happen? Just one day — no sun at all. What would they NOT be able to do? Genuinely wait."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne bola — light tedhi medhi travel karti hai — isliye hum corners ke peeche ki cheezein dekh sakte hain! Kya ye sahi hai? Bilkul galat! Light STRAIGHT LINE mein travel karti hai — seedha! Isliye hum corners ke peeche nahi dekh sakte! Proof — torch jalaao — beam seedha jaata hai — kabhi nahi muda! Aur shadow isliye banta hai kyunki light seedhi jaati hai — koi opaque cheez raaste mein aaye toh light nahi jaati peeche — shadow banta hai! Agar light curved hoti toh shadow nahi banta! Aur ek aur galat baat — kisi ne bola glass aur paani same hain — dono transparent — toh dono bilkul same hain. Lekin nahi — paani pe shadow banta hai thoda — lekin clear glass pe bilkul nahi!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Ek fun shadow experiment! Torch ya phone torch jalaao. Haath torch ke saamne rakho — deewar pe shadow dekho. Ab haath ko deewar ke paas karo — shadow bada ya chhota? Phir haath ko torch ke paas karo — shadow bada ya chhota? 2 minutes try karo!",
+        "wait_seconds": 120,
+        "follow_up_script": "Kya hua? Deewar ke paas haath tha toh shadow bada tha ya chhota? Torch ke paas tha toh?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "shadow_experiment",
+        "script": "Soch — light seedha aa rahi hai torch se. Ek object rakhte hain beech mein. Agar object TRANSPARENT hai — jaise clear glass ya paani — light poori pass ho jaati hai! Koi shadow nahi! Agar object TRANSLUCENT hai — jaise butter paper ya frosted glass — thodi light pass hoti hai, thodi nahi — partial shadow! Aur agar object OPAQUE hai — jaise kitaab, cardboard, haath — light bilkul pass nahi hoti — peeche poori shadow! Aur haath ko torch ke paas laao — shadow bada! Kyunki zyada light block hoti hai. Deewar ke paas laao — shadow chhota! Aur raat ko shadows nahi hote — kyunki raat mein light hi nahi hoti!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — glass ke through dikh jaata hai kyunki glass ___ hai? Aur kitaab ke peeche shadow kyunki kitaab ___  hai? Aur shadow kyun banta hai basically?",
+        "stt_listen": true,
+        "celebration_script": "Bilkul! Glass transparent hai — light through! Kitaab opaque hai — shadow! Shadow isliye kyunki light straight line mein travel karti hai aur opaque cheezein block karti hain!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_7_lottie",
+        "script": "Light ek form of energy hai! Light ke SOURCES — Natural: Sun (sabse bada!), stars, firefly, fire. Artificial: bulb, torch, candle, LED. Light teen cheezein bataati hain — TRANSPARENT objects mein se light poori pass hoti hai — clear glass, clear water, air. TRANSLUCENT objects mein se thodi light pass hoti hai — butter paper, frosted glass, thin cotton. OPAQUE objects mein se bilkul light pass nahi hoti — metal, wood, stone, most cloth. Aur SHADOW formation — opaque object raste mein — light nahi ja sakti — peeche dark area — shadow! Sun ki light seedhi aati hai — isliye din mein saari cheezein clearly visible!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "NCERT ke liye — ye chapter bahut scoring hai!",
+        "ncert_definition": "Light is a form of energy. Light travels in a straight line. Objects that allow light to pass through them completely are called transparent. Objects that allow some light to pass are called translucent. Objects that do not allow any light to pass are called opaque. A shadow is formed when an opaque object comes in the path of light.",
+        "key_points": [
+          "Natural sources of light: sun, stars, fire, firefly (jugnu)",
+          "Artificial sources: electric bulb, torch, candle, LED, tube light",
+          "Transparent: clear glass, clean water — no shadow, can see clearly through",
+          "Translucent: butter paper, frosted glass, oiled paper — partial shadow, blurry image",
+          "Opaque: metal, wood, stone, most cloth — complete shadow, cannot see through"
+        ],
+        "keywords": ["light", "transparent", "translucent", "opaque", "shadow", "natural", "artificial", "straight line"],
+        "memory_trick": "T-T-O! Transparent-Translucent-Opaque! Teen Taur pe Objects! Sab door Transparent, Thoda Translucent, Opaque Off karta hai light!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "recall",
+            "question_text": "Hume cheezein dekhne ke liye kya chahiye? Ek zaruri cheez!",
+            "expected_concepts": ["light", "roshni"],
+            "correct_indicator": "child says light or roshni",
+            "response_correct": "Sahi! Light! Bina light ke kuch nahi dikhta — isliye raat ko andhera lagta hai jab sun nahi hota!",
+            "response_incorrect": "Light chahiye! Roshni! Bina roshni ke aankhen hone ke bawajood kuch nahi dikhta!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Clear glass window se bahar dikh sakta hai — glass ko kya kehte hain?",
+            "expected_concepts": ["transparent"],
+            "correct_indicator": "child says transparent",
+            "response_correct": "Bilkul! Transparent! Light poori pass ho jaati hai clear glass mein se — isliye dikh jaata hai!",
+            "response_incorrect": "Clear glass transparent hai! Light poori pass ho jaati hai usmein se — isliye window ke through bahar dikh jaata hai!"
+          },
+          {
+            "order": 3,
+            "type": "application",
+            "question_text": "Torch ke saamne kitaab rakho — deewar pe shadow banega ya nahi? Kitaab ko kya kehte hain?",
+            "expected_concepts": ["shadow banega", "opaque"],
+            "correct_indicator": "child says shadow and opaque",
+            "response_correct": "Sahi! Shadow banega! Kitaab opaque hai — light bilkul pass nahi hoti — toh peeche shadow!",
+            "response_incorrect": "Shadow banega! Kitaab opaque hai — light poori block ho jaati hai — peeche dark area ban jaata hai — shadow!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Last interesting wala — subah mein choti shadow hoti hai ya badi? Dopahar mein? Kyun aisa hota hai?",
+            "expected_concepts": ["dopahar mein shadow chhoti", "sun straight upar", "subah shadow badi"],
+            "correct_indicator": "child identifies that noon shadows are shorter",
+            "response_correct": "Brilliant! Dopahar mein shadow chhoti — sun seedha upar hota hai! Subah aur shaam shadow badi — kyunki sun angle pe hota hai — zyada area block hota hai!",
+            "response_incorrect": "Dopahar mein shadow sabse chhoti hoti hai — kyunki sun seedha upar hota hai! Subah aur shaam sun angle pe hota hai — shadow zyada badi hoti hai!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "Big celebration! Cliffhanger: 'Kal music class ki kahani sunaaunga — guitar ki string pe ek bahut interesting experiment kiya — sound ke baare mein!'",
+        "ai_context_mid_score": "Warm encouragement. Remind T-T-O. Cliffhanger same.",
+        "ai_context_low_score": "Gentle. Focus on: transparent=pass through, opaque=shadow. Cliffhanger same.",
+        "parent_try_tonight": "Ghar mein {child_name} ke saath — torch lekar 5 objects test karo — transparent, translucent, ya opaque? Glass, plastic bag, thick curtain, white paper, tin box — classify karo!"
+      }
+    },
+
+    {
+      "chapter_number": 14,
+      "chapter_title": "Sound — A Form of Energy",
+      "unit": "Unit 5: Energy",
+      "ncert_topics": [
+        "How sound is produced — vibration",
+        "How we hear sound — eardrum vibration",
+        "Pleasant and unpleasant sounds",
+        "How sound is useful",
+        "Noise pollution"
+      ],
+
+      "animations": {
+        "stage_3_lottie": {
+          "search_query": "sound wave vibration string guitar frequency",
+          "trigger": "wrong answer trap about sound in space",
+          "show": "sound waves traveling through medium"
+        },
+        "stage_5_rive": {
+          "state_name": "sound_wave_interactive",
+          "trigger": "visualization — how sound reaches ear",
+          "description": "Interactive animation. Child taps guitar string — it vibrates (shown as wavy line). Vibration travels through air as waves. Waves reach animated ear. Eardrum vibrates. 'You hear sound!' appears. Child can also tap drum or tap finger on table to see vibration."
+        },
+        "stage_7_lottie": {
+          "search_query": "ear anatomy eardrum hearing sound",
+          "trigger": "concept reveal — how we hear",
+          "show": "simplified ear diagram showing sound entering and eardrum"
+        },
+        "stage_8_lottie": {
+          "search_query": "noise pollution traffic horn factory loud sound",
+          "trigger": "exam mode — noise pollution",
+          "show": "traffic noise, factory noise vs pleasant bird chirping"
+        }
+      },
+
+      "stage_1_hook": {
+        "type": "realtime_ai",
+        "ai_system_context": "Zumi was in music class when teacher played guitar — she noticed the string was vibrating while playing. She wondered — is that vibration connected to the sound? She tried to stop the vibration with her finger — and the sound stopped too! Ask child if they've ever noticed something vibrating while making a sound. 2-3 sentences."
+      },
+
+      "stage_2_predict": {
+        "type": "realtime_ai",
+        "ai_system_context": "Ask child: if astronauts are in space and one of them shouts — will the other hear? Space mein koi medium nahi hoti. Let child think and answer. React naturally."
+      },
+
+      "stage_3_wrong_answer_trap": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_3_lottie",
+        "script": "Ek bacche ne bola — sound space mein bhi travel karti hai — space mein astronauts baat kar sakte hain bina radio ke! Kya ye sahi hai? Bilkul galat! Sound travel karne ke liye MEDIUM chahiye — paani ya hawa ya koi solid material. Space mein koi medium nahi hota — toh sound travel nahi karti! Isliye space movies mein jo blast hote hain — reality mein aawaz nahi aati — lekin movies mein sound effects add karte hain! Aur ek aur trap — kisi ne bola ki loud sound sun ne se kaan thodi der ke liye kaam karna band karte hain — toh baad mein theek ho jaate hain! Lekin bahut loud sound se permanent hearing loss ho sakta hai — kaan hamesha ke liye damage ho sakte hain!"
+      },
+
+      "stage_4_experiment": {
+        "type": "prestored_tts_then_wait",
+        "zumi_avatar_state": "talking",
+        "instruction_script": "Ek amazing experiment! Apna haath apne gale pe rakho. Ab bolte jao — AAAA — feel karo kya ho raha hai gale mein! Zyada tez bolo — aur feel karo. Ab whisper mein bolo — feel karo fark! 30 seconds try karo — aur batao!",
+        "wait_seconds": 30,
+        "follow_up_script": "Kya feel hua gale mein? Hil raha tha? Tez bolne par aur whisper mein — fark tha?",
+        "follow_up_type": "realtime_ai_response"
+      },
+
+      "stage_5_visualization": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "rive_trigger": "sound_wave_interactive",
+        "script": "Ab soch — jab guitar ki string baji — string vibrate hui — hilli! String ke vibrate hone se uske aas paas ki hawa bhi thodi hilli — disturbed hui. Ye disturbance hawa mein SOUND WAVES ki tarah travel karti hai — jaise paani mein pathar dalo toh rings banti hain — aise! Ye waves teri taraf aati hain. Tere kaan ke andar ek chhota sa part hai — EARDRUM. Ye sound waves eardrum ko bhi vibrate karti hain — aur brain ye vibration ko sound ke roop mein process karta hai — aur TU SUNTA HAI! Aur isliye tu apne gale pe haath rakhe toh vibration feel hoti hai — tere voice box ki strings vibrate karti hain teri awaaz banane ke liye!"
+      },
+
+      "stage_6_discovery": {
+        "type": "hybrid",
+        "zumi_avatar_state": "thinking",
+        "lead_question_script": "Toh {child_name} — sound hamesha vibration se banta hai. Agar main drum bajaaun — drum ka kya hoga? Aur kya hoga teri awaaz ke saath jab tu bolta hai?",
+        "stt_listen": true,
+        "celebration_script": "EXACTLY! Sound = Vibration! Koi bhi cheez vibrate kare — sound produce hoti hai! Aur vibration band karo — sound band!",
+        "zumi_avatar_on_correct": "celebrating"
+      },
+
+      "stage_7_concept_reveal": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "story_mode",
+        "lottie_trigger": "stage_7_lottie",
+        "script": "Sound ek form of energy hai! Sound vibration se produce hoti hai — koi bhi object vibrate kare, sound banta hai. Sound travel karne ke liye MEDIUM chahiye — hawa, paani, ya solid. Space mein sound nahi travel karti — no medium! Hum kaise sunte hain — sound waves kaan mein jaati hain — EARDRUM vibrate karta hai — brain process karta hai! Sounds do types ke hote hain — PLEASANT sounds — jaise music, birds, flowing water. UNPLEASANT sounds — jaise traffic noise, machine noise, crackers. Bahut loud unpleasant sounds — NOISE POLLUTION — ye health ke liye harmful hai — kaan damage, stress, sleep problems!"
+      },
+
+      "stage_8_exam_mode": {
+        "type": "prestored_tts",
+        "zumi_avatar_state": "talking",
+        "lottie_trigger": "stage_8_lottie",
+        "intro_script": "Last chapter — NCERT ke liye pakka karo.",
+        "ncert_definition": "Sound is a form of energy produced by vibrating objects. Sound needs a medium to travel. The eardrum in our ear vibrates when sound waves reach it, and we hear the sound.",
+        "key_points": [
+          "Sound is produced by vibration — strings vibrate (guitar), air column vibrates (flute), vocal cords vibrate (voice)",
+          "Sound needs a medium — cannot travel in vacuum (space)",
+          "Sound travels through solid faster than liquid, and liquid faster than gas",
+          "Eardrum — thin membrane in ear that vibrates with sound waves",
+          "Pleasant sounds: music, birds chirping, flowing water",
+          "Unpleasant sounds: noise pollution — traffic, machines, explosions",
+          "Too much noise causes noise pollution — harmful to health"
+        ],
+        "keywords": ["sound", "vibration", "medium", "eardrum", "pleasant", "unpleasant", "noise pollution"],
+        "memory_trick": "V-M-E — Vibration Makes Ear respond! Sound needs Vibration to start, Medium to travel, Ear to receive! V-M-E!"
+      },
+
+      "stage_9_quiz": {
+        "type": "hybrid",
+        "questions": [
+          {
+            "order": 1,
+            "type": "physical_then_recall",
+            "question_text": "Abhi apne gale pe haath rakho aur bolo AAAAAA — kya ho raha hai gale mein?",
+            "expected_concepts": ["vibration", "hil raha hai"],
+            "correct_indicator": "child mentions vibration or shaking",
+            "response_correct": "Vibration! Gala vibrate kar raha hai aur isliye awaaz aa rahi hai! Vibration = Sound!",
+            "response_incorrect": "Gala vibrate kar raha hai — hil raha hai! Ye vibration hi sound produce karta hai! Vibration band karo — awaaz band!"
+          },
+          {
+            "order": 2,
+            "type": "application",
+            "question_text": "Guitar ki string bajao toh sound kaise aata hai?",
+            "expected_concepts": ["string vibrate hoti hai", "vibration se sound"],
+            "correct_indicator": "child mentions vibration of string",
+            "response_correct": "Sahi! String vibrate karti hai — jaldi jaldi hilti hai — vibration se sound banta hai!",
+            "response_incorrect": "Jab string ko bajate hain toh wo vibrate karti hai — jaldi jaldi hilti hai — aur vibration se sound produce hota hai!"
+          },
+          {
+            "order": 3,
+            "type": "recall",
+            "question_text": "Kya astronaut space mein bina radio ke apne saathi se baat kar sakta hai? Kyun?",
+            "expected_concepts": ["no", "space mein medium nahi", "sound travel nahi karti"],
+            "correct_indicator": "child says no and mentions no medium in space",
+            "response_correct": "Bilkul sahi! Space mein medium nahi — toh sound travel nahi karti! Isliye radio ya special helmet speakers use hote hain!",
+            "response_incorrect": "Nahi! Space mein koi air ya medium nahi hoti — aur sound travel ke liye medium chahiye! Isliye space mein direct baat nahi ho sakti — radio use karte hain!"
+          },
+          {
+            "order": 4,
+            "type": "hots",
+            "question_text": "Last wala — agar earphones mein bahut loud music sunoge daily — kya hoga? Kyun?",
+            "expected_concepts": ["kaan kharab", "eardrum damage", "hearing loss"],
+            "correct_indicator": "child mentions ear damage",
+            "response_correct": "Bahut smart! Loud music se eardrum bahut zyada vibrate karta hai — over time damage ho sakta hai — permanent hearing loss! Isliye volume low rakhna chahiye!",
+            "response_incorrect": "Bahut loud sound se eardrum bahut force se vibrate karta hai — over time ye damage ho jaata hai — hearing loss ho sakti hai! Isliye volume control karo!"
+          }
+        ]
+      },
+
+      "stage_10_closing": {
+        "type": "realtime_ai",
+        "ai_context_high_score": "HUGE celebration! Last chapter complete! Say child is amazing and has learned all of Class 3 Science. Say: 'Tu ek chhota scientist ban gaya! Main bahut proud hoon!' Then warmly say goodbye for today.",
+        "ai_context_mid_score": "Warm celebration. Still last chapter. Encourage. Say: 'Itna seekh liya — bahut accha kiya!' Warm goodbye.",
+        "ai_context_low_score": "Gentle, encouraging. 'Seekhna ek journey hai — ek kadam ek baar!' Warm goodbye. No cliffhanger needed — last chapter!",
+        "parent_try_tonight": "Aaj {child_name} ne Class 3 Science ka last chapter complete kiya! Celebration karo! Ek activity: ghar mein alag alag cheezein bajao — table, glass, plate — aur pehchano pleasant sound hai ya unpleasant! Aur discuss karo — sabse annoying sound kaun si hai ghar mein!"
+      }
+    }
+
+  ]
+}

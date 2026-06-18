@@ -348,6 +348,133 @@ export interface WorkedProblem {
   commonMistake?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Zumi voice "Fun" feature -- optional voice-story layer on a topic.
+//
+// Present ONLY on topics authored for the grade <= 6 voice experience (the
+// Class 3 Science chapters seeded via `seedVoiceStories.ts`). When absent,
+// the topic behaves exactly as before (text lesson + MCQ quiz). The field is
+// optional so existing topics are untouched and the Zod drift guard in
+// `schemas/topicContent.ts` mirrors it as `.optional()`.
+// ---------------------------------------------------------------------------
+
+/**
+ * One spoken quiz question in `VoiceStory.voiceQuiz[]`. The child answers by
+ * speaking; the transcript is evaluated server-side (`zumiEvaluateAnswer`)
+ * against `expectedConcepts` + `correctIndicator`. The three `response*`
+ * lines are the canned things Zumi says back depending on the verdict.
+ */
+export interface VoiceQuizQuestion {
+  /** Stable id, e.g. `ch1_q1`. Used as the key in the server eval record. */
+  questionId: string;
+  /** 1-based display order. */
+  order: number;
+  /** Author tag: `recall` | `application` | `mcq_spoken` | `hots`. Informational only. */
+  type?: string;
+  /** Hinglish question text; may contain the `{child_name}` placeholder. */
+  questionText: string;
+  /** Optional pre-generated TTS audio (Firebase Storage https URL). */
+  questionAudioUrl?: string;
+  /** Concept keywords a correct answer should contain (drives the fallback matcher). */
+  expectedConcepts: string[];
+  /** Human-readable description of what counts as correct (fed to the evaluator). */
+  correctIndicator: string;
+  /** Zumi's spoken reply when the answer is correct. */
+  responseCorrect: string;
+  /** Zumi's spoken reply when the answer is partially correct (optional). */
+  responsePartial?: string;
+  /** Zumi's spoken reply when the answer is wrong (still encouraging). */
+  responseIncorrect: string;
+}
+
+/**
+ * A single animation cue for a story stage. `type` selects which renderer the
+ * screen uses: a Lottie JSON (downloaded art, `lottieStorageUrl`) or a Rive
+ * state-machine state (`stateName`). `searchQuery` is the lottiefiles.com hint
+ * for the content team before the art is uploaded.
+ */
+export interface VoiceAnimation {
+  /** Raw author key from the source JSON, e.g. `stage_3_lottie`, `rive_interaction_1`. */
+  key: string;
+  /** Stage (1-10) parsed from `key`; 0 when the key isn't stage-scoped. */
+  stageNumber: number;
+  type: 'lottie' | 'rive';
+  /** Author description of when this fires. */
+  trigger?: string;
+  /** lottiefiles.com search hint (Lottie only). */
+  searchQuery?: string;
+  /** What the child should see (Lottie only). */
+  show?: string;
+  /** Firebase Storage https URL of the Lottie JSON once uploaded (Lottie only). */
+  lottieStorageUrl?: string;
+  /** Rive state-machine state to trigger (Rive only). */
+  stateName?: string;
+  /** What the child sees / can interact with (Rive only). */
+  description?: string;
+}
+
+/**
+ * The full 10-stage voice story attached to a topic. Mirrors the curated
+ * Class 3 Science JSON but normalised to camelCase. Real-time stages (hook,
+ * predict, discovery, closing) carry only an AI context string; the scripted
+ * stages carry the exact Hinglish lines Zumi speaks (pre-stored TTS or
+ * on-device fallback).
+ */
+export interface VoiceStory {
+  /** Stage 1 -- AI greeting + mystery hook context. */
+  hookContext: string;
+  /** Stage 2 -- AI prediction prompt context. */
+  predictContext: string;
+  /** Stage 3 -- wrong-answer-trap narration (scripted). */
+  wrongAnswerTrapScript: string;
+  /** Animation key to play during stage 3 (optional). */
+  trapLottieKey?: string;
+  /** Stage 4 -- physical experiment instruction (scripted). */
+  experimentInstruction: string;
+  /** How long Zumi waits in silence while the child does the experiment. */
+  experimentWaitSeconds: number;
+  /** Stage 4 -- follow-up question after the wait (scripted, then STT). */
+  experimentFollowUp: string;
+  /** Interactive Rive animation key for the experiment (optional). */
+  experimentRiveKey?: string;
+  /** Stage 5 -- visualization narration (scripted). */
+  visualizationScript: string;
+  /** Animation key to play during stage 5 (optional). */
+  visualizationLottieKey?: string;
+  /** Stage 6 -- AI lead question prompting the child to state the concept (scripted line). */
+  discoveryLeadQuestion: string;
+  /** Stage 6 -- celebration line after the child's discovery (scripted). */
+  discoveryCelebration: string;
+  /** Stage 7 -- concept reveal narration (scripted). */
+  conceptRevealScript: string;
+  /** Rive animation key for the concept reveal (optional). */
+  conceptRevealRiveKey?: string;
+  /** Stage 8 -- exam-mode intro line (scripted). */
+  examModeIntro: string;
+  /** Stage 8 -- NCERT-language definition (scripted). */
+  ncertDefinition: string;
+  /** Stage 8 -- bullet key points. */
+  keyPoints: string[];
+  /** Stage 8 -- exam keywords to memorise. */
+  keywords: string[];
+  /** Stage 8 -- mnemonic / memory trick. */
+  memoryTrick: string;
+  /** Animation key to play during stage 8 (optional). */
+  examLottieKey?: string;
+  /** Stage 9 -- the four spoken quiz questions. */
+  voiceQuiz: VoiceQuizQuestion[];
+  /** Stage 10 -- AI closing context for >= 75%. */
+  closingHighScoreContext: string;
+  /** Stage 10 -- AI closing context for 50-74%. */
+  closingMidScoreContext: string;
+  /** Stage 10 -- AI closing context for < 50%. */
+  closingLowScoreContext: string;
+  /** Stage 10 -- "try tonight" activity surfaced to the parent. */
+  parentTryTonight: string;
+  /** All animation cues for the story, indexed by their author key. */
+  animations: VoiceAnimation[];
+}
+
 /**
  * `curriculum/{curriculumId}/chapters/{chapterId}/topics/{topicId}` -- full curated
  * topic content (explanation + examples + brainstorming + quiz).
@@ -384,6 +511,11 @@ export interface TopicContent {
   /** UID of the human content curator who wrote this topic. */
   curatedBy: string;
   publishedAt?: FirestoreFieldValueLike;
+  /**
+   * Optional Zumi voice-story layer (grade <= 6 "Fun" experience). Present
+   * only on voice-authored topics; absent topics behave exactly as before.
+   */
+  voiceStory?: VoiceStory;
 }
 
 // ---------------------------------------------------------------------------
@@ -485,13 +617,42 @@ export interface QuizAnswerInput {
 }
 
 /**
+ * One raw spoken answer the child submits for a voice quiz question. The
+ * server NEVER trusts a client-supplied score -- for voice it reads the
+ * authoritative per-question verdict that `zumiEvaluateAnswer` already wrote
+ * to `quizVoiceEvals/{assignmentId}_{childUid}`. The transcript is forwarded
+ * only for audit / a server re-evaluation fallback.
+ */
+export interface VoiceAnswerInput {
+  questionId: string;
+  /** Speech-to-text transcript of what the child said (`''` if nothing captured). */
+  transcript: string;
+}
+
+/**
  * Input contract for the `submitQuizAttempt` callable. The child sends only
  * the assignment id + their raw selections; everything else (topic, school,
  * class, grading) is resolved server-side from the assignment.
+ *
+ * `mode` defaults to `'mcq'` (the existing tap-quiz path). When `'voice'`,
+ * the server grades from the server-written `quizVoiceEvals` record instead
+ * of `quiz[].correctIndex`, and `voiceAnswers` carries the transcripts.
  */
 export interface SubmitQuizAttemptInput {
   assignmentId: string;
   answers: QuizAnswerInput[];
+  mode?: 'mcq' | 'voice';
+  voiceAnswers?: VoiceAnswerInput[];
+}
+
+/** Per-question voice verdict, recorded on the attempt doc for report UIs. */
+export interface VoiceQuestionResult {
+  questionId: string;
+  transcript: string;
+  result: 'correct' | 'partial' | 'incorrect';
+  /** 0-25 per question (25 correct, 12 partial, 0 incorrect). */
+  score: number;
+  reasoning?: string;
 }
 
 /**
@@ -577,6 +738,10 @@ export interface QuizAttemptDoc {
   firstPassedAt?: FirestoreFieldValueLike;
   createdAt: FirestoreFieldValueLike;
   updatedAt: FirestoreFieldValueLike;
+  /** True when this attempt came from the Zumi voice quiz (vs the MCQ quiz). */
+  isVoice?: boolean;
+  /** Per-question spoken verdicts (voice attempts only). */
+  voiceResults?: VoiceQuestionResult[];
 }
 
 // ---------------------------------------------------------------------------

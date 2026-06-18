@@ -12,12 +12,18 @@
     "seed:staging": "pnpm --filter @zerebro/functions seed:staging",
     "grant-role": "pnpm --filter @zerebro/functions grant-role",
     "import:curriculum": "pnpm --filter @zerebro/functions import:curriculum",
+    "seed:voice-stories": "pnpm --filter @zerebro/functions seed:voice-stories",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules .turbo apps/*/.turbo packages/*/.turbo"
   },
   "engines": {
     "node": ">=20"
   },
   "packageManager": "pnpm@9.15.9",
+  "pnpm": {
+    "overrides": {
+      "@types/node": "20.19.41"
+    }
+  },
   "devDependencies": {
     "turbo": "^2.5.4",
     "typescript": "^5.5.0"

@@ -113,6 +113,66 @@ export const TopicSectionSchema = z.object({
 });
 
 /**
+ * Zumi voice-story sub-schemas. Mirror the `VoiceStory` family in
+ * `education.ts` EXACTLY (field set + optionality) so the `_TopicContentDriftGuard`
+ * below keeps passing. Validations are intentionally light (types only) --
+ * the voice stories are seeded via an Admin-SDK script, not this importer.
+ */
+export const VoiceQuizQuestionSchema = z.object({
+  questionId: z.string(),
+  order: z.number(),
+  type: z.string().optional(),
+  questionText: z.string(),
+  questionAudioUrl: z.string().optional(),
+  expectedConcepts: z.array(z.string()),
+  correctIndicator: z.string(),
+  responseCorrect: z.string(),
+  responsePartial: z.string().optional(),
+  responseIncorrect: z.string(),
+});
+
+export const VoiceAnimationSchema = z.object({
+  key: z.string(),
+  stageNumber: z.number(),
+  type: z.enum(['lottie', 'rive']),
+  trigger: z.string().optional(),
+  searchQuery: z.string().optional(),
+  show: z.string().optional(),
+  lottieStorageUrl: z.string().optional(),
+  stateName: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export const VoiceStorySchema = z.object({
+  hookContext: z.string(),
+  predictContext: z.string(),
+  wrongAnswerTrapScript: z.string(),
+  trapLottieKey: z.string().optional(),
+  experimentInstruction: z.string(),
+  experimentWaitSeconds: z.number(),
+  experimentFollowUp: z.string(),
+  experimentRiveKey: z.string().optional(),
+  visualizationScript: z.string(),
+  visualizationLottieKey: z.string().optional(),
+  discoveryLeadQuestion: z.string(),
+  discoveryCelebration: z.string(),
+  conceptRevealScript: z.string(),
+  conceptRevealRiveKey: z.string().optional(),
+  examModeIntro: z.string(),
+  ncertDefinition: z.string(),
+  keyPoints: z.array(z.string()),
+  keywords: z.array(z.string()),
+  memoryTrick: z.string(),
+  examLottieKey: z.string().optional(),
+  voiceQuiz: z.array(VoiceQuizQuestionSchema),
+  closingHighScoreContext: z.string(),
+  closingMidScoreContext: z.string(),
+  closingLowScoreContext: z.string(),
+  parentTryTonight: z.string(),
+  animations: z.array(VoiceAnimationSchema),
+});
+
+/**
  * Top-level Topic schema. Note we accept either `'draft'` or `'published'`;
  * the import script defaults `status` to `'published'` when missing AND
  * the file lives under a `published/` folder, otherwise to `'draft'`.
@@ -158,6 +218,7 @@ export const TopicContentSchema = z.object({
   status: z.enum(['draft', 'published']).default('published'),
   curatedBy: z.string().min(1, 'curatedBy required (use a content-team uid or "content_team")'),
   publishedAt: z.union([z.number(), z.record(z.unknown())]).optional(),
+  voiceStory: VoiceStorySchema.optional(),
 });
 
 /** Validated `TopicContent` payload, including any Zod defaults that were applied. */

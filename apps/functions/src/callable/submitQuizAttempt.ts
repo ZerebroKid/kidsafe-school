@@ -21,6 +21,12 @@
  * `questionId`, compare to `correctIndex`, and count correct answers.
  * `percentage = round(score / total * 100)`, `passed = percentage >= 60`.
  *
+ * Voice mode (`mode === 'voice'`, the Zumi "Fun" quiz): the server is STILL the
+ * source of truth. Instead of MCQ selections it reads the per-question verdicts
+ * that `zumiEvaluateAnswer` already wrote to `quizVoiceEvals/{assignmentId}_{uid}`
+ * and sums them (25 correct / 12 partial / 0 wrong, `total = n * 25`). The
+ * client never supplies a score. Reward unlock + retake semantics are identical.
+ *
  * Persistence (retake-aware, locked decision -- unlimited retakes until pass):
  *   Deterministic doc id `{assignmentId}_{childUid}` => ONE doc per child per
  *   assignment, upserted in a transaction. Each submit bumps `attemptCount`,
@@ -46,15 +52,21 @@ import {FieldValue} from 'firebase-admin/firestore';
 
 import {db} from '../lib/admin';
 import {requireAuth, requireRole} from '../lib/auth';
+import {voiceEvalDocId} from '../lib/zumiSession';
 import type {
   QuizAnswerInput,
   QuizQuestionResult,
   SubmitQuizAttemptInput,
   SubmitQuizAttemptOutput,
+  VoiceQuestionResult,
+  VoiceQuizQuestion,
 } from '../lib/sharedTypes';
 
 /** Locked pass threshold (percentage). */
 const PASS_PERCENTAGE = 60;
+
+/** Per-question max for the spoken Zumi quiz (correct=25, partial=12, wrong=0). */
+const VOICE_POINTS_PER_QUESTION = 25;
 
 interface QuizQuestionShape {
   questionId: string;
@@ -72,11 +84,13 @@ export const submitQuizAttempt = onCall<
 
   const {assignmentId, answers} =
     request.data ?? ({} as Partial<SubmitQuizAttemptInput>);
+  const mode: 'mcq' | 'voice' =
+    request.data?.mode === 'voice' ? 'voice' : 'mcq';
 
   if (typeof assignmentId !== 'string' || assignmentId.length === 0) {
     throw new HttpsError('invalid-argument', 'assignmentId is required.');
   }
-  if (!Array.isArray(answers)) {
+  if (mode === 'mcq' && !Array.isArray(answers)) {
     throw new HttpsError('invalid-argument', 'answers must be an array.');
   }
 
@@ -84,7 +98,7 @@ export const submitQuizAttempt = onCall<
   // the score -- we only use them to look up "what did the child pick for
   // question X". Last-write-wins on duplicate questionIds.
   const selectionByQuestion = new Map<string, number>();
-  for (const a of answers) {
+  for (const a of answers ?? []) {
     if (
       a &&
       typeof (a as QuizAnswerInput).questionId === 'string' &&
@@ -160,39 +174,106 @@ export const submitQuizAttempt = onCall<
     typeof topic.grade === 'number' && Number.isFinite(topic.grade)
       ? topic.grade
       : null;
-  const quiz: QuizQuestionShape[] = Array.isArray(topic.quiz)
-    ? (topic.quiz as QuizQuestionShape[])
-    : [];
-  if (quiz.length === 0) {
-    throw new HttpsError(
-      'failed-precondition',
-      'This topic has no quiz to submit.',
-    );
+  // ---- Grade server-side -------------------------------------------------
+  // Two paths share the same persistence below. Both compute `score`,
+  // `total`, `results` (MCQ breakdown), `gradedAnswers` (lastAnswers), and the
+  // voice-only `voiceResults`. The server is the source of truth in BOTH: the
+  // MCQ path re-grades against `quiz[].correctIndex`; the voice path reads the
+  // verdicts that `zumiEvaluateAnswer` already wrote to `quizVoiceEvals`.
+  let score = 0;
+  let total = 0;
+  let results: QuizQuestionResult[] = [];
+  let gradedAnswers: QuizAnswerInput[] = [];
+  let voiceResults: VoiceQuestionResult[] | null = null;
+
+  if (mode === 'voice') {
+    const voiceStory = topic.voiceStory as
+      | {voiceQuiz?: VoiceQuizQuestion[]}
+      | undefined;
+    const voiceQuiz: VoiceQuizQuestion[] = Array.isArray(voiceStory?.voiceQuiz)
+      ? (voiceStory!.voiceQuiz as VoiceQuizQuestion[])
+      : [];
+    if (voiceQuiz.length === 0) {
+      throw new HttpsError(
+        'failed-precondition',
+        'This topic has no Zumi voice quiz to submit.',
+      );
+    }
+
+    // Read the server-written verdicts. Client scores are NEVER trusted.
+    const evalSnap = await db()
+      .collection('quizVoiceEvals')
+      .doc(voiceEvalDocId(assignmentId, caller.uid))
+      .get();
+    const storedAnswers =
+      (evalSnap.exists ? evalSnap.data()?.answers : undefined) ?? {};
+
+    voiceResults = voiceQuiz.map(q => {
+      const rec =
+        storedAnswers && typeof storedAnswers === 'object'
+          ? (storedAnswers as Record<string, unknown>)[q.questionId]
+          : undefined;
+      const r = (rec ?? {}) as {
+        result?: unknown;
+        score?: unknown;
+        transcript?: unknown;
+        reasoning?: unknown;
+      };
+      const verdict =
+        r.result === 'correct' || r.result === 'partial' ? r.result : 'incorrect';
+      const rawScore = typeof r.score === 'number' ? r.score : 0;
+      const qScore = Math.max(0, Math.min(VOICE_POINTS_PER_QUESTION, rawScore));
+      score += qScore;
+      return {
+        questionId: q.questionId,
+        transcript: typeof r.transcript === 'string' ? r.transcript : '',
+        result: verdict,
+        score: qScore,
+        ...(typeof r.reasoning === 'string' ? {reasoning: r.reasoning} : {}),
+      };
+    });
+
+    total = voiceQuiz.length * VOICE_POINTS_PER_QUESTION;
+    // No MCQ selections in voice mode.
+    results = [];
+    gradedAnswers = [];
+  } else {
+    const quiz: QuizQuestionShape[] = Array.isArray(topic.quiz)
+      ? (topic.quiz as QuizQuestionShape[])
+      : [];
+    if (quiz.length === 0) {
+      throw new HttpsError(
+        'failed-precondition',
+        'This topic has no quiz to submit.',
+      );
+    }
+
+    results = quiz.map(q => {
+      const correctIndex =
+        typeof q.correctIndex === 'number' ? q.correctIndex : -1;
+      const raw = selectionByQuestion.get(q.questionId);
+      const selectedIndex =
+        typeof raw === 'number' && Number.isFinite(raw) ? raw : -1;
+      const isCorrect = selectedIndex === correctIndex && correctIndex >= 0;
+      if (isCorrect) score += 1;
+      return {
+        questionId: q.questionId,
+        selectedIndex,
+        correctIndex,
+        isCorrect,
+        ...(typeof q.explanation === 'string' && q.explanation.length > 0
+          ? {explanation: q.explanation}
+          : {}),
+      };
+    });
+    total = quiz.length;
+    gradedAnswers = results.map(r => ({
+      questionId: r.questionId,
+      selectedIndex: r.selectedIndex,
+    }));
   }
 
-  // ---- Grade server-side -------------------------------------------------
-  let score = 0;
-  const results: QuizQuestionResult[] = quiz.map(q => {
-    const correctIndex =
-      typeof q.correctIndex === 'number' ? q.correctIndex : -1;
-    const raw = selectionByQuestion.get(q.questionId);
-    const selectedIndex =
-      typeof raw === 'number' && Number.isFinite(raw) ? raw : -1;
-    const isCorrect = selectedIndex === correctIndex && correctIndex >= 0;
-    if (isCorrect) score += 1;
-    return {
-      questionId: q.questionId,
-      selectedIndex,
-      correctIndex,
-      isCorrect,
-      ...(typeof q.explanation === 'string' && q.explanation.length > 0
-        ? {explanation: q.explanation}
-        : {}),
-    };
-  });
-
-  const total = quiz.length;
-  const percentage = Math.round((score / total) * 100);
+  const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
   const passedThisAttempt = percentage >= PASS_PERCENTAGE;
 
   // Best-effort parent link for denormalisation onto the attempt doc.
@@ -202,13 +283,6 @@ export const submitQuizAttempt = onCall<
   if (typeof rawParent === 'string' && rawParent.length > 0) {
     parentUid = rawParent;
   }
-
-  // Persist only the raw selections we actually scored against, so the stored
-  // `lastAnswers` reflects exactly what the server graded.
-  const gradedAnswers: QuizAnswerInput[] = results.map(r => ({
-    questionId: r.questionId,
-    selectedIndex: r.selectedIndex,
-  }));
 
   // ---- Upsert the deterministic attempt doc ------------------------------
   const attemptId = `${assignmentId}_${caller.uid}`;
@@ -261,6 +335,9 @@ export const submitQuizAttempt = onCall<
         ...(isFirstPass ? {firstPassedAt: FieldValue.serverTimestamp()} : {}),
         ...(snap.exists ? {} : {createdAt: FieldValue.serverTimestamp()}),
         updatedAt: FieldValue.serverTimestamp(),
+        ...(mode === 'voice'
+          ? {isVoice: true, ...(voiceResults ? {voiceResults} : {})}
+          : {}),
       },
       {merge: true},
     );

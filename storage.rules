@@ -1,0 +1,30 @@
+rules_version = '2';
+
+// Cloud Storage security rules.
+//
+// The only client-writable area is the Zumi speech-to-text scratch space:
+// a signed-in child may upload their own short answer recording under
+// `zumi_stt/{their uid}/...`. The `zumiTranscribe` Cloud Function (admin SDK)
+// reads + deletes it server-side, so no client READ rule is needed.
+//
+// Zumi TTS audio (`zumi_tts/...`) is written by the `zumiSpeak` function via the
+// admin SDK and served through Firebase download-token URLs, which bypass these
+// rules -- so it is intentionally locked to clients here.
+//
+// Everything else is denied by default. If you add other Storage features,
+// extend this file (it is the source of truth once registered in firebase.json).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /zumi_stt/{uid}/{fileName} {
+      allow write: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('audio/.*');
+      allow read: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

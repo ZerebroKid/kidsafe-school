@@ -3,6 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {StudyMissionScreen} from '../screens/learn/StudyMissionScreen';
 import {TopicScreen} from '../screens/learn/TopicScreen';
+import {ZumiVoiceScreen} from '../screens/fun/ZumiVoiceScreen';
 import {QuizScreen} from '../screens/learn/QuizScreen';
 import {QuizResultScreen} from '../screens/learn/QuizResultScreen';
 import {RewardUnlockScreen} from '../screens/learn/RewardUnlockScreen';
@@ -31,6 +32,11 @@ export function StudyNavigator() {
         name="TopicLearn"
         component={TopicScreen}
         options={({route}) => ({headerTitle: route.params.topicName})}
+      />
+      <Stack.Screen
+        name="ZumiVoice"
+        component={ZumiVoiceScreen}
+        options={{headerShown: false}}
       />
       <Stack.Screen
         name="Quiz"

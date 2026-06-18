@@ -12,6 +12,7 @@
 
 import {useEffect, useMemo, useState} from 'react';
 import firestore from '@react-native-firebase/firestore';
+import type {VoiceStory} from '@zerebro/shared-types';
 
 const SCHOOL_TIMEZONE = 'Asia/Kolkata';
 
@@ -59,6 +60,50 @@ export function useChildClassId(uid: string | null): HookState<ChildClassRef> {
       );
     return unsub;
   }, [uid]);
+
+  return state;
+}
+
+/**
+ * Live subscription to the child's class grade, read from
+ * `schools/{schoolId}/classes/{classId}.grade`. Drives the Zumi "Fun" gate
+ * (grade <= 6). `data === null` means "unknown" -- callers should treat that
+ * as a non-Fun (older) child so the existing Study flow is never disrupted.
+ */
+export function useChildGrade(
+  classRef: ChildClassRef | null,
+): HookState<number> {
+  const [state, setState] = useState<HookState<number>>({
+    data: null,
+    loading: true,
+    error: null,
+  });
+
+  const schoolId = classRef?.schoolId ?? null;
+  const classId = classRef?.classId ?? null;
+
+  useEffect(() => {
+    if (!schoolId || !classId) {
+      setState({data: null, loading: false, error: null});
+      return;
+    }
+    setState(s => ({...s, loading: true}));
+    const unsub = firestore()
+      .collection('schools')
+      .doc(schoolId)
+      .collection('classes')
+      .doc(classId)
+      .onSnapshot(
+        snap => {
+          const raw = snap.exists ? (snap.data()?.grade as unknown) : undefined;
+          const grade =
+            typeof raw === 'number' && Number.isFinite(raw) ? raw : null;
+          setState({data: grade, loading: false, error: null});
+        },
+        err => setState({data: null, loading: false, error: err.message}),
+      );
+    return unsub;
+  }, [schoolId, classId]);
 
   return state;
 }
@@ -329,6 +374,8 @@ export interface TopicContent {
   sections?: TopicSection[];
   quiz: QuizQuestion[];
   status: 'draft' | 'published';
+  /** Optional Zumi voice-story layer (grade <= 6 "Fun" experience). */
+  voiceStory?: VoiceStory;
 }
 
 export function useTopicContent(

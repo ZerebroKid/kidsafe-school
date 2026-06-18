@@ -4,6 +4,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import {StatusScreen} from '../screens/child/StatusScreen';
 import {colors} from '../theme';
+import {useChildProfile} from '../context/ChildProfileContext';
 import type {MainTabParamList} from './types';
 import {StudyNavigator} from './StudyNavigator';
 
@@ -21,6 +22,13 @@ function TabItem({emoji, label, focused}: {emoji: string; label: string; focused
 }
 
 export function MainTabNavigator() {
+  // Grade <= 6 children see the playful "Fun" tab (Zumi); everyone else keeps
+  // the standard "Study" tab. The tab still hosts the same StudyNavigator --
+  // only the label/icon changes, and per-topic routing decides Zumi vs lesson.
+  const {isFunMode} = useChildProfile();
+  const studyEmoji = isFunMode ? '🎮' : '📖';
+  const studyLabel = isFunMode ? 'Fun' : 'Study';
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -39,7 +47,9 @@ export function MainTabNavigator() {
         name="StudyTab"
         component={StudyNavigator}
         options={{
-          tabBarIcon: ({focused}) => <TabItem emoji="📖" label="Study" focused={focused} />,
+          tabBarIcon: ({focused}) => (
+            <TabItem emoji={studyEmoji} label={studyLabel} focused={focused} />
+          ),
         }}
       />
     </Tab.Navigator>

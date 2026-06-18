@@ -74,6 +74,62 @@ export const TopicSectionSchema = z.object({
   videoUrl: z.string().regex(HTTPS_URL).optional(),
 });
 
+// Zumi voice-story sub-schemas -- mirror of the same in shared-types
+// `schemas/topicContent.ts` (and the `VoiceStory` family in education.ts).
+export const VoiceQuizQuestionSchema = z.object({
+  questionId: z.string().min(1),
+  order: z.number(),
+  type: z.string().optional(),
+  questionText: z.string().min(1),
+  questionAudioUrl: z.string().optional(),
+  expectedConcepts: z.array(z.string()),
+  correctIndicator: z.string(),
+  responseCorrect: z.string(),
+  responsePartial: z.string().optional(),
+  responseIncorrect: z.string(),
+});
+
+export const VoiceAnimationSchema = z.object({
+  key: z.string(),
+  stageNumber: z.number(),
+  type: z.enum(['lottie', 'rive']),
+  trigger: z.string().optional(),
+  searchQuery: z.string().optional(),
+  show: z.string().optional(),
+  lottieStorageUrl: z.string().optional(),
+  stateName: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export const VoiceStorySchema = z.object({
+  hookContext: z.string(),
+  predictContext: z.string(),
+  wrongAnswerTrapScript: z.string(),
+  trapLottieKey: z.string().optional(),
+  experimentInstruction: z.string(),
+  experimentWaitSeconds: z.number(),
+  experimentFollowUp: z.string(),
+  experimentRiveKey: z.string().optional(),
+  visualizationScript: z.string(),
+  visualizationLottieKey: z.string().optional(),
+  discoveryLeadQuestion: z.string(),
+  discoveryCelebration: z.string(),
+  conceptRevealScript: z.string(),
+  conceptRevealRiveKey: z.string().optional(),
+  examModeIntro: z.string(),
+  ncertDefinition: z.string(),
+  keyPoints: z.array(z.string()),
+  keywords: z.array(z.string()),
+  memoryTrick: z.string(),
+  examLottieKey: z.string().optional(),
+  voiceQuiz: z.array(VoiceQuizQuestionSchema),
+  closingHighScoreContext: z.string(),
+  closingMidScoreContext: z.string(),
+  closingLowScoreContext: z.string(),
+  parentTryTonight: z.string(),
+  animations: z.array(VoiceAnimationSchema),
+});
+
 export const TopicContentSchema = z.object({
   curriculumId: z.string().min(1).regex(/^[a-z0-9_]+$/),
   grade: z.number().int().min(1).max(12),
@@ -95,6 +151,7 @@ export const TopicContentSchema = z.object({
   status: z.enum(['draft', 'published']).default('published'),
   curatedBy: z.string().min(1),
   publishedAt: z.union([z.number(), z.record(z.unknown())]).optional(),
+  voiceStory: VoiceStorySchema.optional(),
 });
 
 export type ValidatedTopicContent = z.infer<typeof TopicContentSchema>;

@@ -18,9 +18,13 @@
 import {getApp, initializeApp} from 'firebase-admin/app';
 import {getFirestore, type Firestore} from 'firebase-admin/firestore';
 import {getAuth, type Auth} from 'firebase-admin/auth';
+import {getStorage} from 'firebase-admin/storage';
+
+type StorageBucket = ReturnType<ReturnType<typeof getStorage>['bucket']>;
 
 let firestoreSingleton: Firestore | null = null;
 let authSingleton: Auth | null = null;
+let bucketSingleton: StorageBucket | null = null;
 
 function ensureApp(): void {
   // Probe specifically for the DEFAULT app. The previous
@@ -51,4 +55,12 @@ export function auth(): Auth {
   ensureApp();
   authSingleton = getAuth();
   return authSingleton;
+}
+
+/** Lazy-cached default Storage bucket handle (Zumi TTS cache + STT uploads). */
+export function bucket(): StorageBucket {
+  if (bucketSingleton) return bucketSingleton;
+  ensureApp();
+  bucketSingleton = getStorage().bucket();
+  return bucketSingleton;
 }

@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
+import firestore from '@react-native-firebase/firestore';
 
 import {
   chapterMetaKey,
@@ -22,6 +23,7 @@ import {
   type ChapterMeta,
 } from '../../firebase/study';
 import {useAuthStore} from '../../state/authStore';
+import {useChildProfile} from '../../context/ChildProfileContext';
 import {colors, radius, spacing} from '../../theme';
 import type {StudyStackParamList} from '../../navigation/types';
 
@@ -50,6 +52,7 @@ interface SubjectGroup {
 
 export function StudyMissionScreen({navigation}: Props) {
   const uid = useAuthStore(s => s.firebaseUid);
+  const {isFunMode} = useChildProfile();
   const classState = useChildClassId(uid);
   const assignmentsState = useTodayAssignments(classState.data?.classId ?? null);
 
@@ -61,17 +64,51 @@ export function StudyMissionScreen({navigation}: Props) {
     [assignments, chapterMeta],
   );
 
+  // Guards against a double-tap while we resolve whether a topic has a Zumi
+  // voice story (Fun mode only -- see openTopic).
+  const [openingTopicId, setOpeningTopicId] = useState<string | null>(null);
+
   const openTopic = useCallback(
-    (a: AssignmentCard) => {
-      navigation.navigate('TopicLearn', {
+    async (a: AssignmentCard) => {
+      const lessonParams = {
         assignmentId: a.id,
         curriculumId: a.curriculumId,
         chapterId: a.chapterId,
         topicId: a.topicId,
         topicName: a.topicName,
-      });
+      };
+
+      // Older kids (grade > 6 / unknown): unchanged behaviour, no extra read.
+      if (!isFunMode) {
+        navigation.navigate('TopicLearn', lessonParams);
+        return;
+      }
+
+      // Fun mode: route to Zumi when the topic has a voice story, else fall
+      // back to the standard lesson. A failed lookup degrades gracefully.
+      if (openingTopicId) return;
+      setOpeningTopicId(a.id);
+      try {
+        const snap = await firestore()
+          .collection('curriculum')
+          .doc(a.curriculumId)
+          .collection('chapters')
+          .doc(a.chapterId)
+          .collection('topics')
+          .doc(a.topicId)
+          .get();
+        const hasVoiceStory = snap.exists && !!snap.data()?.voiceStory;
+        navigation.navigate(
+          hasVoiceStory ? 'ZumiVoice' : 'TopicLearn',
+          lessonParams,
+        );
+      } catch {
+        navigation.navigate('TopicLearn', lessonParams);
+      } finally {
+        setOpeningTopicId(null);
+      }
     },
-    [navigation],
+    [navigation, isFunMode, openingTopicId],
   );
 
   if (classState.loading || assignmentsState.loading) {

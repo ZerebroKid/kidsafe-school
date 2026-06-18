@@ -504,6 +504,17 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // quizVoiceEvals/{assignmentId}_{childUid}
+    //   Per-(assignment, child) record of authoritative Zumi voice-quiz
+    //   verdicts. Written EXCLUSIVELY by the `zumiEvaluateAnswer` callable
+    //   (Admin SDK); `submitQuizAttempt` reads it server-side to score the
+    //   voice quiz. Clients never write it (so a child can't forge a score);
+    //   the child may read their own record for resilience/debugging.
+    match /quizVoiceEvals/{id} {
+      allow read: if isAdmin() || isSelf(resource.data.childUid);
+      allow create, update, delete: if false;
+    }
+
     // curriculum/{curriculumId}/chapters/{chapterId}/topics/{topicId}
     //   Imported by `scripts/import-curriculum.ts` (Admin SDK). Any signed-in
     //   user can read published topics (kids read in the learn screen,

@@ -47,9 +47,49 @@ export interface QuizAnswerInput {
   selectedIndex: number;
 }
 
+/** Mirror of @zerebro/shared-types VoiceAnswerInput. */
+export interface VoiceAnswerInput {
+  questionId: string;
+  transcript: string;
+}
+
 export interface SubmitQuizAttemptInput {
   assignmentId: string;
   answers: QuizAnswerInput[];
+  mode?: 'mcq' | 'voice';
+  voiceAnswers?: VoiceAnswerInput[];
+}
+
+/** Mirror of @zerebro/shared-types VoiceQuizQuestion (server reads from voiceStory). */
+export interface VoiceQuizQuestion {
+  questionId: string;
+  order: number;
+  type?: string;
+  questionText: string;
+  questionAudioUrl?: string;
+  expectedConcepts: string[];
+  correctIndicator: string;
+  responseCorrect: string;
+  responsePartial?: string;
+  responseIncorrect: string;
+}
+
+/** Mirror of @zerebro/shared-types VoiceQuestionResult. */
+export interface VoiceQuestionResult {
+  questionId: string;
+  transcript: string;
+  result: 'correct' | 'partial' | 'incorrect';
+  score: number;
+  reasoning?: string;
+}
+
+/** Server-written authoritative verdict for one voice quiz answer. */
+export interface VoiceEvalRecord {
+  result: 'correct' | 'partial' | 'incorrect';
+  score: number;
+  transcript: string;
+  reasoning?: string;
+  evaluatedAt: number;
 }
 
 export interface QuizQuestionResult {

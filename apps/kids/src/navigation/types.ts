@@ -43,6 +43,14 @@ export type StudyStackParamList = {
     topicId: string;
     topicName: string;
   };
+  /** Zumi voice "Fun" session (grade <= 6 topics with a voiceStory). */
+  ZumiVoice: {
+    assignmentId: string;
+    curriculumId: string;
+    chapterId: string;
+    topicId: string;
+    topicName: string;
+  };
   Quiz: {
     assignmentId: string;
     curriculumId: string;
