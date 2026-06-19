@@ -32,9 +32,13 @@ import {
   type AvatarState,
   type SessionState,
 } from '../../services/zumi/zumiSessionManager';
-import {ZumiVoiceOrb} from './components/ZumiVoiceOrb';
+import {ZumiPlayground} from './components/ZumiPlayground';
 import {ZumiSpeechBubble} from './components/ZumiSpeechBubble';
-import {AnimationPlayer} from './components/AnimationPlayer';
+import {
+  ZumiSceneCue,
+  ZumiCelebration,
+  type ZumiCueData,
+} from './components/ZumiCue';
 import {QuizProgressBar} from './components/QuizProgressBar';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'ZumiVoice'>;
@@ -61,8 +65,10 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
   const [sessionState, setSessionState] = useState<SessionState>('init');
   const [avatar, setAvatar] = useState<AvatarState>('idle');
   const [bubble, setBubble] = useState('');
-  const [lottieUrl, setLottieUrl] = useState<string | null>(null);
+  const [cue, setCue] = useState<ZumiCueData | null>(null);
   const [listening, setListening] = useState(false);
+  const [listenMode, setListenMode] = useState<'auto' | 'tap'>('auto');
+  const [speaking, setSpeaking] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [prompt, setPrompt] = useState<{skippable: boolean; hint?: string} | null>(
     null,
@@ -107,14 +113,17 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
           case 'bubble':
             setBubble(event.text);
             break;
-          case 'lottie':
-            setLottieUrl(event.url);
-            break;
-          case 'rive':
-            // Interactive Rive cues ship with the .riv asset later; no-op now.
+          case 'cue':
+            setCue(event.cue);
             break;
           case 'listening':
             setListening(event.on);
+            if (event.on) {
+              setListenMode(event.mode ?? 'tap');
+              setSpeaking(!!event.speaking);
+            } else {
+              setSpeaking(false);
+            }
             break;
           case 'transcribing':
             setTranscribing(event.on);
@@ -199,6 +208,10 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
     void managerRef.current?.tapTalk();
   }, []);
 
+  const onStopAuto = useCallback(() => {
+    managerRef.current?.stopListening();
+  }, []);
+
   const onSkip = useCallback(() => {
     managerRef.current?.skipTurn();
   }, []);
@@ -257,12 +270,9 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
 
       <View style={styles.stage}>
         <View style={styles.orbZone}>
-          {lottieUrl ? (
-            <View style={styles.lottieLayer} pointerEvents="none">
-              <AnimationPlayer url={lottieUrl} />
-            </View>
-          ) : null}
-          <ZumiVoiceOrb state={avatar} />
+          <ZumiSceneCue cue={cue} />
+          <ZumiPlayground state={avatar} />
+          <ZumiCelebration show={avatar === 'celebrating'} />
         </View>
 
         <ScrollView
@@ -289,6 +299,28 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
               <ActivityIndicator size="large" color="#ffffff" />
             </View>
             <Text style={styles.listenHint}>Samajh raha hoon…</Text>
+          </View>
+        ) : listening && listenMode === 'auto' ? (
+          <View style={styles.micArea}>
+            <Pressable
+              onPress={onStopAuto}
+              hitSlop={12}
+              android_ripple={{
+                color: 'rgba(231,0,11,0.25)',
+                borderless: true,
+              }}
+              style={({pressed}) => [
+                styles.micButton,
+                styles.micButtonActive,
+                speaking && styles.micButtonSpeaking,
+                pressed && styles.micButtonPressed,
+              ]}>
+              <Text style={styles.micGlyph}>⏹</Text>
+            </Pressable>
+            <Text style={styles.recordingLabel}>
+              {speaking ? '● Sun raha hoon…' : '🎧 Bolo, main sun raha hoon'}
+            </Text>
+            <Text style={styles.autoHint}>Bol ke ruk jao — main samajh jaunga</Text>
           </View>
         ) : listening ? (
           <View style={styles.micArea}>
@@ -404,13 +436,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   orbZone: {
-    height: 264,
+    height: 240,
     flexShrink: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  lottieLayer: {
-    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -451,11 +478,17 @@ const styles = StyleSheet.create({
     shadowColor: colors.danger,
   },
   micButtonThinking: {backgroundColor: '#7c3aed'},
+  micButtonSpeaking: {transform: [{scale: 1.06}]},
   micGlyph: {fontSize: 36, color: '#ffffff'},
   recordingLabel: {
     fontSize: 16,
     color: colors.danger,
     fontWeight: '800',
+    textAlign: 'center',
+  },
+  autoHint: {
+    fontSize: 13,
+    color: colors.textMuted,
     textAlign: 'center',
   },
   micLabel: {

@@ -18,7 +18,12 @@ import {bucket} from '../lib/admin';
 import {elevenLabsApiKey, transcribe} from '../lib/elevenLabs';
 
 export interface ZumiTranscribeInput {
-  storagePath: string;
+  /** Storage path (legacy path: upload first, then transcribe). */
+  storagePath?: string;
+  /** Base64-encoded audio bytes (fast path: skip Storage entirely). */
+  audioBase64?: string;
+  /** MIME type of the audio (default audio/mp4). */
+  mimeType?: string;
 }
 
 export interface ZumiTranscribeOutput {
@@ -36,7 +41,24 @@ export const zumiTranscribe = onCall<
     const caller = requireAuth(request);
     await requireRole(caller.uid, 'child');
 
-    const storagePath = request.data?.storagePath;
+    const {storagePath, audioBase64, mimeType} = request.data ?? {};
+    const mime = typeof mimeType === 'string' ? mimeType : 'audio/mp4';
+
+    // Fast path: audio sent inline as base64 (no Storage round trip).
+    if (typeof audioBase64 === 'string' && audioBase64.length > 0) {
+      const bytes = Buffer.from(audioBase64, 'base64');
+      if (bytes.length === 0 || bytes.length > MAX_AUDIO_BYTES) {
+        return {transcript: ''};
+      }
+      try {
+        const transcript = await transcribe(bytes, mime);
+        return {transcript};
+      } catch {
+        return {transcript: ''};
+      }
+    }
+
+    // Legacy path: download from Storage, transcribe, then clean up.
     const prefix = `zumi_stt/${caller.uid}/`;
     if (
       typeof storagePath !== 'string' ||
@@ -49,24 +71,19 @@ export const zumiTranscribe = onCall<
     const file = bucket().file(storagePath);
 
     try {
-      // Single round trip: download straight away (a missing object throws and
-      // we fall through to '' below). The Storage write rule already caps size
-      // at 5MB; we re-check the buffer length as defence-in-depth.
       const [bytes] = await file.download();
       if (bytes.length > MAX_AUDIO_BYTES) {
         return {transcript: ''};
       }
-      let transcript = '';
       try {
-        transcript = await transcribe(bytes, 'audio/mp4');
+        const transcript = await transcribe(bytes, 'audio/mp4');
+        return {transcript};
       } catch {
-        transcript = '';
+        return {transcript: ''};
       }
-      return {transcript};
     } catch {
       return {transcript: ''};
     } finally {
-      // Always clean up the temp upload, success or not.
       void file.delete().catch(() => undefined);
     }
   },

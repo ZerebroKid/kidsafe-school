@@ -64,31 +64,31 @@
       "stage_1_hook": {
         "type": "realtime_ai",
         "zumi_avatar_state": "talking",
-        "ai_system_context": "Zumi greets child warmly by name. Says she went to a new grocery shop today and everything was mixed up — soap next to banana, shampoo next to potato. Mummy got upset because it took forever. Ask child if they've ever been somewhere confusing like that. Be genuinely curious. 2-3 sentences max."
+        "ai_system_context": "Zumi went to a shop where EVERYTHING was mixed up — soap next to bananas, shampoo next to chips! It was SO funny and confusing. Ask the child if that sounds crazy. Keep it to 2 short fun sentences and one question. Sound excited, not lecture-y."
       },
 
       "stage_2_predict": {
         "type": "realtime_ai",
         "zumi_avatar_state": "thinking",
-        "ai_system_context": "Ask child: if their own bag had books, tiffin, toys, stationery all jumbled together, could they find their pencil in 5 seconds? Genuinely wait for answer. React naturally. Say 'interesting! chalo ek cheez try karte hain'"
+        "ai_system_context": "Challenge the child playfully: 'Agar tumhare bag mein sab kuch ulta pulta ho — books, tiffin, toys sab milke — toh 5 second mein pencil dhundh sakte ho?' Wait for answer. React with 'ohhh interesting! Chalo ek game khelte hain!' Max 2 sentences."
       },
 
       "stage_3_wrong_answer_trap": {
         "type": "prestored_tts",
         "zumi_avatar_state": "story_mode",
         "lottie_trigger": "stage_3_lottie",
-        "script": "Ek baar mere ek dost ne bola — main bahut smart hoon, mujhe kuch arrange karne ki zarurat nahi, sab yaad rakhta hoon. Toh maine usse test kiya. Maine bola — suno, main 10 cheezein bolunga, ek baar, aur tumhe yaad rakhna hai. Ready? Ball, kitaab, apple, kursi, pencil, kela, toy car, scale, mango, rubber. Ab bolo — kaun si fruits thi list mein? Mushkil laga na? Lekin ab main phir bolunga — fruits mein sirf teen hain: apple, kela, mango. Stationery mein: pencil, scale, rubber. Toys mein: ball, toy car. Ab kaun si fruits batao? Aasaan ho gaya na! Yaad rakhna — jab cheezein groups mein hoti hain toh dhundhna bahut aasaan ho jaata hai!",
-        "pause_after_first_list_seconds": 4
+        "script": "Mere ek dost ne bola — mujhe sab yaad hai, groups ki zarurat nahi! Maine bola theek hai — yaad rakho: ball, kitaab, apple, pencil, kela, toy car, mango. Ab batao kaun si fruits thi? Mushkil hai na! Ab groups mein suno — fruits: apple, kela, mango. Toys: ball, toy car. School: kitaab, pencil. Ab batao fruits? Easy! Groups bana do toh sab easy ho jaata hai!",
+        "pause_after_first_list_seconds": 3
       },
 
       "stage_4_experiment": {
         "type": "prestored_tts_then_wait",
         "zumi_avatar_state": "talking",
         "rive_trigger": "sort_game",
-        "instruction_script": "Accha {child_name}, ab ek chhota sa experiment karte hain. Apni pencil case ya school bag dekho abhi. Jo cheezein likhne ke kaam aati hain — pencil, pen, scale, rubber — unhe ek taraf rakho mentally. Aur jo cheezein khane ke kaam aati hain — tiffin, water bottle — unhe doosri taraf. 30 seconds mein karo. Main wait karta hoon — GO!",
-        "wait_seconds": 30,
+        "instruction_script": "{child_name}, quick game! Apne aas paas dekho — 5 cheezein dhundho aur sochho: ye likhne ki cheez hai ya khane ki? Bas 20 seconds! GO!",
+        "wait_seconds": 20,
         "zumi_avatar_during_wait": "listening",
-        "follow_up_script": "Ho gaya? Kitni likhne wali cheezein mili? Aur kitni khane wali? Batao!",
+        "follow_up_script": "Kitni likhne wali mili aur kitni khane wali? Batao!",
         "follow_up_type": "realtime_ai_response"
       },
 
@@ -96,15 +96,15 @@
         "type": "prestored_tts",
         "zumi_avatar_state": "story_mode",
         "lottie_trigger": "stage_5_lottie",
-        "script": "Ab school ki library soch — agar saari books ek badi pile mein hoti toh? Science book dhundhni hai — poori pile paltani padti! Lekin librarian aunty ne kya kiya? Science books ek shelf pe, story books ek shelf pe, dictionaries ek shelf pe. Ab agar mujhe science ki book chahiye toh seedha kahan jaunga? Science shelf! Ek second mein! Bas groups ki wajah se. Aur ghar mein bhi na — mummy ne kitchen mein daals ek jagah rakhte hain, masale ek jagah — isliye jaldi khaana ban jaata hai. Groups se sab kuch fast hota hai!"
+        "script": "Library sochho — agar SAARI books ek pile mein hoti toh science book dhundhne mein pura din lag jaata! But librarian aunty ne science books ek shelf pe rakhi, stories doosri pe. Ab science chahiye? Seedha us shelf pe jao — 2 second! Groups ki power hai ye!"
       },
 
       "stage_6_discovery": {
         "type": "hybrid",
         "zumi_avatar_state": "thinking",
-        "lead_question_script": "Toh {child_name}... samajh aa raha hai kya ho raha hai? Jab hum cheezein unki kisi quality ke basis pe alag alag groups mein rakhte hain — toh kya hota hai? Tu batao apne shabdon mein!",
+        "lead_question_script": "Toh {child_name}, jab hum cheezein groups mein rakhte hain — toh kya magic hota hai? Batao!",
         "stt_listen": true,
-        "celebration_script": "HAAAAAN! Bilkul yehi hai! Tu khud samajh gaya! Dhundhna aasaan ho jaata hai, sab organized rehta hai — EXACTLY!",
+        "celebration_script": "YESSS! Bilkul! Dhundhna easy ho jaata hai, sab set rehta hai! Tu khud samajh gaya — genius hai tu!",
         "zumi_avatar_on_correct": "celebrating"
       },
 
@@ -112,23 +112,22 @@
         "type": "prestored_tts",
         "zumi_avatar_state": "story_mode",
         "rive_trigger": "concept_zoom",
-        "script": "Aur {child_name}, is kaam ko — cheezein groups mein rakhna — scientists ne ek special naam diya hai. Sunna chahoge? Isse kehte hain... CLASSIFICATION! Classify karna matlab — cheezein unki qualities dekh ke alag alag groups mein rakhna. Quality matlab cheez ki koi bhi khaasiyat — jaise uska rang, size, shape, ya use! Aur ye classification sirf ghar ya school mein nahi hoti — duniya ki saari cheezein do bade groups mein classified hain — living things aur non-living things!"
+        "script": "{child_name}, is superpower ka naam hai — CLASSIFICATION! Matlab cheezein unki quality dekh ke groups mein rakhna. Quality matlab — rang, size, shape, ya use! Aur suno — duniya ki saari cheezein do bade groups mein hain: living aur non-living!"
       },
 
       "stage_8_exam_mode": {
         "type": "prestored_tts",
         "zumi_avatar_state": "talking",
         "lottie_trigger": "stage_8_lottie",
-        "intro_script": "Acha {child_name}, ab school wali language mein pakka kar lete hain. Ye sab board exam mein aata hai — dhyan se suno.",
-        "ncert_definition": "Classification ka matlab hai: arranging things into groups on the basis of their characteristics. Characteristics matlab — kisi cheez ki quality, jaise uska shape, size, colour, use, aur purpose.",
+        "intro_script": "Ab exam wala version — short aur important!",
+        "ncert_definition": "Classification matlab: arranging things into groups based on their characteristics — jaise shape, size, colour, use, purpose.",
         "key_points": [
-          "Hum cheezein classify kar sakte hain — colour ke basis pe, size ke basis pe, shape ke basis pe, use ke basis pe, purpose ke basis pe",
-          "Classification se diversity samajhna aasaan hota hai",
-          "Duniya ki saari cheezein do groups mein hain — living things aur non-living things",
-          "Classification ko tables, diagrams, aur flowcharts se show karte hain"
+          "Classify colour, size, shape, use, ya purpose se kar sakte hain",
+          "Saari cheezein living ya non-living hain",
+          "Tables aur flowcharts se classification dikhate hain"
         ],
-        "keywords": ["classification", "characteristics", "diversity", "living", "non-living"],
-        "memory_trick": "CLASS-ification yaad rakhna! Class mein sab log alag alag rows mein baithte hain na — waise hi cheezein alag groups mein! CLASS mein order hota hai, usi tarah classification mein bhi order hota hai!"
+        "keywords": ["classification", "characteristics", "living", "non-living"],
+        "memory_trick": "CLASS-ification! Class mein sab rows mein baithte hain — waise hi cheezein groups mein!"
       },
 
       "stage_9_quiz": {
@@ -137,39 +136,39 @@
           {
             "order": 1,
             "type": "recall",
-            "question_text": "Accha {child_name}, cheezein groups mein rakhne ko kya kehte hain? Woh special word jo abhi seekha!",
+            "question_text": "Cheezein groups mein rakhne ko kya kehte hain? Woh special word!",
             "expected_concepts": ["classification"],
             "correct_indicator": "child says classification",
-            "response_correct": "Waah! Classification! Bilkul sahi! Tu toh bahut smart hai!",
-            "response_incorrect": "Isse kehte hain classification! CLASS-ification — yaad rakhna apni class ki tarah!"
+            "response_correct": "Classification! Sahi jawaab! Smart ho tum!",
+            "response_incorrect": "Classification! CLASS-ification — class ki tarah yaad rakhna!"
           },
           {
             "order": 2,
             "type": "application",
-            "question_text": "Library mein story books, textbooks, aur dictionaries alag alag shelves pe hain. Ye kaunsa example hai? Classification hai ya kuch aur?",
+            "question_text": "Library mein story books aur textbooks alag shelves pe hain. Ye classification hai ya nahi?",
             "expected_concepts": ["classification", "haan"],
             "correct_indicator": "child says yes or classification",
-            "response_correct": "Bilkul! Ye perfect classification ka example hai! Books unke purpose ke basis pe classify ki gayi hain!",
-            "response_incorrect": "Ye classification hi hai! Books unke type ke basis pe groups mein rakhi gayi hain — story books ek group, textbooks doosra group!"
+            "response_correct": "Haan! Books purpose ke basis pe classify ki gayi hain!",
+            "response_incorrect": "Haan ye classification hai! Type ke basis pe groups bane hain!"
           },
           {
             "order": 3,
             "type": "mcq_spoken",
-            "question_text": "Butterfly — living hai ya non-living? Aur wooden table — living hai ya non-living? Dono ke baare mein batao!",
+            "question_text": "Butterfly — living ya non-living? Aur table — living ya non-living?",
             "expected_concepts": ["butterfly living", "table non-living"],
             "correct_indicator": "child correctly identifies both",
-            "response_correct": "Excellent! Butterfly living hai — wo udti hai, khana khati hai, badhti hai! Aur table non-living — wo kuch nahi karta khud se!",
-            "response_partial": "Ek sahi! Butterfly living hai kyunki wo move karti hai, khana khati hai. Table non-living hai kyunki wo apne aap kuch nahi karta!",
-            "response_incorrect": "Butterfly living hai — wo udti hai, khana khati hai, badhti hai! Table non-living hai — wo apne aap move nahi karta, badhta nahi!"
+            "response_correct": "Sahi! Butterfly living — udti hai, khati hai! Table non-living — khud se kuch nahi karta!",
+            "response_partial": "Ek sahi! Butterfly living kyunki move karti hai. Table non-living kyunki apne aap kuch nahi karta!",
+            "response_incorrect": "Butterfly living — udti hai, badhti hai! Table non-living — apne aap move nahi karta!"
           },
           {
             "order": 4,
             "type": "hots",
-            "question_text": "Last aur sabse interesting wala! Ek toy seller ne toys ko teen shelves pe rakha — pehli shelf pe 25 rupaye wale, doosri pe 50 rupaye wale, teesri pe 75 rupaye wale. Usne toys kaise classify kiye?",
+            "question_text": "Toy seller ne toys rakhe — 25 rupaye wale ek shelf, 50 wale doosri, 75 wale teesri. Kaise classify kiya?",
             "expected_concepts": ["price", "cost", "daam", "rupaye"],
             "correct_indicator": "child mentions price or cost",
-            "response_correct": "Zabardast! Price ke basis pe! Daam ke basis pe classify kiya! Tu toh classification expert ban gaya!",
-            "response_incorrect": "Usne price ke basis pe classify kiya — daam ke basis pe! Saste sab ek shelf pe, mehengle doosri pe! Ye bhi classification hai!"
+            "response_correct": "Price ke basis pe! Daam se classify kiya — tu expert hai!",
+            "response_incorrect": "Price ke basis pe! Saste ek jagah, mehengle doosri — ye bhi classification hai!"
           }
         ]
       },
@@ -177,10 +176,10 @@
       "stage_10_closing": {
         "type": "realtime_ai",
         "zumi_avatar_state": "celebrating",
-        "ai_context_high_score": "Child scored 75%+. Celebrate enthusiastically. Say they discovered classification like a real scientist. Give cliffhanger: 'Kal ek aur mystery hai — kya ek teddy bear aur ek live rabbit mein koi similarity hai? Sochna!'",
-        "ai_context_mid_score": "Child scored 50-74%. Encourage warmly. Say they're getting it. Remind of library example. Cliffhanger same as above.",
-        "ai_context_low_score": "Child scored below 50%. Very encouraging, never discouraging. Say 'tu bahut brave hai jo try kiya!' Remind: CLASS-ification = class ki rows. Cliffhanger same.",
-        "parent_try_tonight": "Aaj raat {child_name} se pucho: ghar mein 10 cheezein lo (toys, books, fruits, kitchen items — kuch bhi) aur unhe 2-3 groups mein batao. Wo khud decide kare kis basis pe! Iska photo lena na bhoolna."
+        "ai_context_high_score": "Child scored 75%+. Celebrate BIG in 1-2 sentences. Cliffhanger: 'Kal mystery — teddy bear aur real rabbit mein kya same hai? Sochna!'",
+        "ai_context_mid_score": "Child scored 50-74%. Encourage warmly in 1-2 sentences. Same cliffhanger as high score.",
+        "ai_context_low_score": "Child scored below 50%. Very encouraging, NEVER negative. 'Bahut brave ho jo try kiya!' Same cliffhanger.",
+        "parent_try_tonight": "Aaj {child_name} se pucho: ghar ki 10 cheezein lo aur 2-3 groups banao. Wo decide kare kis basis pe!"
       }
     },
 

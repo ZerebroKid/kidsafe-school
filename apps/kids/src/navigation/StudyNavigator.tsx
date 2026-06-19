@@ -3,26 +3,38 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {StudyMissionScreen} from '../screens/learn/StudyMissionScreen';
 import {TopicScreen} from '../screens/learn/TopicScreen';
+import {ZumiHomeScreen} from '../screens/fun/ZumiHomeScreen';
 import {ZumiVoiceScreen} from '../screens/fun/ZumiVoiceScreen';
 import {QuizScreen} from '../screens/learn/QuizScreen';
 import {QuizResultScreen} from '../screens/learn/QuizResultScreen';
 import {RewardUnlockScreen} from '../screens/learn/RewardUnlockScreen';
 import {RewardWebViewScreen} from '../screens/learn/RewardWebViewScreen';
 import {VideoPlayerScreen} from '../screens/learn/VideoPlayerScreen';
+import {useChildProfile} from '../context/ChildProfileContext';
 import {colors} from '../theme';
 import type {StudyStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<StudyStackParamList>();
 
 export function StudyNavigator() {
+  // Fun-mode kids (grade <= 6) land straight on Zumi the character; everyone
+  // else keeps the standard Study Mission list as the stack's entry point.
+  const {isFunMode} = useChildProfile();
+
   return (
     <Stack.Navigator
+      initialRouteName={isFunMode ? 'ZumiHome' : 'StudyMission'}
       screenOptions={{
         headerStyle: {backgroundColor: colors.bg},
         headerTintColor: colors.text,
         headerShadowVisible: false,
         contentStyle: {backgroundColor: colors.bg},
       }}>
+      <Stack.Screen
+        name="ZumiHome"
+        component={ZumiHomeScreen}
+        options={{headerShown: false}}
+      />
       <Stack.Screen
         name="StudyMission"
         component={StudyMissionScreen}

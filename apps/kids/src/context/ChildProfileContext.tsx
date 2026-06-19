@@ -16,6 +16,7 @@
  * "opts in" once we positively know grade <= 6.
  */
 
+import auth from '@react-native-firebase/auth';
 import React, {createContext, useContext, useMemo} from 'react';
 
 import {useAuthStore} from '../state/authStore';
@@ -60,8 +61,15 @@ export function ChildProfileProvider({children}: {children: React.ReactNode}) {
 
   const value = useMemo<ChildProfile>(() => {
     const childGrade = gradeState.data;
+    let name = (displayName ?? '').trim();
+    if (!name) {
+      const fbName = auth().currentUser?.displayName;
+      if (typeof fbName === 'string' && fbName.trim()) {
+        name = fbName.trim().split(/\s+/)[0];
+      }
+    }
     return {
-      childName: (displayName ?? '').trim(),
+      childName: name,
       childGrade,
       isFunMode: isZumiGrade(childGrade),
       loading: classState.loading || gradeState.loading,

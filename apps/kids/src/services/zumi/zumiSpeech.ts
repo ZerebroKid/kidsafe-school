@@ -21,6 +21,10 @@ import AudioRecorderPlayer, {
   OutputFormatAndroidType,
   type AudioSet,
 } from 'react-native-audio-recorder-player';
+import Voice, {
+  type SpeechResultsEvent,
+  type SpeechErrorEvent,
+} from '@react-native-voice/voice';
 import storage from '@react-native-firebase/storage';
 import auth from '@react-native-firebase/auth';
 import {
@@ -252,8 +256,6 @@ export async function speak(text: string): Promise<void> {
   const clean = (text ?? '').trim();
   if (clean.length === 0) return;
 
-  // Snapshot the playback generation: if stopSpeaking() runs while we await the
-  // synthesis below, the generation changes and we must NOT start any audio.
   const gen = playbackGeneration;
   const url = await resolveTtsUrl(clean);
   if (gen !== playbackGeneration) return;
@@ -262,7 +264,6 @@ export async function speak(text: string): Promise<void> {
       await playUrl(url);
       return;
     } catch {
-      // A stale/expired URL -> drop it and fall back to on-device TTS.
       ttsUrlCache.delete(clean);
     }
   }
@@ -473,8 +474,63 @@ const recorderPlayer = new AudioRecorderPlayer();
 let recording = false;
 
 /**
+ * Read the recorded audio file as base64 and send it directly to the Cloud
+ * Function for transcription — skips the Firebase Storage upload + download
+ * round trip that was adding ~6-7s of latency. Falls back to the legacy
+ * Storage-based path if the local file read fails.
+ */
+async function uploadAndTranscribe(path: string): Promise<string> {
+  if (!path) return '';
+  const uid = auth().currentUser?.uid;
+  if (!uid) return '';
+
+  // Fast path: read file as base64 and send directly to the Cloud Function,
+  // skipping the Firebase Storage upload + download round trip.
+  try {
+    const localUri = path.startsWith('file://') ? path : `file://${path}`;
+    const resp = await fetch(localUri);
+    const blob = await resp.blob();
+    const base64: string = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        resolve(dataUrl.split(',')[1] ?? '');
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    if (base64) {
+      const {transcript} = await zumiTranscribe({
+        audioBase64: base64,
+        mimeType: RECORDING_MIME,
+      });
+      return (transcript ?? '').trim();
+    }
+  } catch {
+    // base64 path failed — fall through to Storage upload.
+  }
+
+  // Legacy fallback: upload to Storage, then transcribe.
+  const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  const dest = `zumi_stt/${uid}/${unique}.${RECORDING_EXT}`;
+  try {
+    await storage().ref(dest).putFile(path, {contentType: RECORDING_MIME});
+  } catch {
+    return '';
+  }
+  try {
+    const {transcript} = await zumiTranscribe({storagePath: dest});
+    return (transcript ?? '').trim();
+  } catch {
+    return '';
+  }
+}
+
+/**
  * Start capturing the child's answer to a local file. Returns false if the mic
  * permission is denied or the recorder fails to start (caller re-prompts).
+ * Used by the manual tap-to-talk fallback.
  */
 export async function startRecording(): Promise<boolean> {
   const granted = await ensureMicPermission();
@@ -485,7 +541,7 @@ export async function startRecording(): Promise<boolean> {
     recording = false;
   }
   try {
-    await recorderPlayer.startRecorder(undefined, RECORD_AUDIO_SET, false);
+    await recorderPlayer.startRecorder(undefined, RECORD_AUDIO_SET, true);
     recording = true;
     return true;
   } catch {
@@ -500,10 +556,9 @@ export function isRecording(): boolean {
 }
 
 /**
- * Stop recording, upload the clip to the caller's own `zumi_stt/{uid}/` path,
- * and return the ElevenLabs transcript. Returns `''` on any failure (no
- * recording, not signed in, upload/transcribe error) -- the session treats that
- * as "no answer" and lets the child retry or skip. Never rejects.
+ * Stop recording, upload the clip, and return the ElevenLabs transcript.
+ * Returns `''` on any failure -- the session treats that as "no answer" and
+ * lets the child retry or skip. Never rejects. (tap-to-talk fallback path).
  */
 export async function stopRecordingAndTranscribe(): Promise<string> {
   if (!recording) return '';
@@ -515,26 +570,7 @@ export async function stopRecordingAndTranscribe(): Promise<string> {
   } catch {
     return '';
   }
-  if (!path) return '';
-
-  const uid = auth().currentUser?.uid;
-  if (!uid) return '';
-
-  const unique = `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-  const dest = `zumi_stt/${uid}/${unique}.${RECORDING_EXT}`;
-  try {
-    // Content type must match audio/* for the Storage write rule to allow it.
-    await storage().ref(dest).putFile(path, {contentType: RECORDING_MIME});
-  } catch {
-    return '';
-  }
-
-  try {
-    const {transcript} = await zumiTranscribe({storagePath: dest});
-    return (transcript ?? '').trim();
-  } catch {
-    return '';
-  }
+  return uploadAndTranscribe(path);
 }
 
 /** Abort an in-progress recording without transcribing (e.g. on teardown). */
@@ -544,8 +580,273 @@ export async function cancelRecording(): Promise<void> {
   await recorderPlayer.stopRecorder().catch(() => undefined);
 }
 
+// ---------------------------------------------------------------------------
+// Hands-free listening
+// ---------------------------------------------------------------------------
+//
+// Primary path: @react-native-voice/voice (Google on-device/cloud Speech API).
+//   - Streaming results, silence detection handled by the OS — near-instant.
+//   - Eliminates the 4s Storage upload + 22s ElevenLabs Scribe round trip.
+//
+// Fallback: record-to-file → upload → ElevenLabs Scribe (original path).
+//   - Used only if Voice fails to start (missing engine, platform issue).
+// ---------------------------------------------------------------------------
+
+export type ListenStatus = 'ok' | 'no-speech' | 'error' | 'no-permission';
+
+export interface ListenResult {
+  transcript: string;
+  status: ListenStatus;
+}
+
+export interface ListenOptions {
+  /** Fired when we switch from recording to uploading/transcribing. */
+  onPhase?: (phase: 'recording' | 'transcribing') => void;
+  /** Fired on every metering tick with whether the child is currently audible. */
+  onLevel?: (speaking: boolean) => void;
+  /** Max listen time before auto-stopping (default 10 s). */
+  maxMs?: number;
+}
+
+/** Transcription artefacts that aren't real child speech. */
+const NOISE_TAGS = /^\[.*\]$|^\(.*\)$/;
+
+/** Max time to wait for speech via Voice API. */
+const VOICE_MAX_MS = 10_000;
+/** Fallback recording max when Voice is unavailable. */
+const FALLBACK_RECORD_MS = 5_000;
+/** Silence after speech before auto-stopping fallback recording. */
+const FALLBACK_SILENCE_MS = 1_800;
+/** Min recording before silence detection kicks in. */
+const FALLBACK_MIN_RECORD_MS = 2_000;
+/** dB threshold for the fallback silence detector (generous). */
+const FALLBACK_SILENCE_DB = -25;
+
+/** Handle to the in-flight listen so the UI / abort can stop it early. */
+let activeListen: {
+  stop: () => void;
+  cancel: () => void;
+} | null = null;
+
+/**
+ * Hands-free turn: listen for the child's spoken answer and return the
+ * transcript. Tries the fast on-device Voice path first; falls back to the
+ * record → upload → ElevenLabs Scribe path if Voice is unavailable.
+ */
+export async function listen(opts: ListenOptions = {}): Promise<ListenResult> {
+  const granted = await ensureMicPermission();
+  if (!granted) return {transcript: '', status: 'no-permission'};
+
+  const voiceResult = await listenVoice(opts);
+  if (voiceResult !== null) return voiceResult;
+
+  return listenRecorder(opts);
+}
+
+// ---- Primary: @react-native-voice/voice (fast, streaming) -----------------
+
+async function listenVoice(opts: ListenOptions): Promise<ListenResult | null> {
+  const maxMs = opts.maxMs ?? VOICE_MAX_MS;
+
+  return new Promise<ListenResult | null>(resolve => {
+    let settled = false;
+    let bestTranscript = '';
+    let speechStarted = false;
+
+    const cleanup = () => {
+      Voice.onSpeechResults = undefined as unknown as (e: SpeechResultsEvent) => void;
+      Voice.onSpeechPartialResults = undefined as unknown as (e: SpeechResultsEvent) => void;
+      Voice.onSpeechError = undefined as unknown as (e: SpeechErrorEvent) => void;
+      Voice.onSpeechStart = undefined as unknown as () => void;
+      Voice.onSpeechEnd = undefined as unknown as () => void;
+      clearTimeout(timer);
+      activeListen = null;
+      Voice.stop().catch(() => undefined);
+      Voice.destroy().catch(() => undefined);
+    };
+
+    const finish = (result: ListenResult | null) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(result);
+    };
+
+    Voice.onSpeechStart = () => {
+      speechStarted = true;
+      opts.onLevel?.(true);
+    };
+
+    Voice.onSpeechEnd = () => {
+      opts.onLevel?.(false);
+      // Google's engine finished — deliver best result (final results may
+      // arrive after onSpeechEnd via onSpeechResults, so give a brief grace).
+      setTimeout(() => {
+        if (!settled) {
+          const text = bestTranscript.trim();
+          if (text && !NOISE_TAGS.test(text)) {
+            finish({transcript: text, status: 'ok'});
+          } else {
+            finish({transcript: '', status: 'no-speech'});
+          }
+        }
+      }, 300);
+    };
+
+    Voice.onSpeechResults = (e: SpeechResultsEvent) => {
+      const results = e.value ?? [];
+      if (results.length > 0 && results[0]) bestTranscript = results[0];
+      opts.onLevel?.(false);
+      // Final results — deliver immediately.
+      const text = bestTranscript.trim();
+      if (text && !NOISE_TAGS.test(text)) {
+        finish({transcript: text, status: 'ok'});
+      }
+    };
+
+    Voice.onSpeechPartialResults = (e: SpeechResultsEvent) => {
+      const partial = e.value ?? [];
+      if (partial.length > 0 && partial[0]) bestTranscript = partial[0];
+      opts.onLevel?.(true);
+    };
+
+    Voice.onSpeechError = (e: SpeechErrorEvent) => {
+      const code = (e.error as {code?: string})?.code ?? '';
+      // "5" = no speech detected; "6" = timeout; "7" = no match
+      if (code === '5' || code === '7' || code === '6') {
+        finish({transcript: '', status: 'no-speech'});
+      } else {
+        finish(null);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      if (speechStarted && bestTranscript.trim()) {
+        finish({transcript: bestTranscript.trim(), status: 'ok'});
+      } else {
+        finish({transcript: '', status: 'no-speech'});
+      }
+    }, maxMs);
+
+    activeListen = {
+      stop: () => {
+        Voice.stop().catch(() => undefined);
+        const text = bestTranscript.trim();
+        if (text) finish({transcript: text, status: 'ok'});
+        else finish({transcript: '', status: 'no-speech'});
+      },
+      cancel: () => finish({transcript: '', status: 'error'}),
+    };
+
+    opts.onPhase?.('recording');
+
+    // 'hi-IN' for Hindi; the engine handles Hinglish (mixed Hindi + English).
+    Voice.start('hi-IN').catch(() => finish(null));
+  });
+}
+
+// ---- Fallback: record to file → upload → ElevenLabs Scribe ---------------
+
+async function listenRecorder(opts: ListenOptions): Promise<ListenResult> {
+  const maxMs = opts.maxMs ?? FALLBACK_RECORD_MS;
+
+  recorderPlayer.removeRecordBackListener();
+  if (recording) {
+    await recorderPlayer.stopRecorder().catch(() => undefined);
+    recording = false;
+  }
+
+  try {
+    await recorderPlayer.startRecorder(undefined, RECORD_AUDIO_SET, true);
+    recording = true;
+  } catch {
+    recording = false;
+    return {transcript: '', status: 'error'};
+  }
+
+  return new Promise<ListenResult>(resolve => {
+    let finished = false;
+    const recordStart = Date.now();
+    let hadLoud = false;
+    let lastLoudTs = Date.now();
+
+    const teardown = () => {
+      recorderPlayer.removeRecordBackListener();
+      clearTimeout(timer);
+      clearInterval(silencePoll);
+      activeListen = null;
+    };
+
+    const finish = async (transcribe: boolean) => {
+      if (finished) return;
+      finished = true;
+      teardown();
+      let path = '';
+      try {
+        path = await recorderPlayer.stopRecorder();
+      } catch {
+        /* handled below */
+      }
+      recording = false;
+      if (!transcribe || !path) {
+        resolve({transcript: '', status: 'error'});
+        return;
+      }
+      opts.onPhase?.('transcribing');
+      const transcript = await uploadAndTranscribe(path);
+      if (transcript && !NOISE_TAGS.test(transcript.trim())) {
+        resolve({transcript, status: 'ok'});
+      } else {
+        resolve({transcript: '', status: 'no-speech'});
+      }
+    };
+
+    opts.onPhase?.('recording');
+
+    recorderPlayer.addRecordBackListener(e => {
+      const db =
+        typeof e.currentMetering === 'number' ? e.currentMetering : -160;
+      const loud = db > FALLBACK_SILENCE_DB;
+      if (loud) {
+        hadLoud = true;
+        lastLoudTs = Date.now();
+      }
+      opts.onLevel?.(loud);
+    });
+
+    const silencePoll = setInterval(() => {
+      const elapsed = Date.now() - recordStart;
+      if (elapsed < FALLBACK_MIN_RECORD_MS) return;
+      if (hadLoud && Date.now() - lastLoudTs >= FALLBACK_SILENCE_MS) {
+        void finish(true);
+      }
+    }, 150);
+
+    const timer = setTimeout(() => void finish(true), maxMs);
+
+    activeListen = {
+      stop: () => void finish(true),
+      cancel: () => void finish(false),
+    };
+  });
+}
+
+/** Manually end the current hands-free turn. */
+export function stopListening(): void {
+  activeListen?.stop();
+}
+
+/** Abort the current hands-free turn without result (teardown/skip). */
+export function cancelListening(): void {
+  activeListen?.cancel();
+}
+
 /** Tear down all speech resources (call on screen unmount). */
 export async function teardownSpeech(): Promise<void> {
   stopSpeaking();
+  cancelListening();
+  Voice.stop().catch(() => undefined);
+  Voice.destroy().catch(() => undefined);
+  recorderPlayer.removeRecordBackListener();
   await cancelRecording();
 }

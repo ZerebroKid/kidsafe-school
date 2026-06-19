@@ -147,8 +147,11 @@ export interface ConverseParams {
 export async function converse(params: ConverseParams): Promise<string> {
   const {childName, grade, context, history} = params;
   const safeName = sanitizeName(childName);
+  const nameClause = safeName
+    ? `${safeName} ka pyaara AI dost`
+    : `ek bachche ka pyaara AI dost (tujhe abhi bachche ka naam nahi pata -- pehle unse puchh aur fir uska naam use kar)`;
   const system =
-    `Tu Zumi hai -- ${safeName} ka pyaara AI dost. Wo class ${grade} mein hai. ` +
+    `Tu Zumi hai -- ${nameClause}. Wo class ${grade} mein hai. ` +
     `Hamesha Hinglish (Roman script) mein baat kar, max 2-3 chhote simple sentences. ` +
     `Warm, playful aur encouraging reh. Kabhi daanto mat. Koi emoji ya markdown mat use kar. ` +
     `Current goal: ${context}`;
@@ -248,6 +251,5 @@ function keywordFallback(transcript: string, concepts: string[]): EvalResult {
 
 /** Strip anything weird from the child's name before putting it in a prompt. */
 function sanitizeName(name: string): string {
-  const trimmed = (name ?? '').trim().slice(0, 40);
-  return trimmed.length > 0 ? trimmed : 'dost';
+  return (name ?? '').trim().slice(0, 40);
 }

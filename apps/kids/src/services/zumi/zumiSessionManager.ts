@@ -45,6 +45,8 @@ export type SessionState =
   | 'init'
   | 'greeting'
   | 'chat'
+  | 'story_intro'
+  | 'predict'
   | 'trap'
   | 'experiment'
   | 'experiment_wait'
@@ -59,13 +61,24 @@ export type SessionState =
   | 'done'
   | 'error';
 
+/**
+ * A normalised animation cue the screen renders (Lottie stage clip or Rive
+ * state). `null` clears the current cue. Mirrors `ZumiCueData` in `ZumiCue.tsx`.
+ */
+export interface ZumiCuePayload {
+  kind: 'lottie' | 'rive';
+  key: string;
+  stageNumber: number;
+  stateName?: string | null;
+  remoteUrl?: string | null;
+}
+
 export type ZumiEvent =
   | {type: 'state'; state: SessionState}
   | {type: 'avatar'; avatar: AvatarState}
   | {type: 'bubble'; text: string}
-  | {type: 'lottie'; url: string | null}
-  | {type: 'rive'; stateName: string | null}
-  | {type: 'listening'; on: boolean}
+  | {type: 'cue'; cue: ZumiCuePayload | null}
+  | {type: 'listening'; on: boolean; mode?: 'auto' | 'tap'; speaking?: boolean}
   | {type: 'transcribing'; on: boolean}
   | {type: 'prompt'; waiting: boolean; skippable: boolean; hint?: string}
   | {type: 'quiz'; current: number; total: number; score: number}
@@ -79,7 +92,12 @@ export interface ZumiSessionConfig {
   childName: string;
 }
 
-const MAX_CHAT_ROUNDS = 2;
+/**
+ * Rounds of free get-to-know-you chat before the lesson. Each round is a full
+ * listen -> AI reply, so this is the heart of the "real conversation" intro
+ * (name, friends, favourite cartoon...) the child has before any story starts.
+ */
+const MAX_CHAT_ROUNDS = 4;
 /** Hard cap on a single recording so a forgotten tap can't record forever. */
 const MAX_RECORD_MS = 15_000;
 const POINTS_PER_QUESTION = 25;
@@ -103,6 +121,12 @@ export class ZumiSessionManager {
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
   /** Max-record timer that auto-stops a recording left running too long. */
   private recordTimer: ReturnType<typeof setTimeout> | null = null;
+  /**
+   * True while hands-free listening is usable (mic granted + recorder works).
+   * Flips to false on a permission/hardware failure so every later turn cleanly
+   * degrades to the manual tap-to-talk button.
+   */
+  private handsFree = true;
 
   constructor(
     private readonly config: ZumiSessionConfig,
@@ -113,8 +137,13 @@ export class ZumiSessionManager {
   async start(): Promise<void> {
     try {
       await speech.configureSpeech();
+      // Ask for the mic up front so the first listening turn is hands-free
+      // rather than blocked on an OS permission dialog mid-conversation.
+      this.handsFree = await speech.ensureMicPermission();
       await this.runGreeting();
       await this.runChat(0);
+      await this.runStoryIntro();
+      await this.runPredict();
       await this.runTrap();
       await this.runExperiment();
       await this.runVisualization();
@@ -144,8 +173,14 @@ export class ZumiSessionManager {
     const resolve = this.pendingTalk;
     this.pendingTalk = null;
     resolve?.('');
+    speech.cancelListening();
     speech.stopSpeaking();
     void speech.teardownSpeech();
+  }
+
+  /** UI "done" tap during a hands-free turn: stop listening and transcribe. */
+  stopListening(): void {
+    speech.stopListening();
   }
 
   // ---- tap-to-talk (driven by the screen) ---------------------------------
@@ -286,10 +321,35 @@ export class ZumiSessionManager {
     if (round >= MAX_CHAT_ROUNDS) return;
     this.setState('chat');
     const said = await this.hear();
-    if (said) this.history.push({role: 'user', content: said});
+    if (!said) return; // child didn't speak — skip to the lesson
+    this.history.push({role: 'user', content: said});
     const reply = await this.converse('chat');
     await this.say(reply);
     await this.runChat(round + 1);
+  }
+
+  /**
+   * Bridge from the get-to-know-you chat into the lesson: Zumi says "aaj mere
+   * saath kuch interesting hua..." and starts the real-life story hook, then
+   * lets the child react once.
+   */
+  private async runStoryIntro(): Promise<void> {
+    this.setState('story_intro');
+    this.avatar('story_mode');
+    const reply = await this.converse('story_intro');
+    await this.say(reply);
+    const said = await this.hear();
+    if (said) this.history.push({role: 'user', content: said});
+  }
+
+  /** Ask the child to predict what happens next, then capture their guess. */
+  private async runPredict(): Promise<void> {
+    this.setState('predict');
+    this.avatar('thinking');
+    const reply = await this.converse('predict');
+    await this.say(reply);
+    const said = await this.hear();
+    if (said) this.history.push({role: 'user', content: said});
   }
 
   private async runTrap(): Promise<void> {
@@ -475,15 +535,68 @@ export class ZumiSessionManager {
   }
 
   /**
-   * Wait for the child to answer this turn. Tap-to-talk: we surface a mic
-   * prompt and block until the screen calls `tapTalk()` (which yields a
-   * transcript) or `skipTurn()` / idle-timeout (which yields ''). Zumi never
-   * races ahead on its own.
+   * Wait for the child to answer this turn. Prefers hands-free listening (Zumi
+   * auto-starts the mic and detects when the child stops talking); on a
+   * permission/hardware failure it degrades to the manual tap-to-talk prompt.
+   * Zumi never races ahead on its own.
    */
-  private hear(): Promise<string> {
+  private async hear(): Promise<string> {
     this.guard();
     this.avatar('listening');
-    this.emit({type: 'prompt', waiting: true, skippable: true});
+    if (this.handsFree) {
+      const auto = await this.hearAuto();
+      if (auto !== null) return auto;
+    }
+    return this.hearTap();
+  }
+
+  /**
+   * Hands-free turn. Resolves with the transcript ('' if nothing was heard), or
+   * `null` when the mic can't be used (permission revoked / recorder failure)
+   * so the caller switches to tap-to-talk for the rest of the session.
+   */
+  private async hearAuto(): Promise<string | null> {
+    this.emit({type: 'listening', on: true, mode: 'auto', speaking: false});
+    const result = await speech.listen({
+      onLevel: speaking => {
+        if (this.aborted) return;
+        this.emit({type: 'listening', on: true, mode: 'auto', speaking});
+      },
+      onPhase: phase => {
+        if (this.aborted) return;
+        if (phase === 'transcribing') {
+          this.emit({type: 'listening', on: false});
+          this.transcribing = true;
+          this.emit({type: 'transcribing', on: true});
+          this.avatar('thinking');
+        }
+      },
+    });
+
+    this.transcribing = false;
+    this.emit({type: 'transcribing', on: false});
+    this.emit({type: 'listening', on: false});
+    if (this.aborted) return '';
+
+    if (result.status === 'no-permission' || result.status === 'error') {
+      this.handsFree = false;
+      return null;
+    }
+    if (result.transcript) {
+      this.avatar('thinking');
+      return result.transcript;
+    }
+    return '';
+  }
+
+  /**
+   * Manual tap-to-talk fallback: surface a mic prompt and block until the
+   * screen calls `tapTalk()` (transcript) or `skipTurn()` / idle-timeout ('').
+   */
+  private hearTap(hint?: string): Promise<string> {
+    this.guard();
+    this.avatar('listening');
+    this.emit({type: 'prompt', waiting: true, skippable: true, hint});
     this.armIdleTimer();
     return new Promise<string>(resolve => {
       this.pendingTalk = resolve;
@@ -545,11 +658,16 @@ export class ZumiSessionManager {
     if (!key) return;
     const anim = this.findAnimation(key);
     if (!anim) return;
-    if (anim.type === 'lottie') {
-      this.emit({type: 'lottie', url: anim.lottieStorageUrl ?? null});
-    } else if (anim.type === 'rive') {
-      this.emit({type: 'rive', stateName: anim.stateName ?? null});
-    }
+    this.emit({
+      type: 'cue',
+      cue: {
+        kind: anim.type,
+        key: anim.key,
+        stageNumber: anim.stageNumber,
+        stateName: anim.stateName ?? null,
+        remoteUrl: anim.lottieStorageUrl ?? null,
+      },
+    });
   }
 
   private findAnimation(key: string): VoiceAnimation | undefined {
@@ -557,8 +675,17 @@ export class ZumiSessionManager {
   }
 
   private fillName(text: string): string {
-    const name = this.config.childName || 'dost';
-    return (text ?? '').replace(/\{child_name\}/g, name);
+    let name = this.config.childName;
+    if (!name) {
+      try {
+        const fbUser = require('@react-native-firebase/auth').default().currentUser;
+        const dn = fbUser?.displayName;
+        if (typeof dn === 'string' && dn.trim()) {
+          name = dn.trim().split(/\s+/)[0];
+        }
+      } catch { /* ignore */ }
+    }
+    return (text ?? '').replace(/\{child_name\}/g, name || 'dost');
   }
 
   private avatar(avatar: AvatarState): void {
@@ -566,6 +693,10 @@ export class ZumiSessionManager {
   }
 
   private setState(state: SessionState): void {
+    // Each stage transition clears the previous animation cue; stages that have
+    // an animation re-emit it immediately after (via `playAnimation`), so a
+    // trap/visualization clip never lingers into the next stage.
+    this.emit({type: 'cue', cue: null});
     this.emit({type: 'state', state});
   }
 
@@ -591,9 +722,13 @@ export class ZumiSessionManager {
   private fallbackLine(stage: ZumiStage): string {
     switch (stage) {
       case 'greeting':
-        return 'Hi! Main Zumi hoon, tumhara dost. Aaj kaise ho?';
+        return 'Hi! Main Zumi hoon, tumhara naya dost. Tumhara naam kya hai?';
       case 'chat':
-        return 'Wah, mast! Chalo aaj kuch interesting karte hain!';
+        return 'Arre wah! Mujhe tumse baat karke maza aa raha hai!';
+      case 'story_intro':
+        return 'Suno na, aaj mere saath kuch bahut interesting hua! Sunna chahoge?';
+      case 'predict':
+        return 'Tumhe kya lagta hai aage kya hua hoga? Ek guess karo!';
       case 'experiment_followup':
         return 'Shabaash! Bahut accha observe kiya!';
       case 'discovery':

@@ -36,6 +36,8 @@ export type MainTabParamList = {
 
 export type StudyStackParamList = {
   StudyMission: undefined;
+  /** Fun-mode (grade <= 6) landing: opens Zumi the character directly. */
+  ZumiHome: undefined;
   TopicLearn: {
     assignmentId: string;
     curriculumId: string;

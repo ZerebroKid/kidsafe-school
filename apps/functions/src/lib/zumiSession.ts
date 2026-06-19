@@ -114,12 +114,23 @@ export async function resolveVoiceContext(
       ? topic.grade
       : 3;
 
-  // Best-effort child display name.
+  // Best-effort child display name: try Firestore first, then Firebase Auth.
   let childName = '';
   const userSnap = await db().collection('users').doc(uid).get();
   const rawName = userSnap.exists ? userSnap.data()?.displayName : undefined;
   if (typeof rawName === 'string' && rawName.trim().length > 0) {
     childName = rawName.trim();
+  }
+  if (!childName) {
+    try {
+      const authUser = await import('./admin').then(m => m.auth().getUser(uid));
+      const authName = authUser.displayName;
+      if (typeof authName === 'string' && authName.trim().length > 0) {
+        childName = authName.trim().split(/\s+/)[0];
+      }
+    } catch {
+      // auth lookup failed — proceed with empty name
+    }
   }
 
   return {

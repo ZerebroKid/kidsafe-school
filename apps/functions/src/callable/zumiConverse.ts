@@ -20,6 +20,8 @@ import {resolveVoiceContext} from '../lib/zumiSession';
 export type ZumiStage =
   | 'greeting'
   | 'chat'
+  | 'story_intro'
+  | 'predict'
   | 'experiment_followup'
   | 'discovery'
   | 'closing';
@@ -38,8 +40,10 @@ export interface ZumiConverseOutput {
 }
 
 const FALLBACK_LINE: Record<ZumiStage, string> = {
-  greeting: 'Hi! Main Zumi hoon, tumhara naya dost. Aaj kaise ho?',
-  chat: 'Arre wah, mast! Chalo aaj kuch interesting karte hain!',
+  greeting: 'Hi! Main Zumi hoon, tumhara naya dost. Tumhara naam kya hai?',
+  chat: 'Arre wah, mast! Mujhe tumse baat karke maza aa raha hai!',
+  story_intro: 'Suno na, aaj mere saath kuch bahut interesting hua!',
+  predict: 'Hmm, tumhe kya lagta hai? Ek guess karo!',
   experiment_followup: 'Shabaash! Bahut accha observe kiya tumne!',
   discovery: 'Wah, tum toh bahut smart ho! Bilkul sahi soch rahe ho!',
   closing: 'Aaj bahut maza aaya! Kal phir milte hain, theek hai? Bye!',
@@ -54,14 +58,34 @@ function buildContext(
   switch (stage) {
     case 'greeting':
       return (
-        `Greet ${ctx.childName || 'the child'} warmly by name and start a friendly chat. ` +
-        `You don't have many friends and would love them to be your friend. Be curious about their day. ` +
-        `Story hook to weave in naturally: ${vs.hookContext}`
+        `Greet ${ctx.childName || 'the child'} warmly by name and start a genuine get-to-know-you chat, ` +
+        `like an excited new friend meeting them for the first time. Ask their name and how their day is going. ` +
+        `Do NOT mention any lesson, story, or experiment yet -- this is pure friendly small talk. ` +
+        `Keep it to 2-3 short, playful Hinglish sentences and end with exactly one simple question.`
       );
     case 'chat':
       return (
-        `Continue the friendly chat. React naturally to what the child just said, ask one light ` +
-        `follow-up about their day, friends or what they like. Predict-prompt to keep in mind: ${vs.predictContext}`
+        `Continue the friendly small talk and make it feel REAL: directly react to the exact thing the child ` +
+        `just said (repeat back a detail, sound delighted/surprised), THEN ask ONE new light personal ` +
+        `follow-up. Rotate topics across turns so it never repeats -- their friends, what games they play, ` +
+        `favourite cartoon, favourite food, pets, what makes them laugh. Never ask the same question twice. ` +
+        `Still absolutely NO lesson, concept, or story yet. Keep it to 1-2 short Hinglish sentences and end ` +
+        `with exactly one simple question.`
+      );
+    case 'story_intro':
+      return (
+        `Now gently shift from small talk into a story. ` +
+        (ctx.childName
+          ? `Address the child by name ("Sun na ${ctx.childName}...") and `
+          : `Use the child's name from the chat so far (if they told you) and `) +
+        `start with something like "aaj mere saath na kuch interesting hua..." and then naturally begin ` +
+        `telling this little real-life story as if it happened to you today: ${vs.hookContext}. ` +
+        `Sound excited and curious, and end by inviting the child into the story. 2-3 short sentences.`
+      );
+    case 'predict':
+      return (
+        `Continue the story by asking the child to predict/guess what would happen. ` +
+        `Use this prompt naturally and wait for their guess: ${vs.predictContext}`
       );
     case 'experiment_followup':
       return `The child just did a small physical experiment. React warmly to what they observed and gently affirm it.`;
@@ -99,6 +123,8 @@ export const zumiConverse = onCall<
   const validStages: ZumiStage[] = [
     'greeting',
     'chat',
+    'story_intro',
+    'predict',
     'experiment_followup',
     'discovery',
     'closing',

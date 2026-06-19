@@ -24,6 +24,8 @@ export interface ChatTurn {
 export type ZumiStage =
   | 'greeting'
   | 'chat'
+  | 'story_intro'
+  | 'predict'
   | 'experiment_followup'
   | 'discovery'
   | 'closing';
@@ -62,7 +64,11 @@ export interface ZumiSpeakOutput {
 
 export interface ZumiTranscribeInput {
   /** Storage path under `zumi_stt/{uid}/` where the recording was uploaded. */
-  storagePath: string;
+  storagePath?: string;
+  /** Base64-encoded audio bytes (fast path: skip Storage). */
+  audioBase64?: string;
+  /** MIME type (default audio/mp4). */
+  mimeType?: string;
 }
 
 export interface ZumiTranscribeOutput {
