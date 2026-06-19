@@ -26,6 +26,16 @@ const FLASHCARD = require('../../../assets/lottie/flashcard.json');
 const SPARKLE = require('../../../assets/lottie/sparkle.json');
 const CONFETTI = require('../../../assets/lottie/confetti.json');
 
+/** Bundled clip ids the adaptive teaching loop can request directly. */
+export type ZumiClip = 'chaos' | 'books' | 'sparkle' | 'flashcard' | 'confetti';
+const CLIPS: Record<ZumiClip, object> = {
+  chaos: CHAOS,
+  books: BOOKS,
+  sparkle: SPARKLE,
+  flashcard: FLASHCARD,
+  confetti: CONFETTI,
+};
+
 /**
  * Rive `.riv` files bundled into the NATIVE app (android `res/raw`, iOS bundle),
  * keyed by the author's Rive intent. EMPTY until art ships -- see
@@ -61,6 +71,8 @@ export interface ZumiCueData {
   stateName?: string | null;
   /** Optional remote Lottie URL override (Storage); preferred when present. */
   remoteUrl?: string | null;
+  /** Explicit bundled-clip id (preferred); set by the adaptive teaching loop. */
+  clip?: ZumiClip | null;
 }
 
 /** Pick the bundled Lottie clip that best fits a cue. */
@@ -84,6 +96,10 @@ function localSourceFor(cue: ZumiCueData): object {
 
 export function ZumiSceneCue({cue}: {cue: ZumiCueData | null}) {
   if (!cue) return null;
+  // Preferred path: an explicit bundled clip chosen by the teaching director.
+  if (cue.clip && CLIPS[cue.clip]) {
+    return <AnimationPlayer source={CLIPS[cue.clip]} style={styles.layer} />;
+  }
   if (cue.kind === 'rive') {
     const resource = riveResourceFor(cue);
     if (resource) {

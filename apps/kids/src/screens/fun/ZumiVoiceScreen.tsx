@@ -270,8 +270,11 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
 
       <View style={styles.stage}>
         <View style={styles.orbZone}>
-          <ZumiSceneCue cue={cue} />
           <ZumiPlayground state={avatar} />
+          {/* Scene animation drawn ON TOP of the mascot so it is clearly
+              visible (Lottie clips are transparent, so the mascot still shows
+              behind). pointerEvents:none keeps the playground tappable. */}
+          <ZumiSceneCue cue={cue} />
           <ZumiCelebration show={avatar === 'celebrating'} />
         </View>
 

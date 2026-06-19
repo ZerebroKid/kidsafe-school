@@ -70,8 +70,9 @@ export {assignTopic} from './callable/assignTopic';
 // P4.9 -- child submits a quiz attempt (server-authoritative scoring)
 export {submitQuizAttempt} from './callable/submitQuizAttempt';
 
-// Zumi voice "Fun" feature -- AI proxy callables (Gemini key stays server-side)
+// Zumi voice "Fun" feature -- AI proxy callables (OpenAI key stays server-side)
 export {zumiConverse} from './callable/zumiConverse';
+export {zumiTeach} from './callable/zumiTeach';
 export {zumiEvaluateAnswer} from './callable/zumiEvaluateAnswer';
 
 // Zumi speech I/O -- ElevenLabs TTS/STT proxies (ElevenLabs key stays server-side)

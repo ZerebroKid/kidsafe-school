@@ -21,14 +21,8 @@ export interface ChatTurn {
   content: string;
 }
 
-export type ZumiStage =
-  | 'greeting'
-  | 'chat'
-  | 'story_intro'
-  | 'predict'
-  | 'experiment_followup'
-  | 'discovery'
-  | 'closing';
+/** Bookend chat stages handled by `zumiConverse` (the lesson is `zumiTeach`). */
+export type ZumiStage = 'greeting' | 'closing';
 
 export interface ZumiConverseInput {
   assignmentId: string;
@@ -41,6 +35,36 @@ export interface ZumiConverseOutput {
   reply: string;
 }
 
+/** Teaching phases the adaptive director moves through, in order. */
+export type TeachPhase =
+  | 'warmup'
+  | 'hook'
+  | 'explore'
+  | 'explain'
+  | 'check'
+  | 'ready_for_quiz';
+
+/** Generic animation categories the director can request per turn. */
+export type AnimationHint =
+  | 'none'
+  | 'experiment'
+  | 'visualize'
+  | 'reveal'
+  | 'celebrate'
+  | 'trap';
+
+export interface ZumiTeachInput {
+  assignmentId: string;
+  phase: TeachPhase;
+  history?: ChatTurn[];
+}
+
+export interface ZumiTeachOutput {
+  say: string;
+  phase: TeachPhase;
+  animationHint: AnimationHint;
+}
+
 export interface ZumiEvaluateInput {
   assignmentId: string;
   questionId: string;
@@ -51,6 +75,8 @@ export interface ZumiEvaluateOutput {
   result: 'correct' | 'partial' | 'incorrect';
   score: number;
   reasoning: string;
+  /** Warm Hinglish line Zumi speaks back, tuned to the verdict + answer. */
+  feedback?: string;
 }
 
 export interface ZumiSpeakInput {
@@ -79,6 +105,11 @@ export function zumiConverse(
   input: ZumiConverseInput,
 ): Promise<ZumiConverseOutput> {
   return callFn<ZumiConverseInput, ZumiConverseOutput>('zumiConverse', input);
+}
+
+/** One turn of the adaptive, stealth-teaching conversation. */
+export function zumiTeach(input: ZumiTeachInput): Promise<ZumiTeachOutput> {
+  return callFn<ZumiTeachInput, ZumiTeachOutput>('zumiTeach', input);
 }
 
 export function zumiEvaluateAnswer(

@@ -27,8 +27,11 @@ import * as speech from './zumiSpeech';
 import {
   submitVoiceQuiz,
   zumiConverse,
+  zumiTeach,
   zumiEvaluateAnswer,
+  type AnimationHint,
   type ChatTurn,
+  type TeachPhase,
   type ZumiStage,
 } from './zumiApi';
 
@@ -44,17 +47,7 @@ export type AvatarState =
 export type SessionState =
   | 'init'
   | 'greeting'
-  | 'chat'
-  | 'story_intro'
-  | 'predict'
-  | 'trap'
-  | 'experiment'
-  | 'experiment_wait'
-  | 'experiment_qa'
-  | 'visualization'
-  | 'discovery'
-  | 'concept_reveal'
-  | 'exam_mode'
+  | 'teaching'
   | 'quiz'
   | 'closing'
   | 'submitting'
@@ -71,7 +64,12 @@ export interface ZumiCuePayload {
   stageNumber: number;
   stateName?: string | null;
   remoteUrl?: string | null;
+  /** Explicit bundled-clip id (preferred); set by the adaptive teaching loop. */
+  clip?: ZumiClip | null;
 }
+
+/** Bundled Lottie clips available in `assets/lottie`. */
+export type ZumiClip = 'chaos' | 'books' | 'sparkle' | 'flashcard' | 'confetti';
 
 export type ZumiEvent =
   | {type: 'state'; state: SessionState}
@@ -93,11 +91,11 @@ export interface ZumiSessionConfig {
 }
 
 /**
- * Rounds of free get-to-know-you chat before the lesson. Each round is a full
- * listen -> AI reply, so this is the heart of the "real conversation" intro
- * (name, friends, favourite cartoon...) the child has before any story starts.
+ * Hard cap on the adaptive teaching loop so a session always reaches the quiz
+ * even if the director never emits `ready_for_quiz`. Each turn is one Zumi line
+ * + one child response, so this is plenty for a full stealth lesson.
  */
-const MAX_CHAT_ROUNDS = 4;
+const MAX_TEACH_TURNS = 16;
 /** Hard cap on a single recording so a forgotten tap can't record forever. */
 const MAX_RECORD_MS = 15_000;
 const POINTS_PER_QUESTION = 25;
@@ -141,15 +139,7 @@ export class ZumiSessionManager {
       // rather than blocked on an OS permission dialog mid-conversation.
       this.handsFree = await speech.ensureMicPermission();
       await this.runGreeting();
-      await this.runChat(0);
-      await this.runStoryIntro();
-      await this.runPredict();
-      await this.runTrap();
-      await this.runExperiment();
-      await this.runVisualization();
-      await this.runDiscovery();
-      await this.runConceptReveal();
-      await this.runExamMode();
+      await this.runTeaching();
       await this.runQuiz();
       await this.runClosing();
     } catch (err) {
@@ -315,124 +305,97 @@ export class ZumiSessionManager {
     this.setState('greeting');
     const reply = await this.converse('greeting');
     await this.say(reply);
-  }
-
-  private async runChat(round: number): Promise<void> {
-    if (round >= MAX_CHAT_ROUNDS) return;
-    this.setState('chat');
+    // Wait for the child to answer the greeting (their name / how they are) so
+    // the first teaching turn reacts to them instead of barrelling ahead.
     const said = await this.hear();
-    if (!said) return; // child didn't speak — skip to the lesson
-    this.history.push({role: 'user', content: said});
-    const reply = await this.converse('chat');
-    await this.say(reply);
-    await this.runChat(round + 1);
+    this.history.push({
+      role: 'user',
+      content: said || '(bachche ne kuch nahi kaha)',
+    });
   }
 
   /**
-   * Bridge from the get-to-know-you chat into the lesson: Zumi says "aaj mere
-   * saath kuch interesting hua..." and starts the real-life story hook, then
-   * lets the child react once.
+   * The adaptive, stealth-teaching conversation -- the heart of the revamp.
+   *
+   * Instead of reading scripted lesson lines, each turn asks the server
+   * (`zumiTeach`) for Zumi's next conversational line plus control fields
+   * (`phase`, `animationHint`). Zumi chats like a friend, slips the topic in
+   * naturally, and the loop ends when the director signals `ready_for_quiz`
+   * (or the turn cap is hit). The full running `history` is fed back every
+   * turn so replies stay coherent and never repeat.
    */
-  private async runStoryIntro(): Promise<void> {
-    this.setState('story_intro');
-    this.avatar('story_mode');
-    const reply = await this.converse('story_intro');
-    await this.say(reply);
-    const said = await this.hear();
-    if (said) this.history.push({role: 'user', content: said});
-  }
+  private async runTeaching(): Promise<void> {
+    this.setState('teaching');
+    let phase: TeachPhase = 'warmup';
 
-  /** Ask the child to predict what happens next, then capture their guess. */
-  private async runPredict(): Promise<void> {
-    this.setState('predict');
-    this.avatar('thinking');
-    const reply = await this.converse('predict');
-    await this.say(reply);
-    const said = await this.hear();
-    if (said) this.history.push({role: 'user', content: said});
-  }
+    for (let turn = 0; turn < MAX_TEACH_TURNS; turn++) {
+      this.guard();
 
-  private async runTrap(): Promise<void> {
-    this.setState('trap');
-    this.avatar('story_mode');
-    this.playAnimation(this.config.story.trapLottieKey);
-    await this.say(this.config.story.wrongAnswerTrapScript);
-  }
+      const result = await this.teach(phase);
+      phase = result.phase;
 
-  private async runExperiment(): Promise<void> {
-    const story = this.config.story;
-    this.setState('experiment');
-    this.avatar('talking');
-    this.playAnimation(story.experimentRiveKey);
-    await this.say(story.experimentInstruction);
+      this.applyAnimationHint(result.animationHint);
+      await this.say(result.say);
 
-    this.setState('experiment_wait');
-    this.avatar('listening');
-    // Warm the follow-up line's audio while the child does the experiment.
-    speech.prefetch(this.fillName(story.experimentFollowUp));
-    await this.wait(Math.max(0, (story.experimentWaitSeconds || 0) * 1000));
+      if (phase === 'ready_for_quiz') break;
 
-    this.setState('experiment_qa');
-    await this.say(story.experimentFollowUp);
-    const said = await this.hear();
-    if (said) {
-      this.history.push({role: 'user', content: said});
-      const reply = await this.converse('experiment_followup');
-      await this.say(reply);
+      const said = await this.hear();
+      // Always record the child's turn (or a silence marker) so the director
+      // can react specifically next turn and re-engage instead of repeating.
+      this.history.push({
+        role: 'user',
+        content: said || '(bachche ne kuch nahi kaha)',
+      });
     }
-  }
 
-  private async runVisualization(): Promise<void> {
-    this.setState('visualization');
-    this.avatar('story_mode');
-    this.playAnimation(this.config.story.visualizationLottieKey);
-    await this.say(this.config.story.visualizationScript);
-  }
-
-  private async runDiscovery(): Promise<void> {
-    const story = this.config.story;
-    this.setState('discovery');
-    this.avatar('thinking');
-    await this.say(story.discoveryLeadQuestion);
-    const said = await this.hear();
-    if (said) {
-      this.history.push({role: 'user', content: said});
-      const reply = await this.converse('discovery');
-      this.avatar('celebrating');
-      await this.say(reply);
-    }
-    this.avatar('celebrating');
-    await this.say(story.discoveryCelebration);
-  }
-
-  private async runConceptReveal(): Promise<void> {
-    this.setState('concept_reveal');
-    this.avatar('story_mode');
-    this.playAnimation(this.config.story.conceptRevealRiveKey);
-    await this.say(this.config.story.conceptRevealScript);
-  }
-
-  private async runExamMode(): Promise<void> {
-    const story = this.config.story;
-    this.setState('exam_mode');
-    this.avatar('talking');
-    this.playAnimation(story.examLottieKey);
-    // Warm the first quiz question while Zumi reads the exam-mode intro/notes.
-    const firstQ = story.voiceQuiz?.[0];
+    // Warm the first quiz question's audio before the quiz starts.
+    const firstQ = this.config.story.voiceQuiz?.[0];
     if (firstQ && !firstQ.questionAudioUrl) {
       speech.prefetch(this.fillName(firstQ.questionText));
     }
-    await this.say(story.examModeIntro);
-    await this.say(story.ncertDefinition);
-    if (story.keywords.length > 0) {
-      await this.say('Keywords yaad rakhna: ' + story.keywords.join(', '));
+  }
+
+  /**
+   * Map a generic animation hint to a bundled Lottie clip and emit it directly
+   * (independent of `story.animations`, which isn't populated with art). This
+   * guarantees a visible, relevant animation at the right moments.
+   */
+  private applyAnimationHint(hint: AnimationHint): void {
+    switch (hint) {
+      case 'visualize':
+        this.avatar('story_mode');
+        this.emitClip('books'); // items sorting into groups = classification
+        break;
+      case 'experiment':
+        this.avatar('story_mode');
+        this.emitClip('chaos');
+        break;
+      case 'reveal':
+        this.avatar('story_mode');
+        this.emitClip('sparkle');
+        break;
+      case 'trap':
+        this.avatar('story_mode');
+        this.emitClip('chaos');
+        break;
+      case 'celebrate':
+        // Confetti is drawn in front via the `celebrating` avatar state.
+        this.avatar('celebrating');
+        this.emit({type: 'cue', cue: null});
+        break;
+      case 'none':
+      default:
+        this.emit({type: 'cue', cue: null});
+        break;
     }
-    if (story.keyPoints.length > 0) {
-      await this.say(story.keyPoints.join('. '));
-    }
-    if (story.memoryTrick) {
-      await this.say('Memory trick: ' + story.memoryTrick);
-    }
+  }
+
+  /** Emit a scene cue for a specific bundled clip. */
+  private emitClip(clip: ZumiClip): void {
+    this.emit({
+      type: 'cue',
+      cue: {kind: 'lottie', key: clip, stageNumber: 0, clip},
+    });
   }
 
   private async runQuiz(): Promise<void> {
@@ -463,8 +426,15 @@ export class ZumiSessionManager {
       this.score += verdict.score;
       this.voiceAnswers.push({questionId: q.questionId, transcript});
 
-      const line = this.responseLine(q, verdict.result);
-      this.avatar(verdict.result === 'correct' ? 'celebrating' : 'encouraging');
+      // Prefer the adaptive, answer-aware feedback from the server; fall back
+      // to the scripted line only if the AI feedback is missing.
+      const line = verdict.feedback || this.responseLine(q, verdict.result);
+      if (verdict.result === 'correct') {
+        this.avatar('celebrating');
+        this.emit({type: 'cue', cue: null});
+      } else {
+        this.avatar('encouraging');
+      }
       await this.say(line);
 
       this.emit({
@@ -622,11 +592,84 @@ export class ZumiSessionManager {
     }
   }
 
+  /**
+   * One adaptive teaching turn. Sends the running history + current phase and
+   * returns the next line + control fields. On failure it returns a safe line
+   * and nudges the phase forward so the session can't get stuck mid-lesson.
+   */
+  private async teach(phase: TeachPhase): Promise<{
+    say: string;
+    phase: TeachPhase;
+    animationHint: AnimationHint;
+  }> {
+    this.guard();
+    this.avatar('thinking');
+    try {
+      const result = await zumiTeach({
+        assignmentId: this.config.assignmentId,
+        phase,
+        history: this.history.slice(-20),
+      });
+      this.guard();
+      if (result.say) {
+        this.history.push({role: 'assistant', content: result.say});
+      }
+      return {
+        say: result.say || this.teachFallbackLine(phase),
+        phase: result.phase || this.nextPhase(phase),
+        animationHint: result.animationHint || 'none',
+      };
+    } catch {
+      return {
+        say: this.teachFallbackLine(phase),
+        phase: this.nextPhase(phase),
+        animationHint: 'none',
+      };
+    }
+  }
+
+  /** Advance one phase so an AI failure can't trap the loop on one phase. */
+  private nextPhase(phase: TeachPhase): TeachPhase {
+    const order: TeachPhase[] = [
+      'warmup',
+      'hook',
+      'explore',
+      'explain',
+      'check',
+      'ready_for_quiz',
+    ];
+    const i = order.indexOf(phase);
+    if (i < 0 || i >= order.length - 1) return 'ready_for_quiz';
+    return order[i + 1];
+  }
+
+  private teachFallbackLine(phase: TeachPhase): string {
+    switch (phase) {
+      case 'warmup':
+        return 'Hey! Aaj tumhara din kaisa raha? Mujhe batao na!';
+      case 'hook':
+        return 'Suno na, aaj mere saath kuch interesting hua! Sunna chahoge?';
+      case 'explore':
+        return 'Tumhe kya lagta hai aage kya hoga? Ek guess karo!';
+      case 'explain':
+        return 'Dekho, ye cheez aise kaam karti hai. Samajh aaya?';
+      case 'check':
+        return 'Tum toh bahut smart ho! Ab batao, tumne kya samjha?';
+      case 'ready_for_quiz':
+      default:
+        return 'Chalo ab ek mazedaar game khelte hai!';
+    }
+  }
+
   /** Server-authoritative evaluation; keyword-ish fallback on failure. */
   private async evaluate(
     q: VoiceQuizQuestion,
     transcript: string,
-  ): Promise<{result: 'correct' | 'partial' | 'incorrect'; score: number}> {
+  ): Promise<{
+    result: 'correct' | 'partial' | 'incorrect';
+    score: number;
+    feedback: string;
+  }> {
     this.guard();
     try {
       const res = await zumiEvaluateAnswer({
@@ -635,11 +678,11 @@ export class ZumiSessionManager {
         transcript,
       });
       this.guard();
-      return {result: res.result, score: res.score};
+      return {result: res.result, score: res.score, feedback: res.feedback ?? ''};
     } catch {
       // The session continues even if the eval call fails; the server will
       // still grade from whatever evals it has at submit time.
-      return {result: 'incorrect', score: 0};
+      return {result: 'incorrect', score: 0, feedback: ''};
     }
   }
 
@@ -700,21 +743,6 @@ export class ZumiSessionManager {
     this.emit({type: 'state', state});
   }
 
-  private wait(ms: number): Promise<void> {
-    return new Promise(resolve => {
-      const timer = setTimeout(resolve, ms);
-      // If aborted mid-wait, resolve early; guard() after will throw.
-      const check = setInterval(() => {
-        if (this.aborted) {
-          clearTimeout(timer);
-          clearInterval(check);
-          resolve();
-        }
-      }, 200);
-      setTimeout(() => clearInterval(check), ms + 50);
-    });
-  }
-
   private guard(): void {
     if (this.aborted) throw new AbortError('aborted');
   }
@@ -723,16 +751,6 @@ export class ZumiSessionManager {
     switch (stage) {
       case 'greeting':
         return 'Hi! Main Zumi hoon, tumhara naya dost. Tumhara naam kya hai?';
-      case 'chat':
-        return 'Arre wah! Mujhe tumse baat karke maza aa raha hai!';
-      case 'story_intro':
-        return 'Suno na, aaj mere saath kuch bahut interesting hua! Sunna chahoge?';
-      case 'predict':
-        return 'Tumhe kya lagta hai aage kya hua hoga? Ek guess karo!';
-      case 'experiment_followup':
-        return 'Shabaash! Bahut accha observe kiya!';
-      case 'discovery':
-        return 'Tum toh bahut smart ho! Bilkul sahi!';
       case 'closing':
         return 'Aaj bahut maza aaya! Kal phir milte hain. Bye!';
       default:

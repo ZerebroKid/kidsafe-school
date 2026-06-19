@@ -24,6 +24,13 @@ export interface VoiceStoryLite {
   closingLowScoreContext: string;
   parentTryTonight: string;
   voiceQuiz: VoiceQuizQuestion[];
+  // Teaching material the adaptive director (`zumiTeach`) uses as knowledge/goals.
+  experimentInstruction: string;
+  conceptRevealScript: string;
+  ncertDefinition: string;
+  keyPoints: string[];
+  keywords: string[];
+  memoryTrick: string;
 }
 
 export interface VoiceContext {

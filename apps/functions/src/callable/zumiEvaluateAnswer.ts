@@ -19,7 +19,7 @@ import {FieldValue} from 'firebase-admin/firestore';
 
 import {db} from '../lib/admin';
 import {requireAuth, requireRole} from '../lib/auth';
-import {geminiApiKey, evaluateAnswer, type EvalVerdict} from '../lib/zumiAi';
+import {openaiApiKey, evaluateAnswer, type EvalVerdict} from '../lib/zumiAi';
 import {resolveVoiceContext, voiceEvalDocId} from '../lib/zumiSession';
 
 export interface ZumiEvaluateInput {
@@ -32,12 +32,14 @@ export interface ZumiEvaluateOutput {
   result: EvalVerdict;
   score: number;
   reasoning: string;
+  /** Warm Hinglish line Zumi speaks back, tuned to the verdict + answer. */
+  feedback: string;
 }
 
 export const zumiEvaluateAnswer = onCall<
   ZumiEvaluateInput,
   Promise<ZumiEvaluateOutput>
->({region: 'asia-south1', secrets: [geminiApiKey]}, async request => {
+>({region: 'asia-south1', secrets: [openaiApiKey]}, async request => {
   const caller = requireAuth(request);
   await requireRole(caller.uid, 'child');
 
@@ -97,5 +99,6 @@ export const zumiEvaluateAnswer = onCall<
     result: verdict.result,
     score: verdict.score,
     reasoning: verdict.reasoning,
+    feedback: verdict.feedback,
   };
 });

@@ -1,9 +1,12 @@
 /**
- * Zumi real-time chat turn (greeting, friendly chat, experiment follow-up,
- * discovery validation, closing). The child app never holds the Gemini key --
- * it calls this callable with the current `stage` + short `history`, and the
- * server derives the child's name/grade and the stage's AI context from the
- * topic's `voiceStory` so prompts stay server-controlled.
+ * Zumi simple chat turn -- only the bookend stages now: `greeting` (warm hello +
+ * ask the child's name) and `closing` (wrap up based on the quiz score). The
+ * whole adaptive lesson in between is handled by `zumiTeach`.
+ *
+ * The child app never holds the OpenAI key -- it calls this callable with the
+ * `stage` + short `history`, and the server derives the child's name/grade and
+ * the stage's AI context from the topic's `voiceStory` so prompts stay
+ * server-controlled.
  *
  * Auth: signed-in child of the assignment's class (see `resolveVoiceContext`).
  *
@@ -14,22 +17,15 @@
 import {HttpsError, onCall} from 'firebase-functions/v2/https';
 
 import {requireAuth, requireRole} from '../lib/auth';
-import {geminiApiKey, converse, type ChatTurn} from '../lib/zumiAi';
+import {openaiApiKey, converse, type ChatTurn} from '../lib/zumiAi';
 import {resolveVoiceContext} from '../lib/zumiSession';
 
-export type ZumiStage =
-  | 'greeting'
-  | 'chat'
-  | 'story_intro'
-  | 'predict'
-  | 'experiment_followup'
-  | 'discovery'
-  | 'closing';
+export type ZumiStage = 'greeting' | 'closing';
 
 export interface ZumiConverseInput {
   assignmentId: string;
   stage: ZumiStage;
-  /** Recent turns of this session's free chat (caller keeps it short). */
+  /** Recent turns of this session's chat (caller keeps it short). */
   history?: ChatTurn[];
   /** Quiz percentage (0-100), only meaningful for `stage === 'closing'`. */
   scorePercent?: number;
@@ -41,11 +37,6 @@ export interface ZumiConverseOutput {
 
 const FALLBACK_LINE: Record<ZumiStage, string> = {
   greeting: 'Hi! Main Zumi hoon, tumhara naya dost. Tumhara naam kya hai?',
-  chat: 'Arre wah, mast! Mujhe tumse baat karke maza aa raha hai!',
-  story_intro: 'Suno na, aaj mere saath kuch bahut interesting hua!',
-  predict: 'Hmm, tumhe kya lagta hai? Ek guess karo!',
-  experiment_followup: 'Shabaash! Bahut accha observe kiya tumne!',
-  discovery: 'Wah, tum toh bahut smart ho! Bilkul sahi soch rahe ho!',
   closing: 'Aaj bahut maza aaya! Kal phir milte hain, theek hai? Bye!',
 };
 
@@ -62,37 +53,6 @@ function buildContext(
         `like an excited new friend meeting them for the first time. Ask their name and how their day is going. ` +
         `Do NOT mention any lesson, story, or experiment yet -- this is pure friendly small talk. ` +
         `Keep it to 2-3 short, playful Hinglish sentences and end with exactly one simple question.`
-      );
-    case 'chat':
-      return (
-        `Continue the friendly small talk and make it feel REAL: directly react to the exact thing the child ` +
-        `just said (repeat back a detail, sound delighted/surprised), THEN ask ONE new light personal ` +
-        `follow-up. Rotate topics across turns so it never repeats -- their friends, what games they play, ` +
-        `favourite cartoon, favourite food, pets, what makes them laugh. Never ask the same question twice. ` +
-        `Still absolutely NO lesson, concept, or story yet. Keep it to 1-2 short Hinglish sentences and end ` +
-        `with exactly one simple question.`
-      );
-    case 'story_intro':
-      return (
-        `Now gently shift from small talk into a story. ` +
-        (ctx.childName
-          ? `Address the child by name ("Sun na ${ctx.childName}...") and `
-          : `Use the child's name from the chat so far (if they told you) and `) +
-        `start with something like "aaj mere saath na kuch interesting hua..." and then naturally begin ` +
-        `telling this little real-life story as if it happened to you today: ${vs.hookContext}. ` +
-        `Sound excited and curious, and end by inviting the child into the story. 2-3 short sentences.`
-      );
-    case 'predict':
-      return (
-        `Continue the story by asking the child to predict/guess what would happen. ` +
-        `Use this prompt naturally and wait for their guess: ${vs.predictContext}`
-      );
-    case 'experiment_followup':
-      return `The child just did a small physical experiment. React warmly to what they observed and gently affirm it.`;
-    case 'discovery':
-      return (
-        `The child is trying to discover the concept in their own words. ` +
-        `Validate and celebrate enthusiastically if they're on track. Lead question was: ${vs.discoveryLeadQuestion}`
       );
     case 'closing': {
       const closing =
@@ -112,56 +72,49 @@ export const zumiConverse = onCall<
   ZumiConverseInput,
   Promise<ZumiConverseOutput>
 >(
-  {region: 'asia-south1', minInstances: 1, secrets: [geminiApiKey]},
+  {region: 'asia-south1', minInstances: 1, secrets: [openaiApiKey]},
   async request => {
-  const caller = requireAuth(request);
-  await requireRole(caller.uid, 'child');
+    const caller = requireAuth(request);
+    await requireRole(caller.uid, 'child');
 
-  const {assignmentId, stage, history, scorePercent} =
-    request.data ?? ({} as Partial<ZumiConverseInput>);
+    const {assignmentId, stage, history, scorePercent} =
+      request.data ?? ({} as Partial<ZumiConverseInput>);
 
-  const validStages: ZumiStage[] = [
-    'greeting',
-    'chat',
-    'story_intro',
-    'predict',
-    'experiment_followup',
-    'discovery',
-    'closing',
-  ];
-  if (typeof stage !== 'string' || !validStages.includes(stage as ZumiStage)) {
-    throw new HttpsError('invalid-argument', 'A valid stage is required.');
-  }
+    const validStages: ZumiStage[] = ['greeting', 'closing'];
+    if (typeof stage !== 'string' || !validStages.includes(stage as ZumiStage)) {
+      throw new HttpsError('invalid-argument', 'A valid stage is required.');
+    }
 
-  const ctx = await resolveVoiceContext(caller.uid, assignmentId as string);
+    const ctx = await resolveVoiceContext(caller.uid, assignmentId as string);
 
-  const safeHistory: ChatTurn[] = Array.isArray(history)
-    ? history
-        .filter(
-          (t): t is ChatTurn =>
-            !!t &&
-            (t.role === 'user' || t.role === 'assistant') &&
-            typeof t.content === 'string',
-        )
-        .slice(-8)
-        .map(t => ({role: t.role, content: t.content.slice(0, 500)}))
-    : [];
+    const safeHistory: ChatTurn[] = Array.isArray(history)
+      ? history
+          .filter(
+            (t): t is ChatTurn =>
+              !!t &&
+              (t.role === 'user' || t.role === 'assistant') &&
+              typeof t.content === 'string',
+          )
+          .slice(-8)
+          .map(t => ({role: t.role, content: t.content.slice(0, 500)}))
+      : [];
 
-  const pct =
-    typeof scorePercent === 'number' && Number.isFinite(scorePercent)
-      ? Math.max(0, Math.min(100, scorePercent))
-      : 0;
+    const pct =
+      typeof scorePercent === 'number' && Number.isFinite(scorePercent)
+        ? Math.max(0, Math.min(100, scorePercent))
+        : 0;
 
-  try {
-    const reply = await converse({
-      childName: ctx.childName,
-      grade: ctx.grade,
-      context: buildContext(stage as ZumiStage, ctx, pct),
-      history: safeHistory,
-    });
-    return {reply: reply || FALLBACK_LINE[stage as ZumiStage]};
-  } catch {
-    // Never block the child's session on an AI hiccup.
-    return {reply: FALLBACK_LINE[stage as ZumiStage]};
-  }
-});
+    try {
+      const reply = await converse({
+        childName: ctx.childName,
+        grade: ctx.grade,
+        context: buildContext(stage as ZumiStage, ctx, pct),
+        history: safeHistory,
+      });
+      return {reply: reply || FALLBACK_LINE[stage as ZumiStage]};
+    } catch {
+      // Never block the child's session on an AI hiccup.
+      return {reply: FALLBACK_LINE[stage as ZumiStage]};
+    }
+  },
+);
