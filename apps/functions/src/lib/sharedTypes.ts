@@ -92,6 +92,26 @@ export interface VoiceEvalRecord {
   evaluatedAt: number;
 }
 
+// ---------------------------------------------------------------------------
+// Zumi Phase A — session signals (mirror of zumiTranscriptStore types).
+// ---------------------------------------------------------------------------
+
+export interface ZumiIncomingSignals {
+  emptyResponseCount?: number;
+  speechDurationMs?: number;
+  pauseCount?: number;
+  speakingSpeedWpm?: number;
+}
+
+export interface ZumiSessionSignals {
+  emptyResponseCount: number;
+  totalUserTurns: number;
+  lastSpeechDurationMs?: number;
+  lastPauseCount?: number;
+  lastSpeakingSpeedWpm?: number;
+  engagementScore: number;
+}
+
 export interface QuizQuestionResult {
   questionId: string;
   selectedIndex: number;

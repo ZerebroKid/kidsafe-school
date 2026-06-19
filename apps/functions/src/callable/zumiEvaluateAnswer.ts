@@ -21,11 +21,20 @@ import {db} from '../lib/admin';
 import {requireAuth, requireRole} from '../lib/auth';
 import {geminiApiKey, evaluateAnswer, type EvalVerdict} from '../lib/zumiAi';
 import {resolveVoiceContext, voiceEvalDocId} from '../lib/zumiSession';
+import {
+  appendTurn,
+  ensureSession,
+  updateSignals,
+  type IncomingSignals,
+} from '../lib/zumiTranscriptStore';
 
 export interface ZumiEvaluateInput {
   assignmentId: string;
   questionId: string;
   transcript: string;
+  /** Phase A — optional session memory (backward compatible). */
+  sessionId?: string;
+  conversationalSignals?: IncomingSignals;
 }
 
 export interface ZumiEvaluateOutput {
@@ -41,7 +50,7 @@ export const zumiEvaluateAnswer = onCall<
   const caller = requireAuth(request);
   await requireRole(caller.uid, 'child');
 
-  const {assignmentId, questionId, transcript} =
+  const {assignmentId, questionId, transcript, sessionId, conversationalSignals} =
     request.data ?? ({} as Partial<ZumiEvaluateInput>);
 
   if (typeof questionId !== 'string' || questionId.length === 0) {
@@ -92,6 +101,22 @@ export const zumiEvaluateAnswer = onCall<
     },
     {merge: true},
   );
+
+  const sid =
+    typeof sessionId === 'string' && sessionId.length > 0 ? sessionId : null;
+  if (sid) {
+    await ensureSession(sid, caller.uid, ctx);
+    await updateSignals(sid, caller.uid, conversationalSignals);
+    if (cleanTranscript.length > 0) {
+      await appendTurn(sid, caller.uid, {
+        role: 'user',
+        content: cleanTranscript,
+        ts: Date.now(),
+        stage: 'quiz',
+        kind: 'primary',
+      });
+    }
+  }
 
   return {
     result: verdict.result,

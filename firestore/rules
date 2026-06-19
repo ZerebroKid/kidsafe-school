@@ -515,6 +515,14 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // zumiSessions/{sessionId}
+    //   Zumi voice session transcript + summary. Written EXCLUSIVELY by
+    //   zumiConverse / zumiEvaluateAnswer (Admin SDK). Child may read own doc.
+    match /zumiSessions/{sessionId} {
+      allow read: if isAdmin() || isSelf(resource.data.childUid);
+      allow create, update, delete: if false;
+    }
+
     // curriculum/{curriculumId}/chapters/{chapterId}/topics/{topicId}
     //   Imported by `scripts/import-curriculum.ts` (Admin SDK). Any signed-in
     //   user can read published topics (kids read in the learn screen,

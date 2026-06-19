@@ -136,6 +136,106 @@ export interface ConverseParams {
   context: string;
   /** Prior turns of THIS session's free-chat (kept short by the caller). */
   history: ChatTurn[];
+  /** Compressed memory of earlier turns (from zumiSessions.summary). */
+  summary?: string;
+  /** Session conversational telemetry for adaptive prompting. */
+  signals?: SessionSignalsForPrompt;
+}
+
+/** Subset of session signals injected into Gemini prompts (Phase A). */
+export interface SessionSignalsForPrompt {
+  emptyResponseCount: number;
+  totalUserTurns: number;
+  lastSpeechDurationMs?: number;
+  lastPauseCount?: number;
+  lastSpeakingSpeedWpm?: number;
+  engagementScore: number;
+}
+
+export interface TranscriptEntryForSummary {
+  role: 'user' | 'assistant';
+  content: string;
+  stage?: string;
+  kind?: string;
+}
+
+/**
+ * Build a prompt block from session signals. Never instruct the model to
+ * mention these metrics to the child.
+ */
+export function formatSignalsBlock(signals: SessionSignalsForPrompt): string {
+  const parts = [
+    `Empty responses this session: ${signals.emptyResponseCount}`,
+    `User turns: ${signals.totalUserTurns}`,
+    `Engagement score (internal): ${signals.engagementScore}`,
+  ];
+  if (typeof signals.lastSpeechDurationMs === 'number') {
+    parts.push(`Last speech duration: ${signals.lastSpeechDurationMs}ms`);
+  }
+  if (typeof signals.lastPauseCount === 'number') {
+    parts.push(`Last pause count: ${signals.lastPauseCount}`);
+  }
+  if (typeof signals.lastSpeakingSpeedWpm === 'number') {
+    parts.push(`Last speaking speed: ~${signals.lastSpeakingSpeedWpm} wpm`);
+  }
+
+  let guidance =
+    'Adapt tone using these internal metrics only — NEVER mention numbers or metrics to the child. ';
+  if (signals.emptyResponseCount >= 2) {
+    guidance +=
+      'The child has been quiet: use simpler words, shorter sentences, one question max. ';
+  }
+  if (
+    typeof signals.lastSpeechDurationMs === 'number' &&
+    signals.lastSpeechDurationMs < 1500
+  ) {
+    guidance += 'Last answer was very short: be extra warm and patient. ';
+  }
+  if (
+    typeof signals.lastSpeakingSpeedWpm === 'number' &&
+    signals.lastSpeakingSpeedWpm < 40
+  ) {
+    guidance += 'Child spoke slowly: slow down, simpler Hinglish. ';
+  }
+  if (typeof signals.lastPauseCount === 'number' && signals.lastPauseCount >= 3) {
+    guidance += 'Child hesitated a lot: encourage without rushing. ';
+  }
+
+  return (
+    `CONVERSATIONAL SIGNALS (internal — do not reveal to child):\n` +
+    `${parts.join('\n')}\n` +
+    guidance
+  );
+}
+
+/**
+ * Compress evicted transcript turns into an updated session summary (≤800 chars).
+ */
+export async function summarizeTranscript(
+  existingSummary: string,
+  evictedTurns: TranscriptEntryForSummary[],
+): Promise<string> {
+  if (evictedTurns.length === 0) {
+    return (existingSummary ?? '').slice(0, 800);
+  }
+
+  const turnsText = evictedTurns
+    .map(t => `${t.role}: ${(t.content ?? '').slice(0, 250)}`)
+    .join('\n');
+
+  const prompt =
+    `You compress a child's tutoring chat into a short memory block for the AI tutor.\n` +
+    `Existing memory:\n${existingSummary || '(none)'}\n\n` +
+    `New turns to fold in:\n${turnsText}\n\n` +
+    `Write ONE updated memory paragraph (max 800 characters). Keep: child's name if known, ` +
+    `interests, lesson progress, misconceptions. Drop filler praise. English or Hinglish OK. ` +
+    `Reply with ONLY the memory text, no JSON.`;
+
+  const raw = await callModel([{role: 'user', content: prompt}], {
+    maxTokens: 300,
+    temperature: 0.2,
+  });
+  return (raw || existingSummary || '').trim().slice(0, 800);
 }
 
 /**
@@ -145,16 +245,23 @@ export interface ConverseParams {
  * e.g. the opening greeting).
  */
 export async function converse(params: ConverseParams): Promise<string> {
-  const {childName, grade, context, history} = params;
+  const {childName, grade, context, history, summary, signals} = params;
   const safeName = sanitizeName(childName);
   const nameClause = safeName
     ? `${safeName} ka pyaara AI dost`
     : `ek bachche ka pyaara AI dost (tujhe abhi bachche ka naam nahi pata -- pehle unse puchh aur fir uska naam use kar)`;
-  const system =
+  let system =
     `Tu Zumi hai -- ${nameClause}. Wo class ${grade} mein hai. ` +
     `Hamesha Hinglish (Roman script) mein baat kar, max 2-3 chhote simple sentences. ` +
     `Warm, playful aur encouraging reh. Kabhi daanto mat. Koi emoji ya markdown mat use kar. ` +
     `Current goal: ${context}`;
+
+  if (signals) {
+    system += `\n\n${formatSignalsBlock(signals)}`;
+  }
+  if (summary && summary.trim().length > 0) {
+    system += `\n\nSESSION MEMORY (earlier conversation):\n${summary.trim()}`;
+  }
 
   // OpenAI shape: system prompt is the first message. Seed a user nudge when
   // there's no child input yet (opening greeting) so the turn isn't empty.

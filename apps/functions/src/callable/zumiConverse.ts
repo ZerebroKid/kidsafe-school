@@ -5,6 +5,10 @@
  * server derives the child's name/grade and the stage's AI context from the
  * topic's `voiceStory` so prompts stay server-controlled.
  *
+ * Phase A (PR1): when `sessionId` is provided, transcript + summary + signals
+ * are persisted in `zumiSessions` and used as Gemini context. Old clients
+ * without `sessionId` keep the previous client-history behaviour.
+ *
  * Auth: signed-in child of the assignment's class (see `resolveVoiceContext`).
  *
  * On any AI failure this STILL returns 200 with a safe canned Hinglish line so
@@ -16,6 +20,14 @@ import {HttpsError, onCall} from 'firebase-functions/v2/https';
 import {requireAuth, requireRole} from '../lib/auth';
 import {geminiApiKey, converse, type ChatTurn} from '../lib/zumiAi';
 import {resolveVoiceContext} from '../lib/zumiSession';
+import {
+  appendTurn,
+  ensureSession,
+  finalizeSession,
+  loadPromptContext,
+  updateSignals,
+  type IncomingSignals,
+} from '../lib/zumiTranscriptStore';
 
 export type ZumiStage =
   | 'greeting'
@@ -28,11 +40,17 @@ export type ZumiStage =
 
 export interface ZumiConverseInput {
   assignmentId: string;
-  stage: ZumiStage;
-  /** Recent turns of this session's free chat (caller keeps it short). */
+  stage?: ZumiStage;
+  /** Recent turns (legacy clients without sessionId). Ignored when sessionId set. */
   history?: ChatTurn[];
   /** Quiz percentage (0-100), only meaningful for `stage === 'closing'`. */
   scorePercent?: number;
+  /** Phase A — server-side session memory. Optional for backward compatibility. */
+  sessionId?: string;
+  /** Last user utterance for this turn (session path). */
+  childUtterance?: string;
+  conversationalSignals?: IncomingSignals;
+  sessionFinalize?: {status: 'completed' | 'abandoned'};
 }
 
 export interface ZumiConverseOutput {
@@ -48,6 +66,16 @@ const FALLBACK_LINE: Record<ZumiStage, string> = {
   discovery: 'Wah, tum toh bahut smart ho! Bilkul sahi soch rahe ho!',
   closing: 'Aaj bahut maza aaya! Kal phir milte hain, theek hai? Bye!',
 };
+
+const VALID_STAGES: ZumiStage[] = [
+  'greeting',
+  'chat',
+  'story_intro',
+  'predict',
+  'experiment_followup',
+  'discovery',
+  'closing',
+];
 
 function buildContext(
   stage: ZumiStage,
@@ -108,34 +136,8 @@ function buildContext(
   }
 }
 
-export const zumiConverse = onCall<
-  ZumiConverseInput,
-  Promise<ZumiConverseOutput>
->(
-  {region: 'asia-south1', minInstances: 1, secrets: [geminiApiKey]},
-  async request => {
-  const caller = requireAuth(request);
-  await requireRole(caller.uid, 'child');
-
-  const {assignmentId, stage, history, scorePercent} =
-    request.data ?? ({} as Partial<ZumiConverseInput>);
-
-  const validStages: ZumiStage[] = [
-    'greeting',
-    'chat',
-    'story_intro',
-    'predict',
-    'experiment_followup',
-    'discovery',
-    'closing',
-  ];
-  if (typeof stage !== 'string' || !validStages.includes(stage as ZumiStage)) {
-    throw new HttpsError('invalid-argument', 'A valid stage is required.');
-  }
-
-  const ctx = await resolveVoiceContext(caller.uid, assignmentId as string);
-
-  const safeHistory: ChatTurn[] = Array.isArray(history)
+function legacyHistory(history: unknown): ChatTurn[] {
+  return Array.isArray(history)
     ? history
         .filter(
           (t): t is ChatTurn =>
@@ -144,24 +146,105 @@ export const zumiConverse = onCall<
             typeof t.content === 'string',
         )
         .slice(-8)
-        .map(t => ({role: t.role, content: t.content.slice(0, 500)}))
+        .map(t => ({role: t.role, content: t.content.slice(0, 250)}))
     : [];
+}
 
-  const pct =
-    typeof scorePercent === 'number' && Number.isFinite(scorePercent)
-      ? Math.max(0, Math.min(100, scorePercent))
-      : 0;
+export const zumiConverse = onCall<
+  ZumiConverseInput,
+  Promise<ZumiConverseOutput>
+>(
+  {region: 'asia-south1', minInstances: 1, secrets: [geminiApiKey]},
+  async request => {
+    const caller = requireAuth(request);
+    await requireRole(caller.uid, 'child');
 
-  try {
-    const reply = await converse({
-      childName: ctx.childName,
-      grade: ctx.grade,
-      context: buildContext(stage as ZumiStage, ctx, pct),
-      history: safeHistory,
-    });
-    return {reply: reply || FALLBACK_LINE[stage as ZumiStage]};
-  } catch {
-    // Never block the child's session on an AI hiccup.
-    return {reply: FALLBACK_LINE[stage as ZumiStage]};
-  }
-});
+    const {
+      assignmentId,
+      stage,
+      history,
+      scorePercent,
+      sessionId,
+      childUtterance,
+      conversationalSignals,
+      sessionFinalize,
+    } = request.data ?? ({} as Partial<ZumiConverseInput>);
+
+    const ctx = await resolveVoiceContext(caller.uid, assignmentId as string);
+
+    const sid =
+      typeof sessionId === 'string' && sessionId.length > 0 ? sessionId : null;
+
+    // Finalize session without an AI turn (Phase A).
+    if (sid && sessionFinalize?.status) {
+      await ensureSession(sid, caller.uid, ctx);
+      await finalizeSession(sid, caller.uid, sessionFinalize.status);
+      return {reply: ''};
+    }
+
+    if (typeof stage !== 'string' || !VALID_STAGES.includes(stage as ZumiStage)) {
+      throw new HttpsError('invalid-argument', 'A valid stage is required.');
+    }
+
+    const stageKey = stage as ZumiStage;
+    const pct =
+      typeof scorePercent === 'number' && Number.isFinite(scorePercent)
+        ? Math.max(0, Math.min(100, scorePercent))
+        : 0;
+
+    // Legacy path — no sessionId (backward compatible).
+    if (!sid) {
+      try {
+        const reply = await converse({
+          childName: ctx.childName,
+          grade: ctx.grade,
+          context: buildContext(stageKey, ctx, pct),
+          history: legacyHistory(history),
+        });
+        return {reply: reply || FALLBACK_LINE[stageKey]};
+      } catch {
+        return {reply: FALLBACK_LINE[stageKey]};
+      }
+    }
+
+    // Session-backed path (Phase A PR1).
+    await ensureSession(sid, caller.uid, ctx);
+    await updateSignals(sid, caller.uid, conversationalSignals);
+
+    const utterance =
+      typeof childUtterance === 'string' ? childUtterance.trim().slice(0, 250) : '';
+    if (utterance.length > 0) {
+      await appendTurn(sid, caller.uid, {
+        role: 'user',
+        content: utterance,
+        ts: Date.now(),
+        stage: stageKey,
+        kind: 'primary',
+      });
+    }
+
+    const {summary, recentTurns, signals} = await loadPromptContext(sid, caller.uid);
+
+    try {
+      const reply = await converse({
+        childName: ctx.childName,
+        grade: ctx.grade,
+        context: buildContext(stageKey, ctx, pct),
+        history: recentTurns,
+        summary,
+        signals,
+      });
+      const line = reply || FALLBACK_LINE[stageKey];
+      await appendTurn(sid, caller.uid, {
+        role: 'assistant',
+        content: line,
+        ts: Date.now(),
+        stage: stageKey,
+        kind: 'primary',
+      });
+      return {reply: line};
+    } catch {
+      return {reply: FALLBACK_LINE[stageKey]};
+    }
+  },
+);
