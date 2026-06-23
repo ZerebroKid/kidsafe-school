@@ -3,3 +3,4 @@ export * from './education';
 export * from './brand-tokens';
 export * from './schemas/topicContent';
 export * from './subscription';
+export * from './reels';

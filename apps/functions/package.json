@@ -22,6 +22,7 @@
     "aggregate:reports": "pnpm build && node dist/scripts/runAggregateClassReports.js",
     "set-school-grades": "pnpm build && node dist/scripts/setSchoolGrades.js",
     "create:plan": "pnpm build && node dist/scripts/createRazorpayPlan.js",
+    "seed:reels": "pnpm build && node dist/scripts/seedReels.js",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {

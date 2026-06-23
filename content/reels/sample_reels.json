@@ -1,0 +1,34 @@
+{
+  "topics": [
+    {
+      "topicTag": "classifying_things",
+      "name": "Classifying Things",
+      "subject": "science",
+      "parentQuestions": [
+        "Can you tell me 3 ways to group animals?",
+        "What is the difference between living and non-living things?",
+        "How would you classify a plant vs an animal?"
+      ]
+    }
+  ],
+  "reels": [
+    {
+      "reelId": "reel_classifying_things_01",
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/kidsafe-e5eac.firebasestorage.app/o/reels%2Fclassifying_things_01.mp4?alt=media&token=aca49df3-ad1d-4976-8c74-35a3f27975b0",
+      "title": "Classifying Things",
+      "kind": "topic",
+      "topicTag": "classifying_things",
+      "subject": "science",
+      "gradeBand": [3],
+      "durationSec": 60
+    },
+    {
+      "reelId": "reel_fun_01",
+      "videoUrl": "https://firebasestorage.googleapis.com/v0/b/kidsafe-e5eac.firebasestorage.app/o/reels%2Ffun_01.mp4?alt=media&token=86911303-0272-488e-8797-7833b4948719",
+      "title": "Fun Break!",
+      "kind": "fun",
+      "gradeBand": [0, 1, 2, 3, 4, 5, 6],
+      "durationSec": 60
+    }
+  ]
+}

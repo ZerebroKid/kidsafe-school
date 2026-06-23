@@ -112,6 +112,15 @@
         {"fieldPath": "processedAt", "order": "DESCENDING"}
       ]
     }
+    ,
+    {
+      "collectionGroup": "reelsCatalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "active", "order": "ASCENDING"},
+        {"fieldPath": "gradeBand", "arrayConfig": "CONTAINS"}
+      ]
+    }
   ],
   "fieldOverrides": []
 }

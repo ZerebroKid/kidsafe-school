@@ -10,13 +10,14 @@ import {CurrentAppPill} from './CurrentAppPill';
 import {LocationTab} from './LocationTab';
 import {PinTab} from './PinTab';
 import {ScheduleTab} from './ScheduleTab';
+import {ReelsInsightsTab} from './ReelsInsightsTab';
 import {StudyTab} from './StudyTab';
 import {UsageTab} from './UsageTab';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<ParentStackParamList, 'ChildDetails'>;
 
-type Tab = 'apps' | 'schedule' | 'location' | 'usage' | 'pin' | 'study';
+type Tab = 'apps' | 'schedule' | 'location' | 'usage' | 'pin' | 'study' | 'reels';
 
 interface TamperEvent {
   id: string;
@@ -84,6 +85,7 @@ export function ChildDetailsScreen({route}: Props) {
           />
           <TabButton label="Study" active={tab === 'study'} onPress={() => setTab('study')} />
           <TabButton label="Usage" active={tab === 'usage'} onPress={() => setTab('usage')} />
+          <TabButton label="Reels" active={tab === 'reels'} onPress={() => setTab('reels')} />
           <TabButton label="PIN" active={tab === 'pin'} onPress={() => setTab('pin')} />
         </View>
 
@@ -108,6 +110,7 @@ export function ChildDetailsScreen({route}: Props) {
             {tab === 'schedule' && <ScheduleTab childUid={childUid} />}
             {tab === 'study' && <StudyTab childUid={childUid} />}
             {tab === 'usage' && <UsageTab childUid={childUid} />}
+            {tab === 'reels' && <ReelsInsightsTab childUid={childUid} childName={childName} />}
             {tab === 'pin' && <PinTab childUid={childUid} childName={childName} />}
           </ScrollView>
         )}

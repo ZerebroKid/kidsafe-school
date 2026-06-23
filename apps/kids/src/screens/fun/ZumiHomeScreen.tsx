@@ -144,6 +144,15 @@ export function ZumiHomeScreen({navigation}: Props) {
             style={({pressed}) => [styles.cta, pressed && styles.ctaPressed]}>
             <Text style={styles.ctaText}>Phir se! ▶</Text>
           </Pressable>
+          <Pressable
+            onPress={() => navigation.navigate('Reels')}
+            android_ripple={{color: 'rgba(236,72,153,0.25)'}}
+            style={({pressed}) => [
+              styles.reelsCta,
+              pressed && styles.reelsCtaPressed,
+            ]}>
+            <Text style={styles.ctaText}>Watch Reels</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );
@@ -156,8 +165,17 @@ export function ZumiHomeScreen({navigation}: Props) {
           <ZumiCharacter state="idle" />
           <Text style={styles.title}>{hello}</Text>
           <Text style={styles.subtitle}>
-            Aaj koi kaam nahi hai. Kal phir milte hain!
+            Aaj koi kaam nahi hai. Tab tak reels dekho!
           </Text>
+          <Pressable
+            onPress={() => navigation.navigate('Reels')}
+            android_ripple={{color: 'rgba(236,72,153,0.25)'}}
+            style={({pressed}) => [
+              styles.reelsCta,
+              pressed && styles.reelsCtaPressed,
+            ]}>
+            <Text style={styles.ctaText}>Watch Reels</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );
@@ -218,4 +236,17 @@ const styles = StyleSheet.create({
   },
   ctaPressed: {backgroundColor: '#7c3aed', transform: [{scale: 0.96}]},
   ctaText: {fontSize: 18, fontWeight: '800', color: '#ffffff'},
+  reelsCta: {
+    marginTop: spacing.sm,
+    backgroundColor: '#ec4899',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: 32,
+    shadowColor: '#ec4899',
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    shadowOffset: {width: 0, height: 6},
+    elevation: 8,
+  },
+  reelsCtaPressed: {backgroundColor: '#db2777', transform: [{scale: 0.96}]},
 });

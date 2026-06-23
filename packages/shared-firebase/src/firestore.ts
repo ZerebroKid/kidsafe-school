@@ -7,6 +7,7 @@ import type {
   Geofence,
   Geo,
   LocationDiagnostics,
+  ReelInsightDoc,
   Schedule,
   SharedProfile,
   UsageDailyDoc,
@@ -26,6 +27,10 @@ export const paths = {
     firestore().collection('children').doc(childUid).collection('events'),
   usageDaily: (childUid: string) =>
     firestore().collection('children').doc(childUid).collection('usageDaily'),
+  reelsCatalog: () => firestore().collection('reelsCatalog'),
+  reelTopics: () => firestore().collection('reelTopics'),
+  reelInsights: (childUid: string) =>
+    firestore().collection('children').doc(childUid).collection('reelInsights'),
 };
 
 /**
@@ -449,4 +454,61 @@ export async function writeGeofenceEvent(
     payload: {lat, lng},
     timestamp,
   });
+}
+
+// --- Reels insight helpers ---------------------------------------------------
+
+/**
+ * Child-side: atomically bumps today's watch time for a single topic. Uses
+ * `increment` so concurrent flushes from rapid swiping merge cleanly.
+ *
+ * The doc id is `YYYY-MM-DD` (same convention as `usageDaily`). On the first
+ * write of the day the doc is created; subsequent writes merge via increment.
+ */
+export async function bumpReelInsight(
+  childUid: string,
+  date: string,
+  topicTag: string,
+  topicName: string,
+  watchedMs: number,
+  views: number,
+) {
+  const ref = paths.reelInsights(childUid).doc(date);
+  await ref.set(
+    {
+      date,
+      totalWatchedMs: firebase.firestore.FieldValue.increment(watchedMs),
+      [`perTopic.${topicTag}.name`]: topicName,
+      [`perTopic.${topicTag}.watchedMs`]:
+        firebase.firestore.FieldValue.increment(watchedMs),
+      [`perTopic.${topicTag}.viewCount`]:
+        firebase.firestore.FieldValue.increment(views),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true},
+  );
+}
+
+/**
+ * Parent-side: live subscription to the most recent N days of reel insight docs.
+ * Mirrors `subscribeUsageWeek` — same `{date, ...}` ordered pattern.
+ */
+export function subscribeReelInsights(
+  childUid: string,
+  cb: (docs: ReelInsightDoc[]) => void,
+  daysBack = 7,
+) {
+  const start = new Date();
+  start.setDate(start.getDate() - (daysBack - 1));
+  const startKey = formatDateKey(start);
+  return paths
+    .reelInsights(childUid)
+    .where('date', '>=', startKey)
+    .orderBy('date')
+    .onSnapshot(
+      snap => {
+        cb(snap.docs.map(d => d.data() as ReelInsightDoc));
+      },
+      err => console.warn('subscribeReelInsights error', err),
+    );
 }

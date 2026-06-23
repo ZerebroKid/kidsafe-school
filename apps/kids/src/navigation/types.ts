@@ -32,6 +32,7 @@ export type ChildStackParamList = {
 export type MainTabParamList = {
   HomeTab: undefined;
   StudyTab: undefined;
+  ReelsTab: undefined;
 };
 
 export type StudyStackParamList = {
@@ -81,4 +82,6 @@ export type StudyStackParamList = {
     videoUrl: string;
     title?: string;
   };
+  /** Reels — vertical short-video feed (Fun mode, grade <= 6). */
+  Reels: undefined;
 };

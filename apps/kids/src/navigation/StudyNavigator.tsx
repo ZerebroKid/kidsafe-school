@@ -10,6 +10,7 @@ import {QuizResultScreen} from '../screens/learn/QuizResultScreen';
 import {RewardUnlockScreen} from '../screens/learn/RewardUnlockScreen';
 import {RewardWebViewScreen} from '../screens/learn/RewardWebViewScreen';
 import {VideoPlayerScreen} from '../screens/learn/VideoPlayerScreen';
+import {ReelsScreen} from '../screens/reels/ReelsScreen';
 import {useChildProfile} from '../context/ChildProfileContext';
 import {colors} from '../theme';
 import type {StudyStackParamList} from './types';
@@ -78,6 +79,11 @@ export function StudyNavigator() {
         options={({route}) => ({
           headerTitle: route.params.title ?? 'Video',
         })}
+      />
+      <Stack.Screen
+        name="Reels"
+        component={ReelsScreen}
+        options={{headerShown: false}}
       />
     </Stack.Navigator>
   );

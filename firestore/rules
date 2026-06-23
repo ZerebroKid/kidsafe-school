@@ -301,6 +301,20 @@ service cloud.firestore {
         // when the user signs out and re-pairs).
         allow delete: if isSelf(childUid);
       }
+
+      // reelInsights subcollection ----------------------------------------
+      // One doc per child-local-day, id = `YYYY-MM-DD`. Powers the parent's
+      // Reels Insights tab (daily per-topic watch time + questions).
+      match /reelInsights/{day} {
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+
+        allow create, update: if isSelf(childUid)
+          && request.resource.data.keys().hasOnly(
+               ['date', 'totalWatchedMs', 'perTopic', 'updatedAt']
+             );
+
+        allow delete: if isSelf(childUid);
+      }
     }
 
     // =====================================================================
@@ -513,6 +527,22 @@ service cloud.firestore {
     match /quizVoiceEvals/{id} {
       allow read: if isAdmin() || isSelf(resource.data.childUid);
       allow create, update, delete: if false;
+    }
+
+    // reelsCatalog/{reelId}
+    //   Admin-seeded video catalogue. Any signed-in user can read (kids
+    //   read in the Reels feed). Writes are admin-only (seeded via script).
+    match /reelsCatalog/{reelId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // reelTopics/{topicTag}
+    //   Per-topic metadata + parent "ask tonight" questions. Same access
+    //   as reelsCatalog: any signed-in user reads; admin writes.
+    match /reelTopics/{topicTag} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
     }
 
     // curriculum/{curriculumId}/chapters/{chapterId}/topics/{topicId}

@@ -7,6 +7,7 @@ import {colors} from '../theme';
 import {useChildProfile} from '../context/ChildProfileContext';
 import type {MainTabParamList} from './types';
 import {StudyNavigator} from './StudyNavigator';
+import {ReelsScreen} from '../screens/reels/ReelsScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -52,6 +53,17 @@ export function MainTabNavigator() {
           ),
         }}
       />
+      {isFunMode && (
+        <Tab.Screen
+          name="ReelsTab"
+          component={ReelsScreen}
+          options={{
+            tabBarIcon: ({focused}) => (
+              <TabItem emoji="🎬" label="Reels" focused={focused} />
+            ),
+          }}
+        />
+      )}
     </Tab.Navigator>
   );
 }
