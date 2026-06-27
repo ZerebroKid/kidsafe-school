@@ -522,3 +522,6 @@ Quick "who can change this collection?" lookup:
 *Generated from the live types in `packages/shared-types/src/`, the access
 rules in `firestore/rules`, and the Cloud Functions in `apps/functions/src/`.
 If a shape here disagrees with those files, the code wins — update this doc.*
+
+<img width="1262" height="841" alt="image" src="https://github.com/user-attachments/assets/d0b6e7a7-eb5f-4e11-a01c-c044b02d20f5" />
+
