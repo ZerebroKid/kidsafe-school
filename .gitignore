@@ -86,6 +86,10 @@ build/
 !.yarn/sdks
 !.yarn/versions
 
+# Python virtualenvs (monorepo-wide — keeps .venv out of git and IDE untracked lists)
+**/.venv/
+**/venv/
+
 # KidSafe — secrets and generated artifacts
 android/app/google-services.json
 android/app/*.keystore
