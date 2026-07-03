@@ -15,6 +15,8 @@
 import {callFn} from '@zerebro/shared-firebase';
 import type {SubmitQuizAttemptInput, SubmitQuizAttemptOutput} from '@zerebro/shared-types';
 
+import {timed} from './zumiPerf';
+
 export type ChatRole = 'user' | 'assistant';
 export interface ChatTurn {
   role: ChatRole;
@@ -33,6 +35,8 @@ export interface ZumiConverseInput {
 
 export interface ZumiConverseOutput {
   reply: string;
+  /** Ready-to-play TTS URL for `reply` (synthesized server-side, may be absent). */
+  audioUrl?: string;
 }
 
 /** Teaching phases the adaptive director moves through, in order. */
@@ -63,6 +67,8 @@ export interface ZumiTeachOutput {
   say: string;
   phase: TeachPhase;
   animationHint: AnimationHint;
+  /** Ready-to-play TTS URL for `say` (synthesized server-side, may be absent). */
+  audioUrl?: string;
 }
 
 export interface ZumiEvaluateInput {
@@ -104,43 +110,91 @@ export interface ZumiTranscribeOutput {
 export function zumiConverse(
   input: ZumiConverseInput,
 ): Promise<ZumiConverseOutput> {
-  return callFn<ZumiConverseInput, ZumiConverseOutput>('zumiConverse', input);
+  return timed(
+    `net zumiConverse[${input.stage}]`,
+    () => callFn<ZumiConverseInput, ZumiConverseOutput>('zumiConverse', input),
+    out => `reply=${out.reply?.length ?? 0} chars audio=${out.audioUrl ? 'yes' : 'NO'}`,
+  );
 }
 
 /** One turn of the adaptive, stealth-teaching conversation. */
 export function zumiTeach(input: ZumiTeachInput): Promise<ZumiTeachOutput> {
-  return callFn<ZumiTeachInput, ZumiTeachOutput>('zumiTeach', input);
+  return timed(
+    `net zumiTeach[${input.phase}]`,
+    () => callFn<ZumiTeachInput, ZumiTeachOutput>('zumiTeach', input),
+    out =>
+      `phase=${out.phase} say=${out.say?.length ?? 0} chars audio=${out.audioUrl ? 'yes' : 'NO'}`,
+  );
 }
 
 export function zumiEvaluateAnswer(
   input: ZumiEvaluateInput,
 ): Promise<ZumiEvaluateOutput> {
-  return callFn<ZumiEvaluateInput, ZumiEvaluateOutput>(
-    'zumiEvaluateAnswer',
-    input,
+  return timed(
+    'net zumiEvaluateAnswer',
+    () =>
+      callFn<ZumiEvaluateInput, ZumiEvaluateOutput>('zumiEvaluateAnswer', input),
+    out => `${out.result} (${out.score} pts)`,
   );
 }
 
 export function submitVoiceQuiz(
   input: SubmitQuizAttemptInput,
 ): Promise<SubmitQuizAttemptOutput> {
-  return callFn<SubmitQuizAttemptInput, SubmitQuizAttemptOutput>(
-    'submitQuizAttempt',
-    input,
+  return timed('net submitQuizAttempt', () =>
+    callFn<SubmitQuizAttemptInput, SubmitQuizAttemptOutput>(
+      'submitQuizAttempt',
+      input,
+    ),
   );
 }
 
 /** ElevenLabs TTS: returns a playable audio URL for a line of Zumi's dialogue. */
 export function zumiSpeak(input: ZumiSpeakInput): Promise<ZumiSpeakOutput> {
-  return callFn<ZumiSpeakInput, ZumiSpeakOutput>('zumiSpeak', input);
+  return timed(
+    'net zumiSpeak',
+    () => callFn<ZumiSpeakInput, ZumiSpeakOutput>('zumiSpeak', input),
+    out => `url=${out.url ? 'yes' : 'NO'} (${input.text.length} chars in)`,
+  );
 }
 
 /** ElevenLabs STT: transcribes a recording previously uploaded to Storage. */
 export function zumiTranscribe(
   input: ZumiTranscribeInput,
 ): Promise<ZumiTranscribeOutput> {
-  return callFn<ZumiTranscribeInput, ZumiTranscribeOutput>(
-    'zumiTranscribe',
-    input,
+  return timed(
+    'net zumiTranscribe',
+    () =>
+      callFn<ZumiTranscribeInput, ZumiTranscribeOutput>('zumiTranscribe', input),
+    out => `"${(out.transcript ?? '').slice(0, 60)}"`,
+  );
+}
+
+// ---- Zumi live streaming session (LiveKit) ---------------------------------
+
+export interface ZumiLiveKitTokenInput {
+  assignmentId: string;
+}
+
+export interface ZumiLiveKitTokenOutput {
+  /** LiveKit server websocket URL. */
+  url: string;
+  /** Signed JWT scoped to this session's room. */
+  token: string;
+  room: string;
+}
+
+/** Mint a LiveKit room token for a streaming Zumi session (agent backend). */
+export function zumiLiveKitToken(
+  input: ZumiLiveKitTokenInput,
+): Promise<ZumiLiveKitTokenOutput> {
+  return timed(
+    'net zumiLiveKitToken',
+    () =>
+      callFn<ZumiLiveKitTokenInput, ZumiLiveKitTokenOutput>(
+        'zumiLiveKitToken',
+        input,
+      ),
+    out => `room=${out.room}`,
   );
 }

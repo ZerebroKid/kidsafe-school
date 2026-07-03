@@ -36,6 +36,7 @@ import {
 } from 'react-native-permissions';
 
 import {zumiSpeak, zumiTranscribe} from './zumiApi';
+import {logInfo, mark, timed} from './zumiPerf';
 
 /**
  * The Zumi scripts are Latin-script Hinglish ("Ek baar mere ek dost ne bola..."),
@@ -257,7 +258,11 @@ export async function speak(text: string): Promise<void> {
   if (clean.length === 0) return;
 
   const gen = playbackGeneration;
-  const url = await resolveTtsUrl(clean);
+  const url = await timed(
+    'tts.resolveUrl',
+    () => resolveTtsUrl(clean),
+    u => (u ? 'cloud' : 'no url (fallback to on-device)'),
+  );
   if (gen !== playbackGeneration) return;
   if (url) {
     try {
@@ -268,7 +273,7 @@ export async function speak(text: string): Promise<void> {
     }
   }
   if (gen !== playbackGeneration) return;
-  await speakOnDevice(clean);
+  await timed('tts.onDevice', () => speakOnDevice(clean));
 }
 
 // ---------------------------------------------------------------------------
@@ -280,6 +285,36 @@ const ttsUrlCache = new Map<string, string>();
 /** In-flight syntheses, so a prefetch + speak for the same line share one call. */
 const ttsInflight = new Map<string, Promise<string>>();
 
+// ---- cloud TTS circuit breaker ---------------------------------------------
+// After repeated zumiSpeak failures (e.g. ElevenLabs quota exhausted) every
+// further cloud attempt just wastes a full round trip before the on-device
+// fallback. Trip the breaker and go straight to on-device for the session.
+
+const CLOUD_TTS_FAIL_LIMIT = 2;
+let cloudTtsFailStreak = 0;
+let cloudTtsDisabled = false;
+
+/** Re-enable cloud TTS (call at the start of every new session). */
+export function resetCloudTts(): void {
+  cloudTtsFailStreak = 0;
+  cloudTtsDisabled = false;
+}
+
+function noteCloudTtsFailure(reason: string): void {
+  cloudTtsFailStreak += 1;
+  logInfo(`cloud TTS failure #${cloudTtsFailStreak}: ${reason}`);
+  if (!cloudTtsDisabled && cloudTtsFailStreak >= CLOUD_TTS_FAIL_LIMIT) {
+    cloudTtsDisabled = true;
+    logInfo(
+      'cloud TTS DISABLED for this session (circuit breaker) — using on-device TTS',
+    );
+  }
+}
+
+function noteCloudTtsSuccess(): void {
+  cloudTtsFailStreak = 0;
+}
+
 /**
  * Return a playable URL for `clean`, reusing a cached/in-flight result so a
  * prefetched line incurs no synth wait. Returns '' on any failure (caller then
@@ -287,7 +322,12 @@ const ttsInflight = new Map<string, Promise<string>>();
  */
 async function resolveTtsUrl(clean: string): Promise<string> {
   const cached = ttsUrlCache.get(clean);
-  if (cached) return cached;
+  if (cached) {
+    logInfo(`tts url cache hit (${clean.length} chars)`);
+    return cached;
+  }
+
+  if (cloudTtsDisabled) return '';
 
   const pending = ttsInflight.get(clean);
   if (pending) return pending;
@@ -296,11 +336,14 @@ async function resolveTtsUrl(clean: string): Promise<string> {
     try {
       const {url} = await zumiSpeak({text: clean});
       if (url) {
+        noteCloudTtsSuccess();
         ttsUrlCache.set(clean, url);
         return url;
       }
+      noteCloudTtsFailure('empty url from zumiSpeak');
       return '';
-    } catch {
+    } catch (err) {
+      noteCloudTtsFailure(err instanceof Error ? err.message : String(err));
       return '';
     } finally {
       ttsInflight.delete(clean);
@@ -402,7 +445,9 @@ export function stopSpeaking(): void {
 export function playUrl(url: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const gen = playbackGeneration;
+    const endLoad = mark('audio.load');
     const sound = new Sound(url, '', error => {
+      endLoad(error ? 'FAILED' : undefined);
       if (error) {
         if (currentSound === sound) currentSound = null;
         reject(error);
@@ -419,7 +464,9 @@ export function playUrl(url: string): Promise<void> {
         return;
       }
       currentSound = sound;
+      const endPlay = mark('audio.playback');
       sound.play(success => {
+        endPlay(success ? undefined : 'FAILED');
         if (currentSound === sound) currentSound = null;
         try {
           sound.release();
@@ -487,6 +534,7 @@ async function uploadAndTranscribe(path: string): Promise<string> {
   // Fast path: read file as base64 and send directly to the Cloud Function,
   // skipping the Firebase Storage upload + download round trip.
   try {
+    const endRead = mark('stt.readFileBase64');
     const localUri = path.startsWith('file://') ? path : `file://${path}`;
     const resp = await fetch(localUri);
     const blob = await resp.blob();
@@ -499,6 +547,7 @@ async function uploadAndTranscribe(path: string): Promise<string> {
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
+    endRead(`${Math.round(base64.length * 0.75)} bytes`);
 
     if (base64) {
       const {transcript} = await zumiTranscribe({
@@ -637,10 +686,18 @@ export async function listen(opts: ListenOptions = {}): Promise<ListenResult> {
   const granted = await ensureMicPermission();
   if (!granted) return {transcript: '', status: 'no-permission'};
 
-  const voiceResult = await listenVoice(opts);
+  const voiceResult = await timed(
+    'listen.voice',
+    () => listenVoice(opts),
+    r => (r === null ? 'unavailable → recorder fallback' : `${r.status} "${r.transcript.slice(0, 60)}"`),
+  );
   if (voiceResult !== null) return voiceResult;
 
-  return listenRecorder(opts);
+  return timed(
+    'listen.recorder',
+    () => listenRecorder(opts),
+    r => `${r.status} "${r.transcript.slice(0, 60)}"`,
+  );
 }
 
 // ---- Primary: @react-native-voice/voice (fast, streaming) -----------------

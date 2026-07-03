@@ -20,6 +20,8 @@ import {
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import Animated, {FadeIn, FadeOut} from 'react-native-reanimated';
+import Video, {type ReactVideoProps} from 'react-native-video';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 import {useTopicContent} from '../../firebase/study';
@@ -32,6 +34,7 @@ import {
   type AvatarState,
   type SessionState,
 } from '../../services/zumi/zumiSessionManager';
+import {ZumiLiveSession, ZUMI_LIVE} from '../../services/zumi/zumiLiveSession';
 import {ZumiPlayground} from './components/ZumiPlayground';
 import {ZumiSpeechBubble} from './components/ZumiSpeechBubble';
 import {
@@ -42,6 +45,28 @@ import {
 import {QuizProgressBar} from './components/QuizProgressBar';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'ZumiVoice'>;
+
+// react-native-video ships types built against @types/react 19, while the
+// mobile apps pin @types/react 18 (see ReelItem.tsx for the same bridge).
+// A bundled asset id (Metro `require` of an mp4) is a number at runtime.
+const VideoPlayer = Video as unknown as React.ComponentType<
+  Omit<ReactVideoProps, 'source'> & {source: number}
+>;
+
+// reanimated's Animated.View isn't a clean JSX element type under our pinned
+// @types/react (same duplicate-React-types issue as the Video/Lottie wrappers).
+const AView = Animated.View as unknown as React.ComponentType<{
+  entering?: unknown;
+  exiting?: unknown;
+  style?: unknown;
+  children?: React.ReactNode;
+}>;
+
+/** The subset of the session manager surface the screen drives. */
+type ZumiSessionLike = Pick<
+  ZumiSessionManager,
+  'start' | 'abort' | 'tapTalk' | 'stopListening' | 'skipTurn' | 'notifyVideoDone'
+>;
 
 interface DoneInfo {
   percentage: number;
@@ -76,10 +101,11 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
   const [quiz, setQuiz] = useState<{current: number; total: number; score: number} | null>(
     null,
   );
+  const [video, setVideo] = useState<number | null>(null);
   const [done, setDone] = useState<DoneInfo | null>(null);
   const [sessionError, setSessionError] = useState<string | null>(null);
 
-  const managerRef = useRef<ZumiSessionManager | null>(null);
+  const managerRef = useRef<ZumiSessionLike | null>(null);
   const startedRef = useRef(false);
   const closedRef = useRef(false);
   const bubbleScrollRef = useRef<ScrollView | null>(null);
@@ -100,7 +126,10 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
     if (!voiceStory) return;
 
     startedRef.current = true;
-    const manager = new ZumiSessionManager(
+    // ZUMI_LIVE: streaming LiveKit session (sub-second turns via the Python
+    // agent); otherwise the original callable-based state machine.
+    const SessionImpl = ZUMI_LIVE ? ZumiLiveSession : ZumiSessionManager;
+    const manager = new SessionImpl(
       {assignmentId, topicName, story: voiceStory, childName},
       event => {
         switch (event.type) {
@@ -115,6 +144,9 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
             break;
           case 'cue':
             setCue(event.cue);
+            break;
+          case 'video':
+            setVideo(event.source);
             break;
           case 'listening':
             setListening(event.on);
@@ -216,6 +248,10 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
     managerRef.current?.skipTurn();
   }, []);
 
+  const onVideoDone = useCallback(() => {
+    managerRef.current?.notifyVideoDone();
+  }, []);
+
   // Hardware back ends the session cleanly.
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -227,7 +263,10 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
 
   // ---- render -------------------------------------------------------------
 
-  if (loading || profileLoading) {
+  // 'init' covers the live-session warmup too (token + WebRTC connect + agent
+  // dispatch + first LLM/TTS turn): the loader stays up until the moment
+  // Zumi's first word starts playing, so the child never sees a silent mascot.
+  if (loading || profileLoading || (!error && voiceStory && sessionState === 'init')) {
     return (
       <SafeAreaView style={styles.center}>
         <ActivityIndicator size="large" color={ACCENT} />
@@ -270,7 +309,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
 
       <View style={styles.stage}>
         <View style={styles.orbZone}>
-          <ZumiPlayground state={avatar} />
+          <ZumiPlayground state={avatar} videoActive={video != null} />
           {/* Scene animation drawn ON TOP of the mascot so it is clearly
               visible (Lottie clips are transparent, so the mascot still shows
               behind). pointerEvents:none keeps the playground tappable. */}
@@ -278,25 +317,57 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
           <ZumiCelebration show={avatar === 'celebrating'} />
         </View>
 
-        <ScrollView
-          ref={bubbleScrollRef}
-          style={styles.bubbleScroll}
-          contentContainerStyle={styles.bubbleScrollContent}
-          showsVerticalScrollIndicator={false}>
-          <ZumiSpeechBubble text={bubble} />
-        </ScrollView>
+        {video != null ? (
+          <AView
+            entering={FadeIn.duration(280)}
+            exiting={FadeOut.duration(220)}
+            style={styles.videoCard}>
+            <VideoPlayer
+              source={video}
+              style={styles.videoCardPlayer}
+              resizeMode="contain"
+              controls={false}
+              paused={false}
+              onEnd={onVideoDone}
+              onError={onVideoDone}
+            />
+          </AView>
+        ) : (
+          <ScrollView
+            ref={bubbleScrollRef}
+            style={styles.bubbleScroll}
+            contentContainerStyle={styles.bubbleScrollContent}
+            showsVerticalScrollIndicator={false}>
+            <ZumiSpeechBubble text={bubble} />
+          </ScrollView>
+        )}
       </View>
 
       <View style={styles.bottom}>
-        {sessionState === 'quiz' && quiz ? (
-          <QuizProgressBar
-            current={quiz.current}
-            total={quiz.total}
-            score={quiz.score}
-          />
-        ) : null}
+        {video != null ? (
+          <View style={styles.micArea}>
+            <Pressable
+              onPress={onVideoDone}
+              hitSlop={10}
+              android_ripple={{color: 'rgba(139,92,246,0.25)'}}
+              style={({pressed}) => [
+                styles.videoSkipButton,
+                pressed && styles.micButtonPressed,
+              ]}>
+              <Text style={styles.videoSkipButtonText}>Aage badho ▶</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <>
+            {sessionState === 'quiz' && quiz ? (
+              <QuizProgressBar
+                current={quiz.current}
+                total={quiz.total}
+                score={quiz.score}
+              />
+            ) : null}
 
-        {transcribing ? (
+            {transcribing ? (
           <View style={styles.micArea}>
             <View style={[styles.micButton, styles.micButtonThinking]}>
               <ActivityIndicator size="large" color="#ffffff" />
@@ -372,6 +443,8 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
             ) : null}
           </View>
         ) : null}
+          </>
+        )}
       </View>
 
       {sessionError && !done ? (
@@ -536,4 +609,33 @@ const styles = StyleSheet.create({
   },
   doneScore: {fontSize: 44, fontWeight: '800', color: ACCENT},
   doneTitle: {fontSize: 24, fontWeight: '800', color: colors.text},
+  videoCard: {
+    flex: 1,
+    alignSelf: 'stretch',
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+    backgroundColor: '#000000',
+    shadowColor: '#000000',
+    shadowOpacity: 0.25,
+    shadowRadius: 18,
+    shadowOffset: {width: 0, height: 8},
+    elevation: 10,
+  },
+  videoCardPlayer: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  videoSkipButton: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.pill,
+    backgroundColor: ACCENT,
+    shadowColor: ACCENT,
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: {width: 0, height: 4},
+    elevation: 6,
+  },
+  videoSkipButtonText: {fontSize: 16, color: '#ffffff', fontWeight: '800'},
 });

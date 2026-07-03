@@ -16,6 +16,7 @@ import {HttpsError, onCall} from 'firebase-functions/v2/https';
 import {requireAuth, requireRole} from '../lib/auth';
 import {bucket} from '../lib/admin';
 import {elevenLabsApiKey, transcribe} from '../lib/elevenLabs';
+import {stepLogger} from '../lib/perf';
 
 export interface ZumiTranscribeInput {
   /** Storage path (legacy path: upload first, then transcribe). */
@@ -38,6 +39,7 @@ export const zumiTranscribe = onCall<
 >(
   {region: 'asia-south1', minInstances: 1, secrets: [elevenLabsApiKey]},
   async request => {
+    const log = stepLogger('zumiTranscribe');
     const caller = requireAuth(request);
     await requireRole(caller.uid, 'child');
 
@@ -47,18 +49,27 @@ export const zumiTranscribe = onCall<
     // Fast path: audio sent inline as base64 (no Storage round trip).
     if (typeof audioBase64 === 'string' && audioBase64.length > 0) {
       const bytes = Buffer.from(audioBase64, 'base64');
+      log.start({path: 'inline-base64', audioBytes: bytes.length, mime});
       if (bytes.length === 0 || bytes.length > MAX_AUDIO_BYTES) {
+        log.end({transcript: '(rejected: bad size)'});
         return {transcript: ''};
       }
       try {
-        const transcript = await transcribe(bytes, mime);
+        const transcript = await log.step(
+          'elevenlabs.transcribe',
+          () => transcribe(bytes, mime),
+          t => `"${t.slice(0, 80)}"`,
+        );
+        log.end({transcriptChars: transcript.length});
         return {transcript};
-      } catch {
+      } catch (err) {
+        log.fail(err);
         return {transcript: ''};
       }
     }
 
     // Legacy path: download from Storage, transcribe, then clean up.
+    log.start({path: 'storage', storagePath: storagePath ?? '(missing)'});
     const prefix = `zumi_stt/${caller.uid}/`;
     if (
       typeof storagePath !== 'string' ||
@@ -71,17 +82,29 @@ export const zumiTranscribe = onCall<
     const file = bucket().file(storagePath);
 
     try {
-      const [bytes] = await file.download();
+      const [bytes] = await log.step(
+        'storage.download',
+        () => file.download(),
+        ([b]) => `${b.length} bytes`,
+      );
       if (bytes.length > MAX_AUDIO_BYTES) {
+        log.end({transcript: '(rejected: too large)'});
         return {transcript: ''};
       }
       try {
-        const transcript = await transcribe(bytes, 'audio/mp4');
+        const transcript = await log.step(
+          'elevenlabs.transcribe',
+          () => transcribe(bytes, 'audio/mp4'),
+          t => `"${t.slice(0, 80)}"`,
+        );
+        log.end({transcriptChars: transcript.length});
         return {transcript};
-      } catch {
+      } catch (err) {
+        log.fail(err);
         return {transcript: ''};
       }
-    } catch {
+    } catch (err) {
+      log.fail(err);
       return {transcript: ''};
     } finally {
       void file.delete().catch(() => undefined);

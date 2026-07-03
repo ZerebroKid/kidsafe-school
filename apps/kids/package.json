@@ -11,6 +11,8 @@
     "test": "jest"
   },
   "dependencies": {
+    "@livekit/react-native": "^2.11.1",
+    "@livekit/react-native-webrtc": "^144.1.1",
     "@react-native-async-storage/async-storage": "^2.1.0",
     "@react-native-firebase/app": "^21.6.1",
     "@react-native-firebase/auth": "^21.6.1",
@@ -26,6 +28,7 @@
     "@zerebro/shared-firebase": "workspace:*",
     "@zerebro/shared-types": "workspace:*",
     "@zerebro/shared-utils": "workspace:*",
+    "livekit-client": "^2.20.0",
     "lottie-react-native": "^7.2.2",
     "nativewind": "4.1.23",
     "react": "18.3.1",
@@ -42,8 +45,8 @@
     "react-native-sound": "^0.11.2",
     "react-native-svg": "15.8.0",
     "react-native-tts": "^4.1.1",
-    "react-native-video": "^6.11.0",
     "react-native-vector-icons": "^10.2.0",
+    "react-native-video": "^6.11.0",
     "react-native-webview": "^13.16.1",
     "react-native-youtube-iframe": "^2.4.1",
     "rive-react-native": "^9.1.0",

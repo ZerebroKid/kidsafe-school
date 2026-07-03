@@ -19,6 +19,7 @@ import {FieldValue} from 'firebase-admin/firestore';
 
 import {db} from '../lib/admin';
 import {requireAuth, requireRole} from '../lib/auth';
+import {stepLogger} from '../lib/perf';
 import {openaiApiKey, evaluateAnswer, type EvalVerdict} from '../lib/zumiAi';
 import {resolveVoiceContext, voiceEvalDocId} from '../lib/zumiSession';
 
@@ -39,66 +40,88 @@ export interface ZumiEvaluateOutput {
 export const zumiEvaluateAnswer = onCall<
   ZumiEvaluateInput,
   Promise<ZumiEvaluateOutput>
->({region: 'asia-south1', secrets: [openaiApiKey]}, async request => {
-  const caller = requireAuth(request);
-  await requireRole(caller.uid, 'child');
+>(
+  {region: 'asia-south1', minInstances: 1, secrets: [openaiApiKey]},
+  async request => {
+    const log = stepLogger('zumiEvaluateAnswer');
+    const caller = requireAuth(request);
+    await requireRole(caller.uid, 'child');
 
-  const {assignmentId, questionId, transcript} =
-    request.data ?? ({} as Partial<ZumiEvaluateInput>);
+    const {assignmentId, questionId, transcript} =
+      request.data ?? ({} as Partial<ZumiEvaluateInput>);
 
-  if (typeof questionId !== 'string' || questionId.length === 0) {
-    throw new HttpsError('invalid-argument', 'questionId is required.');
-  }
+    if (typeof questionId !== 'string' || questionId.length === 0) {
+      throw new HttpsError('invalid-argument', 'questionId is required.');
+    }
 
-  const ctx = await resolveVoiceContext(caller.uid, assignmentId as string);
+    const cleanTranscript =
+      typeof transcript === 'string' ? transcript.slice(0, 1000) : '';
 
-  const question = ctx.voiceStory.voiceQuiz.find(q => q.questionId === questionId);
-  if (!question) {
-    throw new HttpsError('not-found', 'Quiz question not found in this story.');
-  }
+    log.start({
+      assignmentId,
+      questionId,
+      transcript: cleanTranscript.slice(0, 120),
+    });
 
-  const cleanTranscript =
-    typeof transcript === 'string' ? transcript.slice(0, 1000) : '';
+    const ctx = await log.step(
+      'resolveContext',
+      () => resolveVoiceContext(caller.uid, assignmentId as string),
+      c => `topic=${c.topicId}`,
+    );
 
-  // Evaluate (AI with deterministic keyword fallback baked into evaluateAnswer).
-  const verdict = await evaluateAnswer({
-    childName: ctx.childName,
-    grade: ctx.grade,
-    questionText: question.questionText,
-    expectedConcepts: Array.isArray(question.expectedConcepts)
-      ? question.expectedConcepts
-      : [],
-    correctIndicator: question.correctIndicator ?? '',
-    transcript: cleanTranscript,
-  });
+    const question = ctx.voiceStory.voiceQuiz.find(q => q.questionId === questionId);
+    if (!question) {
+      throw new HttpsError('not-found', 'Quiz question not found in this story.');
+    }
 
-  // Persist the authoritative verdict (deep-merge so sibling answers survive).
-  const evalRef = db()
-    .collection('quizVoiceEvals')
-    .doc(voiceEvalDocId(ctx.assignmentId, caller.uid));
-  await evalRef.set(
-    {
-      assignmentId: ctx.assignmentId,
-      childUid: caller.uid,
-      classId: ctx.classId,
-      answers: {
-        [questionId]: {
-          result: verdict.result,
-          score: verdict.score,
+    // Evaluate (AI with deterministic keyword fallback baked into evaluateAnswer).
+    const verdict = await log.step(
+      'openai.evaluate',
+      () =>
+        evaluateAnswer({
+          childName: ctx.childName,
+          grade: ctx.grade,
+          questionText: question.questionText,
+          expectedConcepts: Array.isArray(question.expectedConcepts)
+            ? question.expectedConcepts
+            : [],
+          correctIndicator: question.correctIndicator ?? '',
           transcript: cleanTranscript,
-          reasoning: verdict.reasoning,
-          evaluatedAt: Date.now(),
-        },
-      },
-      updatedAt: FieldValue.serverTimestamp(),
-    },
-    {merge: true},
-  );
+        }),
+      v => `${v.result} (${v.score} pts) — ${v.reasoning.slice(0, 60)}`,
+    );
 
-  return {
-    result: verdict.result,
-    score: verdict.score,
-    reasoning: verdict.reasoning,
-    feedback: verdict.feedback,
-  };
-});
+    // Persist the authoritative verdict (deep-merge so sibling answers survive).
+    const evalRef = db()
+      .collection('quizVoiceEvals')
+      .doc(voiceEvalDocId(ctx.assignmentId, caller.uid));
+    await log.step('firestore.persist', () =>
+      evalRef.set(
+        {
+          assignmentId: ctx.assignmentId,
+          childUid: caller.uid,
+          classId: ctx.classId,
+          answers: {
+            [questionId]: {
+              result: verdict.result,
+              score: verdict.score,
+              transcript: cleanTranscript,
+              reasoning: verdict.reasoning,
+              evaluatedAt: Date.now(),
+            },
+          },
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        {merge: true},
+      ),
+    );
+
+    log.end({result: verdict.result, score: verdict.score});
+    return {
+      result: verdict.result,
+      score: verdict.score,
+      reasoning: verdict.reasoning,
+      feedback: verdict.feedback,
+    };
+  },
+);

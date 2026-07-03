@@ -32,8 +32,11 @@ import {
   type AnimationHint,
   type ChatTurn,
   type TeachPhase,
+  type ZumiConverseOutput,
   type ZumiStage,
 } from './zumiApi';
+import {logInfo, timed, turn as perfTurn} from './zumiPerf';
+import {findTopicVideo, type ZumiVideoSource} from './zumiVideos';
 
 export type AvatarState =
   | 'idle'
@@ -76,6 +79,7 @@ export type ZumiEvent =
   | {type: 'avatar'; avatar: AvatarState}
   | {type: 'bubble'; text: string}
   | {type: 'cue'; cue: ZumiCuePayload | null}
+  | {type: 'video'; source: ZumiVideoSource | null}
   | {type: 'listening'; on: boolean; mode?: 'auto' | 'tap'; speaking?: boolean}
   | {type: 'transcribing'; on: boolean}
   | {type: 'prompt'; waiting: boolean; skippable: boolean; hint?: string}
@@ -125,6 +129,10 @@ export class ZumiSessionManager {
    * degrades to the manual tap-to-talk button.
    */
   private handsFree = true;
+  /** Resolver for the in-flight explanation video (screen calls notifyVideoDone). */
+  private pendingVideo: (() => void) | null = null;
+  /** The explanation video only plays once per session. */
+  private videoPlayed = false;
 
   constructor(
     private readonly config: ZumiSessionConfig,
@@ -134,11 +142,20 @@ export class ZumiSessionManager {
   /** Run the whole session. Returns when done (or silently on abort). */
   async start(): Promise<void> {
     try {
-      await speech.configureSpeech();
+      speech.resetCloudTts();
+      // LATENCY: fire the greeting AI call immediately, in parallel with the
+      // speech engine + mic-permission setup, so Zumi's first line (and its
+      // server-synthesized audio) is usually ready the moment the screen is.
+      const greetingPromise = this.converse('greeting');
+      await timed('setup.configureSpeech', () => speech.configureSpeech());
       // Ask for the mic up front so the first listening turn is hands-free
       // rather than blocked on an OS permission dialog mid-conversation.
-      this.handsFree = await speech.ensureMicPermission();
-      await this.runGreeting();
+      this.handsFree = await timed(
+        'setup.micPermission',
+        () => speech.ensureMicPermission(),
+        ok => (ok ? 'granted' : 'DENIED (tap-to-talk mode)'),
+      );
+      await this.runGreeting(greetingPromise);
       await this.runTeaching();
       await this.runQuiz();
       await this.runClosing();
@@ -163,9 +180,21 @@ export class ZumiSessionManager {
     const resolve = this.pendingTalk;
     this.pendingTalk = null;
     resolve?.('');
+    // Unwind an awaited explanation video the same way.
+    const videoResolve = this.pendingVideo;
+    this.pendingVideo = null;
+    videoResolve?.();
     speech.cancelListening();
     speech.stopSpeaking();
     void speech.teardownSpeech();
+  }
+
+  /** Screen callback: the explanation video finished (or was skipped). */
+  notifyVideoDone(): void {
+    const resolve = this.pendingVideo;
+    this.pendingVideo = null;
+    this.emit({type: 'video', source: null});
+    resolve?.();
   }
 
   /** UI "done" tap during a hands-free turn: stop listening and transcribe. */
@@ -301,10 +330,14 @@ export class ZumiSessionManager {
 
   // ---- stage runners ------------------------------------------------------
 
-  private async runGreeting(): Promise<void> {
+  private async runGreeting(
+    greetingPromise?: Promise<{reply: string; audioUrl?: string}>,
+  ): Promise<void> {
+    const t = perfTurn('greeting');
     this.setState('greeting');
-    const reply = await this.converse('greeting');
-    await this.say(reply);
+    const {reply, audioUrl} = await (greetingPromise ?? this.converse('greeting'));
+    this.guard();
+    await this.say(reply, audioUrl);
     // Wait for the child to answer the greeting (their name / how they are) so
     // the first teaching turn reacts to them instead of barrelling ahead.
     const said = await this.hear();
@@ -312,6 +345,7 @@ export class ZumiSessionManager {
       role: 'user',
       content: said || '(bachche ne kuch nahi kaha)',
     });
+    t.end();
   }
 
   /**
@@ -330,14 +364,26 @@ export class ZumiSessionManager {
 
     for (let turn = 0; turn < MAX_TEACH_TURNS; turn++) {
       this.guard();
+      const t = perfTurn(`teaching#${turn} (${phase})`);
 
       const result = await this.teach(phase);
+      const enteringExplain = result.phase === 'explain' && phase !== 'explain';
       phase = result.phase;
 
-      this.applyAnimationHint(result.animationHint);
-      await this.say(result.say);
+      // First time the lesson reaches the explain phase: play the topic's
+      // explanation video (its own voiceover explains the concept), then let
+      // Zumi continue with her line.
+      if (enteringExplain && !this.videoPlayed) {
+        await this.playTopicVideo();
+      }
 
-      if (phase === 'ready_for_quiz') break;
+      this.applyAnimationHint(result.animationHint);
+      await this.say(result.say, result.audioUrl);
+
+      if (phase === 'ready_for_quiz') {
+        t.end('ready_for_quiz');
+        break;
+      }
 
       const said = await this.hear();
       // Always record the child's turn (or a silence marker) so the director
@@ -346,6 +392,7 @@ export class ZumiSessionManager {
         role: 'user',
         content: said || '(bachche ne kuch nahi kaha)',
       });
+      t.end(`phase=${phase}`);
     }
 
     // Warm the first quiz question's audio before the quiz starts.
@@ -353,6 +400,38 @@ export class ZumiSessionManager {
     if (firstQ && !firstQ.questionAudioUrl) {
       speech.prefetch(this.fillName(firstQ.questionText));
     }
+  }
+
+  /**
+   * Play the topic's bundled explanation video, if there is one. Zumi stops
+   * talking, the screen shows a fullscreen player (video has its own
+   * voiceover), and the lesson resumes when the screen calls
+   * `notifyVideoDone()` (video ended or the child tapped Skip).
+   */
+  private async playTopicVideo(): Promise<void> {
+    this.guard();
+    const source = findTopicVideo(this.config.topicName);
+    if (!source) {
+      logInfo(`no explanation video for topic "${this.config.topicName}"`);
+      return;
+    }
+    this.videoPlayed = true;
+    speech.stopSpeaking();
+    this.avatar('story_mode');
+    this.emit({type: 'cue', cue: null});
+    this.emit({
+      type: 'bubble',
+      text: 'Dekho, maine tumhare liye ek video banaya hai!',
+    });
+    logInfo('explanation video START');
+    const t = perfTurn('explanation-video');
+    this.emit({type: 'video', source});
+    await new Promise<void>(resolve => {
+      this.pendingVideo = resolve;
+    });
+    t.end();
+    this.guard();
+    this.avatar('idle');
   }
 
   /**
@@ -403,6 +482,7 @@ export class ZumiSessionManager {
     const questions = this.config.story.voiceQuiz ?? [];
     for (let i = 0; i < questions.length; i++) {
       this.guard();
+      const t = perfTurn(`quiz#${i}`);
       const q = questions[i];
       this.emit({
         type: 'quiz',
@@ -443,6 +523,7 @@ export class ZumiSessionManager {
         total: questions.length,
         score: this.score,
       });
+      t.end(`result=${verdict.result} score=${this.score}`);
     }
   }
 
@@ -452,9 +533,9 @@ export class ZumiSessionManager {
     const maxScore = Math.max(1, questions.length * POINTS_PER_QUESTION);
     const percentage = Math.round((this.score / maxScore) * 100);
 
-    const reply = await this.converse('closing', percentage);
+    const {reply, audioUrl} = await this.converse('closing', percentage);
     this.avatar(percentage >= 50 ? 'celebrating' : 'encouraging');
-    await this.say(reply);
+    await this.say(reply, audioUrl);
 
     // Finalise -- server re-derives the authoritative score from the eval
     // records, so a submit failure doesn't lose the child's work silently.
@@ -485,7 +566,12 @@ export class ZumiSessionManager {
 
   // ---- primitives ---------------------------------------------------------
 
-  /** Speak a line (pre-stored audio if available, else on-device TTS). */
+  /**
+   * Speak a line. Prefers a ready-to-play `audioUrl` (returned inline by
+   * zumiTeach/zumiConverse, or pre-stored on a quiz question) so no extra
+   * TTS round trip is needed; falls back to `speech.speak()` (cloud synth ->
+   * on-device TTS) if the URL is absent or playback fails.
+   */
   private async say(text: string, audioUrl?: string): Promise<void> {
     this.guard();
     const clean = this.fillName(text);
@@ -496,8 +582,12 @@ export class ZumiSessionManager {
         await speech.playUrl(audioUrl);
         this.guard();
         return;
-      } catch {
-        // fall back to TTS
+      } catch (err) {
+        logInfo(
+          `server audioUrl playback failed, falling back to speak(): ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
       }
     }
     await speech.speak(clean);
@@ -574,21 +664,27 @@ export class ZumiSessionManager {
   }
 
   /** One AI chat turn; falls back to a safe line on network failure. */
-  private async converse(stage: ZumiStage, scorePercent?: number): Promise<string> {
+  private async converse(
+    stage: ZumiStage,
+    scorePercent?: number,
+  ): Promise<{reply: string; audioUrl?: string}> {
     this.guard();
     this.avatar('thinking');
     try {
-      const {reply} = await zumiConverse({
+      const out: ZumiConverseOutput = await zumiConverse({
         assignmentId: this.config.assignmentId,
         stage,
         history: this.history.slice(-8),
         scorePercent,
       });
       this.guard();
-      if (reply) this.history.push({role: 'assistant', content: reply});
-      return reply || this.fallbackLine(stage);
+      if (out.reply) this.history.push({role: 'assistant', content: out.reply});
+      return {
+        reply: out.reply || this.fallbackLine(stage),
+        audioUrl: out.audioUrl,
+      };
     } catch {
-      return this.fallbackLine(stage);
+      return {reply: this.fallbackLine(stage)};
     }
   }
 
@@ -601,6 +697,7 @@ export class ZumiSessionManager {
     say: string;
     phase: TeachPhase;
     animationHint: AnimationHint;
+    audioUrl?: string;
   }> {
     this.guard();
     this.avatar('thinking');
@@ -618,6 +715,7 @@ export class ZumiSessionManager {
         say: result.say || this.teachFallbackLine(phase),
         phase: result.phase || this.nextPhase(phase),
         animationHint: result.animationHint || 'none',
+        audioUrl: result.audioUrl,
       };
     } catch {
       return {

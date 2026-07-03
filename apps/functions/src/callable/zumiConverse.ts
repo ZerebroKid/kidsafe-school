@@ -8,6 +8,10 @@
  * the stage's AI context from the topic's `voiceStory` so prompts stay
  * server-controlled.
  *
+ * LATENCY: after the AI reply we ALSO synthesize the line via the shared TTS
+ * cache and return `audioUrl`, so the client plays it directly instead of
+ * making a second `zumiSpeak` round trip.
+ *
  * Auth: signed-in child of the assignment's class (see `resolveVoiceContext`).
  *
  * On any AI failure this STILL returns 200 with a safe canned Hinglish line so
@@ -17,6 +21,9 @@
 import {HttpsError, onCall} from 'firebase-functions/v2/https';
 
 import {requireAuth, requireRole} from '../lib/auth';
+import {elevenLabsApiKey} from '../lib/elevenLabs';
+import {stepLogger} from '../lib/perf';
+import {tryGetTtsUrl} from '../lib/ttsCache';
 import {openaiApiKey, converse, type ChatTurn} from '../lib/zumiAi';
 import {resolveVoiceContext} from '../lib/zumiSession';
 
@@ -33,6 +40,8 @@ export interface ZumiConverseInput {
 
 export interface ZumiConverseOutput {
   reply: string;
+  /** Ready-to-play TTS URL for `reply` (absent if synthesis failed). */
+  audioUrl?: string;
 }
 
 const FALLBACK_LINE: Record<ZumiStage, string> = {
@@ -72,8 +81,13 @@ export const zumiConverse = onCall<
   ZumiConverseInput,
   Promise<ZumiConverseOutput>
 >(
-  {region: 'asia-south1', minInstances: 1, secrets: [openaiApiKey]},
+  {
+    region: 'asia-south1',
+    minInstances: 1,
+    secrets: [openaiApiKey, elevenLabsApiKey],
+  },
   async request => {
+    const log = stepLogger('zumiConverse');
     const caller = requireAuth(request);
     await requireRole(caller.uid, 'child');
 
@@ -85,7 +99,18 @@ export const zumiConverse = onCall<
       throw new HttpsError('invalid-argument', 'A valid stage is required.');
     }
 
-    const ctx = await resolveVoiceContext(caller.uid, assignmentId as string);
+    log.start({
+      assignmentId,
+      stage,
+      historyTurns: Array.isArray(history) ? history.length : 0,
+      scorePercent: scorePercent ?? null,
+    });
+
+    const ctx = await log.step(
+      'resolveContext',
+      () => resolveVoiceContext(caller.uid, assignmentId as string),
+      c => `topic=${c.topicId} child=${c.childName || '(no name)'}`,
+    );
 
     const safeHistory: ChatTurn[] = Array.isArray(history)
       ? history
@@ -105,16 +130,30 @@ export const zumiConverse = onCall<
         : 0;
 
     try {
-      const reply = await converse({
-        childName: ctx.childName,
-        grade: ctx.grade,
-        context: buildContext(stage as ZumiStage, ctx, pct),
-        history: safeHistory,
-      });
-      return {reply: reply || FALLBACK_LINE[stage as ZumiStage]};
-    } catch {
+      const reply = await log.step(
+        'openai.converse',
+        () =>
+          converse({
+            childName: ctx.childName,
+            grade: ctx.grade,
+            context: buildContext(stage as ZumiStage, ctx, pct),
+            history: safeHistory,
+          }),
+        r => `${r.length} chars: "${r.slice(0, 60)}..."`,
+      );
+      const finalReply = reply || FALLBACK_LINE[stage as ZumiStage];
+
+      // Synthesize server-side so the client skips the zumiSpeak round trip.
+      const audioUrl = await tryGetTtsUrl(finalReply, log);
+
+      log.end({replyChars: finalReply.length, hasAudio: !!audioUrl});
+      return {reply: finalReply, audioUrl};
+    } catch (err) {
       // Never block the child's session on an AI hiccup.
-      return {reply: FALLBACK_LINE[stage as ZumiStage]};
+      log.fail(err);
+      const fallback = FALLBACK_LINE[stage as ZumiStage];
+      const audioUrl = await tryGetTtsUrl(fallback, log);
+      return {reply: fallback, audioUrl};
     }
   },
 );

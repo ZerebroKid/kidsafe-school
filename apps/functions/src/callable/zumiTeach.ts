@@ -8,6 +8,11 @@
  * line PLUS structured control fields (`phase`, `animationHint`) so the manager
  * can drive animations and know when the concept is taught (-> quiz).
  *
+ * LATENCY: after the AI reply we ALSO synthesize the line via the shared TTS
+ * cache and return `audioUrl`, so the client plays it directly instead of
+ * making a second `zumiSpeak` round trip. If TTS fails we still return the
+ * text and the client falls back to its own TTS path.
+ *
  * Auth: signed-in child of the assignment's class (see `resolveVoiceContext`).
  *
  * On any AI failure this STILL returns 200 with a safe canned Hinglish line so
@@ -17,6 +22,9 @@
 import {HttpsError, onCall} from 'firebase-functions/v2/https';
 
 import {requireAuth, requireRole} from '../lib/auth';
+import {elevenLabsApiKey} from '../lib/elevenLabs';
+import {stepLogger} from '../lib/perf';
+import {tryGetTtsUrl} from '../lib/ttsCache';
 import {
   openaiApiKey,
   teachTurn,
@@ -38,6 +46,8 @@ export interface ZumiTeachOutput {
   say: string;
   phase: TeachPhase;
   animationHint: AnimationHint;
+  /** Ready-to-play TTS URL for `say` (absent if synthesis failed). */
+  audioUrl?: string;
 }
 
 const VALID_PHASES: TeachPhase[] = [
@@ -50,8 +60,13 @@ const VALID_PHASES: TeachPhase[] = [
 ];
 
 export const zumiTeach = onCall<ZumiTeachInput, Promise<ZumiTeachOutput>>(
-  {region: 'asia-south1', minInstances: 1, secrets: [openaiApiKey]},
+  {
+    region: 'asia-south1',
+    minInstances: 1,
+    secrets: [openaiApiKey, elevenLabsApiKey],
+  },
   async request => {
+    const log = stepLogger('zumiTeach');
     const caller = requireAuth(request);
     await requireRole(caller.uid, 'child');
 
@@ -62,7 +77,21 @@ export const zumiTeach = onCall<ZumiTeachInput, Promise<ZumiTeachOutput>>(
       throw new HttpsError('invalid-argument', 'A valid phase is required.');
     }
 
-    const ctx = await resolveVoiceContext(caller.uid, assignmentId as string);
+    log.start({
+      assignmentId,
+      phase,
+      historyTurns: Array.isArray(history) ? history.length : 0,
+      lastChildLine:
+        Array.isArray(history) && history.length > 0
+          ? String(history[history.length - 1]?.content ?? '').slice(0, 80)
+          : '(none)',
+    });
+
+    const ctx = await log.step(
+      'resolveContext',
+      () => resolveVoiceContext(caller.uid, assignmentId as string),
+      c => `topic=${c.topicId} child=${c.childName || '(no name)'}`,
+    );
     const vs = ctx.voiceStory;
 
     const safeHistory: ChatTurn[] = Array.isArray(history)
@@ -78,37 +107,50 @@ export const zumiTeach = onCall<ZumiTeachInput, Promise<ZumiTeachOutput>>(
       : [];
 
     try {
-      const result = await teachTurn({
-        childName: ctx.childName,
-        grade: ctx.grade,
-        phase: phase as TeachPhase,
-        history: safeHistory,
-        material: {
-          topicName: ctx.topicName,
-          hookContext: vs.hookContext,
-          predictContext: vs.predictContext,
-          experimentInstruction: vs.experimentInstruction,
-          conceptRevealScript: vs.conceptRevealScript,
-          ncertDefinition: vs.ncertDefinition,
-          keyPoints: Array.isArray(vs.keyPoints) ? vs.keyPoints : [],
-          keywords: Array.isArray(vs.keywords) ? vs.keywords : [],
-          memoryTrick: vs.memoryTrick,
-        },
+      const result = await log.step(
+        'openai.teachTurn',
+        () =>
+          teachTurn({
+            childName: ctx.childName,
+            grade: ctx.grade,
+            phase: phase as TeachPhase,
+            history: safeHistory,
+            material: {
+              topicName: ctx.topicName,
+              hookContext: vs.hookContext,
+              predictContext: vs.predictContext,
+              experimentInstruction: vs.experimentInstruction,
+              conceptRevealScript: vs.conceptRevealScript,
+              ncertDefinition: vs.ncertDefinition,
+              keyPoints: Array.isArray(vs.keyPoints) ? vs.keyPoints : [],
+              keywords: Array.isArray(vs.keywords) ? vs.keywords : [],
+              memoryTrick: vs.memoryTrick,
+            },
+          }),
+        r => `phase=${r.phase} hint=${r.animationHint} say="${r.say.slice(0, 60)}..."`,
+      );
+
+      // Synthesize server-side so the client skips the zumiSpeak round trip.
+      const audioUrl = await tryGetTtsUrl(result.say, log);
+
+      log.end({
+        phase: result.phase,
+        animationHint: result.animationHint,
+        sayChars: result.say.length,
+        hasAudio: !!audioUrl,
       });
-      return result;
+      return {...result, audioUrl};
     } catch (err) {
       // Keep a concise error log so a future AI outage is diagnosable, but
       // never block the child's session on an AI hiccup -- keep moving forward.
-      const e = err as {message?: string; status?: number};
-      console.error('[zumiTeach] teachTurn failed', {
-        phase,
-        status: e?.status,
-        message: e?.message,
-      });
+      log.fail(err);
+      const fallbackSay = 'Arre, chalo aage badhte hai! Tum bahut accha kar rahe ho.';
+      const audioUrl = await tryGetTtsUrl(fallbackSay, log);
       return {
-        say: 'Arre, chalo aage badhte hai! Tum bahut accha kar rahe ho.',
+        say: fallbackSay,
         phase: nextPhase(phase as TeachPhase),
         animationHint: 'none',
+        audioUrl,
       };
     }
   },

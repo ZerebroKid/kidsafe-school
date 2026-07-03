@@ -55,10 +55,23 @@ interface Particle {
   emoji: string;
 }
 
-export function ZumiPlayground({state}: {state: AvatarState}) {
+export function ZumiPlayground({
+  state,
+  videoActive = false,
+}: {
+  state: AvatarState;
+  videoActive?: boolean;
+}) {
   const [particles, setParticles] = useState<Particle[]>([]);
   const nextId = useRef(0);
   const bounce = useSharedValue(1);
+  // 0 = normal centered pose, 1 = shrunk + lifted so Zumi "sits above" the
+  // explanation video. Springs both ways for a smooth up/down transition.
+  const lift = useSharedValue(0);
+
+  useEffect(() => {
+    lift.value = withSpring(videoActive ? 1 : 0, {damping: 14, stiffness: 120});
+  }, [videoActive, lift]);
 
   const spawn = useCallback((x: number, y: number) => {
     const id = nextId.current++;
@@ -83,20 +96,32 @@ export function ZumiPlayground({state}: {state: AvatarState}) {
       );
     });
 
-  const bounceStyle = useAnimatedStyle(() => ({
-    transform: [{scale: bounce.value}],
+  const avatarStyle = useAnimatedStyle(() => ({
+    transform: [
+      {translateY: lift.value * -44},
+      {scale: bounce.value * (1 - lift.value * 0.42)},
+    ],
+  }));
+
+  // Floating toys fade out during the video so they don't clutter/overlap it.
+  const toysStyle = useAnimatedStyle(() => ({
+    opacity: 1 - lift.value,
   }));
 
   return (
     <GestureDetector gesture={tap}>
       <AView style={styles.fill}>
-        <AView style={[styles.center, bounceStyle]}>
+        <AView style={[styles.center, avatarStyle]}>
           <ZumiCharacter state={state} />
         </AView>
 
-        {TOYS.map((t, i) => (
-          <DragToy key={i} emoji={t.emoji} left={t.left} top={t.top} />
-        ))}
+        <AView
+          style={[styles.fill, toysStyle]}
+          pointerEvents={videoActive ? 'none' : 'box-none'}>
+          {TOYS.map((t, i) => (
+            <DragToy key={i} emoji={t.emoji} left={t.left} top={t.top} />
+          ))}
+        </AView>
 
         {particles.map(p => (
           <SparkleParticle key={p.id} particle={p} onDone={remove} />

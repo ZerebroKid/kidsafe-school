@@ -16,7 +16,12 @@
 globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
 import {AppRegistry} from 'react-native';
+import {registerGlobals} from '@livekit/react-native';
 import messaging from '@react-native-firebase/messaging';
+
+// LiveKit (Zumi live voice sessions) needs its WebRTC globals installed before
+// any livekit-client code runs.
+registerGlobals();
 
 import App from './src/App';
 import {name as appName} from './app.json';

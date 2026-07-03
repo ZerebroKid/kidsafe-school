@@ -79,6 +79,9 @@ export {zumiEvaluateAnswer} from './callable/zumiEvaluateAnswer';
 export {zumiSpeak} from './callable/zumiSpeak';
 export {zumiTranscribe} from './callable/zumiTranscribe';
 
+// Zumi live streaming session -- LiveKit room token (agent in apps/zumi-agent)
+export {zumiLiveKitToken} from './callable/zumiLiveKitToken';
+
 // P4.10 -- reward unlock trigger (fires on quizAttempts writes)
 export {onQuizAttemptWrite} from './triggers/onQuizAttemptWrite';
 

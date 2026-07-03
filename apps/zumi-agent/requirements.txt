@@ -1,0 +1,7 @@
+livekit-agents[silero,turn-detector]~=1.2
+livekit-plugins-sarvam~=1.2
+livekit-plugins-openai~=1.2
+livekit-plugins-elevenlabs~=1.2
+livekit-plugins-noise-cancellation~=0.2
+firebase-admin~=6.5
+python-dotenv~=1.0
