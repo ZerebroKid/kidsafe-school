@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+dist/
+*.egg-info/
+
+# Firebase service account key — NEVER commit.
+service-account.json
+*serviceAccount*.json
+*service-account*.json

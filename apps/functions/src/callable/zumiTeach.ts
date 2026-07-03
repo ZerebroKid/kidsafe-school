@@ -14,17 +14,17 @@
  * the on-device session never gets stuck mid-conversation.
  */
 
-import {HttpsError, onCall} from 'firebase-functions/v2/https';
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
-import {requireAuth, requireRole} from '../lib/auth';
+import { requireAuth, requireRole } from '../lib/auth';
 import {
-  openaiApiKey,
   teachTurn,
   type AnimationHint,
   type ChatTurn,
   type TeachPhase,
 } from '../lib/zumiAi';
-import {resolveVoiceContext} from '../lib/zumiSession';
+import { resolveVoiceContext } from '../lib/zumiSession';
+import { synthesizeInline } from '../lib/elevenLabs';
 
 export interface ZumiTeachInput {
   assignmentId: string;
@@ -38,6 +38,8 @@ export interface ZumiTeachOutput {
   say: string;
   phase: TeachPhase;
   animationHint: AnimationHint;
+  audioBase64: string;
+  audioUrl?: string;
 }
 
 const VALID_PHASES: TeachPhase[] = [
@@ -50,13 +52,15 @@ const VALID_PHASES: TeachPhase[] = [
 ];
 
 export const zumiTeach = onCall<ZumiTeachInput, Promise<ZumiTeachOutput>>(
-  {region: 'asia-south1', minInstances: 1, secrets: [openaiApiKey]},
+  { region: 'asia-south1', minInstances: 1 },
   async request => {
     const caller = requireAuth(request);
     await requireRole(caller.uid, 'child');
 
-    const {assignmentId, phase, history} =
+    const { assignmentId, phase, history } =
       request.data ?? ({} as Partial<ZumiTeachInput>);
+
+    console.log('[zumiTeach] called', { uid: caller.uid, phase, historyLen: Array.isArray(history) ? history.length : 0 });
 
     if (typeof phase !== 'string' || !VALID_PHASES.includes(phase as TeachPhase)) {
       throw new HttpsError('invalid-argument', 'A valid phase is required.');
@@ -67,14 +71,14 @@ export const zumiTeach = onCall<ZumiTeachInput, Promise<ZumiTeachOutput>>(
 
     const safeHistory: ChatTurn[] = Array.isArray(history)
       ? history
-          .filter(
-            (t): t is ChatTurn =>
-              !!t &&
-              (t.role === 'user' || t.role === 'assistant') &&
-              typeof t.content === 'string',
-          )
-          .slice(-20)
-          .map(t => ({role: t.role, content: t.content.slice(0, 500)}))
+        .filter(
+          (t): t is ChatTurn =>
+            !!t &&
+            (t.role === 'user' || t.role === 'assistant') &&
+            typeof t.content === 'string',
+        )
+        .slice(-10)
+        .map(t => ({ role: t.role, content: t.content.slice(0, 500) }))
       : [];
 
     try {
@@ -95,20 +99,29 @@ export const zumiTeach = onCall<ZumiTeachInput, Promise<ZumiTeachOutput>>(
           memoryTrick: vs.memoryTrick,
         },
       });
-      return result;
+      const { audioBase64 } = await synthesizeInline(result.say);
+      console.log('[zumiTeach] AI success', { phase: result.phase, hint: result.animationHint, sayLen: result.say.length, preview: result.say.slice(0, 80) });
+      return { ...result, audioBase64 };
     } catch (err) {
       // Keep a concise error log so a future AI outage is diagnosable, but
       // never block the child's session on an AI hiccup -- keep moving forward.
-      const e = err as {message?: string; status?: number};
+      const e = err as { message?: string; status?: number };
       console.error('[zumiTeach] teachTurn failed', {
         phase,
         status: e?.status,
         message: e?.message,
       });
+      const fallbackSay = 'Arre, chalo aage badhte hai! Tum bahut accha kar rahe ho.';
+      let audioBase64 = '';
+      try {
+        const inline = await synthesizeInline(fallbackSay);
+        audioBase64 = inline.audioBase64;
+      } catch { /* proceed without audio */ }
       return {
-        say: 'Arre, chalo aage badhte hai! Tum bahut accha kar rahe ho.',
+        say: fallbackSay,
         phase: nextPhase(phase as TeachPhase),
         animationHint: 'none',
+        audioBase64,
       };
     }
   },

@@ -15,6 +15,15 @@
 // so the deprecation tracker sees it during module init.
 globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
+// LiveKit WebRTC polyfills — MUST run before any livekit-client import.
+import {registerGlobals} from '@livekit/react-native';
+registerGlobals();
+
+// Enable LiveKit WebRTC voice mode for Zumi in dev builds.
+if (__DEV__) {
+  globalThis.__ZUMI_VOICE_MODE = 'livekit';
+}
+
 import {AppRegistry} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 

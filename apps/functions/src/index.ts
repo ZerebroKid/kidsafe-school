@@ -79,6 +79,13 @@ export {zumiEvaluateAnswer} from './callable/zumiEvaluateAnswer';
 export {zumiSpeak} from './callable/zumiSpeak';
 export {zumiTranscribe} from './callable/zumiTranscribe';
 
+// Zumi Phase 2 -- SSE streaming endpoint (LLM -> sentence buffer -> parallel TTS)
+// Replaces the sequential callable chain to hit ~500-800ms TTFA.
+export {zumiStream} from './http/zumiStream';
+
+// Zumi Phase 3 -- LiveKit WebRTC token + agent dispatch
+export {zumiLiveKitToken} from './callable/zumiLiveKitToken';
+
 // P4.10 -- reward unlock trigger (fires on quizAttempts writes)
 export {onQuizAttemptWrite} from './triggers/onQuizAttemptWrite';
 

@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   AppState,
   BackHandler,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -29,6 +30,7 @@ import {colors, radius, spacing} from '../../theme';
 import type {StudyStackParamList} from '../../navigation/types';
 import {
   ZumiSessionManager,
+  ZUMI_VOICE_MODE,
   type AvatarState,
   type SessionState,
 } from '../../services/zumi/zumiSessionManager';
@@ -78,11 +80,21 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
   );
   const [done, setDone] = useState<DoneInfo | null>(null);
   const [sessionError, setSessionError] = useState<string | null>(null);
+  const [debugLog, setDebugLog] = useState<string[]>([]);
+  const [debugOpen, setDebugOpen] = useState(true);
 
   const managerRef = useRef<ZumiSessionManager | null>(null);
   const startedRef = useRef(false);
   const closedRef = useRef(false);
   const bubbleScrollRef = useRef<ScrollView | null>(null);
+
+  // Mirror sessionState into a ref so the AppState listener can read the live
+  // value without re-subscribing. Used to ignore transient backgrounding while
+  // the LiveKit connection is still being established.
+  const sessionStateRef = useRef<SessionState>('init');
+  useEffect(() => {
+    sessionStateRef.current = sessionState;
+  }, [sessionState]);
 
   // Reset the bubble scroll to the top whenever Zumi says a new line, so the
   // child always sees the start of a long script rather than a mid-scroll
@@ -153,6 +165,9 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
           case 'error':
             setSessionError(event.message);
             break;
+          case 'debug':
+            setDebugLog(prev => [`[${new Date().toLocaleTimeString()}] ${event.message}`, ...prev].slice(0, 30));
+            break;
         }
       },
     );
@@ -198,8 +213,20 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
   // Backgrounding/closing the app also fully ends the session (Android keeps
   // audio playing otherwise).
   useEffect(() => {
+    // In LiveKit (WebRTC) mode the session lives on a persistent connection and
+    // the agent holds the conversation state. Transient backgrounding (screen
+    // sleeping, a system app grabbing focus, the mic/assistant service) must NOT
+    // tear it down — LiveKit keeps the connection alive and reconnects. We only
+    // end the session on an explicit exit (X / back / unmount). The legacy
+    // on-device pipeline still stops on background to save battery/audio.
+    if (ZUMI_VOICE_MODE === 'livekit') return;
     const sub = AppState.addEventListener('change', state => {
-      if (state === 'background') closeSession(true);
+      // While the session is still connecting ('init'), the Android mic
+      // permission dialog can briefly background the app. Ignore that so it
+      // doesn't tear down the in-flight connection.
+      if (state === 'background' && sessionStateRef.current !== 'init') {
+        closeSession(true);
+      }
     });
     return () => sub.remove();
   }, [closeSession]);
@@ -267,6 +294,27 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
           <Text style={styles.close}>✕</Text>
         </Pressable>
       </View>
+
+      {__DEV__ && (
+        <View style={styles.debugPanel}>
+          <Pressable onPress={() => setDebugOpen(o => !o)} style={styles.debugHeader}>
+            <Text style={styles.debugTitle}>🐛 DEBUG {debugOpen ? '▲' : '▼'}</Text>
+            <Text style={styles.debugMeta}>
+              state={sessionState} | avatar={avatar} | mic={listening ? (listenMode === 'auto' ? 'auto' : 'tap') : 'off'} | transcribing={String(transcribing)}
+            </Text>
+          </Pressable>
+          {debugOpen && (
+            <ScrollView style={styles.debugScroll} nestedScrollEnabled>
+              {debugLog.map((line, i) => (
+                <Text key={i} style={styles.debugLine}>{line}</Text>
+              ))}
+              {debugLog.length === 0 && (
+                <Text style={styles.debugLine}>(no events yet)</Text>
+              )}
+            </ScrollView>
+          )}
+        </View>
+      )}
 
       <View style={styles.stage}>
         <View style={styles.orbZone}>
@@ -536,4 +584,40 @@ const styles = StyleSheet.create({
   },
   doneScore: {fontSize: 44, fontWeight: '800', color: ACCENT},
   doneTitle: {fontSize: 24, fontWeight: '800', color: colors.text},
+  // DEV debug overlay
+  debugPanel: {
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    borderRadius: 8,
+    marginTop: 4,
+    overflow: 'hidden',
+  },
+  debugHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  debugTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#22d3ee',
+  },
+  debugMeta: {
+    flex: 1,
+    fontSize: 10,
+    color: '#a1a1aa',
+    fontFamily: Platform.OS === 'android' ? 'monospace' : 'Menlo',
+  },
+  debugScroll: {
+    maxHeight: 120,
+    paddingHorizontal: 10,
+    paddingBottom: 6,
+  },
+  debugLine: {
+    fontSize: 10,
+    color: '#d4d4d8',
+    fontFamily: Platform.OS === 'android' ? 'monospace' : 'Menlo',
+    lineHeight: 14,
+  },
 });

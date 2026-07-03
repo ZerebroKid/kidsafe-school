@@ -84,10 +84,17 @@ android {
     defaultConfig {
         applicationId "com.kidsafe.kids"
         minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
+
+        // Restrict to 64-bit + 32-bit ARM for release; x86_64 is emulator-only.
+        // NDK 26+ compiles arm64-v8a with 16KB-aligned ELF segments automatically
+        // when useLegacyPackaging = false is set in jniLibs below.
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
+        }
     }
     signingConfigs {
         debug {
@@ -112,6 +119,14 @@ android {
 
     packagingOptions {
         pickFirst '**/libc++_shared.so'
+        // 16KB page-size support (Android 15 / API 35).
+        // useLegacyPackaging = false tells the AGP packager to keep the
+        // native libraries uncompressed in the APK so the OS can mmap them
+        // directly with the correct 16KB-aligned offsets rather than
+        // extracting to a 4KB-aligned temp location.
+        jniLibs {
+            useLegacyPackaging = false
+        }
     }
 }
 

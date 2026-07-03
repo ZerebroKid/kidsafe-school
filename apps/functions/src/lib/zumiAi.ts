@@ -3,8 +3,9 @@
  *
  * The child app never holds the key; it calls the `zumiConverse` / `zumiTeach` /
  * `zumiEvaluateAnswer` callables, which call into here. The key is injected at
- * runtime via `defineSecret('OPENAI_API_KEY')` (same pattern as Razorpay in
- * `razorpay.ts`) so it never lives in source or in the client bundle.
+ * runtime from `process.env.OPENAI_API_KEY`, populated via a `.env` file in
+ * the functions project root (Firebase Functions v2 loads it automatically
+ * on deploy and in the emulator -- no Secret Manager binding needed).
  *
  * We use the official `openai` SDK (Chat Completions). gpt-4o-mini is a strong,
  * fast, low-cost fit for Zumi's Hinglish + Indic tone and supports JSON
@@ -28,15 +29,11 @@
  * session moving -- a child is never stuck).
  */
 
-import {defineSecret} from 'firebase-functions/params';
 import OpenAI from 'openai';
 
-/** OpenAI API key. Set once with: `firebase functions:secrets:set OPENAI_API_KEY`. */
-export const openaiApiKey = defineSecret('OPENAI_API_KEY');
-
 // gpt-4o-mini: fast, low-cost, strong Hinglish, supports JSON structured output.
-// If you want a stronger model, change ONLY this line (e.g. 'gpt-4.1-mini').
-const MODEL = 'gpt-4o-mini';
+// Override via `LLM_MODEL` in .env without a code change (e.g. 'gpt-4.1-mini').
+const MODEL = process.env.LLM_MODEL || 'gpt-4o-mini';
 const REQUEST_TIMEOUT_MS = 12_000;
 
 export type ChatRole = 'system' | 'user' | 'assistant';
@@ -55,13 +52,13 @@ export interface EvalResult {
   feedback: string;
 }
 
-/** Lazy OpenAI client. The key is only available at runtime via the secret. */
+/** Lazy OpenAI client. The key is only available at runtime via process.env. */
 let clientSingleton: OpenAI | null = null;
 function client(): OpenAI {
   if (clientSingleton) return clientSingleton;
-  const apiKey = openaiApiKey.value();
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error('OPENAI_API_KEY secret is not configured.');
+    throw new Error('OPENAI_API_KEY is not set. Check your .env file.');
   }
   clientSingleton = new OpenAI({
     apiKey,
@@ -94,28 +91,28 @@ export interface ConverseParams {
  * e.g. the opening greeting).
  */
 export async function converse(params: ConverseParams): Promise<string> {
-  const {childName, grade, context, history} = params;
+  const { childName, grade, context, history } = params;
   const safeName = sanitizeName(childName);
   const nameClause = safeName
     ? `${safeName} ka pyaara AI dost`
     : `ek bachche ka pyaara AI dost (tujhe abhi bachche ka naam nahi pata -- pehle unse puchh aur fir uska naam use kar)`;
   const system =
     `Tu Zumi hai -- ${nameClause}. Wo class ${grade} mein hai. ` +
-    `Hamesha Hinglish (Roman script) mein baat kar, max 2-3 chhote simple sentences. ` +
+    `Hamesha Hinglish (Roman script) mein baat kar, max 1-2 chhote simple sentences (strictly under 100 characters). ` +
     `Warm, playful aur encouraging reh. Kabhi daanto mat. Koi emoji ya markdown mat use kar. ` +
     `Current goal: ${context}`;
 
   const messages: ChatTurn[] = [
-    {role: 'system', content: system},
+    { role: 'system', content: system },
     ...(history.length > 0
       ? history
-      : [{role: 'user' as const, content: '(start)'}]),
+      : [{ role: 'user' as const, content: '(start)' }]),
   ];
 
   const res = await client().chat.completions.create({
     model: MODEL,
     messages,
-    max_tokens: 200,
+    max_tokens: 100,
     temperature: 0.85,
   });
   const reply = res.choices?.[0]?.message?.content?.trim() ?? '';
@@ -213,7 +210,7 @@ const TEACH_SCHEMA = {
  * KNOWLEDGE/GOALS, never as a script to read verbatim.
  */
 export async function teachTurn(params: TeachParams): Promise<TeachResult> {
-  const {childName, grade, material, phase, history} = params;
+  const { childName, grade, material, phase, history } = params;
   const safeName = sanitizeName(childName);
   const nameClause = safeName
     ? `Bachche ka naam ${safeName} hai.`
@@ -221,12 +218,13 @@ export async function teachTurn(params: TeachParams): Promise<TeachResult> {
 
   const system =
     `Tu Zumi hai -- ek class ${grade} bachche ka pyaara, mazaakiya, super-energetic AI dost. ${nameClause} ` +
-    `Tu Hinglish (Roman script) mein baat karta hai, hamesha 1-3 chhote simple sentences, ` +
+    `Tu Hinglish (Roman script) mein baat karta hai, hamesha 1-2 chhote simple sentences (strictly under 120 characters total), ` +
     `aur har turn EXACTLY ek hi sawaal/invite pe khatam karta hai taaki bachcha bole. ` +
     `Koi emoji ya markdown mat use kar.\n\n` +
-    `SABSE ZARURI -- HOOK: Bachche ko pehle second se baandh ke rakhna hai. Suspense, mystery, ` +
-    `"guess karo!", chhote challenges, funny twists, "pataa hai kya hua?!" jaisa drama use kar. ` +
-    `Boring ya lecture-y bilkul mat ho. Har turn curiosity badhaye -- bachcha sochta rahe "aage kya?".\n\n` +
+    `SABSE ZARURI -- HOOK & VARIETY: Bachche ko pehle second se baandh ke rakhna hai. Suspense, mystery, ` +
+    `"guess karo!", funny twists, "pataa hai kya hua?!" jaisa drama use kar. ` +
+    `Har turn mein bilkul naye aur alag type ke creative questions/prompts poochho (jaise riddles, rapid predictions, quick word games, or funny scenarios). ` +
+    `Repetitive or lecture-style questions bilkul mat pucho. Har baar child ko surprise karo.\n\n` +
     `GOAL (chhupa hua): Bachche ko aise padhana hai ki use bilkul na lage ki wo padh raha hai. ` +
     `Pehle dost ki tarah baat karo, fir baaton-baaton mein topic pe le aao, ` +
     `aur aise guide karo ki bachcha khud concept "discover" kar le. Teacher mat bano. ` +
@@ -258,18 +256,18 @@ export async function teachTurn(params: TeachParams): Promise<TeachResult> {
     `wapas conversation mein laao -- ruko mat, repeat mat karo.`;
 
   const messages: ChatTurn[] = [
-    {role: 'system', content: system},
+    { role: 'system', content: system },
     ...(history.length > 0
       ? history
-      : [{role: 'user' as const, content: '(start the lesson)'}]),
+      : [{ role: 'user' as const, content: '(start the lesson)' }]),
   ];
 
   const res = await client().chat.completions.create({
     model: MODEL,
     messages,
-    max_tokens: 220,
+    max_tokens: 120,
     temperature: 0.9,
-    response_format: {type: 'json_schema', json_schema: TEACH_SCHEMA},
+    response_format: { type: 'json_schema', json_schema: TEACH_SCHEMA },
   });
 
   const raw = res.choices?.[0]?.message?.content ?? '';
@@ -311,9 +309,9 @@ function parseTeach(raw: string, currentPhase: TeachPhase): TeachResult {
     const animationHint = hints.includes(obj.animationHint as AnimationHint)
       ? (obj.animationHint as AnimationHint)
       : 'none';
-    return {say, phase, animationHint};
+    return { say, phase, animationHint };
   } catch {
-    return {say: raw.trim() || '...', phase: currentPhase, animationHint: 'none'};
+    return { say: raw.trim() || '...', phase: currentPhase, animationHint: 'none' };
   }
 }
 
@@ -333,8 +331,8 @@ const EVAL_SCHEMA = {
     type: 'object',
     additionalProperties: false,
     properties: {
-      result: {type: 'string', enum: ['correct', 'partial', 'incorrect']},
-      reasoning: {type: 'string'},
+      result: { type: 'string', enum: ['correct', 'partial', 'incorrect'] },
+      reasoning: { type: 'string' },
       feedback: {
         type: 'string',
         description:
@@ -353,7 +351,7 @@ const EVAL_SCHEMA = {
 export async function evaluateAnswer(
   params: EvaluateParams,
 ): Promise<EvalResult> {
-  const {childName, grade, questionText, expectedConcepts, correctIndicator, transcript} =
+  const { childName, grade, questionText, expectedConcepts, correctIndicator, transcript } =
     params;
 
   const clean = (transcript ?? '').trim();
@@ -373,16 +371,16 @@ export async function evaluateAnswer(
     `What counts as correct: "${correctIndicator}".\n` +
     `The child said: "${clean}".\n` +
     `Be lenient with spelling, Hinglish, and child phrasing -- judge the idea, not the words. ` +
-    `For "feedback": react to what the child ACTUALLY said. If wrong, gently say it was not right ` +
-    `(never scold) and give the correct idea simply. If correct, celebrate. Return JSON {result, reasoning, feedback}.`;
+    `For "feedback": react to what the child ACTUALLY said. Keep feedback strictly under 100 characters (max 1-2 sentences). ` +
+    `If wrong, gently say it was not right (never scold) and give the correct idea simply. If correct, celebrate. Return JSON {result, reasoning, feedback}.`;
 
   try {
     const res = await client().chat.completions.create({
       model: MODEL,
-      messages: [{role: 'user', content: prompt}],
-      max_tokens: 120,
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 100,
       temperature: 0.1,
-      response_format: {type: 'json_schema', json_schema: EVAL_SCHEMA},
+      response_format: { type: 'json_schema', json_schema: EVAL_SCHEMA },
     });
     const raw = res.choices?.[0]?.message?.content ?? '';
     const parsed = parseEval(raw);
@@ -447,4 +445,231 @@ function defaultFeedback(result: EvalVerdict): string {
 /** Strip anything weird from the child's name before putting it in a prompt. */
 function sanitizeName(name: string): string {
   return (name ?? '').trim().slice(0, 40);
+}
+
+// ---------------------------------------------------------------------------
+// Control JSON parsers — used by the streaming pipeline to extract structured
+// fields from the trailing <<<{...}>>> block emitted by streaming models.
+// ---------------------------------------------------------------------------
+
+/** Parse the trailing control JSON from a streaming teach turn response. */
+export function parseTeachControl(
+  json: string | null,
+  currentPhase: TeachPhase,
+): { phase: TeachPhase; animationHint: AnimationHint } {
+  const phases: TeachPhase[] = [
+    'warmup', 'hook', 'explore', 'explain', 'check', 'ready_for_quiz',
+  ];
+  const hints: AnimationHint[] = [
+    'none', 'experiment', 'visualize', 'reveal', 'celebrate', 'trap',
+  ];
+  if (!json) return { phase: currentPhase, animationHint: 'none' };
+  try {
+    const obj = JSON.parse(json.trim()) as { phase?: unknown; animationHint?: unknown };
+    return {
+      phase: phases.includes(obj.phase as TeachPhase)
+        ? (obj.phase as TeachPhase)
+        : currentPhase,
+      animationHint: hints.includes(obj.animationHint as AnimationHint)
+        ? (obj.animationHint as AnimationHint)
+        : 'none',
+    };
+  } catch {
+    return { phase: currentPhase, animationHint: 'none' };
+  }
+}
+
+/** Parse the trailing control JSON from a streaming evaluate response. */
+export function parseEvalControl(
+  json: string | null,
+): { result: EvalVerdict; reasoning: string; score: number } {
+  if (!json) {
+    return { result: 'incorrect', reasoning: 'parse-failed', score: 0 };
+  }
+  try {
+    const obj = JSON.parse(json.trim()) as { result?: unknown; reasoning?: unknown };
+    const result: EvalVerdict =
+      obj.result === 'correct' || obj.result === 'partial'
+        ? (obj.result as EvalVerdict)
+        : 'incorrect';
+    return {
+      result,
+      score: scoreForVerdict(result),
+      reasoning: typeof obj.reasoning === 'string' ? obj.reasoning.slice(0, 280) : 'stream',
+    };
+  } catch {
+    return { result: 'incorrect', reasoning: 'parse-failed', score: 0 };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Streaming variants — used by the zumiStream SSE endpoint (Phase 2).
+// Each generator yields token deltas so the caller can pipe them to the
+// SSE response without waiting for the full completion.
+// ---------------------------------------------------------------------------
+
+/**
+ * Stream a `converse()` reply token by token. The caller accumulates the
+ * stream and may begin TTS on the first complete sentence before the model
+ * has finished generating the rest.
+ */
+export async function* converseStream(
+  params: ConverseParams,
+): AsyncGenerator<string> {
+  const { childName, grade, context, history } = params;
+  const safeName = sanitizeName(childName);
+  const nameClause = safeName
+    ? `${safeName} ka pyaara AI dost`
+    : `ek bachche ka pyaara AI dost (tujhe abhi bachche ka naam nahi pata -- pehle unse puchh aur fir uska naam use kar)`;
+  const system =
+    `Tu Zumi hai -- ${nameClause}. Wo class ${grade} mein hai. ` +
+    `Hamesha Hinglish (Roman script) mein baat kar, max 1-2 chhote simple sentences (strictly under 100 characters). ` +
+    `Warm, playful aur encouraging reh. Kabhi daanto mat. Koi emoji ya markdown mat use kar. ` +
+    `Current goal: ${context}`;
+
+  const messages: ChatTurn[] = [
+    { role: 'system', content: system },
+    ...(history.length > 0
+      ? history
+      : [{ role: 'user' as const, content: '(start)' }]),
+  ];
+
+  const stream = await client().chat.completions.create({
+    model: MODEL,
+    messages,
+    max_tokens: 100,
+    temperature: 0.85,
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const delta = chunk.choices?.[0]?.delta?.content ?? '';
+    if (delta) yield delta;
+  }
+}
+
+/**
+ * Stream a `teachTurn()` reply token by token. Unlike the batch version, the
+ * streaming version cannot use `response_format: json_schema` (structured output
+ * requires non-streaming mode). Instead, the prompt instructs the model to emit
+ * the spoken text first (plain Hinglish), followed by a JSON control block on
+ * its own line: `<<<{"phase":"...","animationHint":"..."}>>>`. The caller's
+ * sentence buffer reads plain text until it sees `<<<`, then parses the control
+ * fields and fires a `control` SSE event.
+ */
+export async function* teachTurnStream(
+  params: TeachParams,
+): AsyncGenerator<string> {
+  const { childName, grade, material, phase, history } = params;
+  const safeName = sanitizeName(childName);
+  const nameClause = safeName
+    ? `Bachche ka naam ${safeName} hai.`
+    : `Tujhe bachche ka naam abhi nahi pata; agar pata chale toh use kar.`;
+
+  const system =
+    `Tu Zumi hai -- ek class ${grade} bachche ka pyaara, mazaakiya, super-energetic AI dost. ${nameClause} ` +
+    `Tu Hinglish (Roman script) mein baat karta hai, hamesha 1-2 chhote simple sentences (strictly under 120 characters total), ` +
+    `aur har turn EXACTLY ek hi sawaal/invite pe khatam karta hai taaki bachcha bole. ` +
+    `Koi emoji ya markdown mat use kar.\n\n` +
+    `SABSE ZARURI -- HOOK & VARIETY: Bachche ko pehle second se baandh ke rakhna hai. Suspense, mystery, ` +
+    `"guess karo!", funny twists, "pataa hai kya hua?!" jaisa drama use kar. ` +
+    `Har turn mein bilkul naye aur alag type ke creative questions/prompts poochho (jaise riddles, rapid predictions, quick word games, or funny scenarios). ` +
+    `Repetitive or lecture-style questions bilkul mat pucho. Har baar child ko surprise karo.\n\n` +
+    `GOAL (chhupa hua): Bachche ko aise padhana hai ki use bilkul na lage ki wo padh raha hai. ` +
+    `Pehle dost ki tarah baat karo, fir baaton-baaton mein topic pe le aao, ` +
+    `aur aise guide karo ki bachcha khud concept "discover" kar le. Teacher mat bano. ` +
+    `Har baar bachche ki EXACT baat pe react karo (uski cheez repeat karke, excited hoke), fir aage badho. ` +
+    `Kabhi same sawaal/line dobara mat bolo.\n\n` +
+    `CREATIVE FREEDOM: Neeche ka content sirf TERA gyaan + lesson goal hai -- ise word-by-word ` +
+    `MAT padho aur blindly follow MAT karo. Apni khud ki real-life examples, kahaniyan, jokes bana ` +
+    `sakta hai, jab tak concept aur memory trick bachche ko clear ho jaye.\n` +
+    `TOPIC: ${material.topicName}\n` +
+    `- Real-life hook idea: ${material.hookContext}\n` +
+    `- Guess karwane ka mauka: ${material.predictContext}\n` +
+    `- Chhota experiment: ${material.experimentInstruction}\n` +
+    `- Concept (jo bachche ko samajhna hai): ${material.conceptRevealScript}\n` +
+    `- Sahi (exam) definition: ${material.ncertDefinition}\n` +
+    `- Key points: ${material.keyPoints.join(' | ')}\n` +
+    `- Keywords (natural tarike se daalo): ${material.keywords.join(', ')}\n` +
+    `- Memory trick: ${material.memoryTrick}\n\n` +
+    `PHASES (in order): warmup (sirf 1 chhota turn -- naam/mood, fir turant hook pe jao) -> ` +
+    `hook (real-life kahani/mystery, drama) -> explore (guess + experiment, bachcha sochta hai) -> ` +
+    `explain (concept clear ho jaye, keywords + memory trick aaye) -> check (chhota sa samajh-check, ` +
+    `lecture nahi) -> ready_for_quiz. Abhi phase: "${phase}". Jab tak current phase ka kaam pura na ho, ` +
+    `aage mat badho. ready_for_quiz tabhi do jab bachche ko concept samajh aa gaya ho AUR memory trick sun chuka ho.\n\n` +
+    `ANIMATION: animationHint se screen pe visual chalega -- ise sahi mauke pe use kar: ` +
+    `"visualize" jab cheezein groups/sort dikhane ho ya concept dikhana ho; "experiment" jab koi ` +
+    `activity/messy cheez ho; "reveal" jab bada concept reveal ho; "celebrate" jab bachcha accha kare; ` +
+    `warna "none". Jab bhi kuch dikhane layak ho, animation zaroor bhej.\n\n` +
+    `IMPORTANT FORMAT: Pehle sirf Zumi ka spoken Hinglish line likho (koi JSON nahi). ` +
+    `Phir EXACTLY ek blank line chhodke control JSON likho is format mein: ` +
+    `<<<{"phase":"...","animationHint":"..."}>>> (valid phases: warmup, hook, explore, explain, check, ready_for_quiz; ` +
+    `valid hints: none, experiment, visualize, reveal, celebrate, trap). ` +
+    `Do NOT mix JSON and spoken text on the same line.`;
+
+  const messages: ChatTurn[] = [
+    { role: 'system', content: system },
+    ...(history.length > 0
+      ? history
+      : [{ role: 'user' as const, content: '(start the lesson)' }]),
+  ];
+
+  const stream = await client().chat.completions.create({
+    model: MODEL,
+    messages,
+    max_tokens: 150,
+    temperature: 0.9,
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const delta = chunk.choices?.[0]?.delta?.content ?? '';
+    if (delta) yield delta;
+  }
+}
+
+/**
+ * Stream an `evaluateAnswer()` reply. Uses the same prompt as the batch version
+ * but streams tokens. The caller reads until `<<<` prefix, then parses the
+ * control JSON for result/reasoning; the plain text before is the feedback line.
+ *
+ * Format emitted: `<feedback text>\n<<<{"result":"...","reasoning":"..."}>>>`
+ */
+export async function* evaluateStream(
+  params: EvaluateParams,
+): AsyncGenerator<string> {
+  const { childName, grade, questionText, expectedConcepts, correctIndicator, transcript } =
+    params;
+
+  const clean = (transcript ?? '').trim();
+  if (clean.length === 0) {
+    // Short-circuit: no speech — yield canned response in streaming format.
+    yield 'Arre, mujhe sunai nahi diya! Koi baat nahi, agli baar zaroor batana!';
+    yield '\n<<<{"result":"incorrect","reasoning":"no-speech"}>>>';
+    return;
+  }
+
+  const safeName = sanitizeName(childName);
+  const prompt =
+    `A class ${grade} child${safeName ? ` named ${safeName}` : ''} was asked (Hinglish): "${questionText}".\n` +
+    `Concepts a good answer includes: ${JSON.stringify(expectedConcepts)}.\n` +
+    `What counts as correct: "${correctIndicator}".\n` +
+    `The child said: "${clean}".\n` +
+    `Be lenient with spelling, Hinglish, and child phrasing -- judge the idea, not the words.\n\n` +
+    `IMPORTANT FORMAT: First write Zumi's warm Hinglish feedback (1-2 sentences, strictly under 100 chars, no emoji, react to what the child ACTUALLY said). ` +
+    `Then on a new line write: <<<{"result":"correct|partial|incorrect","reasoning":"<brief>"}>>> ` +
+    `(result is correct/partial/incorrect; be lenient with phrasing). Do NOT mix them.`;
+
+  const stream = await client().chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: 120,
+    temperature: 0.1,
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const delta = chunk.choices?.[0]?.delta?.content ?? '';
+    if (delta) yield delta;
+  }
 }

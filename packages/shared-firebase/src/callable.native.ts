@@ -19,15 +19,28 @@
  */
 
 import functions from '@react-native-firebase/functions';
+import { Platform } from 'react-native';
 
 const FUNCTIONS_REGION = 'asia-south1';
+// Android emulator reaches the host machine via 10.0.2.2, not 127.0.0.1.
+const EMULATOR_HOST = Platform.OS === 'android' ? '10.0.2.2' : '127.0.0.1';
+const EMULATOR_PORT = 5001;
+
+let emulatorConnected = false;
+
+function getFunctionsInstance() {
+  const fn = functions().app.functions(FUNCTIONS_REGION);
+  if (!emulatorConnected && __DEV__) {
+    fn.useEmulator(EMULATOR_HOST, EMULATOR_PORT);
+    emulatorConnected = true;
+  }
+  return fn;
+}
 
 export async function callFn<TIn, TOut>(
   name: string,
   payload: TIn,
 ): Promise<TOut> {
-  const result = await functions()
-    .app.functions(FUNCTIONS_REGION)
-    .httpsCallable(name)(payload);
+  const result = await getFunctionsInstance().httpsCallable(name)(payload);
   return result.data as TOut;
 }

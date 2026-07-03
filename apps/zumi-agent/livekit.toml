@@ -1,0 +1,3 @@
+[agent]
+name = "zumi-voice-agent"
+entrypoint = "agent.py"

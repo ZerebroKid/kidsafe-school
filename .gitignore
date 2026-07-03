@@ -105,3 +105,17 @@ ui-debug.log
 # Don't commit large binaries; share via Drive/App Distribution instead.
 *.apk
 android/app/src/main/assets/index.android.bundle
+
+# Cursor session/debug artifacts
+.cursor/
+
+# Local Gradle home + Kotlin build junk (custom cache dirs)
+apps/kids/android/.gradle-home/
+**/.kotlin/
+
+# Zumi Python agent runtime logs
+apps/zumi-agent/*.log
+
+# Stray npm lockfiles (this repo uses pnpm)
+package-lock.json
+**/package-lock.json

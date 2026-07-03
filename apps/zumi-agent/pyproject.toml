@@ -1,0 +1,17 @@
+[project]
+name = "zumi-agent"
+version = "0.1.0"
+description = "Zumi real-time voice teaching agent — LiveKit + Deepgram + OpenAI + Cartesia"
+requires-python = ">=3.11"
+dependencies = [
+    "livekit-agents[deepgram,openai,cartesia,silero]",
+    "firebase-admin",
+    "python-dotenv",
+]
+
+[tool.setuptools]
+py-modules = ["agent", "context_loader", "events", "prompts"]
+packages = ["tools"]
+
+[project.scripts]
+zumi-agent = "agent:main"

@@ -38,4 +38,17 @@ baseConfig.resolver.disableHierarchicalLookup = true;
 baseConfig.resolver.unstable_enablePackageExports = true;
 baseConfig.resolver.unstable_conditionNames = ['react-native', 'require', 'default'];
 
-module.exports = mergeConfig(baseConfig, {});
+module.exports = mergeConfig(baseConfig, {
+  // Exclude all Gradle build-output directories from the file watcher.
+  // On Windows, Metro's FallbackWatcher throws ENOENT if these directories
+  // don't exist yet (they are created on first `./gradlew assembleDebug`).
+  // Blocking them here is safe — Metro only needs to watch JS/TS source files.
+  resolver: {
+    blockList: [
+      // App-level Android build outputs
+      /.*[/\\]android[/\\]build[/\\].*/,
+      // node_modules Android build outputs (async-storage, reanimated, mmkv …)
+      /.*[/\\]node_modules[/\\].*[/\\]android[/\\]build[/\\].*/,
+    ],
+  },
+});

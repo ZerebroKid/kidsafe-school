@@ -32,4 +32,20 @@ baseConfig.resolver.disableHierarchicalLookup = true;
 baseConfig.resolver.unstable_enablePackageExports = true;
 baseConfig.resolver.unstable_conditionNames = ['react-native', 'require', 'default'];
 
-module.exports = mergeConfig(baseConfig, {});
+module.exports = mergeConfig(baseConfig, {
+  // Use port 8082 so guardian Metro runs in parallel with zkid (port 8081).
+  server: {
+    port: 8082,
+  },
+
+  // Exclude all Gradle build-output directories from the file watcher.
+  // On Windows, Metro's FallbackWatcher throws ENOENT if these directories
+  // don't exist yet (created on first Gradle build). Blocking them is safe —
+  // Metro only needs to watch JS/TS source files.
+  resolver: {
+    blockList: [
+      /.*[/\\]android[/\\]build[/\\].*/,
+      /.*[/\\]node_modules[/\\].*[/\\]android[/\\]build[/\\].*/,
+    ],
+  },
+});

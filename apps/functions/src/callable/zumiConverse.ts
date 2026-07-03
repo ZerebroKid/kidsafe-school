@@ -14,11 +14,12 @@
  * the on-device session never gets stuck mid-conversation.
  */
 
-import {HttpsError, onCall} from 'firebase-functions/v2/https';
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
 
-import {requireAuth, requireRole} from '../lib/auth';
-import {openaiApiKey, converse, type ChatTurn} from '../lib/zumiAi';
-import {resolveVoiceContext} from '../lib/zumiSession';
+import { requireAuth, requireRole } from '../lib/auth';
+import { converse, type ChatTurn } from '../lib/zumiAi';
+import { resolveVoiceContext } from '../lib/zumiSession';
+import { synthesizeInline } from '../lib/elevenLabs';
 
 export type ZumiStage = 'greeting' | 'closing';
 
@@ -33,6 +34,8 @@ export interface ZumiConverseInput {
 
 export interface ZumiConverseOutput {
   reply: string;
+  audioBase64: string;
+  audioUrl?: string;
 }
 
 const FALLBACK_LINE: Record<ZumiStage, string> = {
@@ -72,13 +75,15 @@ export const zumiConverse = onCall<
   ZumiConverseInput,
   Promise<ZumiConverseOutput>
 >(
-  {region: 'asia-south1', minInstances: 1, secrets: [openaiApiKey]},
+  { region: 'asia-south1', minInstances: 1 },
   async request => {
     const caller = requireAuth(request);
     await requireRole(caller.uid, 'child');
 
-    const {assignmentId, stage, history, scorePercent} =
+    const { assignmentId, stage, history, scorePercent } =
       request.data ?? ({} as Partial<ZumiConverseInput>);
+
+    console.log('[zumiConverse] called', { uid: caller.uid, stage, historyLen: Array.isArray(history) ? history.length : 0 });
 
     const validStages: ZumiStage[] = ['greeting', 'closing'];
     if (typeof stage !== 'string' || !validStages.includes(stage as ZumiStage)) {
@@ -89,14 +94,14 @@ export const zumiConverse = onCall<
 
     const safeHistory: ChatTurn[] = Array.isArray(history)
       ? history
-          .filter(
-            (t): t is ChatTurn =>
-              !!t &&
-              (t.role === 'user' || t.role === 'assistant') &&
-              typeof t.content === 'string',
-          )
-          .slice(-8)
-          .map(t => ({role: t.role, content: t.content.slice(0, 500)}))
+        .filter(
+          (t): t is ChatTurn =>
+            !!t &&
+            (t.role === 'user' || t.role === 'assistant') &&
+            typeof t.content === 'string',
+        )
+        .slice(-8)
+        .map(t => ({ role: t.role, content: t.content.slice(0, 500) }))
       : [];
 
     const pct =
@@ -111,10 +116,20 @@ export const zumiConverse = onCall<
         context: buildContext(stage as ZumiStage, ctx, pct),
         history: safeHistory,
       });
-      return {reply: reply || FALLBACK_LINE[stage as ZumiStage]};
-    } catch {
+      const resolvedReply = reply || FALLBACK_LINE[stage as ZumiStage];
+      console.log('[zumiConverse] AI success', { stage, replyLen: resolvedReply.length, preview: resolvedReply.slice(0, 80) });
+      const { audioBase64 } = await synthesizeInline(resolvedReply);
+      return { reply: resolvedReply, audioBase64 };
+    } catch (err) {
+      console.error('[zumiConverse] AI failed, using fallback', { stage, error: (err as Error)?.message ?? err });
       // Never block the child's session on an AI hiccup.
-      return {reply: FALLBACK_LINE[stage as ZumiStage]};
+      const fallback = FALLBACK_LINE[stage as ZumiStage];
+      let audioBase64 = '';
+      try {
+        const inline = await synthesizeInline(fallback);
+        audioBase64 = inline.audioBase64;
+      } catch { /* proceed without audio */ }
+      return { reply: fallback, audioBase64 };
     }
   },
 );

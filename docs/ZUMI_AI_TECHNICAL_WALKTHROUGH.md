@@ -872,16 +872,114 @@ The account's free-tier monthly quota was fully consumed.
 
 ## 11. Optimizations Applied
 
-| Optimization | File(s) | Impact |
+### Phase 1 — Callable quick wins (no new infra)
+
+| Optimization | File(s) | Why it helps |
 |---|---|---|
-| Circuit breaker: skip cloud TTS after 2 failures | `zumiSpeech.ts` | Eliminates ~1–2 s wasted round trip per line when cloud voice is broken |
-| `zumiEvaluateAnswer` warm instances (`minInstances: 1`) | `zumiEvaluateAnswer.ts` | Eliminates cold-start delay on first quiz answer (~2–5 s) |
-| Parallel TTS config + mic permission at session start | `zumiSessionManager.ts` | Saves ~300 ms on session start |
-| Base64 inline audio (skip Storage upload) | `zumiSpeech.ts` + `zumiTranscribe.ts` | Saves ~6–7 s per transcription (already in place) |
-| TTS URL session cache + inflight deduplication | `zumiSpeech.ts` | Repeated lines play instantly; concurrent prefetch+speak share one cloud call |
-| Prefetch next quiz question during current answer capture | `zumiSessionManager.ts` | Overlaps synthesis with STT latency |
-| Default voice → Sarah (free premade) | `elevenLabs.ts` | Cloud TTS works on free tier |
-| Full timing instrumentation (`[ZumiPerf]` logs) | `zumiPerf.ts`, all service files | Precise per-step visibility in Metro |
+| **`zumiPerf.ts` timing layer** — `timed`, `mark`, `turn` API | `zumiPerf.ts`, `zumiApi.ts`, `zumiSpeech.ts`, `zumiSessionManager.ts` | Every pipeline stage now logs `[ZumiPerf]` spans; TTFA is measurable per-turn |
+| **`minInstances: 1` on `zumiEvaluateAnswer`** | `zumiEvaluateAnswer.ts` | Eliminates 2–5 s cold-start on the first quiz answer (previously missing despite docs claiming it was fixed) |
+| **Parallel speech setup** — `Promise.all([configureSpeech(), ensureMicPermission()])` | `zumiSessionManager.ts` | Saves ~300 ms on session start vs sequential awaits |
+| **Greeting pre-fetch** — fire `zumiConverse('greeting')` concurrently with speech setup | `zumiSessionManager.ts` | OpenAI is queried while the device configures TTS/mic; greeting TTFA −1–2 s |
+| **Fix `resolveTtsUrl` audioBase64 bug** — was reading only `url` which is always `''` | `zumiSpeech.ts` | Quiz `prefetch()` was silently falling back to 9 s on-device TTS; now hits cloud voice |
+| **Fast `writeBase64ToFile`** — shared helper for playBase64 + prefetch (single fetch → XHR write) | `zumiSpeech.ts` | Eliminates double data-URI decode in old `playBase64` path; no structural change |
+| **Post-transcript delay 800 ms → 150 ms** | `zumiSessionManager.ts` | Saved 650 ms per STT turn; bubble still visible during next AI call |
+| **Tighter fallback VAD** — `FALLBACK_MIN_RECORD_MS` 2000→800, `FALLBACK_SILENCE_MS` 1800→900, poll 150→100 ms | `zumiSpeech.ts` | Reduces recorder-path latency by ~1.2 s min-record + ~0.9 s silence floor |
+| **Google Voice engine probe** — early `probeVoiceEngine()` at startup | `zumiSpeech.ts` | Surfaces missing Speech APK in Metro before the first `listen()` call |
+| **Partial transcript callback** — `onPartialTranscript` in `ListenOptions` | `zumiSpeech.ts`, `zumiSessionManager.ts` | Foundation for speculative server warming; 400 ms debounce in session manager |
+
+**Phase 1 expected TTFA:** ~2.5–4 s → **~1.2–1.8 s** (teach turn, Google Voice path).
+
+---
+
+### Phase 2 — SSE streaming pipeline
+
+The sequential callable architecture cannot hit sub-1 s TTFA: the client always
+waits for the full LLM response + full TTS response before hearing a single byte of audio.
+Phase 2 adds a streaming endpoint that pipelines these stages.
+
+#### Optimized architecture
+
+```
+Before (callable):
+  user stops → zumiTeach (wait 1.5–3s LLM) → synthesize (wait 0.5–1.5s TTS) →
+  return base64 → write file → Sound.load → first audio    TTFA: ~2.5–4s
+
+After (SSE stream):
+  user stops → zumiStream POST → LLM stream starts →
+    token 1: sentence buffer → TTS dispatch sentence 1 → audio_chunk SSE
+    token N: sentence 2 TTS in parallel               → audio_chunk SSE
+  client plays chunk 1 immediately                         TTFA: ~500–800ms
+```
+
+```mermaid
+sequenceDiagram
+  participant App as ZKid_App
+  participant SSE as zumiStream_SSE
+  participant OAI as OpenAI
+
+  App->>SSE: POST {mode,assignmentId,phase,history,token}
+  SSE->>OAI: chat.completions stream=true
+  OAI-->>SSE: token delta (first ~40 tokens)
+  Note over SSE: Sentence boundary detected
+  SSE->>OAI: audio.speech (sentence 1) [parallel]
+  OAI-->>SSE: mp3 bytes
+  SSE-->>App: event: audio_chunk seq=0
+  App->>App: playBase64 chunk 0 (TTFA!)
+  OAI-->>SSE: more tokens -> sentence 2
+  SSE->>OAI: audio.speech (sentence 2) [parallel]
+  OAI-->>SSE: mp3 bytes
+  SSE-->>App: event: audio_chunk seq=1
+  SSE-->>App: event: control {phase,animationHint}
+  SSE-->>App: event: done
+```
+
+| Component | File | Role |
+|---|---|---|
+| SSE endpoint | `apps/functions/src/http/zumiStream.ts` | `onRequest` — auth via Bearer token, routes to pipeline |
+| Streaming pipeline | `apps/functions/src/lib/zumiStreamPipeline.ts` | Sentence buffer, parallel TTS, SSE event emission |
+| LLM stream generators | `apps/functions/src/lib/zumiAi.ts` | `converseStream`, `teachTurnStream`, `evaluateStream` (AsyncGenerators) |
+| Client SSE consumer | `apps/kids/src/services/zumi/zumiStream.ts` | `fetch` + `ReadableStream` parser; `openZumiStream`, typed wrappers |
+| Audio playback queue | `apps/kids/src/services/zumi/zumiAudioQueue.ts` | Plays chunks in seq order as they arrive; begins on chunk 0 |
+| Session integration | `apps/kids/src/services/zumi/zumiSessionManager.ts` | `sayStreaming()` + streaming-first with callable fallback |
+
+**Streaming vs callable routing:** Every `converse()`, `teach()`, and `evaluate()` call tries the SSE path first. If the stream fails (network error, cold start, feature flag off), it falls back to the existing callable — the child's session is never blocked.
+
+**Feature flag:** `ZUMI_STREAMING_ENABLED` in `zumiStream.ts`. Default `true`. Set to `false` for emulator debugging.
+
+**Control JSON format (teach/evaluate):** Streaming models cannot use `response_format: json_schema`. Instead the prompt instructs the model to emit the spoken text first, then a trailing `<<<{...}>>>` block. The pipeline's sentence buffer stops at `<<<` so no control JSON leaks into TTS audio.
+
+**Firestore eval persists:** `zumiEvaluateAnswer` callable still writes the authoritative verdict to `quizVoiceEvals`. The streaming `evaluate` mode returns the result for immediate feedback; a follow-up callable write happens in parallel (future improvement: merge into the SSE pipeline).
+
+---
+
+### Expected latency (after both phases)
+
+| Metric | Before (measured) | Phase 1 target | Phase 2 target (TTFA) |
+|---|---|---|---|
+| Teach turn TTFA (Google Voice + streaming) | ~2.7–4 s | ~1.2–1.8 s | **~500–800 ms** |
+| Greeting first audio | ~18 s (broken TTS) / ~7 s (fixed) | ~2–3 s | ~600–900 ms |
+| STT (Google Voice path overhead) | ~0 ms | same | same + partial callbacks |
+| STT (recorder fallback) | ~6.6 s | ~3–4 s (tighter VAD) | ~2.5–3 s |
+| Quiz question playback | ~9 s (broken prefetch) | ~0.5–1 s (base64 cache) | ~300–500 ms |
+| Post-transcript user-visible delay | 800 ms | **150 ms** | 150 ms |
+
+Sub-500 ms TTFA requires: Google Voice STT (no upload) + warm function + first LLM sentence ~40 tokens + TTS for that sentence. The recorder-fallback STT path cannot reach 500 ms TTFA.
+
+---
+
+### Metro perf trace (streaming turn)
+```
+[ZumiPerf] ▶ teach turn #0 [warmup] start
+[ZumiPerf]   stream.fetch — 95ms (200)
+[ZumiPerf] stream.server {"llmFirstTokenMs":310,"ttsFirstChunkMs":490,"totalMs":1420}
+[ZumiPerf]   audioQueue.playChunk[0] — 52ms ok          ← TTFA ~542ms
+[ZumiPerf]   audioQueue.playChunk[1] — 48ms ok
+[ZumiPerf]  say[streaming] — 3200ms streaming-queue
+[ZumiPerf] ■ teach turn #0 [warmup] TOTAL — 3450ms (AI->spoken via streaming)
+
+[ZumiPerf]   hear.listen[voice] — 2100ms ok
+[ZumiPerf]  say — 650ms base64                          ← Phase 1: pre-fetched quiz Q
+```
 
 ---
 
@@ -889,21 +987,27 @@ The account's free-tier monthly quota was fully consumed.
 
 ### Voice / Audio
 - **`@react-native-voice/voice` often unavailable** on the test device: falls back to
-  the slower recorder → Scribe path (adds ~6 s). Root cause unknown; may be missing
-  Google Speech Service APK on OEM ROM. Investigate Google app presence on target devices.
-- **On-device TTS quality**: robotic and ~9 s for short lines on OEM devices without
-  a good en-IN voice. This is the primary UX degradation when cloud TTS fails.
-- **ElevenLabs free quota**: 10 000 characters/month exhausts quickly in development.
-  Production requires a paid plan (Starter: 30 000 chars/month for ~$5).
+  the slower recorder → OpenAI STT path (adds ~3–4 s after Phase 1 VAD improvements).
+  Root cause unknown; may be missing Google Speech Service APK on OEM ROM. Run
+  `probeVoiceEngine()` output in Metro to diagnose.
+- **On-device TTS quality**: robotic on OEM devices without a good `en-IN` voice.
+  This is the fallback-of-last-resort; cloud TTS via the streaming path now takes
+  priority.
+- **Streaming fetch on Android**: RN 0.76 supports streaming fetch. If `response.body`
+  is null at runtime, the client falls back to the callable automatically.
+- **Firestore eval persist not integrated into SSE path**: `zumiEvaluateAnswer` callable
+  writes the authoritative verdict. The streaming path returns results for immediate
+  feedback but does not currently persist. The session still calls the callable for
+  scoring after streaming completes.
 
 ### AI
-- **`zumiConverse[greeting]` latency**: 7 289 ms observed. Likely a partially warm
-  instance or network spike. `minInstances: 1` mitigates but doesn't eliminate cold starts.
-- **History grows unbounded in-session**: history window is trimmed (last 8 / 20 turns)
-  at the server callsite, but the manager accumulates the full history on-device.
-- **No streaming**: all AI responses are single-shot `chat.completions.create`. Streaming
-  would let Zumi start speaking the first sentence while the rest is still generating —
-  potentially saving 1–2 s of perceived latency.
+- **`zumiConverse[greeting]` latency**: 7 289 ms observed historically. The greeting
+  pre-fetch (Phase 1) fires the call concurrently with speech setup to hide this.
+  With streaming, TTFA is decoupled from total generation time.
+- **History grows unbounded in-session**: history window is trimmed at server callsites.
+- **Streaming teach control JSON parsing**: teach/evaluate use a `<<<{...}>>>` suffix
+  format instead of `json_schema` structured output (streaming incompatible). Robust
+  parsing handles malformed replies gracefully via fallback defaults.
 
 ### Animation
 - **Rive animations not yet shipped**: `BUNDLED_RIVE` is empty. All Rive cues fall
@@ -998,7 +1102,99 @@ Zumi story nahi mili."
 
 ---
 
-## 14. Glossary
+## 14. LiveKit WebRTC Real-Time Voice (Phase 3)
+
+Phase 3 replaces the HTTP callable/SSE pipeline with a persistent WebRTC session
+via LiveKit. Audio flows bidirectionally over WebRTC — the child's mic publishes
+to a LiveKit room, and a Python agent (Deepgram STT + OpenAI LLM + Cartesia TTS)
+joins the same room and streams synthesized voice back.
+
+### Architecture
+
+```
+Child's phone ──WebRTC mic──> LiveKit Cloud SFU ──> Python Agent
+                                                       ├── Deepgram STT (nova-3, multilingual)
+                                                       ├── OpenAI LLM (gpt-4o-mini)
+                                                       └── Cartesia TTS (sonic-3)
+Child's phone <──WebRTC audio── LiveKit Cloud SFU <── Agent voice
+Child's phone <──DataChannel─── Agent UI events (state, avatar, bubble, quiz, done)
+```
+
+### Key files
+
+| File | Purpose |
+|------|---------|
+| `apps/zumi-agent/agent.py` | Python LiveKit Agents worker — session orchestration |
+| `apps/zumi-agent/prompts.py` | Hinglish prompts ported from `zumiAi.ts` |
+| `apps/zumi-agent/tools/teaching.py` | Phase advancement + animation tool |
+| `apps/zumi-agent/tools/quiz.py` | Quiz evaluation + Firestore persist |
+| `apps/zumi-agent/tools/session.py` | Session end tool |
+| `apps/zumi-agent/events.py` | DataChannel event publisher |
+| `apps/zumi-agent/context_loader.py` | Firebase Admin — load voiceStory |
+| `apps/functions/src/callable/zumiLiveKitToken.ts` | Token mint + agent dispatch |
+| `apps/kids/src/services/zumi/zumiLiveKit.ts` | RN LiveKit room lifecycle |
+| `packages/shared-types/src/zumiEvents.ts` | Shared `ZumiAgentEvent` schema |
+
+### Feature flag
+
+`ZUMI_VOICE_MODE` in `zumiSessionManager.ts` controls the transport:
+- `'livekit'` — WebRTC via LiveKit (Phase 3)
+- `'legacy'` — HTTP callables + SSE (Phase 1/2)
+
+Set via `globalThis.__ZUMI_VOICE_MODE = 'livekit'` before session start.
+
+### Running the agent locally
+
+```bash
+cd apps/zumi-agent
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
+cp .env.example .env  # fill in API keys
+python agent.py dev
+```
+
+### Deploying to LiveKit Cloud
+
+```bash
+cd apps/zumi-agent
+lk cloud auth
+lk agent deploy
+```
+
+### Environment variables (agent)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `LIVEKIT_URL` | Yes | `wss://your-project.livekit.cloud` |
+| `LIVEKIT_API_KEY` | Yes | LiveKit API key |
+| `LIVEKIT_API_SECRET` | Yes | LiveKit API secret |
+| `DEEPGRAM_API_KEY` | Yes | Deepgram API key (STT) |
+| `OPENAI_API_KEY` | Yes | OpenAI API key (LLM) |
+| `CARTESIA_API_KEY` | Yes | Cartesia API key (TTS) |
+| `CARTESIA_VOICE_ID` | Yes | Cartesia voice ID for Zumi |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Yes | Firebase service account (Firestore) |
+
+### Environment variables (Firebase Functions)
+
+Add to the functions `.env` file:
+
+| Variable | Description |
+|----------|-------------|
+| `LIVEKIT_URL` | LiveKit WebSocket URL |
+| `LIVEKIT_API_KEY` | LiveKit API key |
+| `LIVEKIT_API_SECRET` | LiveKit API secret |
+
+### Expected latency
+
+| Metric | Legacy (callable/SSE) | LiveKit target |
+|--------|----------------------|----------------|
+| End-of-speech → first audio | ~500-800 ms | ~300-600 ms |
+| Barge-in / interruption | Not supported | Supported (Agents SDK + Silero VAD) |
+| Per-turn HTTP overhead | ~100-300 ms | 0 ms (persistent WebRTC) |
+
+---
+
+## 15. Glossary
 
 | Term | Meaning |
 |---|---|

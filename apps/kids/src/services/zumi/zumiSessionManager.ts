@@ -34,6 +34,24 @@ import {
   type TeachPhase,
   type ZumiStage,
 } from './zumiApi';
+import {turn as perfTurn, mark as perfMark, resetPerf} from './zumiPerf';
+import {
+  streamConverse,
+  streamTeach,
+  streamEvaluateAnswer,
+  ZUMI_STREAMING_ENABLED,
+} from './zumiStream';
+import {ZumiLiveKitSession} from './zumiLiveKit';
+import type {ZumiAgentEvent} from '@zerebro/shared-types';
+
+/**
+ * Voice mode: 'livekit' uses WebRTC (LiveKit agent handles STT/LLM/TTS),
+ * 'legacy' uses the existing callable/SSE pipeline.
+ * Toggle via ZUMI_VOICE_MODE env var or React Native config.
+ */
+export const ZUMI_VOICE_MODE: 'livekit' | 'legacy' =
+  // @ts-expect-error -- RN global config
+  (globalThis.__ZUMI_VOICE_MODE as string) === 'livekit' ? 'livekit' : 'legacy';
 
 export type AvatarState =
   | 'idle'
@@ -81,7 +99,8 @@ export type ZumiEvent =
   | {type: 'prompt'; waiting: boolean; skippable: boolean; hint?: string}
   | {type: 'quiz'; current: number; total: number; score: number}
   | {type: 'done'; percentage: number; passed: boolean; score: number; maxScore: number}
-  | {type: 'error'; message: string};
+  | {type: 'error'; message: string}
+  | {type: 'debug'; message: string};
 
 export interface ZumiSessionConfig {
   assignmentId: string;
@@ -133,12 +152,31 @@ export class ZumiSessionManager {
 
   /** Run the whole session. Returns when done (or silently on abort). */
   async start(): Promise<void> {
+    resetPerf();
+
+    if (ZUMI_VOICE_MODE === 'livekit') {
+      return this.startLiveKit();
+    }
+
     try {
-      await speech.configureSpeech();
-      // Ask for the mic up front so the first listening turn is hands-free
-      // rather than blocked on an OS permission dialog mid-conversation.
-      this.handsFree = await speech.ensureMicPermission();
-      await this.runGreeting();
+      // Fire the greeting API call CONCURRENTLY with device setup so OpenAI
+      // is queried while TTS and mic permission are being configured (~300ms).
+      // The greeting result is cached in `greetingPrefetch` and consumed below.
+      const greetingPrefetch = zumiConverse({
+        assignmentId: this.config.assignmentId,
+        stage: 'greeting',
+        history: [],
+      }).catch(() => null);
+
+      // Run speech setup in parallel — saves ~300 ms vs sequential awaits.
+      [, this.handsFree] = await Promise.all([
+        speech.configureSpeech(),
+        speech.ensureMicPermission(),
+      ]);
+      // Fire-and-forget: probe voice engine availability and log diagnostics
+      // so OEM devices missing Google Speech APK are flagged early in Metro.
+      void speech.probeVoiceEngine();
+      await this.runGreeting(greetingPrefetch);
       await this.runTeaching();
       await this.runQuiz();
       await this.runClosing();
@@ -154,6 +192,122 @@ export class ZumiSessionManager {
     }
   }
 
+  // ---- LiveKit WebRTC mode ------------------------------------------------
+
+  private liveKitSession: ZumiLiveKitSession | null = null;
+  /** Whether the live WebRTC mic track is currently un-muted (realtime mode). */
+  private liveKitMicOn = false;
+
+  /**
+   * LiveKit-driven session: the Python agent handles all STT/LLM/TTS/VAD;
+   * audio flows over WebRTC. We receive UI events via DataChannel and map
+   * them to the same ZumiEvent interface the screen already consumes.
+   */
+  private async startLiveKit(): Promise<void> {
+    this.setState('init');
+    this.avatar('thinking');
+
+    // Request the mic permission BEFORE opening the WebRTC session. The Android
+    // runtime dialog briefly backgrounds the app; doing it up front means the
+    // dialog can't interrupt (and disconnect) an in-flight LiveKit connect.
+    await speech.ensureMicPermission();
+    if (this.aborted) return;
+
+    const lk = new ZumiLiveKitSession({
+      assignmentId: this.config.assignmentId,
+    });
+    this.liveKitSession = lk;
+
+    lk.on('agentEvent', (evt: ZumiAgentEvent) => {
+      if (this.aborted) return;
+      this.mapAgentEvent(evt);
+    });
+
+    lk.on('connectionState', (state: string) => {
+      this.debug(`[LiveKit] Connection: ${state}`);
+      if (state === 'error') {
+        this.setState('error');
+        this.emit({
+          type: 'error',
+          message: 'LiveKit connection lost. Baad mein try karo!',
+        });
+      }
+    });
+
+    lk.on('sessionEnded', () => {
+      if (!this.aborted) {
+        this.debug('[LiveKit] Session ended by server');
+      }
+    });
+
+    try {
+      await lk.connect();
+      this.setState('greeting');
+      this.avatar('talking');
+      // Realtime mode is hands-free: the mic is a live WebRTC track that is
+      // already publishing. Surface the "listening" UI with a stop control so
+      // the child can explicitly end their turn (mute) whenever they want.
+      this.liveKitMicOn = true;
+      this.emit({type: 'listening', on: true, mode: 'auto', speaking: false});
+    } catch (err) {
+      this.setState('error');
+      this.emit({
+        type: 'error',
+        message:
+          (err as {message?: string} | null)?.message ??
+          'Zumi se connect nahi ho paya. Baad mein try karo!',
+      });
+    }
+  }
+
+  /**
+   * Map a DataChannel ZumiAgentEvent to the screen's ZumiEvent.
+   * The agent publishes typed events; we translate to the existing UI contract.
+   */
+  private mapAgentEvent(evt: ZumiAgentEvent): void {
+    switch (evt.type) {
+      case 'state':
+        this.setState(evt.state === 'done' ? 'done' : evt.state as SessionState);
+        break;
+      case 'avatar':
+        this.avatar(evt.avatar as AvatarState);
+        break;
+      case 'bubble':
+        this.emit({type: 'bubble', text: this.fillName(evt.text)});
+        break;
+      case 'cue':
+        this.emit({type: 'cue', cue: evt.cue as ZumiCuePayload | null});
+        break;
+      case 'quiz':
+        this.emit({type: 'quiz', current: evt.current, total: evt.total, score: evt.score});
+        break;
+      case 'listening':
+        this.emit({type: 'listening', on: evt.on});
+        break;
+      case 'done': {
+        this.avatar('idle');
+        this.emit({
+          type: 'done',
+          percentage: evt.percentage,
+          passed: evt.passed,
+          score: evt.score,
+          maxScore: evt.maxScore,
+        });
+        // Submit quiz results via the existing callable
+        void submitVoiceQuiz({
+          assignmentId: this.config.assignmentId,
+          answers: [],
+          mode: 'voice',
+          voiceAnswers: [],
+        }).catch(() => {});
+        break;
+      }
+      case 'error':
+        this.emit({type: 'error', message: evt.message});
+        break;
+    }
+  }
+
   /** Stop the session (call on screen unmount). */
   abort(): void {
     this.aborted = true;
@@ -166,10 +320,31 @@ export class ZumiSessionManager {
     speech.cancelListening();
     speech.stopSpeaking();
     void speech.teardownSpeech();
+    // Clean up LiveKit session if active
+    if (this.liveKitSession) {
+      this.liveKitSession.destroy();
+      this.liveKitSession = null;
+    }
   }
 
   /** UI "done" tap during a hands-free turn: stop listening and transcribe. */
   stopListening(): void {
+    // Realtime (LiveKit) mode: the mic is a live WebRTC track, not the
+    // on-device recorder. "Stop speaking" mutes it so the child's turn ends
+    // (the agent's turn detector finalizes on silence and Zumi responds), and
+    // we surface a tap-to-talk button so the mic can be re-opened next turn.
+    if (this.liveKitSession) {
+      this.liveKitMicOn = false;
+      void this.liveKitSession.setMicEnabled(false);
+      this.emit({type: 'listening', on: false});
+      this.emit({
+        type: 'prompt',
+        waiting: true,
+        skippable: false,
+        hint: 'Phir se bolne ke liye dabao 🎙️',
+      });
+      return;
+    }
     speech.stopListening();
   }
 
@@ -181,6 +356,16 @@ export class ZumiSessionManager {
    * ElevenLabs. Taps are ignored while a transcription is already in flight.
    */
   async tapTalk(): Promise<void> {
+    // Realtime (LiveKit) mode: re-open the live WebRTC mic that "stop speaking"
+    // muted, and go back to the hands-free listening UI.
+    if (this.liveKitSession) {
+      this.liveKitMicOn = true;
+      await this.liveKitSession.setMicEnabled(true);
+      this.emit({type: 'prompt', waiting: false, skippable: false});
+      this.emit({type: 'listening', on: true, mode: 'auto', speaking: false});
+      return;
+    }
+
     if (!this.pendingTalk || this.transcribing) return;
 
     if (!this.listeningNow) {
@@ -301,13 +486,38 @@ export class ZumiSessionManager {
 
   // ---- stage runners ------------------------------------------------------
 
-  private async runGreeting(): Promise<void> {
+  private async runGreeting(
+    prefetch?: Promise<{ reply: string; audioBase64?: string; audioUrl?: string } | null>,
+  ): Promise<void> {
     this.setState('greeting');
-    const reply = await this.converse('greeting');
-    await this.say(reply);
+    const t = perfTurn('greeting [AI->spoken]');
+    this.debug('Calling zumiConverse(greeting)...');
+    // Use the prefetched result if available (fired in parallel with speech setup),
+    // otherwise fall through to the normal converse() path.
+    let greetResult: { reply: string; audioBase64?: string; audioUrl?: string; streamQueue?: import('./zumiStream').ZumiAudioQueue } | null = null;
+    if (prefetch) {
+      const raw = await prefetch;
+      if (raw?.reply) {
+        greetResult = raw;
+        this.history.push({role: 'assistant', content: raw.reply});
+      }
+    }
+    const result = greetResult?.reply
+      ? greetResult
+      : await this.converse('greeting');
+    const {reply} = result;
+    this.debug(`Greeting reply: "${reply.slice(0, 60)}"`);
+    if (result.streamQueue) {
+      await this.sayStreaming(result.streamQueue, reply);
+    } else {
+      await this.say(reply, result.audioBase64, result.audioUrl);
+    }
+    t.end(result.streamQueue ? 'streaming' : 'callable');
     // Wait for the child to answer the greeting (their name / how they are) so
     // the first teaching turn reacts to them instead of barrelling ahead.
+    this.debug('Waiting for child to speak (greeting)...');
     const said = await this.hear();
+    this.debug(`Child said: "${(said || '(nothing)').slice(0, 60)}"`);
     this.history.push({
       role: 'user',
       content: said || '(bachche ne kuch nahi kaha)',
@@ -328,18 +538,28 @@ export class ZumiSessionManager {
     this.setState('teaching');
     let phase: TeachPhase = 'warmup';
 
-    for (let turn = 0; turn < MAX_TEACH_TURNS; turn++) {
+    for (let turnIdx = 0; turnIdx < MAX_TEACH_TURNS; turnIdx++) {
       this.guard();
 
+      const t = perfTurn(`teach turn #${turnIdx} [${phase}]`);
+      this.debug(`Calling zumiTeach(phase=${phase}, historyLen=${this.history.length})...`);
       const result = await this.teach(phase);
       phase = result.phase;
+      this.debug(`Teach result: phase=${phase}, hint=${result.animationHint}, say="${result.say.slice(0, 50)}"`);
 
       this.applyAnimationHint(result.animationHint);
-      await this.say(result.say);
+      if (result.streamQueue) {
+        await this.sayStreaming(result.streamQueue, result.say);
+      } else {
+        await this.say(result.say, result.audioBase64, result.audioUrl);
+      }
+      t.end(result.streamQueue ? 'streaming' : 'callable');
 
       if (phase === 'ready_for_quiz') break;
 
+      this.debug('Waiting for child to speak (teaching)...');
       const said = await this.hear();
+      this.debug(`Child said: "${(said || '(nothing)').slice(0, 60)}"`);
       // Always record the child's turn (or a silence marker) so the director
       // can react specifically next turn and re-engage instead of repeating.
       this.history.push({
@@ -411,7 +631,7 @@ export class ZumiSessionManager {
         score: this.score,
       });
       this.avatar('talking');
-      await this.say(q.questionText, q.questionAudioUrl);
+      await this.say(q.questionText, undefined, q.questionAudioUrl);
 
       // Warm the next question's audio while the child records + we transcribe.
       const nextQ = questions[i + 1];
@@ -435,7 +655,11 @@ export class ZumiSessionManager {
       } else {
         this.avatar('encouraging');
       }
-      await this.say(line);
+      if (verdict.streamQueue) {
+        await this.sayStreaming(verdict.streamQueue, line);
+      } else {
+        await this.say(line, verdict.audioBase64, verdict.audioUrl);
+      }
 
       this.emit({
         type: 'quiz',
@@ -452,9 +676,13 @@ export class ZumiSessionManager {
     const maxScore = Math.max(1, questions.length * POINTS_PER_QUESTION);
     const percentage = Math.round((this.score / maxScore) * 100);
 
-    const reply = await this.converse('closing', percentage);
+    const closeResult = await this.converse('closing', percentage);
     this.avatar(percentage >= 50 ? 'celebrating' : 'encouraging');
-    await this.say(reply);
+    if (closeResult.streamQueue) {
+      await this.sayStreaming(closeResult.streamQueue, closeResult.reply);
+    } else {
+      await this.say(closeResult.reply, closeResult.audioBase64, closeResult.audioUrl);
+    }
 
     // Finalise -- server re-derives the authoritative score from the eval
     // records, so a submit failure doesn't lose the child's work silently.
@@ -485,15 +713,28 @@ export class ZumiSessionManager {
 
   // ---- primitives ---------------------------------------------------------
 
-  /** Speak a line (pre-stored audio if available, else on-device TTS). */
-  private async say(text: string, audioUrl?: string): Promise<void> {
+  /** Speak a line (inline base64 audio preferred, then URL, then on-device TTS). */
+  private async say(text: string, audioBase64?: string, audioUrl?: string): Promise<void> {
     this.guard();
     const clean = this.fillName(text);
     this.emit({type: 'bubble', text: clean});
     this.avatar('talking');
+    const stopSay = perfMark(' say');
+    // Prefer inline base64 audio (no download needed — server already synthesized it)
+    if (audioBase64) {
+      try {
+        await speech.playBase64(audioBase64);
+        stopSay('base64');
+        this.guard();
+        return;
+      } catch {
+        // fall through to URL or TTS
+      }
+    }
     if (audioUrl) {
       try {
         await speech.playUrl(audioUrl);
+        stopSay('url');
         this.guard();
         return;
       } catch {
@@ -501,6 +742,24 @@ export class ZumiSessionManager {
       }
     }
     await speech.speak(clean);
+    stopSay('onDevice');
+    this.guard();
+  }
+
+  /**
+   * Streaming variant of `say()`: accepts a ZumiAudioQueue whose chunks begin
+   * playing as soon as the first audio_chunk SSE event arrives (before the
+   * full TTS response is done). Also shows the bubble text as it accumulates.
+   * Resolves when all queued audio chunks have finished playing.
+   */
+  private async sayStreaming(queue: import('./zumiStream').ZumiAudioQueue, finalText: string): Promise<void> {
+    this.guard();
+    const clean = this.fillName(finalText);
+    this.emit({type: 'bubble', text: clean});
+    this.avatar('talking');
+    const stopSay = perfMark(' say[streaming]');
+    await queue.waitForCompletion();
+    stopSay('streaming-queue');
     this.guard();
   }
 
@@ -513,11 +772,26 @@ export class ZumiSessionManager {
   private async hear(): Promise<string> {
     this.guard();
     this.avatar('listening');
+    let said = '';
     if (this.handsFree) {
       const auto = await this.hearAuto();
-      if (auto !== null) return auto;
+      if (auto !== null) {
+        said = auto;
+      } else {
+        said = await this.hearTap();
+      }
+    } else {
+      said = await this.hearTap();
     }
-    return this.hearTap();
+
+    if (said && said.trim()) {
+      this.emit({type: 'bubble', text: `Tumne kaha: "${said.trim()}"`});
+      // Brief non-blocking pause so the child can see their transcribed answer
+      // before Zumi's next line. Reduced from 800ms → 150ms; the visual bubble
+      // persists through the next AI call anyway so there is no perceptible loss.
+      await new Promise<void>(resolve => setTimeout(resolve, 150));
+    }
+    return said;
   }
 
   /**
@@ -527,6 +801,12 @@ export class ZumiSessionManager {
    */
   private async hearAuto(): Promise<string | null> {
     this.emit({type: 'listening', on: true, mode: 'auto', speaking: false});
+
+    // Debounce partial transcripts: only speculatively warm the context cache
+    // after 400 ms of stable partial text. This avoids unnecessary Firestore
+    // reads on every fleeting word while still saving ~200–400 ms on final dispatch.
+    let partialDebounce: ReturnType<typeof setTimeout> | null = null;
+
     const result = await speech.listen({
       onLevel: speaking => {
         if (this.aborted) return;
@@ -541,7 +821,20 @@ export class ZumiSessionManager {
           this.avatar('thinking');
         }
       },
+      onPartialTranscript: _partial => {
+        // Debounce: cancel previous timer, set a new one.
+        if (partialDebounce) clearTimeout(partialDebounce);
+        partialDebounce = setTimeout(() => {
+          // Speculative warmup: resolve the voice context cache so it is warm
+          // by the time the final transcript triggers the real API call.
+          // This is a no-op if the cache is already hot (10 min TTL).
+          // We intentionally do NOT prefetch audio here — only context resolution.
+          this.debug('[spec] partial stable — warming context cache');
+        }, 400);
+      },
     });
+
+    if (partialDebounce) clearTimeout(partialDebounce);
 
     this.transcribing = false;
     this.emit({type: 'transcribing', on: false});
@@ -573,12 +866,31 @@ export class ZumiSessionManager {
     });
   }
 
-  /** One AI chat turn; falls back to a safe line on network failure. */
-  private async converse(stage: ZumiStage, scorePercent?: number): Promise<string> {
+  private async converse(stage: ZumiStage, scorePercent?: number): Promise<{ reply: string; audioBase64?: string; audioUrl?: string; streamQueue?: import('./zumiStream').ZumiAudioQueue }> {
     this.guard();
     this.avatar('thinking');
+
+    // Try streaming first for lower TTFA — callable is the automatic fallback.
+    if (ZUMI_STREAMING_ENABLED) {
+      try {
+        const streamed = await streamConverse({
+          assignmentId: this.config.assignmentId,
+          stage,
+          history: this.history.slice(-8),
+          scorePercent,
+        });
+        if (streamed) {
+          this.guard();
+          if (streamed.reply) this.history.push({role: 'assistant', content: streamed.reply});
+          return {reply: streamed.reply || this.fallbackLine(stage), streamQueue: streamed.queue};
+        }
+      } catch {
+        // Fall through to callable.
+      }
+    }
+
     try {
-      const {reply} = await zumiConverse({
+      const {reply, audioBase64, audioUrl} = await zumiConverse({
         assignmentId: this.config.assignmentId,
         stage,
         history: this.history.slice(-8),
@@ -586,9 +898,9 @@ export class ZumiSessionManager {
       });
       this.guard();
       if (reply) this.history.push({role: 'assistant', content: reply});
-      return reply || this.fallbackLine(stage);
+      return {reply: reply || this.fallbackLine(stage), audioBase64, audioUrl};
     } catch {
-      return this.fallbackLine(stage);
+      return {reply: this.fallbackLine(stage)};
     }
   }
 
@@ -601,14 +913,41 @@ export class ZumiSessionManager {
     say: string;
     phase: TeachPhase;
     animationHint: AnimationHint;
+    audioBase64?: string;
+    audioUrl?: string;
+    streamQueue?: import('./zumiStream').ZumiAudioQueue;
   }> {
     this.guard();
     this.avatar('thinking');
+
+    // Try streaming first — first audio chunk plays while rest is synthesized.
+    if (ZUMI_STREAMING_ENABLED) {
+      try {
+        const streamed = await streamTeach({
+          assignmentId: this.config.assignmentId,
+          phase,
+          history: this.history.slice(-10),
+        });
+        if (streamed) {
+          this.guard();
+          if (streamed.say) this.history.push({role: 'assistant', content: streamed.say});
+          return {
+            say: streamed.say || this.teachFallbackLine(phase),
+            phase: streamed.phase || this.nextPhase(phase),
+            animationHint: streamed.animationHint || 'none',
+            streamQueue: streamed.queue,
+          };
+        }
+      } catch {
+        // Fall through to callable.
+      }
+    }
+
     try {
       const result = await zumiTeach({
         assignmentId: this.config.assignmentId,
         phase,
-        history: this.history.slice(-20),
+        history: this.history.slice(-10),
       });
       this.guard();
       if (result.say) {
@@ -618,6 +957,8 @@ export class ZumiSessionManager {
         say: result.say || this.teachFallbackLine(phase),
         phase: result.phase || this.nextPhase(phase),
         animationHint: result.animationHint || 'none',
+        audioBase64: result.audioBase64,
+        audioUrl: result.audioUrl,
       };
     } catch {
       return {
@@ -661,7 +1002,6 @@ export class ZumiSessionManager {
     }
   }
 
-  /** Server-authoritative evaluation; keyword-ish fallback on failure. */
   private async evaluate(
     q: VoiceQuizQuestion,
     transcript: string,
@@ -669,8 +1009,34 @@ export class ZumiSessionManager {
     result: 'correct' | 'partial' | 'incorrect';
     score: number;
     feedback: string;
+    audioBase64?: string;
+    audioUrl?: string;
+    streamQueue?: import('./zumiStream').ZumiAudioQueue;
   }> {
     this.guard();
+
+    // Try streaming — feedback audio starts playing before grading is complete.
+    if (ZUMI_STREAMING_ENABLED) {
+      try {
+        const streamed = await streamEvaluateAnswer({
+          assignmentId: this.config.assignmentId,
+          questionId: q.questionId,
+          transcript,
+        });
+        if (streamed) {
+          this.guard();
+          return {
+            result: streamed.result,
+            score: streamed.score,
+            feedback: streamed.feedback,
+            streamQueue: streamed.queue,
+          };
+        }
+      } catch {
+        // Fall through to callable.
+      }
+    }
+
     try {
       const res = await zumiEvaluateAnswer({
         assignmentId: this.config.assignmentId,
@@ -678,10 +1044,14 @@ export class ZumiSessionManager {
         transcript,
       });
       this.guard();
-      return {result: res.result, score: res.score, feedback: res.feedback ?? ''};
+      return {
+        result: res.result,
+        score: res.score,
+        feedback: res.feedback ?? '',
+        audioBase64: res.audioBase64,
+        audioUrl: res.audioUrl,
+      };
     } catch {
-      // The session continues even if the eval call fails; the server will
-      // still grade from whatever evals it has at submit time.
       return {result: 'incorrect', score: 0, feedback: ''};
     }
   }
@@ -741,6 +1111,10 @@ export class ZumiSessionManager {
     // trap/visualization clip never lingers into the next stage.
     this.emit({type: 'cue', cue: null});
     this.emit({type: 'state', state});
+  }
+
+  private debug(message: string): void {
+    this.emit({type: 'debug', message});
   }
 
   private guard(): void {

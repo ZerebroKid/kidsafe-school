@@ -51,13 +51,28 @@ export interface VoiceContext {
 /**
  * Resolve + authorize a voice session for `uid` against `assignmentId`.
  * Throws the same HttpsError contract as `submitQuizAttempt`.
+ *
+ * Results are cached in-memory (keyed by uid:assignmentId) with a 10-minute
+ * TTL so subsequent turns within the same session skip the Firestore reads.
+ * Since `minInstances: 1` keeps the function instance warm, this cache
+ * survives across calls within a session.
  */
+const CTX_CACHE = new Map<string, { ctx: VoiceContext; expires: number }>();
+const CTX_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
 export async function resolveVoiceContext(
   uid: string,
   assignmentId: string,
 ): Promise<VoiceContext> {
   if (typeof assignmentId !== 'string' || assignmentId.length === 0) {
     throw new HttpsError('invalid-argument', 'assignmentId is required.');
+  }
+
+  // Check in-memory cache first.
+  const cacheKey = `${uid}:${assignmentId}`;
+  const cached = CTX_CACHE.get(cacheKey);
+  if (cached && Date.now() < cached.expires) {
+    return cached.ctx;
   }
 
   const assignmentSnap = await db()
@@ -140,7 +155,7 @@ export async function resolveVoiceContext(
     }
   }
 
-  return {
+  const result: VoiceContext = {
     assignmentId,
     schoolId: String(assignment.schoolId ?? ''),
     classId,
@@ -152,6 +167,11 @@ export async function resolveVoiceContext(
     childName,
     voiceStory,
   };
+
+  // Cache for subsequent turns within this session.
+  CTX_CACHE.set(cacheKey, { ctx: result, expires: Date.now() + CTX_TTL_MS });
+
+  return result;
 }
 
 /** Deterministic id for the per-(assignment, child) voice eval record. */

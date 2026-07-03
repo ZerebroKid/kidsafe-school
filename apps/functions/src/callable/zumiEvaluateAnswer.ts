@@ -14,13 +14,14 @@
  * Auth: signed-in child of the assignment's class (see `resolveVoiceContext`).
  */
 
-import {HttpsError, onCall} from 'firebase-functions/v2/https';
-import {FieldValue} from 'firebase-admin/firestore';
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { FieldValue } from 'firebase-admin/firestore';
 
-import {db} from '../lib/admin';
-import {requireAuth, requireRole} from '../lib/auth';
-import {openaiApiKey, evaluateAnswer, type EvalVerdict} from '../lib/zumiAi';
-import {resolveVoiceContext, voiceEvalDocId} from '../lib/zumiSession';
+import { db } from '../lib/admin';
+import { requireAuth, requireRole } from '../lib/auth';
+import { evaluateAnswer, type EvalVerdict } from '../lib/zumiAi';
+import { resolveVoiceContext, voiceEvalDocId } from '../lib/zumiSession';
+import { synthesizeInline } from '../lib/elevenLabs';
 
 export interface ZumiEvaluateInput {
   assignmentId: string;
@@ -34,16 +35,22 @@ export interface ZumiEvaluateOutput {
   reasoning: string;
   /** Warm Hinglish line Zumi speaks back, tuned to the verdict + answer. */
   feedback: string;
+  audioBase64: string;
+  audioUrl?: string;
 }
 
 export const zumiEvaluateAnswer = onCall<
   ZumiEvaluateInput,
   Promise<ZumiEvaluateOutput>
->({region: 'asia-south1', secrets: [openaiApiKey]}, async request => {
+>(
+  // minInstances: 1 eliminates the 2–5s cold-start on the first quiz answer.
+  // Without it the first eval consistently hit a cold Cloud Run instance.
+  { region: 'asia-south1', minInstances: 1 },
+  async request => {
   const caller = requireAuth(request);
   await requireRole(caller.uid, 'child');
 
-  const {assignmentId, questionId, transcript} =
+  const { assignmentId, questionId, transcript } =
     request.data ?? ({} as Partial<ZumiEvaluateInput>);
 
   if (typeof questionId !== 'string' || questionId.length === 0) {
@@ -92,13 +99,19 @@ export const zumiEvaluateAnswer = onCall<
       },
       updatedAt: FieldValue.serverTimestamp(),
     },
-    {merge: true},
+    { merge: true },
   );
 
+  let audioBase64 = '';
+  try {
+    const inline = await synthesizeInline(verdict.feedback);
+    audioBase64 = inline.audioBase64;
+  } catch { /* proceed without audio */ }
   return {
     result: verdict.result,
     score: verdict.score,
     reasoning: verdict.reasoning,
     feedback: verdict.feedback,
+    audioBase64,
   };
 });

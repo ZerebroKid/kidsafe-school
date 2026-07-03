@@ -1,0 +1,4 @@
+# Zumi LiveKit voice agent — pip install -r requirements.txt
+livekit-agents[deepgram,openai,cartesia,silero]>=1.2.0
+firebase-admin>=6.5.0
+python-dotenv>=1.0.0

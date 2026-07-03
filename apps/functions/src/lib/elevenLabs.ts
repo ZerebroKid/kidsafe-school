@@ -1,200 +1,150 @@
 /**
- * ElevenLabs proxy -- the ONLY place the ElevenLabs API key is used.
+ * OpenAI voice proxy -- the ONLY place TTS/STT calls happen.
  *
- * The child app never holds the key; it calls the `zumiSpeak` (TTS) and
- * `zumiTranscribe` (STT) callables, which call into here. The key is injected
- * at runtime via `defineSecret('ELEVENLABS_API_KEY')` (same pattern as the
- * Gemini key in `zumiAi.ts`) so it never lives in source or the client bundle.
+ * Replaces the previous ElevenLabs-based proxy (`elevenLabs.ts`). Uses the
+ * SAME OpenAI account/key as the LLM (`lib/zumiAi.ts`), read straight from
+ * `process.env.OPENAI_API_KEY`. With Firebase Functions v2, a `.env` file
+ * placed in the functions project root is loaded into `process.env`
+ * automatically on deploy AND in the emulator -- no `defineSecret` /
+ * `defineString` / Secret Manager binding needed. See `.env.example`.
  *
  * Two operations:
- *   - `synthesize(text)`  -> mp3 audio Buffer, using the low-latency Flash v2.5
- *     model (supports Hindi/Hinglish). The caller caches the result in Storage.
- *   - `transcribe(buffer)` -> a plain-text transcript via Scribe v2.
+ *   - `synthesize(text)`  -> mp3 audio Buffer via OpenAI TTS
+ *     (`gpt-4o-mini-tts` by default). The caller caches the result in Storage.
+ *   - `transcribe(buffer)` -> a plain-text transcript via OpenAI STT
+ *     (`gpt-4o-mini-transcribe` by default).
  *
- * PRIVACY NOTE: this sends Zumi's spoken text and the child's recorded audio to
- * ElevenLabs. For production with real children, review ElevenLabs' data/zero-
- * retention options. STT temp uploads are deleted right after transcription.
+ * PRIVACY NOTE: this sends Zumi's spoken text and the child's recorded audio
+ * to OpenAI. For production with real children, review OpenAI's API data
+ * retention / zero-retention options.
  *
- * Resilience: requests are wrapped in an AbortController timeout. TTS retries
- * once (idempotent); STT does not (the audio upload is one-shot). Callers decide
- * the fallback (Zumi falls back to on-device TTS / treats '' as "no answer").
+ * Resilience: the OpenAI SDK client has its own timeout + one retry baked in
+ * (see `client()` below). Callers decide the fallback (Zumi falls back to
+ * on-device TTS / treats '' as "no answer").
  */
 
-import {defineSecret} from 'firebase-functions/params';
-import {defineString} from 'firebase-functions/params';
+import { createHash, randomUUID } from 'crypto';
+import OpenAI, { toFile } from 'openai';
+import { bucket } from './admin';
 
-/** ElevenLabs API key. Set once: `firebase functions:secrets:set ELEVENLABS_API_KEY`. */
-export const elevenLabsApiKey = defineSecret('ELEVENLABS_API_KEY');
+const REQUEST_TIMEOUT_MS = 20_000;
 
-/**
- * Voice id. Defaults to "Sarah" (warm, friendly). Override without a code
- * change via the `ELEVENLABS_VOICE_ID` env/param -- e.g. an Indian-accent voice
- * from the ElevenLabs Voice Library for a more authentic Hinglish feel. A few
- * good options: Sarah `EXAVITQu4vr4xnSDxMaL`, Rachel `21m00Tcm4TlvDq8ikWAM`,
- * Jessica `cgSgspJ2msm6clMCkdW9`, Lily `pFZP5JQG7iQjIQuC4Bku`.
- */
-export const elevenLabsVoiceId = defineString('ELEVENLABS_VOICE_ID', {
-  default: 'RxWGQqmx8sKzknGaIdmb',
-});
-
-/**
- * Speaking speed (ElevenLabs `voice_settings.speed`, range 0.7-1.2). Default
- * 0.88 = a little slower than natural so a child can follow each word. Tunable
- * via the `ELEVENLABS_VOICE_SPEED` env/param without a code change.
- */
-export const elevenLabsVoiceSpeed = defineString('ELEVENLABS_VOICE_SPEED', {
-  default: '0.88',
-});
-
-function resolveSpeed(): number {
-  const raw = Number.parseFloat(elevenLabsVoiceSpeed.value());
-  if (!Number.isFinite(raw)) return 0.88;
-  // Clamp to ElevenLabs' supported window.
-  return Math.min(1.2, Math.max(0.7, raw));
+/** Lazy OpenAI client, shared shape with `lib/zumiAi.ts`. */
+let clientSingleton: OpenAI | null = null;
+function client(): OpenAI {
+  if (clientSingleton) return clientSingleton;
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is not set. Check your .env file.');
+  }
+  clientSingleton = new OpenAI({
+    apiKey,
+    timeout: REQUEST_TIMEOUT_MS,
+    maxRetries: 1,
+  });
+  return clientSingleton;
 }
 
-const API_BASE = 'https://api.elevenlabs.io/v1';
-// Flash v2.5: ~75ms server latency, 32 languages incl. Hindi. Best for the
-// near-real-time Zumi loop. Swap to `eleven_multilingual_v2` for max quality.
-const TTS_MODEL = 'eleven_flash_v2_5';
-const TTS_OUTPUT_FORMAT = 'mp3_44100_64';
-const STT_MODEL = 'scribe_v2';
-const TTS_TIMEOUT_MS = 15_000;
-const STT_TIMEOUT_MS = 20_000;
+/**
+ * TTS voice. One of: alloy, ash, ballad, coral, echo, fable, onyx, nova,
+ * sage, shimmer, verse. Override via `OPENAI_TTS_VOICE` in .env -- "shimmer"
+ * is a warm, friendly default close in spirit to the old ElevenLabs choice.
+ */
+function ttsVoice(): string {
+  return process.env.OPENAI_TTS_VOICE || 'shimmer';
+}
+
+/** TTS model. `gpt-4o-mini-tts` is fast, low-cost, and instructable. */
+function ttsModel(): string {
+  return process.env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
+}
+
+/** STT model. `gpt-4o-mini-transcribe` is fast and low-cost; `whisper-1` also works. */
+function sttModel(): string {
+  return process.env.OPENAI_STT_MODEL || 'gpt-4o-mini-transcribe';
+}
+
+/**
+ * Speaking speed, OpenAI TTS range 0.25-4.0. Default 0.9 = a touch slower
+ * than natural so a child can follow each word. Tunable via
+ * `OPENAI_TTS_SPEED` in .env without a code change.
+ */
+function resolveSpeed(): number {
+  const raw = Number.parseFloat(process.env.OPENAI_TTS_SPEED ?? '');
+  if (!Number.isFinite(raw)) return 0.9;
+  return Math.min(4.0, Math.max(0.25, raw));
+}
+
+export const TTS_CONTENT_TYPE = 'audio/mpeg';
 /** Hard cap so a runaway prompt can't rack up TTS characters. */
 export const MAX_TTS_CHARS = 800;
 
-export const TTS_CONTENT_TYPE = 'audio/mpeg';
-
 /** A stable cache key input for a given spoken line + voice + model + speed. */
 export function ttsCacheKey(text: string): string {
-  return `${elevenLabsVoiceId.value()}|${TTS_MODEL}|${TTS_OUTPUT_FORMAT}|${resolveSpeed()}|${text}`;
+  return `${ttsVoice()}|${ttsModel()}|${resolveSpeed()}|${text}`;
 }
 
 /**
- * Synthesize `text` to an mp3 Buffer. Throws on non-2xx / network / timeout
- * after a single retry.
+ * Synthesize `text` to an mp3 Buffer. Throws on failure (network, timeout,
+ * non-2xx) -- the SDK already retries once internally.
  */
 export async function synthesize(text: string): Promise<Buffer> {
-  const apiKey = elevenLabsApiKey.value();
-  if (!apiKey) {
-    throw new Error('ELEVENLABS_API_KEY secret is not configured.');
-  }
   const clean = (text ?? '').trim().slice(0, MAX_TTS_CHARS);
   if (clean.length === 0) {
     throw new Error('No text to synthesize.');
   }
 
-  const url =
-    `${API_BASE}/text-to-speech/${encodeURIComponent(elevenLabsVoiceId.value())}` +
-    `?output_format=${TTS_OUTPUT_FORMAT}`;
-  const body = JSON.stringify({
-    text: clean,
-    model_id: TTS_MODEL,
-    voice_settings: {
-      // Higher stability + low style = a calm, steady, consistent read (less
-      // dramatic swings), which is easier for a child to follow.
-      stability: 0.6,
-      similarity_boost: 0.85,
-      style: 0.0,
-      use_speaker_boost: true,
-      speed: resolveSpeed(),
-    },
+  const res = await client().audio.speech.create({
+    model: ttsModel(),
+    voice: ttsVoice() as OpenAI.Audio.Speech.SpeechCreateParams['voice'],
+    input: clean,
+    response_format: 'mp3',
+    speed: resolveSpeed(),
   });
-
-  let lastErr: unknown;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TTS_TIMEOUT_MS);
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'xi-api-key': apiKey,
-          'content-type': 'application/json',
-          accept: TTS_CONTENT_TYPE,
-        },
-        body,
-        signal: controller.signal,
-      });
-      if (!res.ok) {
-        const errText = await res.text().catch(() => '');
-        throw new Error(
-          `ElevenLabs TTS ${res.status}: ${errText.slice(0, 200)}`,
-        );
-      }
-      const arrayBuf = await res.arrayBuffer();
-      return Buffer.from(arrayBuf);
-    } catch (err) {
-      lastErr = err;
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-  throw lastErr instanceof Error ? lastErr : new Error('ElevenLabs TTS failed.');
-}
-
-interface ScribeResponse {
-  text?: string;
-  language_code?: string;
+  const arrayBuf = await res.arrayBuffer();
+  return Buffer.from(arrayBuf);
 }
 
 /**
- * Transcribe an audio Buffer to text via Scribe v2. Throws on non-2xx /
- * network / timeout (the caller treats a thrown error as "no answer").
+ * Synthesize `text` to an mp3 and return it as inline base64 -- NO Storage
+ * upload. This eliminates the ~2.5s Storage round-trip per turn. For a 2-3
+ * sentence Hinglish line the MP3 is ~50-150 KB, well within callable limits.
+ */
+export async function synthesizeInline(text: string): Promise<{
+  audioBase64: string;
+  contentType: string;
+}> {
+  const audio = await synthesize(text);
+  return {
+    audioBase64: audio.toString('base64'),
+    contentType: TTS_CONTENT_TYPE,
+  };
+}
+
+/**
+ * Transcribe an audio Buffer to text via OpenAI STT. Throws on failure (the
+ * caller treats a thrown error as "no answer").
  */
 export async function transcribe(
   audio: Buffer,
   mimeType = 'audio/mp4',
 ): Promise<string> {
-  const apiKey = elevenLabsApiKey.value();
-  if (!apiKey) {
-    throw new Error('ELEVENLABS_API_KEY secret is not configured.');
-  }
+  console.log('[elevenLabs/transcribe] called', { bufferSize: audio?.length ?? 0, mimeType });
   if (!audio || audio.length === 0) {
     throw new Error('No audio to transcribe.');
   }
 
-  // Build the multipart/form-data body by hand. The `lib: ES2022` (no DOM)
-  // tsconfig makes the global FormData/Blob types awkward to use with a Node
-  // Buffer, so a hand-rolled body keeps this fully type-safe and dependency-free.
-  const boundary = `----zumiSTT${Date.now().toString(16)}`;
-  const fileName = `audio.${extForMime(mimeType)}`;
-  const head =
-    `--${boundary}\r\n` +
-    `Content-Disposition: form-data; name="model_id"\r\n\r\n` +
-    `${STT_MODEL}\r\n` +
-    `--${boundary}\r\n` +
-    `Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n` +
-    `Content-Type: ${mimeType}\r\n\r\n`;
-  const tail = `\r\n--${boundary}--\r\n`;
-  const multipartBody = Buffer.concat([
-    Buffer.from(head, 'utf8'),
-    audio,
-    Buffer.from(tail, 'utf8'),
-  ]);
+  const file = await toFile(audio, `audio.${extForMime(mimeType)}`, {
+    type: mimeType,
+  });
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), STT_TIMEOUT_MS);
-  try {
-    const res = await fetch(`${API_BASE}/speech-to-text`, {
-      method: 'POST',
-      headers: {
-        'xi-api-key': apiKey,
-        'content-type': `multipart/form-data; boundary=${boundary}`,
-      },
-      body: new Uint8Array(multipartBody),
-      signal: controller.signal,
-    });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      throw new Error(`ElevenLabs STT ${res.status}: ${errText.slice(0, 200)}`);
-    }
-    const data = (await res.json()) as ScribeResponse;
-    return (data.text ?? '').trim();
-  } finally {
-    clearTimeout(timer);
-  }
+  const res = await client().audio.transcriptions.create({
+    model: sttModel(),
+    file,
+  });
+  const text = (res.text ?? '').trim();
+  console.log('[elevenLabs/transcribe] result', { textLen: text.length, preview: text.slice(0, 80) });
+  return text;
 }
 
 function extForMime(mime: string): string {
@@ -206,4 +156,72 @@ function extForMime(mime: string): string {
   if (mime.includes('webm')) return 'webm';
   if (mime.includes('ogg') || mime.includes('opus')) return 'ogg';
   return 'm4a';
+}
+
+function downloadUrl(bucketName: string, path: string, token: string): string {
+  const encoded = encodeURIComponent(path);
+  return (
+    `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encoded}` +
+    `?alt=media&token=${token}`
+  );
+}
+
+/**
+ * Server-side unified helper to get cached TTS URL or generate a new one.
+ * Reduces round trips by resolving TTS directly during AI text generation.
+ */
+export async function getOrGenerateTtsUrl(text: string): Promise<string> {
+  const clean = (text ?? '').trim().slice(0, MAX_TTS_CHARS);
+  if (clean.length === 0) return '';
+
+  const hash = createHash('sha256').update(ttsCacheKey(clean)).digest('hex');
+  const path = `zumi_tts/${hash}.mp3`;
+  const b = bucket();
+  const file = b.file(path);
+
+  try {
+    // Cache hit? Probe metadata.
+    let cachedToken: string | null = null;
+    let cached = false;
+    try {
+      const [meta] = await file.getMetadata();
+      cached = true;
+      cachedToken =
+        (meta.metadata?.firebaseStorageDownloadTokens as string | undefined) ??
+        null;
+    } catch {
+      cached = false;
+    }
+
+    if (cached) {
+      if (cachedToken) {
+        return downloadUrl(b.name, path, cachedToken.split(',')[0]);
+      }
+      const token = randomUUID();
+      await file.setMetadata({
+        metadata: { firebaseStorageDownloadTokens: token },
+      });
+      return downloadUrl(b.name, path, token);
+    }
+
+    // Cache miss: synthesize new audio.
+    const audio = await synthesize(clean);
+    const token = randomUUID();
+    await file.save(audio, {
+      resumable: false,
+      contentType: TTS_CONTENT_TYPE,
+      metadata: {
+        contentType: TTS_CONTENT_TYPE,
+        cacheControl: 'public, max-age=31536000, immutable',
+        metadata: {
+          firebaseStorageDownloadTokens: token,
+          voiceId: ttsVoice(),
+        },
+      },
+    });
+    return downloadUrl(b.name, path, token);
+  } catch (err) {
+    console.error('[getOrGenerateTtsUrl] Failed to get or generate TTS:', err);
+    return '';
+  }
 }
