@@ -80,7 +80,7 @@ export function ParentNavigator() {
       <Stack.Screen
         name="ChildDetails"
         component={ChildDetailsScreen}
-        options={({route}) => ({title: route.params.childName})}
+        options={{headerShown: false}}
       />
     </Stack.Navigator>
   );

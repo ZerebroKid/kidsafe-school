@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, Switch, Text, View} from 'react-native';
+import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
 
-import {colors, radius, spacing} from '../../theme';
+import {colors, radius, softShadow, spacing, tileGradientFor} from '../../theme';
 import {
   setAppBlocked,
   subscribeChildApps,
@@ -22,6 +23,27 @@ import type {AppEntry, ChildDoc} from '@zerebro/shared-types';
  *   - synced + empty (child has zero installed apps, very unusual) -> "no apps" copy.
  *   - synced + non-empty -> the normal blockable list.
  */
+/** 44px rounded gradient tile with the app's first letter — fallback when no icon synced. */
+function GradientLetterTile({packageName, letter}: {packageName: string; letter: string}) {
+  const pair = tileGradientFor(packageName);
+  // Gradient id must be unique per tile, otherwise sibling SVGs resolve the same def.
+  const id = `tile-${packageName.replace(/[^a-zA-Z0-9]/g, '')}`;
+  return (
+    <View style={styles.tile}>
+      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
+        <Defs>
+          <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={pair.from} />
+            <Stop offset="1" stopColor={pair.to} />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${id})`} />
+      </Svg>
+      <Text style={styles.tileLetter}>{letter}</Text>
+    </View>
+  );
+}
+
 export function AppsTab({childUid}: {childUid: string}) {
   const [apps, setApps] = useState<AppEntry[]>([]);
   const [childDoc, setChildDoc] = useState<ChildDoc | null>(null);
@@ -65,23 +87,25 @@ export function AppsTab({childUid}: {childUid: string}) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Installed Apps</Text>
+        <Text style={styles.sectionCount}>
+          {apps.length} {apps.length === 1 ? 'app' : 'apps'}
+        </Text>
+      </View>
       {apps.map(item => (
-        <View key={item.packageName} style={styles.row}>
+        <View key={item.packageName} style={styles.card}>
           {item.icon ? (
             <Image source={{uri: item.icon}} style={styles.icon} />
           ) : (
-            <View style={[styles.icon, styles.iconFallback]}>
-              <Text style={styles.iconFallbackText}>
-                {item.appName.charAt(0).toUpperCase()}
-              </Text>
-            </View>
+            <GradientLetterTile
+              packageName={item.packageName}
+              letter={item.appName.charAt(0).toUpperCase()}
+            />
           )}
           <View style={styles.body}>
             <Text style={styles.name} numberOfLines={1}>
               {item.appName}
-            </Text>
-            <Text style={styles.pkg} numberOfLines={1}>
-              {item.packageName}
             </Text>
           </View>
           <Switch
@@ -100,43 +124,58 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.lg,
-    gap: spacing.sm,
+    gap: spacing.sm + 4,
   },
-  row: {
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+    justifyContent: 'space-between',
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  sectionTitle: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  sectionCount: {
+    color: colors.textMuted,
+    fontSize: 12,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg - 4,
     padding: spacing.md,
-    gap: spacing.md,
+    gap: spacing.md - 4,
+    ...softShadow,
   },
-  body: {flex: 1},
+  body: {flex: 1, minWidth: 0},
   icon: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
   },
-  iconFallback: {
-    backgroundColor: colors.surfaceAlt,
+  tile: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconFallbackText: {
-    color: colors.text,
+  tileLetter: {
+    color: '#ffffff',
     fontSize: 18,
     fontWeight: '700',
   },
   name: {
     color: colors.text,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '600',
-  },
-  pkg: {
-    color: colors.textMuted,
-    fontSize: 12,
-    marginTop: 2,
   },
   empty: {
     color: colors.textMuted,
@@ -144,14 +183,13 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   waitingCard: {
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg - 4,
     padding: spacing.lg,
     gap: spacing.sm,
     borderLeftWidth: 4,
     borderLeftColor: colors.primary,
+    ...softShadow,
   },
   waitingTitle: {
     color: colors.text,

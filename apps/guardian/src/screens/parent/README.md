@@ -12,7 +12,7 @@ ParentTabs (bottom tabs)
 └── Settings      -> SettingsScreen
 
 ChildDetails (push from Children list)
-└── ChildDetailsScreen   (sub-tabs: Apps | Schedule | Location | Usage | PIN)
+└── ChildDetailsScreen   (sub-tabs: Apps | Schedule | Location | Study | Reels | PIN)
 ```
 
 The v1 shared-mode routes (`SharedProfileSetup`, `SharedPermissionsOnboarding`)
@@ -20,20 +20,18 @@ were removed in P1.6.1.
 
 `ChildDetailsScreen` sub-tabs are *not* React Navigation tabs -- they're an
 internal state machine (`const [tab, setTab] = useState<Tab>('apps')`) over the
-5 tab components in this folder.
+tab components in this folder.
 
 ## Files
 
 | File                                  | Purpose                                                            |
 |---------------------------------------|--------------------------------------------------------------------|
 | `ChildrenListScreen.tsx`              | List linked children with lock toggle                              |
-| `ChildDetailsScreen.tsx`              | Shell for the 5 inner tabs + tamper-attempt banner                 |
+| `ChildDetailsScreen.tsx`              | Shell for the inner tabs + tamper-attempt banner                   |
 | `CurrentAppPill.tsx`                  | Live "child is using X" pill at the top of every tab               |
 | `AppsTab.tsx`                         | Per-child app list with allow / block toggles                      |
 | `ScheduleTab.tsx`                     | Daily window + allowed apps within window                          |
 | `LocationTab.tsx`                     | `react-native-maps` view + location diagnostics banner             |
-| `UsageTab.tsx`                        | 7-day usage chart from `usageDaily` subcollection                  |
-| `UsageBarChart.tsx`                   | Pure-SVG bar chart used by UsageTab                                |
 | `PinTab.tsx`                          | Trigger a remote PIN reset on the child device                     |
 | `SettingsScreen.tsx`                  | Pairing code (generate / share) + sign-out                         |
 

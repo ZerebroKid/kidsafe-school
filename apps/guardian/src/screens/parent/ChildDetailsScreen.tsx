@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
+import Svg, {Path} from 'react-native-svg';
 
-import {colors, radius, spacing} from '../../theme';
+import {GradientBackground} from '../../components/GradientBackground';
+import {colors, radius, softShadow, spacing} from '../../theme';
 import type {ParentStackParamList} from '../../navigation/types';
 import {paths} from '@zerebro/shared-firebase/firestore';
 import {AppsTab} from './AppsTab';
@@ -12,12 +14,20 @@ import {PinTab} from './PinTab';
 import {ScheduleTab} from './ScheduleTab';
 import {ReelsInsightsTab} from './ReelsInsightsTab';
 import {StudyTab} from './StudyTab';
-import {UsageTab} from './UsageTab';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 type Props = NativeStackScreenProps<ParentStackParamList, 'ChildDetails'>;
 
-type Tab = 'apps' | 'schedule' | 'location' | 'usage' | 'pin' | 'study' | 'reels';
+type Tab = 'apps' | 'schedule' | 'location' | 'pin' | 'study' | 'reels';
+
+const TABS: Array<{key: Tab; label: string}> = [
+  {key: 'apps', label: 'Apps'},
+  {key: 'schedule', label: 'Schedule'},
+  {key: 'location', label: 'Location'},
+  {key: 'study', label: 'Study'},
+  {key: 'reels', label: 'Reels'},
+  {key: 'pin', label: 'PIN'},
+];
 
 interface TamperEvent {
   id: string;
@@ -26,7 +36,7 @@ interface TamperEvent {
   timestamp: number;
 }
 
-export function ChildDetailsScreen({route}: Props) {
+export function ChildDetailsScreen({route, navigation}: Props) {
   const {childUid, childName} = route.params;
   const [tab, setTab] = useState<Tab>('apps');
   const [tamperEvents, setTamperEvents] = useState<TamperEvent[]>([]);
@@ -60,9 +70,28 @@ export function ChildDetailsScreen({route}: Props) {
   }, [childUid]);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <GradientBackground />
+      {/* Custom large header — the native stack header is hidden for this screen because the
+          default title was too small to read. The child name is the hero of this screen. */}
+      <View style={styles.header}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          hitSlop={8}
+          style={({pressed}) => [styles.backButton, pressed && styles.backButtonPressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Go back">
+          <BackArrowIcon />
+        </Pressable>
+        <View style={styles.headerText}>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {childName}
+          </Text>
+          <Text style={styles.headerSubtitle}>Device Controls</Text>
+        </View>
+      </View>
       {/* Sticky status strip — sits OUTSIDE the tab body so the live "Currently using"
-          pill stays visible regardless of which tab is selected or how far the user has
+          card stays visible regardless of which tab is selected or how far the user has
           scrolled inside scrollable tabs. */}
       <View style={styles.statusStrip}>
         <CurrentAppPill childUid={childUid} />
@@ -71,23 +100,22 @@ export function ChildDetailsScreen({route}: Props) {
           flex-fill region — `MapView` with flex:1 does not expand inside an outer ScrollView
           whose content height is only `minHeight: 360`, which produced the half-empty map. */}
       <View style={styles.body}>
-        <View style={styles.tabbar}>
-          <TabButton label="Apps" active={tab === 'apps'} onPress={() => setTab('apps')} />
-          <TabButton
-            label="Schedule"
-            active={tab === 'schedule'}
-            onPress={() => setTab('schedule')}
-          />
-          <TabButton
-            label="Location"
-            active={tab === 'location'}
-            onPress={() => setTab('location')}
-          />
-          <TabButton label="Study" active={tab === 'study'} onPress={() => setTab('study')} />
-          <TabButton label="Usage" active={tab === 'usage'} onPress={() => setTab('usage')} />
-          <TabButton label="Reels" active={tab === 'reels'} onPress={() => setTab('reels')} />
-          <TabButton label="PIN" active={tab === 'pin'} onPress={() => setTab('pin')} />
-        </View>
+        {/* Horizontally scrollable pill chips: seven tabs no longer fit a fixed segmented
+            bar at a readable font size, so chips scroll instead of shrinking. */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tabbar}
+          contentContainerStyle={styles.tabbarContent}>
+          {TABS.map(t => (
+            <TabChip
+              key={t.key}
+              label={t.label}
+              active={tab === t.key}
+              onPress={() => setTab(t.key)}
+            />
+          ))}
+        </ScrollView>
 
         {tab === 'location' ? (
           <LocationTab childUid={childUid} />
@@ -109,13 +137,26 @@ export function ChildDetailsScreen({route}: Props) {
             )}
             {tab === 'schedule' && <ScheduleTab childUid={childUid} />}
             {tab === 'study' && <StudyTab childUid={childUid} />}
-            {tab === 'usage' && <UsageTab childUid={childUid} />}
             {tab === 'reels' && <ReelsInsightsTab childUid={childUid} childName={childName} />}
             {tab === 'pin' && <PinTab childUid={childUid} childName={childName} />}
           </ScrollView>
         )}
       </View>
     </SafeAreaView>
+  );
+}
+
+function BackArrowIcon() {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M19 12H5M11 18l-6-6 6-6"
+        stroke={colors.text}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
   );
 }
 
@@ -173,7 +214,7 @@ function formatRelative(ts: number): string {
   return `${Math.floor(diff / 86_400_000)} d ago`;
 }
 
-function TabButton({
+function TabChip({
   label,
   active,
   onPress,
@@ -183,10 +224,10 @@ function TabButton({
   onPress: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} style={[styles.tab, active && styles.tabActive]}>
+    <Pressable onPress={onPress} style={[styles.chip, active && styles.chipActive]}>
       <Text
         numberOfLines={1}
-        style={[styles.tabLabel, active && styles.tabLabelActive]}>
+        style={[styles.chipLabel, active && styles.chipLabelActive]}>
         {label}
       </Text>
     </Pressable>
@@ -195,17 +236,54 @@ function TabButton({
 
 const styles = StyleSheet.create({
   safe: {flex: 1, backgroundColor: colors.bg},
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...softShadow,
+  },
+  backButtonPressed: {
+    opacity: 0.6,
+  },
+  headerText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  headerTitle: {
+    color: colors.text,
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+  },
+  headerSubtitle: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 19,
+    marginTop: 1,
+  },
   statusStrip: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
     width: '100%',
     overflow: 'hidden',
   },
-  /** Column below the status pill — tab bar is fixed; Location fills remainder. */
+  /** Column below the status card — tab bar is fixed; Location fills remainder. */
   body: {
     flex: 1,
   },
-  /** Scrollable region for Apps / Schedule / Usage / PIN only. */
+  /** Scrollable region for every tab except Location (which needs flex-fill for the map). */
   scrollableTab: {
     flex: 1,
   },
@@ -214,31 +292,41 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   tabbar: {
-    flexDirection: 'row',
-    margin: spacing.md,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.pill,
-    padding: 4,
+    flexGrow: 0,
+    marginVertical: spacing.md,
   },
-  tab: {
-    flex: 1,
+  tabbarContent: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    gap: spacing.sm,
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 2,
-    borderRadius: radius.pill,
   },
-  tabActive: {backgroundColor: colors.primary},
-  tabLabel: {color: colors.textMuted, fontWeight: '600', fontSize: 11},
-  tabLabelActive: {color: colors.primaryText},
+  chip: {
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    ...softShadow,
+  },
+  chipActive: {backgroundColor: colors.primary},
+  chipLabel: {
+    color: colors.text,
+    fontSize: 14,
+    lineHeight: 19,
+    fontWeight: '500',
+  },
+  chipLabelActive: {
+    color: colors.primaryText,
+    fontWeight: '600',
+  },
   tamperCard: {
     marginHorizontal: spacing.md,
     marginBottom: spacing.md,
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg - 4,
     padding: spacing.md,
     gap: spacing.sm,
+    ...softShadow,
   },
   tamperTitle: {
     color: colors.text,

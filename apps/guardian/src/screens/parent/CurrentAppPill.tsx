@@ -1,12 +1,13 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
+import Svg, {Path} from 'react-native-svg';
 
-import {colors, radius, spacing} from '../../theme';
+import {colors, gradients, radius, softShadow, spacing} from '../../theme';
 import {subscribeChildApps, subscribeChildDoc} from '@zerebro/shared-firebase/firestore';
 import type {AppEntry, ChildDoc, ChildForegroundApp} from '@zerebro/shared-types';
 
 /**
- * Live "what is my child using right now" pill, rendered above the tabs on
+ * Live "what is my child using right now" status card, rendered above the tabs on
  * `ChildDetailsScreen`. Reads `ChildDoc.currentApp` (written by the native
  * `KidSafeForegroundService` UsageStats resolver every ~1.5s, plus the JS coalesce path as a
  * fallback in-process writer) and joins the package name against the `apps` subcollection
@@ -27,7 +28,7 @@ import type {AppEntry, ChildDoc, ChildForegroundApp} from '@zerebro/shared-types
  * aggressive OEMs. If the doc IS truly stale (we explicitly hit `LONG_STALE_THRESHOLD_MS`
  * without a refresh), we show "Phone idle" to fail safe.
  *
- * The pill spans the content width and ellipsizes long app names after "Using".
+ * The card spans the content width and ellipsizes long app names after "Using".
  */
 
 /** Past this many ms without any update we assume the child device is genuinely offline. */
@@ -35,7 +36,7 @@ const LONG_STALE_THRESHOLD_MS = 5 * 60_000;
 
 /**
  * Common Android launcher packages — kept here purely so we can recognise launcher payloads
- * coming over the wire and re-route them to the last real app or "Phone idle". The pill
+ * coming over the wire and re-route them to the last real app or "Phone idle". The card
  * itself never renders a launcher name.
  */
 const LAUNCHER_PREFIXES = [
@@ -61,6 +62,8 @@ function isLauncher(pkg: string): boolean {
   );
 }
 
+type StateGlyph = 'moon' | 'warning' | 'phone';
+
 interface PillView {
   /** Full label for muted / idle states. */
   label: string;
@@ -70,7 +73,19 @@ interface PillView {
   dotColor: string;
   iconUri?: string;
   iconFallback?: string;
+  /** Glyph drawn in the circular container when there is no app icon to show. */
+  glyph?: StateGlyph;
   muted: boolean;
+}
+
+function idleView(): PillView {
+  return {
+    label: 'Phone idle',
+    sublabel: 'No activity detected',
+    dotColor: colors.textMuted,
+    glyph: 'moon',
+    muted: true,
+  };
 }
 
 function resolvePillView(
@@ -81,24 +96,28 @@ function resolvePillView(
   if (!current) {
     return {
       label: 'Waiting for your child\u2019s phone',
+      sublabel: 'Ask them to open KidSafe once',
       dotColor: colors.textMuted,
+      glyph: 'phone',
       muted: true,
     };
   }
   if (current.state === 'screen_off') {
-    return {label: 'Phone idle', dotColor: colors.textMuted, muted: true};
+    return idleView();
   }
   if (current.state === 'unavailable') {
     return {
       label: 'Live activity unavailable',
+      sublabel: 'Accessibility is turned off',
       dotColor: colors.warning,
+      glyph: 'warning',
       muted: true,
     };
   }
 
   const longStale = now - current.updatedAt > LONG_STALE_THRESHOLD_MS;
   if (longStale) {
-    return {label: 'Phone idle', dotColor: colors.textMuted, muted: true};
+    return idleView();
   }
 
   // Resolve the package we want to surface. Defensive: if for any reason the writer hands us
@@ -109,7 +128,7 @@ function resolvePillView(
     ? rawPkg
     : current.lastNonLauncherPackage ?? '';
   if (!pkg) {
-    return {label: 'Phone idle', dotColor: colors.textMuted, muted: true};
+    return idleView();
   }
 
   const entry = appsByPkg.get(pkg);
@@ -118,11 +137,53 @@ function resolvePillView(
   return {
     label: '',
     appName: friendlyName,
+    sublabel: 'Active now',
     dotColor: colors.success,
     iconUri: entry?.icon,
     iconFallback: friendlyName.charAt(0).toUpperCase(),
     muted: false,
   };
+}
+
+function StateGlyphIcon({glyph}: {glyph: StateGlyph}) {
+  const stroke = colors.textMuted;
+  if (glyph === 'moon') {
+    return (
+      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+        <Path
+          d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8Z"
+          stroke={stroke}
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </Svg>
+    );
+  }
+  if (glyph === 'warning') {
+    return (
+      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+        <Path
+          d="M10.3 4.1 2.6 17.4a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.1a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01"
+          stroke={stroke}
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </Svg>
+    );
+  }
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2ZM11 18h2"
+        stroke={stroke}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
 }
 
 export function CurrentAppPill({childUid}: {childUid: string}) {
@@ -146,15 +207,16 @@ export function CurrentAppPill({childUid}: {childUid: string}) {
   const view = resolvePillView(childDoc?.currentApp, appsByPkg, Date.now());
 
   return (
-    <View style={[styles.pill, view.muted && styles.pillMuted]}>
-      <View style={[styles.dot, {backgroundColor: view.dotColor}]} />
-      {view.iconUri ? (
-        <Image source={{uri: view.iconUri}} style={styles.icon} />
-      ) : view.iconFallback ? (
-        <View style={[styles.icon, styles.iconFallback]}>
+    <View style={styles.card}>
+      <View style={styles.iconWrap}>
+        {view.iconUri ? (
+          <Image source={{uri: view.iconUri}} style={styles.icon} />
+        ) : view.glyph ? (
+          <StateGlyphIcon glyph={view.glyph} />
+        ) : (
           <Text style={styles.iconFallbackText}>{view.iconFallback}</Text>
-        </View>
-      ) : null}
+        )}
+      </View>
       <View style={styles.textWrap}>
         {view.appName ? (
           <View style={styles.labelRow}>
@@ -167,10 +229,7 @@ export function CurrentAppPill({childUid}: {childUid: string}) {
             </Text>
           </View>
         ) : (
-          <Text
-            style={[styles.label, view.muted && styles.labelMuted]}
-            numberOfLines={1}
-            ellipsizeMode="tail">
+          <Text style={styles.label} numberOfLines={1} ellipsizeMode="tail">
             {view.label}
           </Text>
         )}
@@ -180,61 +239,62 @@ export function CurrentAppPill({childUid}: {childUid: string}) {
           </Text>
         ) : null}
       </View>
+      <View style={[styles.dot, {backgroundColor: view.dotColor}]} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  pill: {
+  card: {
     alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.pill,
-    paddingVertical: 12,
-    paddingHorizontal: spacing.lg - 4,
+    gap: spacing.md - 4,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg - 4,
+    padding: spacing.md,
     maxWidth: '100%',
-    overflow: 'hidden',
+    ...softShadow,
+    shadowOpacity: 0.1,
+    elevation: 3,
   },
-  pillMuted: {
-    backgroundColor: colors.surfaceAlt,
-    opacity: 0.85,
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  icon: {
-    width: 26,
-    height: 26,
-    borderRadius: 6,
-  },
-  iconFallback: {
-    backgroundColor: colors.surfaceAlt,
+  iconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: gradients.iconCircle,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+    overflow: 'hidden',
+  },
+  icon: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
   },
   iconFallbackText: {
     color: colors.text,
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '700',
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    flexShrink: 0,
+    marginLeft: spacing.xs,
   },
   label: {
     color: colors.text,
-    fontSize: 15,
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 21,
     fontWeight: '600',
-  },
-  labelMuted: {
-    color: colors.textMuted,
-    fontWeight: '500',
   },
   textWrap: {
     flex: 1,
     minWidth: 0,
-    gap: 3,
+    gap: 2,
   },
   labelRow: {
     flexDirection: 'row',
@@ -247,8 +307,8 @@ const styles = StyleSheet.create({
   },
   sublabel: {
     color: colors.textMuted,
-    fontSize: 13,
-    lineHeight: 17,
+    fontSize: 12,
+    lineHeight: 16,
     fontWeight: '500',
     flexShrink: 1,
   },

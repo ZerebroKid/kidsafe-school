@@ -3,6 +3,7 @@ import {ScrollView, StyleSheet, Text, View, ViewStyle} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {colors, spacing} from '../theme';
+import {GradientBackground} from './GradientBackground';
 
 interface Props {
   title?: string;
@@ -22,6 +23,7 @@ export function Screen({title, subtitle, children, scroll = true, contentStyle}:
   );
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      <GradientBackground />
       {scroll ? (
         <ScrollView
           keyboardShouldPersistTaps="handled"
@@ -47,8 +49,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.text,
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.4,
   },
   subtitle: {
     color: colors.textMuted,

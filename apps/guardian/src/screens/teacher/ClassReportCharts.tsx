@@ -25,8 +25,8 @@ const BUCKET_LABELS = ['0-20', '21-40', '41-60', '61-80', '81-100'];
 
 /**
  * Visual summary for the class report: three stat cards + a pass/fail/
- * not-attempted donut + a score-distribution histogram. Pure react-native-svg
- * (mirrors `UsageBarChart`); display-only, no interaction.
+ * not-attempted donut + a score-distribution histogram. Pure react-native-svg;
+ * display-only, no interaction.
  */
 export function ClassReportCharts({metrics}: {metrics: ClassMetrics}) {
   return (

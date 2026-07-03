@@ -3,8 +3,10 @@ import {Pressable, ScrollView, StyleSheet, Switch, Text, View} from 'react-nativ
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
+import Svg, {Circle, Defs, LinearGradient, Stop} from 'react-native-svg';
+
 import {Screen} from '../../components/Screen';
-import {colors, radius, spacing} from '../../theme';
+import {colors, radius, softShadow, spacing, tileGradientFor} from '../../theme';
 import {
   setLock,
   subscribeChildDoc,
@@ -70,13 +72,30 @@ export function ChildrenListScreen() {
               navigation.navigate('ChildDetails', {childUid: item.uid, childName: displayName})
             }
             style={({pressed}) => [styles.card, pressed && {opacity: 0.85}]}>
-            <View style={{flex: 1}}>
-              <Text style={styles.name}>{displayName}</Text>
-              <Text style={styles.meta}>
-                {item.doc?.status === 'online' ? '\u25cf Online' : '\u25cb Offline'}
-                {'  \u00b7  '}
-                {item.doc?.lockState?.locked ? 'Locked' : 'Unlocked'}
+            <GradientAvatar
+              uid={item.uid}
+              letter={displayName.charAt(0).toUpperCase()}
+            />
+            <View style={{flex: 1, minWidth: 0}}>
+              <Text style={styles.name} numberOfLines={1}>
+                {displayName}
               </Text>
+              <View style={styles.metaRow}>
+                <View
+                  style={[
+                    styles.statusDot,
+                    {
+                      backgroundColor:
+                        item.doc?.status === 'online' ? colors.success : colors.border,
+                    },
+                  ]}
+                />
+                <Text style={styles.meta} numberOfLines={1}>
+                  {item.doc?.status === 'online' ? 'Online' : 'Offline'}
+                  {'  \u00b7  '}
+                  {item.doc?.lockState?.locked ? 'Locked' : 'Unlocked'}
+                </Text>
+              </View>
             </View>
             <Switch
               value={item.doc?.lockState?.locked ?? false}
@@ -89,6 +108,26 @@ export function ChildrenListScreen() {
         })}
       </ScrollView>
     </Screen>
+  );
+}
+
+/** 48px circular gradient avatar with the child's first initial, stable color per uid. */
+function GradientAvatar({uid, letter}: {uid: string; letter: string}) {
+  const pair = tileGradientFor(uid);
+  const id = `avatar-${uid.replace(/[^a-zA-Z0-9]/g, '')}`;
+  return (
+    <View style={styles.avatar}>
+      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" pointerEvents="none">
+        <Defs>
+          <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={pair.from} />
+            <Stop offset="1" stopColor={pair.to} />
+          </LinearGradient>
+        </Defs>
+        <Circle cx="24" cy="24" r="24" fill={`url(#${id})`} />
+      </Svg>
+      <Text style={styles.avatarLetter}>{letter}</Text>
+    </View>
   );
 }
 
@@ -109,22 +148,45 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.bg,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg - 4,
     padding: spacing.md,
-    gap: spacing.md,
+    gap: spacing.md - 4,
+    ...softShadow,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarLetter: {
+    color: '#ffffff',
+    fontSize: 19,
+    fontWeight: '700',
   },
   name: {
     color: colors.text,
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 3,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   meta: {
     color: colors.textMuted,
     fontSize: 13,
-    marginTop: 4,
+    flexShrink: 1,
   },
   empty: {
     flex: 1,

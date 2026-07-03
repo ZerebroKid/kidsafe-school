@@ -3,7 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {PhoneConfirmScreen} from '../screens/auth/PhoneConfirmScreen';
 import {PhoneLoginScreen} from '../screens/auth/PhoneLoginScreen';
-import {colors} from '../theme';
+import {colors, gradients} from '../theme';
 import type {AuthStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -24,7 +24,8 @@ export function AuthNavigator() {
     <Stack.Navigator
       initialRouteName="PhoneLogin"
       screenOptions={{
-        headerStyle: {backgroundColor: colors.bg},
+        // Header blends into the top stop of the screens' gradient background.
+        headerStyle: {backgroundColor: gradients.screen.from},
         headerTintColor: colors.text,
         headerShadowVisible: false,
         headerTitle: '',

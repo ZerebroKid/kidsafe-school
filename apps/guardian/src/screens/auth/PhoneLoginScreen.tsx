@@ -16,7 +16,8 @@ import auth from '@react-native-firebase/auth';
 import Svg, {Path, Circle, Line} from 'react-native-svg';
 
 import {stashConfirmation} from './phoneConfirmationStore';
-import {colors, radius, spacing} from '../../theme';
+import {GradientBackground} from '../../components/GradientBackground';
+import {colors, radius, softShadow, spacing} from '../../theme';
 import type {AuthStackParamList} from '../../navigation/types';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'PhoneLogin'>;
@@ -94,6 +95,7 @@ export function PhoneLoginScreen({navigation}: Props) {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      <GradientBackground />
       <KeyboardAvoidingView
         style={styles.flex1}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -202,9 +204,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.text,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   subtitle: {
     fontSize: 16,
@@ -226,10 +228,11 @@ const styles = StyleSheet.create({
   inputWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg - 4,
     height: 56,
     paddingHorizontal: spacing.md,
+    ...softShadow,
   },
   inputIcon: {
     marginRight: spacing.sm,
@@ -256,9 +259,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     backgroundColor: colors.primary,
-    borderRadius: radius.md,
+    borderRadius: radius.lg - 4,
     height: 56,
     marginTop: spacing.xl,
+    ...softShadow,
+    shadowOpacity: 0.18,
+    elevation: 3,
   },
   sendBtnDisabled: {
     opacity: 0.6,
