@@ -1,0 +1,114 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 2,
+  "chapterName": "The Invisible Living World: Beyond Our Naked Eye",
+  "topicId": "what_is_a_cell",
+  "topicName": "1. What is a Cell?",
+  "explanation": "A cell is the smallest living unit of life. Just as bricks combine to form a building, cells combine to form living organisms. Every living organism, whether a tiny bacterium or a giant elephant, is made up of cells. Cells perform all the basic functions necessary for life, such as obtaining nutrition, producing energy, removing waste, growing, and reproducing. That is why cells are called the basic structural and functional units of life. Some organisms are made of only one cell (unicellular, like Amoeba), while others consist of millions of cells (multicellular, like humans and trees). The discovery of cells is credited to Robert Hooke in 1665, who observed tiny box-like compartments in a slice of cork under a microscope and named them 'cells', publishing his work in Micrographia. Plant cells have a fixed rectangular shape due to a rigid cell wall and contain a cell wall, cell membrane, cytoplasm, nucleus, vacuole, and chloroplast. Animal cells have no cell wall, are rounded or irregular, and contain a cell membrane, cytoplasm, nucleus, and mitochondria. Key organelles: the nucleus is the control centre; the cell membrane controls movement in and out; cytoplasm is the jelly-like material where activities occur; the vacuole stores food, water and waste; chloroplast (only in plant cells) makes food; mitochondria is the 'powerhouse of the cell'. Cells vary in shape according to function: muscle cells are long and flexible, nerve cells are long and branched, and red blood cells are disc-shaped to carry oxygen.",
+  "examples": [
+    "Amoeba is a unicellular organism made of just one cell.",
+    "A human being and a mango tree are multicellular organisms made of millions of cells.",
+    "Mitochondria is called the powerhouse of the cell because it produces energy.",
+    "Chloroplasts contain chlorophyll and help plants prepare food through photosynthesis."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=eK-NCfvTtIE",
+  "brainstorming": [
+    {
+      "question": "How can a tiny cell create an entire human body?",
+      "answer": "A single cell repeatedly divides into many cells. Over time, these cells form tissues, organs, and organ systems, resulting in a complete human body."
+    },
+    {
+      "question": "Why can't we see cells with our naked eyes?",
+      "answer": "Cells are extremely small. Most cells are much smaller than a grain of sand and require microscopes for observation."
+    },
+    {
+      "question": "Why do brain cells and muscle cells look different?",
+      "answer": "Different cells perform different functions. Their shapes are adapted to perform those functions efficiently."
+    },
+    {
+      "question": "Can a single cell survive on its own?",
+      "answer": "Yes. Organisms such as Amoeba and Paramecium consist of a single cell that performs all life activities independently.",
+      "videoUrl": "https://youtu.be/8xyEM0wBGrw"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Cells are always round.",
+      "correct": "Cells come in many shapes depending on their functions."
+    },
+    {
+      "wrong": "All cells look exactly the same.",
+      "correct": "Different cells have different structures and functions."
+    },
+    {
+      "wrong": "Cells can be seen easily without instruments.",
+      "correct": "Most cells are microscopic and require microscopes for observation."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Growth from Baby to Adult",
+      "description": "A baby grows into an adult because cells continuously divide and increase in number."
+    },
+    {
+      "title": "Healing of Wounds",
+      "description": "When the skin is damaged, cells divide and replace injured cells."
+    },
+    {
+      "title": "Hair Growth",
+      "description": "Hair grows because specialized cells continuously produce new hair tissue."
+    },
+    {
+      "title": "Muscle Development",
+      "description": "Exercise causes muscle cells to grow and repair themselves."
+    },
+    {
+      "title": "Thinking and Learning",
+      "description": "Nerve cells help us think, remember, and process information."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Observation of Onion Peel Cells",
+      "instructions": "Materials: onion peel, microscope, glass slide, water. Procedure: 1. Remove a thin onion peel. 2. Place it on a slide. 3. Add a drop of water. 4. Observe under a microscope. Observation: Tiny rectangular cells arranged in rows can be seen. Conclusion: Living organisms are made up of cells, which form the basic units of life."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Who discovered cells?",
+      "options": ["Louis Pasteur", "Robert Hooke", "Newton", "Darwin"],
+      "correctIndex": 1,
+      "explanation": "Robert Hooke discovered cells in 1665 while observing cork under a microscope."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which organelle is known as the powerhouse of the cell?",
+      "options": ["Nucleus", "Chloroplast", "Mitochondria", "Vacuole"],
+      "correctIndex": 2,
+      "explanation": "Mitochondria is called the powerhouse because it produces energy for the cell."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Which structure is present only in plant cells?",
+      "options": ["Cell Membrane", "Cytoplasm", "Chloroplast", "Nucleus"],
+      "correctIndex": 2,
+      "explanation": "Chloroplast is found only in plant cells and helps in food production."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Amoeba is:",
+      "options": ["Multicellular", "Unicellular", "A tissue", "An organ"],
+      "correctIndex": 1,
+      "explanation": "Amoeba is a unicellular organism made of a single cell."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

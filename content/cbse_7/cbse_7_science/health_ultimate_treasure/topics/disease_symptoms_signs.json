@@ -1,0 +1,124 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 3,
+  "chapterName": "Health: The Ultimate Treasure",
+  "topicId": "disease_symptoms_signs",
+  "topicName": "2. Disease, Symptoms and Signs",
+  "explanation": "Our body normally functions in a healthy and balanced way. However, sometimes the normal functioning of the body or mind gets disturbed. This condition is called a disease. A disease may affect physical health, mental health, daily activities, and growth. Diseases can be temporary, such as the common cold, or long-lasting, such as diabetes. A disease is a condition in which the body or mind does not function normally, and a person may feel weak, uncomfortable, or unable to perform normal activities. Symptoms are changes that a person feels when they are sick and cannot always be seen by others, such as headache, body pain, tiredness, nausea, dizziness, and sore throat; symptoms are what we feel. Signs are changes that can be observed or measured by others, such as fever, rash, swelling, coughing, and high blood pressure; signs are what can be seen or measured. Symptoms are felt by the patient (subjective) while signs are observed by others (objective). Diseases may occur due to infection by microorganisms (bacteria, viruses, fungi, parasites), an unhealthy lifestyle (lack of exercise, junk food, smoking), environmental factors (polluted air, contaminated water), or genetic factors. Recognizing symptoms and signs early helps start treatment quickly, prevent complications, and improve recovery. Symptoms act as warning signals from the body, so they should not be ignored, and medical advice should be sought whenever symptoms persist.",
+  "examples": [
+    "Headache, tiredness, and body pain are symptoms felt by the patient.",
+    "Fever, rash, and swelling are signs that can be observed or measured.",
+    "A common cold is a temporary disease while diabetes is long-lasting.",
+    "Ignoring a fever may let a serious infection go untreated."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=IBWkeLN2N0E",
+  "brainstorming": [
+    {
+      "question": "Why do we get a fever when we are sick?",
+      "answer": "Fever is the body's natural defense mechanism. It helps fight harmful microorganisms."
+    },
+    {
+      "question": "Can a disease exist without visible signs?",
+      "answer": "Yes. Some diseases may initially show only symptoms felt by the patient."
+    },
+    {
+      "question": "Why do doctors ask so many questions before treatment?",
+      "answer": "Doctors use symptoms and signs to identify the disease correctly."
+    },
+    {
+      "question": "Can two people have the same disease but different symptoms?",
+      "answer": "Yes. Different individuals may experience diseases differently.",
+      "videoUrl": "https://youtu.be/8iOkM0msd28"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Fever is a disease.",
+      "correct": "Fever is usually a sign of an underlying disease."
+    },
+    {
+      "wrong": "Symptoms and signs are the same.",
+      "correct": "Symptoms are felt by the patient; signs are observed by others."
+    },
+    {
+      "wrong": "Diseases affect only the body.",
+      "correct": "Some diseases can affect the mind and emotions as well."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Fever",
+      "description": "A common sign that the body may be fighting an infection."
+    },
+    {
+      "title": "Cold and Cough",
+      "description": "Common symptoms include sneezing, sore throat, and coughing."
+    },
+    {
+      "title": "Doctor Visits",
+      "description": "Doctors use signs and symptoms to diagnose illnesses."
+    },
+    {
+      "title": "Treatment",
+      "description": "Early treatment often leads to faster recovery."
+    },
+    {
+      "title": "Safe Water",
+      "description": "Drinking clean water reduces the risk of many diseases."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Observing Signs and Symptoms",
+      "instructions": "Think of a common cold. List its symptoms (headache, sore throat, tiredness) and its signs (sneezing, runny nose, fever). Observation: Students learn to distinguish symptoms from signs. Conclusion: Symptoms and signs help identify diseases."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "What is a disease?",
+      "options": [
+        "A normal body condition",
+        "Disturbance in normal body functioning",
+        "Physical exercise",
+        "Healthy condition"
+      ],
+      "correctIndex": 1,
+      "explanation": "A disease disturbs the normal functioning of the body or mind."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which of the following is a symptom?",
+      "options": ["Fever", "Rash", "Headache", "Swelling"],
+      "correctIndex": 2,
+      "explanation": "Headache is a symptom felt by the patient."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Which of the following is a sign?",
+      "options": ["Tiredness", "Headache", "Fever", "Dizziness"],
+      "correctIndex": 2,
+      "explanation": "Fever is a sign that can be observed or measured."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Why is early diagnosis important?",
+      "options": [
+        "To increase disease spread",
+        "To delay treatment",
+        "To improve recovery",
+        "To avoid doctors"
+      ],
+      "correctIndex": 2,
+      "explanation": "Early diagnosis helps start treatment quickly and improves recovery."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

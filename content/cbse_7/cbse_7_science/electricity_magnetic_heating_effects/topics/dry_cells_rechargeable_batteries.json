@@ -1,0 +1,124 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 4,
+  "chapterName": "Electricity: Magnetic and Heating Effects",
+  "topicId": "dry_cells_rechargeable_batteries",
+  "topicName": "5. Dry Cells and Rechargeable Batteries",
+  "explanation": "Electric cells produce electricity through chemical reactions, but simple cells such as lemon cells are not practical for everyday use because they produce very little electricity, are difficult to carry, and cannot power devices for long. To solve these problems, scientists developed dry cells and later rechargeable batteries. Today almost every portable device, such as mobile phones, laptops, cameras, remote controls, toys, and torches, uses one of these. A dry cell is a type of electric cell in which the electrolyte is present as a thick moist paste instead of a liquid, which is why it is called dry. Because the electrolyte is not liquid, it is easier to carry, leaks less, and is safer to use. A dry cell has three main parts: the zinc container, which acts as the negative terminal and participates in reactions; the carbon rod in the centre, which acts as the positive terminal; and the paste electrolyte between them, which allows chemical reactions and helps produce current. Inside the cell, chemical reactions release electrons, current flows through the external circuit, and the connected device works. A dry cell does not last forever; after long use the chemicals get exhausted and current production stops, and dry cells are generally single-use. To overcome this, rechargeable batteries were developed that can be charged again and again. During use, chemical energy converts into electrical energy; during charging, electrical energy converts back into chemical energy. Most modern devices use lithium-ion (Li-ion) batteries, which are lightweight, long-lasting, and store lots of energy. Repeated charging slowly reduces battery capacity. Old batteries should be recycled through proper e-waste facilities because they contain harmful substances such as lithium, nickel, cadmium, and lead.",
+  "examples": [
+    "A dry cell has a zinc container, a carbon rod, and a paste electrolyte.",
+    "The carbon rod in a dry cell acts as the positive terminal.",
+    "Smartphones and laptops use rechargeable lithium-ion batteries.",
+    "Batteries should be recycled because they contain harmful substances."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=IAlZNieILNQ",
+  "brainstorming": [
+    {
+      "question": "Why can't most dry cells be recharged?",
+      "answer": "The chemical reactions inside ordinary dry cells cannot be easily reversed."
+    },
+    {
+      "question": "Why do mobile phones use rechargeable batteries instead of dry cells?",
+      "answer": "Mobile phones need large amounts of energy and frequent recharging, which dry cells cannot provide."
+    },
+    {
+      "question": "Why does a battery become warm while charging?",
+      "answer": "Some electrical energy is converted into heat during the charging process."
+    },
+    {
+      "question": "Why are scientists developing new battery technologies?",
+      "answer": "To create batteries that charge faster, last longer, and are safer for users and the environment.",
+      "videoUrl": "https://youtu.be/iprvmNnwIMk"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "All batteries are rechargeable.",
+      "correct": "Many dry cells are designed for single use only."
+    },
+    {
+      "wrong": "Dead batteries contain no chemicals.",
+      "correct": "They still contain chemicals and require proper disposal."
+    },
+    {
+      "wrong": "Bigger batteries always provide more voltage.",
+      "correct": "Voltage depends on battery design, not just size."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Smartphones",
+      "description": "Use rechargeable lithium-ion batteries."
+    },
+    {
+      "title": "Laptops",
+      "description": "Store electrical energy in rechargeable batteries."
+    },
+    {
+      "title": "Torches",
+      "description": "Often use dry cells."
+    },
+    {
+      "title": "Electric Vehicles",
+      "description": "Use large rechargeable battery packs."
+    },
+    {
+      "title": "Battery Recycling Centers",
+      "description": "Help recover useful materials and reduce pollution."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Compare Different Batteries",
+      "instructions": "Materials: dry cell, rechargeable battery, torch or LED. Procedure: 1. Observe both batteries. 2. Compare size, weight, and labeling. 3. Identify which one is rechargeable. Observation: Students observe differences between battery types. Conclusion: Different batteries are designed for different purposes."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Why is a dry cell called a dry cell?",
+      "options": [
+        "It contains no chemicals",
+        "It contains a paste electrolyte",
+        "It contains water only",
+        "It produces dry electricity"
+      ],
+      "correctIndex": 1,
+      "explanation": "A dry cell uses a thick paste electrolyte instead of a liquid one."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which part acts as the positive terminal in a dry cell?",
+      "options": ["Zinc container", "Carbon rod", "Electrolyte", "Wire"],
+      "correctIndex": 1,
+      "explanation": "The carbon rod in the centre acts as the positive terminal."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Which battery is commonly used in smartphones?",
+      "options": ["Lemon Cell", "Dry Cell", "Li-ion Battery", "Voltaic Cell"],
+      "correctIndex": 2,
+      "explanation": "Smartphones use rechargeable lithium-ion (Li-ion) batteries."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Why should batteries be recycled?",
+      "options": [
+        "To increase electricity",
+        "To reduce pollution",
+        "To make them heavier",
+        "To create magnets"
+      ],
+      "correctIndex": 1,
+      "explanation": "Recycling reduces pollution and recovers useful materials."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

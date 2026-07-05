@@ -1,0 +1,124 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 3,
+  "chapterName": "Health: The Ultimate Treasure",
+  "topicId": "diagnosis_treatment_antibiotics",
+  "topicName": "5. Diagnosis, Treatment and Antibiotic Resistance",
+  "explanation": "When a person becomes sick, doctors first try to identify the disease. This process is called diagnosis. After diagnosis, suitable treatment is provided to help the patient recover. Many diseases can be treated using medicines, and one important group is antibiotics. However, the incorrect use of antibiotics has led to a serious problem known as antibiotic resistance. Diagnosis identifies a disease by studying symptoms, signs, medical history, and laboratory tests. Doctors use physical examination (temperature, blood pressure, heart rate, breathing), asking questions, laboratory tests (blood, urine, stool tests), and medical imaging (X-rays, ultrasound, CT scans). Treatment helps a patient recover and may include medicines, rest, proper nutrition, and adequate fluids. Antibiotics are medicines used to kill or stop the growth of harmful bacteria; examples include penicillin, streptomycin, and amoxicillin. Antibiotics work against bacterial infections such as typhoid, tuberculosis, and bacterial pneumonia, but they do NOT work against viral infections such as the common cold, flu, and chickenpox. Misuse of antibiotics, such as taking them without a doctor's advice, stopping treatment midway, or using them for viral infections, can create serious problems. Antibiotic resistance occurs when bacteria develop the ability to survive antibiotic treatment: if an antibiotic kills 95 of 100 bacteria but 5 strong ones survive, they multiply until most bacteria become resistant and the antibiotic no longer works. To prevent resistance, use antibiotics only when prescribed, complete the full course, never share medicines, and do not use them for viral infections. India also has traditional systems of medicine such as Ayurveda, Siddha, and Unani.",
+  "examples": [
+    "A blood test is a laboratory method used to diagnose diseases.",
+    "Penicillin and amoxicillin are antibiotics used against bacterial infections.",
+    "The common cold is caused by a virus, so antibiotics do not help.",
+    "Stopping an antibiotic course early can lead to antibiotic resistance."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=w13IOLzSNj8",
+  "brainstorming": [
+    {
+      "question": "Why don't antibiotics cure the common cold?",
+      "answer": "The common cold is caused by viruses, while antibiotics work only against bacteria."
+    },
+    {
+      "question": "Why must we complete the full antibiotic course?",
+      "answer": "Stopping early may leave some bacteria alive, allowing them to become resistant."
+    },
+    {
+      "question": "Can bacteria become stronger than medicines?",
+      "answer": "Yes. Through antibiotic resistance, some bacteria can survive medicines that once killed them."
+    },
+    {
+      "question": "Why do doctors order blood tests before treatment?",
+      "answer": "Blood tests help identify the disease and choose the correct treatment.",
+      "videoUrl": "https://youtu.be/znnp-Ivj2ek"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Antibiotics cure every disease.",
+      "correct": "Antibiotics work only against bacterial infections."
+    },
+    {
+      "wrong": "Stopping medicines after feeling better is safe.",
+      "correct": "The complete prescribed course should be finished."
+    },
+    {
+      "wrong": "More antibiotics mean faster recovery.",
+      "correct": "Misusing antibiotics can lead to antibiotic resistance."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Doctor's Prescription",
+      "description": "Doctors prescribe medicines after diagnosing the disease."
+    },
+    {
+      "title": "Blood Tests",
+      "description": "Hospitals use laboratory tests to identify illnesses."
+    },
+    {
+      "title": "Common Cold",
+      "description": "Antibiotics usually do not help because it is caused by viruses."
+    },
+    {
+      "title": "Responsible Medicine Use",
+      "description": "Following doctor's instructions improves treatment success."
+    },
+    {
+      "title": "Herbal Remedies",
+      "description": "Many people use traditional systems such as Ayurveda along with modern healthcare."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Survey on Medicine Use",
+      "instructions": "Ask family members: Have they ever taken antibiotics? Did they complete the full course? Record the responses. Observation: Students learn how medicines are used in daily life. Conclusion: Responsible antibiotic use is important for public health."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "What is diagnosis?",
+      "options": [
+        "Prevention of disease",
+        "Identification of disease",
+        "Treatment of disease",
+        "Vaccination"
+      ],
+      "correctIndex": 1,
+      "explanation": "Diagnosis is the process of identifying a disease."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Antibiotics are mainly used against:",
+      "options": ["Viruses", "Bacteria", "Fungi only", "Parasites only"],
+      "correctIndex": 1,
+      "explanation": "Antibiotics are used to kill or stop the growth of harmful bacteria."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Which disease is usually caused by a virus?",
+      "options": ["Typhoid", "Tuberculosis", "Common Cold", "Cholera"],
+      "correctIndex": 2,
+      "explanation": "The common cold is caused by a virus, not bacteria."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "What causes antibiotic resistance?",
+      "options": [
+        "Proper use of antibiotics",
+        "Completing antibiotic courses",
+        "Misuse of antibiotics",
+        "Drinking water"
+      ],
+      "correctIndex": 2,
+      "explanation": "Antibiotic resistance is caused by the misuse of antibiotics."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

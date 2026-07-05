@@ -1,0 +1,124 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 4,
+  "chapterName": "Electricity: Magnetic and Heating Effects",
+  "topicId": "magnetic_effect_of_current",
+  "topicName": "1. Magnetic Effect of Electric Current",
+  "explanation": "Electricity and magnetism are closely related. Many devices such as electric bells, speakers, cranes, motors, and trains work because of the relationship between electricity and magnetism. Scientists discovered that whenever electric current flows through a wire, it creates a magnetic field around the wire. This is called the Magnetic Effect of Electric Current, and it was first discovered by Hans Christian Oersted. In 1820, Oersted observed that when electric current flowed through a wire placed near a magnetic compass, the compass needle moved. Normally a compass needle points North-South, but when current flowed the needle deflected, showing that electric current produced a magnetic effect. A wire carrying current behaves like a magnet, producing an invisible magnetic field around it that can affect nearby magnetic objects. Without current the compass points North-South; with current the compass needle deflects. The greater the current, the stronger the magnetic field and the larger the deflection. If the battery terminals are reversed, the direction of current changes, the direction of the magnetic field also changes, and the compass needle deflects in the opposite direction. The magnetic field strength depends on the amount of current (more current means a stronger field), the distance from the wire (closer means greater deflection), and the direction of current. The magnetic effect of current is the foundation of many electrical devices such as electric motors, electromagnets, loudspeakers, electric bells, and relays.",
+  "examples": [
+    "Oersted discovered the magnetic effect of current in 1820 using a compass near a wire.",
+    "A compass needle deflects when current flows through a nearby wire.",
+    "Reversing the battery terminals makes the compass deflect the opposite way.",
+    "Electric bells and loudspeakers rely on the magnetic effect of current."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=mxAuHF39sPQ",
+  "brainstorming": [
+    {
+      "question": "How can electricity create magnetism?",
+      "answer": "Moving electric charges create magnetic fields around them. This is why a current-carrying wire behaves like a magnet."
+    },
+    {
+      "question": "Why does a compass move near a wire carrying current?",
+      "answer": "Because the magnetic field produced by the current interacts with the compass needle."
+    },
+    {
+      "question": "Can a wire become a magnet without touching a magnet?",
+      "answer": "Yes. When current flows through it, the wire itself produces a magnetic field."
+    },
+    {
+      "question": "Why does the compass move in the opposite direction when battery terminals are reversed?",
+      "answer": "Because reversing the current reverses the magnetic field direction.",
+      "videoUrl": "https://youtu.be/O0zIwCocaa8"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Electricity and magnetism are completely different.",
+      "correct": "Electric current produces magnetic fields, so they are closely related."
+    },
+    {
+      "wrong": "A wire becomes magnetic only if it touches a magnet.",
+      "correct": "A current-carrying wire produces its own magnetic field."
+    },
+    {
+      "wrong": "The compass moves because of heat from the wire.",
+      "correct": "The compass moves because of the magnetic field produced by the current."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Electric Bell",
+      "description": "Uses magnetic effects to produce ringing sound."
+    },
+    {
+      "title": "Speakers",
+      "description": "Convert electrical signals into sound using magnetic fields."
+    },
+    {
+      "title": "Maglev Trains",
+      "description": "Use powerful magnetic fields for movement."
+    },
+    {
+      "title": "Industrial Machines",
+      "description": "Many machines use magnetic principles for operation."
+    },
+    {
+      "title": "Mobile Phones",
+      "description": "Contain components that work using electricity and magnetism."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Oersted's Experiment",
+      "instructions": "Materials: battery, wire, compass, switch. Procedure: 1. Place a compass below a straight wire. 2. Connect the wire to a battery. 3. Close the switch. Observation: The compass needle deflects. Conclusion: Electric current produces a magnetic field around the wire."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Who discovered the magnetic effect of electric current?",
+      "options": ["Newton", "Oersted", "Einstein", "Faraday"],
+      "correctIndex": 1,
+      "explanation": "Hans Christian Oersted discovered the magnetic effect of current in 1820."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "What happens when current flows through a wire?",
+      "options": [
+        "Light is produced only",
+        "Sound is produced only",
+        "Magnetic field is produced",
+        "Nothing happens"
+      ],
+      "correctIndex": 2,
+      "explanation": "A current-carrying wire produces a magnetic field around it."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Which instrument is used to detect a magnetic field?",
+      "options": ["Thermometer", "Compass", "Ammeter", "Barometer"],
+      "correctIndex": 1,
+      "explanation": "A compass detects a magnetic field through the deflection of its needle."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "What happens when battery terminals are reversed?",
+      "options": [
+        "Compass does not move",
+        "Current stops",
+        "Compass deflects in opposite direction",
+        "Wire melts"
+      ],
+      "correctIndex": 2,
+      "explanation": "Reversing the current reverses the magnetic field, so the compass deflects the opposite way."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

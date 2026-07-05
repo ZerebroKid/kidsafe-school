@@ -1,0 +1,129 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 4,
+  "chapterName": "Electricity: Magnetic and Heating Effects",
+  "topicId": "electromagnets",
+  "topicName": "2. Electromagnets",
+  "explanation": "A current-carrying wire produces a magnetic field around it, but the magnetic effect becomes much stronger when the wire is wound into a coil. A coil carrying electric current behaves like a magnet, and such a magnet produced by electric current is called an electromagnet. Electromagnets are widely used in electric bells, cranes, loudspeakers, relays, and motors. An electromagnet is a temporary magnet: when the current is ON the magnet is ON, and when the current is OFF the magnet is OFF. Unlike a permanent magnet, it works only while current flows. When current flows through a coil, each turn produces a magnetic field and these fields combine to make a stronger field, so a coil acts like a bar magnet. To make an electromagnet stronger, a soft iron nail or rod is placed inside the coil, because iron becomes magnetized easily and greatly increases the strength. Working steps: current flows through the coil, a magnetic field develops, the iron core becomes magnetized, the electromagnet attracts iron objects, and when current stops the magnetism disappears. The strength of an electromagnet depends on the number of turns in the coil (more turns means stronger), the current flowing through the coil (higher current means stronger), and the presence of an iron core (with iron core means stronger). Large cranes in scrap yards use powerful electromagnets to lift heavy iron objects and drop them by switching the current off, and electric bells use an electromagnet to move a hammer that strikes the bell.",
+  "examples": [
+    "A coil of wire carrying current acts like a bar magnet.",
+    "A soft iron core makes an electromagnet much stronger.",
+    "Scrap-yard cranes lift iron by switching an electromagnet on and off.",
+    "Increasing the coil turns from 25 to 100 makes the electromagnet stronger."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=SK4uLmodN6A",
+  "brainstorming": [
+    {
+      "question": "Why can an electromagnet be switched ON and OFF but a bar magnet cannot?",
+      "answer": "Because an electromagnet depends on electric current. When current stops, magnetism disappears."
+    },
+    {
+      "question": "Why is iron used inside the coil?",
+      "answer": "Iron becomes magnetized easily and greatly increases the strength of the electromagnet."
+    },
+    {
+      "question": "Can a coil without an iron nail still act as a magnet?",
+      "answer": "Yes. It still produces a magnetic field, but it is weaker."
+    },
+    {
+      "question": "Why do large cranes use electromagnets instead of permanent magnets?",
+      "answer": "Because electromagnets can be switched ON to lift objects and OFF to release them.",
+      "videoUrl": "https://youtu.be/goNgBewCI0k"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Electromagnets remain magnetic forever.",
+      "correct": "Electromagnets lose magnetism when current stops."
+    },
+    {
+      "wrong": "Iron creates electricity.",
+      "correct": "Iron strengthens the magnetic field but does not create electricity."
+    },
+    {
+      "wrong": "More wire turns make no difference.",
+      "correct": "More turns make the electromagnet stronger."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Scrap Yard Cranes",
+      "description": "Use powerful electromagnets to lift heavy metal objects."
+    },
+    {
+      "title": "Electric Bells",
+      "description": "Work using electromagnets to move a hammer."
+    },
+    {
+      "title": "Magnetic Trains",
+      "description": "Use powerful electromagnets for movement."
+    },
+    {
+      "title": "Loudspeakers",
+      "description": "Convert electrical signals into sound using magnetic effects."
+    },
+    {
+      "title": "Industrial Machines",
+      "description": "Many machines rely on electromagnets for operation."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Make Your Own Electromagnet",
+      "instructions": "Materials: iron nail, copper wire, battery, paper clips. Procedure: 1. Wrap copper wire around the nail. 2. Connect wire ends to a battery. 3. Bring the nail near paper clips. Observation: The nail attracts paper clips. Conclusion: The current-carrying coil converts the nail into an electromagnet."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "What is an electromagnet?",
+      "options": [
+        "Permanent magnet",
+        "Current-carrying coil acting as a magnet",
+        "Iron rod",
+        "Compass"
+      ],
+      "correctIndex": 1,
+      "explanation": "An electromagnet is a current-carrying coil that behaves like a magnet."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which material is commonly used as the core of an electromagnet?",
+      "options": ["Wood", "Plastic", "Soft Iron", "Glass"],
+      "correctIndex": 2,
+      "explanation": "Soft iron is used because it becomes magnetized easily."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "What happens when current is switched OFF?",
+      "options": [
+        "Electromagnet becomes stronger",
+        "Electromagnet loses magnetism",
+        "Iron melts",
+        "Coil breaks"
+      ],
+      "correctIndex": 1,
+      "explanation": "An electromagnet loses its magnetism when the current stops."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Increasing the number of turns in a coil will:",
+      "options": [
+        "Weaken the electromagnet",
+        "Stop current flow",
+        "Strengthen the electromagnet",
+        "Produce light"
+      ],
+      "correctIndex": 2,
+      "explanation": "More turns in the coil make the electromagnet stronger."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

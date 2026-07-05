@@ -1,0 +1,119 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 2,
+  "chapterName": "The Invisible Living World: Beyond Our Naked Eye",
+  "topicId": "cell_basic_unit_of_life",
+  "topicName": "5. Why Is the Cell the Basic Unit of Life?",
+  "explanation": "A cell is called the basic unit of life because it is the smallest part of a living organism that can perform all life processes. Just as a building is made of bricks, every living organism is made of one or more cells. Cells take in nutrients, produce energy, grow, reproduce, remove waste, and respond to the environment. Since all living activities occur within cells, they are the structural and functional units of life. As the structural unit, cells form the body of every organism, whether it has trillions of cells (human), millions (mango tree), or just one (Amoeba). As the functional unit, cells carry out nutrition, respiration, excretion, growth, and reproduction. Some organisms are unicellular (Amoeba, Paramecium, bacteria, yeast) and perform all life activities with one cell; others are multicellular (humans, dogs, trees, birds) where different cells perform specialized functions. Growth occurs because cells divide continuously: 1 cell becomes 2, 2 becomes 4, 4 becomes 8, and so on until millions form. Cell specialization means different cells have different functions: nerve cells transmit messages, muscle cells help movement, red blood cells transport oxygen, and white blood cells protect against infection. Plant cells have a cell wall, chloroplast, and large vacuole; animal cells have none of these; fungal cells have a cell wall but no chloroplast; bacterial cells are very small with no true nucleus. Scientists study cells using light microscopes and electron microscopes.",
+  "examples": [
+    "A human body has trillions of cells while an Amoeba has just one.",
+    "Growth happens through cell division: 1 to 2 to 4 to 8 cells and so on.",
+    "Red blood cells transport oxygen; nerve cells transmit messages.",
+    "An electron microscope reveals detailed internal cell structures."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=Zg5vv0tNGEg",
+  "brainstorming": [
+    {
+      "question": "If cells are so small, how do they build huge organisms?",
+      "answer": "Cells continuously divide and increase in number. Over time, millions and billions of cells form a complete organism."
+    },
+    {
+      "question": "Can a single cell survive independently?",
+      "answer": "Yes. Organisms such as Amoeba and Paramecium survive and perform all life activities using just one cell."
+    },
+    {
+      "question": "Why do different cells have different shapes?",
+      "answer": "Different cells perform different functions, so their shapes are adapted to their specific jobs."
+    },
+    {
+      "question": "Can damaged body parts repair themselves?",
+      "answer": "Many body tissues repair themselves because cells divide and replace damaged cells.",
+      "videoUrl": "https://youtu.be/BiBOUqjtyR0"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Only large organisms are made of cells.",
+      "correct": "Both small and large living organisms are made of cells."
+    },
+    {
+      "wrong": "All cells perform the same work.",
+      "correct": "Different cells perform different specialized functions."
+    },
+    {
+      "wrong": "Cells stop working after growth is complete.",
+      "correct": "Cells continue performing life functions throughout life."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Human Growth",
+      "description": "A single fertilized egg develops into a complete human through cell division."
+    },
+    {
+      "title": "Wound Healing",
+      "description": "Cells divide and repair damaged tissues after injuries."
+    },
+    {
+      "title": "Hair Growth",
+      "description": "Hair grows because cells at the roots continuously divide."
+    },
+    {
+      "title": "Muscle Building",
+      "description": "Exercise causes muscle cells to grow and repair themselves."
+    },
+    {
+      "title": "Learning and Thinking",
+      "description": "Nerve cells help us process information and learn new things."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Comparing Plant and Animal Cells",
+      "instructions": "Materials: prepared slides of plant and animal cells, microscope. Procedure: 1. Observe both slides under a microscope. 2. Compare their shapes and structures. Observation: Plant cells appear more regular and rectangular, while animal cells appear irregular. Conclusion: Different types of cells have different structures based on their functions."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Why is the cell called the basic unit of life?",
+      "options": [
+        "It is the largest unit",
+        "It performs all life processes",
+        "It produces oxygen only",
+        "It is visible without a microscope"
+      ],
+      "correctIndex": 1,
+      "explanation": "The cell is the smallest unit that can perform all life processes."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which of the following is a unicellular organism?",
+      "options": ["Human", "Mango Tree", "Amoeba", "Dog"],
+      "correctIndex": 2,
+      "explanation": "Amoeba is a unicellular organism made of a single cell."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Growth in organisms occurs mainly because of:",
+      "options": ["Water intake", "Cell division", "Sunlight", "Movement"],
+      "correctIndex": 1,
+      "explanation": "Growth occurs through cell division, which increases the number of cells."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Which cell transports oxygen in the body?",
+      "options": ["Muscle Cell", "Nerve Cell", "Red Blood Cell", "White Blood Cell"],
+      "correctIndex": 2,
+      "explanation": "Red blood cells are disc-shaped and transport oxygen."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

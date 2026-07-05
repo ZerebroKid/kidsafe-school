@@ -1,0 +1,118 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 3,
+  "chapterName": "Health: The Ultimate Treasure",
+  "topicId": "what_is_health",
+  "topicName": "1. What is Health?",
+  "explanation": "Health is much more than simply not being sick. According to the World Health Organization (WHO), health is a state of complete physical, mental, and social well-being. A healthy person has a properly functioning body, a peaceful and positive mind, and good relationships with family and society. Health and happiness are closely related: a healthy person usually feels happier, and a happy person often enjoys better health. Good health helps us study effectively, play actively, work efficiently, and enjoy life. There are three main components of health. Physical health refers to the proper functioning of the body, achieved by eating nutritious food, exercising regularly, getting enough sleep, and maintaining personal hygiene. Mental health refers to emotional and psychological well-being: thinking positively, handling stress, making good decisions, and maintaining emotional balance. Social health refers to our ability to interact positively with others by respecting others, communicating effectively, cooperating, and participating in community activities. Health and happiness influence each other: when we are healthy we feel energetic and confident, and positive emotions contribute to better physical health. Maintaining health requires healthy habits such as a balanced diet, regular exercise, adequate sleep, personal hygiene, and positive thinking.",
+  "examples": [
+    "Eating fruits and vegetables and drinking clean water supports physical health.",
+    "Handling stress calmly and thinking positively reflects good mental health.",
+    "Respecting others and cooperating with friends shows good social health.",
+    "Adequate sleep improves memory and helps the body repair itself."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=pSBV2DHDtGc",
+  "brainstorming": [
+    {
+      "question": "Can a person be healthy even if they are physically fit but always stressed?",
+      "answer": "No. Good health includes mental well-being as well as physical fitness."
+    },
+    {
+      "question": "Why do doctors ask about sleep during check-ups?",
+      "answer": "Sleep is essential for body repair, growth, and mental health."
+    },
+    {
+      "question": "Can happiness affect health?",
+      "answer": "Yes. Positive emotions can improve mental and physical well-being."
+    },
+    {
+      "question": "Why do athletes still get sick sometimes?",
+      "answer": "Physical fitness alone is not enough. Health also depends on immunity, nutrition, rest, and mental well-being."
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Health means not having a disease.",
+      "correct": "Health includes physical, mental, and social well-being."
+    },
+    {
+      "wrong": "Only exercise is enough for good health.",
+      "correct": "Good health also requires proper nutrition, sleep, and mental well-being."
+    },
+    {
+      "wrong": "Mental health is not important.",
+      "correct": "Mental health is an essential part of overall health."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "School Life",
+      "description": "Good health helps students concentrate and perform better in studies."
+    },
+    {
+      "title": "Sports",
+      "description": "Healthy children can participate actively in games and sports."
+    },
+    {
+      "title": "Sleep",
+      "description": "Adequate sleep improves memory and learning."
+    },
+    {
+      "title": "Positive Mindset",
+      "description": "Being happy and stress-free supports overall health."
+    },
+    {
+      "title": "Relationships",
+      "description": "Good social health helps maintain strong friendships and family bonds."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Health Diary Activity",
+      "instructions": "For one week, record: food eaten, sleep duration, exercise, and water intake. Observation: Students can identify healthy and unhealthy habits. Conclusion: Daily habits greatly influence overall health."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Health means:",
+      "options": [
+        "Absence of disease only",
+        "Physical fitness only",
+        "Complete physical, mental, and social well-being",
+        "Eating healthy food"
+      ],
+      "correctIndex": 2,
+      "explanation": "WHO defines health as complete physical, mental, and social well-being."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which is NOT a component of health?",
+      "options": ["Physical Health", "Mental Health", "Social Health", "Financial Health"],
+      "correctIndex": 3,
+      "explanation": "The three components are physical, mental, and social health."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Which habit helps maintain good health?",
+      "options": ["Skipping sleep", "Eating junk food daily", "Regular exercise", "Ignoring hygiene"],
+      "correctIndex": 2,
+      "explanation": "Regular exercise keeps the body fit and active."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Health and happiness are:",
+      "options": ["Unrelated", "Opposites", "Closely connected", "Temporary"],
+      "correctIndex": 2,
+      "explanation": "Health and happiness influence each other and are closely connected."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

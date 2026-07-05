@@ -1,0 +1,119 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 2,
+  "chapterName": "The Invisible Living World: Beyond Our Naked Eye",
+  "topicId": "connected_to_microbes",
+  "topicName": "4. How Are We Connected to Microbes?",
+  "explanation": "When people hear the word microbe, they often think only about diseases. However, microbes are closely connected to our daily lives and provide many benefits. Microorganisms help us produce food, improve soil fertility, manufacture medicines, recycle waste, generate fuel, and maintain the balance of nature. In food production, curd is prepared by bacteria called Lactobacillus, which multiply in warm milk and convert it into curd through fermentation; bread dough contains yeast that feeds on sugar and produces carbon dioxide gas, making the dough rise. Fermentation is used in preparing curd, bread, idli, dosa, and yogurt. In agriculture, the bacterium Rhizobium lives in root nodules of leguminous plants (pea, gram, bean) and converts atmospheric nitrogen into a usable form, a process called nitrogen fixation. Microbes act as decomposers, breaking down dead plants, animals, and organic waste into simpler substances, and help form manure. Some microorganisms produce biogas (mainly methane) from animal dung, plant waste, and kitchen waste. Many medicines come from microbes: antibiotics such as penicillin and streptomycin kill harmful bacteria, and vaccines help the body develop immunity. Microalgae like Spirulina and Chlorella are highly nutritious potential future foods. Certain bacteria produce biofuels and clean oil spills through bioremediation. Ancient Indian texts such as the Vedas mention tiny organisms called Krimi.",
+  "examples": [
+    "Lactobacillus bacteria convert milk into curd through fermentation.",
+    "Yeast produces carbon dioxide that makes bread soft and fluffy.",
+    "Rhizobium bacteria fix atmospheric nitrogen in the roots of pea and bean plants.",
+    "Antibiotics like penicillin are produced using microorganisms."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=qM0--Or2ONs",
+  "brainstorming": [
+    {
+      "question": "Why does bread become soft and fluffy?",
+      "answer": "Yeast produces carbon dioxide gas during fermentation. The trapped gas causes the dough to expand and become soft."
+    },
+    {
+      "question": "How can tiny microbes improve soil fertility?",
+      "answer": "Microbes break down organic matter and recycle nutrients, making the soil richer and more fertile."
+    },
+    {
+      "question": "Can microbes help clean pollution?",
+      "answer": "Yes. Certain bacteria can break down pollutants such as oil spills and harmful waste materials."
+    },
+    {
+      "question": "Why are microbes called nature's recyclers?",
+      "answer": "They decompose dead plants and animals, returning nutrients to the environment.",
+      "videoUrl": "https://youtu.be/QedLjVaDmY8"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "All microbes are harmful.",
+      "correct": "Many microbes are beneficial and essential for life."
+    },
+    {
+      "wrong": "Curd forms naturally without microorganisms.",
+      "correct": "Lactobacillus bacteria are responsible for curd formation."
+    },
+    {
+      "wrong": "Decomposition happens automatically.",
+      "correct": "Microorganisms perform decomposition by breaking down organic matter."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Making Curd at Home",
+      "description": "Lactobacillus bacteria convert milk into curd."
+    },
+    {
+      "title": "Bakery Products",
+      "description": "Yeast helps prepare bread, cakes, and buns."
+    },
+    {
+      "title": "Farming",
+      "description": "Rhizobium bacteria naturally improve soil fertility."
+    },
+    {
+      "title": "Medicines",
+      "description": "Many antibiotics used by doctors are obtained from microorganisms."
+    },
+    {
+      "title": "Biogas Plants",
+      "description": "Villages use biogas generated from animal waste as fuel."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Observe Curd Formation",
+      "instructions": "Materials: warm milk, a small amount of curd. Procedure: 1. Add a spoonful of curd to warm milk. 2. Keep it undisturbed overnight. Observation: Milk gradually changes into curd. Conclusion: Lactobacillus bacteria multiply and convert milk into curd."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Which bacterium helps convert milk into curd?",
+      "options": ["Rhizobium", "Lactobacillus", "Amoeba", "Yeast"],
+      "correctIndex": 1,
+      "explanation": "Lactobacillus bacteria ferment milk into curd."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which microorganism is used in bread making?",
+      "options": ["Virus", "Amoeba", "Yeast", "Algae"],
+      "correctIndex": 2,
+      "explanation": "Yeast produces carbon dioxide that makes bread dough rise."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "What is nitrogen fixation?",
+      "options": [
+        "Production of oxygen",
+        "Conversion of atmospheric nitrogen into usable forms",
+        "Decomposition",
+        "Fermentation"
+      ],
+      "correctIndex": 1,
+      "explanation": "Nitrogen fixation converts atmospheric nitrogen into a form plants can use."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Which gas is mainly present in biogas?",
+      "options": ["Oxygen", "Nitrogen", "Methane", "Hydrogen"],
+      "correctIndex": 2,
+      "explanation": "Biogas mainly contains methane gas."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

@@ -1,0 +1,119 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 2,
+  "chapterName": "The Invisible Living World: Beyond Our Naked Eye",
+  "topicId": "levels_of_organisation",
+  "topicName": "2. Levels of Organisation in Living Organisms",
+  "explanation": "Living organisms are highly organized. A complex organism like a human being is not made up of cells randomly arranged together. Instead, cells are organized into different levels, each performing specific functions. The levels of organization are: Cell to Tissue to Organ to Organ System to Organism. Each level is built from the previous one. A cell is the smallest structural and functional unit of life, and every living organism begins as a single cell. A fertilized human egg starts as one cell and divides into millions of cells to form a complete baby; the ostrich egg is one of the largest known single cells. A tissue is a group of similar cells working together, such as muscle tissue (movement), nervous tissue (carries messages), and blood tissue (transports oxygen and nutrients); in plants, xylem transports water and phloem transports food. Different tissues combine to form an organ, such as the heart (pumps blood), lungs (breathing), stomach (digestion), leaf (makes food), and root (absorbs water). Several organs work together to form an organ system, such as the digestive system, respiratory system, and circulatory system. When all organ systems work together, they form a complete organism such as a human, dog, or mango tree. Organization makes life efficient because each part performs a specific task and the body functions smoothly.",
+  "examples": [
+    "The correct sequence of organization is Cell to Tissue to Organ to Organ System to Organism.",
+    "A group of similar cells forms a tissue, such as muscle tissue for movement.",
+    "The heart is an organ that pumps blood throughout the body.",
+    "The respiratory system (nose, trachea, lungs) helps us breathe."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=URUJD5NEXC8",
+  "brainstorming": [
+    {
+      "question": "How can a single cell become a complete human body?",
+      "answer": "A single fertilized egg continuously divides into millions of cells. These cells specialize and form tissues, organs, and organ systems."
+    },
+    {
+      "question": "Why can't individual cells perform all functions in humans?",
+      "answer": "Humans are very complex organisms. Different cells specialize in different tasks, making body functions more efficient."
+    },
+    {
+      "question": "What would happen if organs worked independently?",
+      "answer": "The body would not function properly because organs depend on each other and must work together in organ systems."
+    },
+    {
+      "question": "Why is the ostrich egg considered special?",
+      "answer": "The ostrich egg is one of the largest single cells found in nature.",
+      "videoUrl": "https://youtu.be/ykG8MQczUx8"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Cells directly form an organism.",
+      "correct": "Cells first form tissues, then organs, then organ systems, and finally an organism."
+    },
+    {
+      "wrong": "All tissues perform the same work.",
+      "correct": "Different tissues have different functions."
+    },
+    {
+      "wrong": "One organ can perform every function.",
+      "correct": "Different organs specialize in different tasks."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Human Growth",
+      "description": "Every human begins life as a single fertilized egg cell."
+    },
+    {
+      "title": "Heart Function",
+      "description": "The heart continuously pumps blood, showing how organs perform specialized functions."
+    },
+    {
+      "title": "Breathing",
+      "description": "The respiratory system helps us take in oxygen and remove carbon dioxide."
+    },
+    {
+      "title": "Plant Growth",
+      "description": "Roots, stems, and leaves work together like organ systems in plants."
+    },
+    {
+      "title": "Digestion",
+      "description": "The digestive system converts food into nutrients that the body can use."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Observe Different Levels in Your Body",
+      "instructions": "Identify a cell (conceptually), a tissue (muscle tissue), an organ (heart), and an organ system (circulatory system). Draw a flow chart showing the relationship. Observation: Students understand how small units combine to form larger structures. Conclusion: Living organisms are organized into different levels, making body functions efficient and coordinated."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "What is the correct sequence of organization?",
+      "options": [
+        "Organ to Cell to Tissue to Organism",
+        "Cell to Tissue to Organ to Organ System to Organism",
+        "Tissue to Cell to Organ to Organism",
+        "Organism to Organ System to Organ"
+      ],
+      "correctIndex": 1,
+      "explanation": "The correct order is Cell to Tissue to Organ to Organ System to Organism."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "A group of similar cells forms:",
+      "options": ["Organ", "Tissue", "Organism", "Organ System"],
+      "correctIndex": 1,
+      "explanation": "A group of similar cells working together forms a tissue."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Which of the following is an organ?",
+      "options": ["Blood", "Muscle Tissue", "Heart", "Cell"],
+      "correctIndex": 2,
+      "explanation": "The heart is an organ made of different tissues working together."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Which organ system helps in breathing?",
+      "options": ["Digestive System", "Respiratory System", "Circulatory System", "Skeletal System"],
+      "correctIndex": 1,
+      "explanation": "The respiratory system helps in breathing."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

@@ -1,0 +1,119 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 4,
+  "chapterName": "Electricity: Magnetic and Heating Effects",
+  "topicId": "electric_cells",
+  "topicName": "4. Electric Cells",
+  "explanation": "Many devices around us need electricity to work, such as wall clocks, remote controls, torches, toys, and calculators. One important source of electricity is an electric cell. An electric cell is a device that converts chemical energy into electrical energy through chemical reactions taking place inside it. Without electric cells, many portable devices would not work. An electric cell contains chemicals that react with each other and generate electrical energy, so chemical energy is converted into electrical energy. Every cell has two terminals: the positive terminal, marked (+), from which current leaves the cell, and the negative terminal, marked (-), to which current returns. Electric current flows only when the circuit is complete and both terminals are connected. Inside a cell, chemical reactions occur that produce electrical energy, and current flows through the external circuit, making bulbs glow and devices operate. One of the earliest electric cells, the Voltaic Cell, was invented by Alessandro Volta and was one of the first devices to produce continuous current. A voltaic cell consists of two different metal electrodes (such as zinc and copper) and an electrolyte solution, a conducting liquid that allows chemical reactions. Electrodes are metal conductors placed inside the electrolyte that transfer electrons, and an electrolyte is a conducting liquid that allows ions to move (examples: salt solution, lemon juice, vinegar). A lemon can be used to make a simple cell using copper wire and an iron nail as electrodes and lemon juice as the electrolyte. A single lemon produces very little voltage, so multiple lemons are connected in series to add their voltages so an LED can glow.",
+  "examples": [
+    "An electric cell converts chemical energy into electrical energy.",
+    "Alessandro Volta invented the Voltaic Cell.",
+    "In a lemon cell, lemon juice acts as the electrolyte.",
+    "Connecting several lemon cells in series adds their voltages to light an LED."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=2sj4T8LXhoE",
+  "brainstorming": [
+    {
+      "question": "How can a lemon produce electricity?",
+      "answer": "The lemon juice acts as an electrolyte and allows chemical reactions between the two metal electrodes."
+    },
+    {
+      "question": "Why are two different metals used in a cell?",
+      "answer": "Different metals react differently, helping create a flow of electrons."
+    },
+    {
+      "question": "Why can't a dead cell produce electricity?",
+      "answer": "The chemicals inside the cell get exhausted and can no longer produce current."
+    },
+    {
+      "question": "Why are multiple cells used in some devices?",
+      "answer": "One cell may not provide enough voltage, so multiple cells are connected together.",
+      "videoUrl": "https://youtu.be/VdBjQ4jQbUg"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "Electricity is stored inside the cell.",
+      "correct": "The cell produces electricity through chemical reactions."
+    },
+    {
+      "wrong": "One lemon can power a house.",
+      "correct": "A lemon cell produces only a tiny amount of electricity."
+    },
+    {
+      "wrong": "Cells work forever.",
+      "correct": "Cells stop working when the chemicals inside are exhausted."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Torch",
+      "description": "Uses electric cells to produce light."
+    },
+    {
+      "title": "Wall Clock",
+      "description": "Runs on a small electric cell."
+    },
+    {
+      "title": "Remote Control",
+      "description": "Uses cells to send signals."
+    },
+    {
+      "title": "Calculator",
+      "description": "Uses cells or solar cells for power."
+    },
+    {
+      "title": "Toys",
+      "description": "Many toys operate using electric cells."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Make a Lemon Cell",
+      "instructions": "Materials: lemon, copper wire, iron nail, LED. Procedure: 1. Insert the copper wire and iron nail into the lemon. 2. Connect the wires to an LED. 3. Observe the result. 4. Connect multiple lemons if needed. Observation: The LED may glow when sufficient voltage is produced. Conclusion: Chemical reactions inside the lemon produce electrical energy."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "What is the function of an electric cell?",
+      "options": [
+        "Produce heat only",
+        "Convert chemical energy into electrical energy",
+        "Store water",
+        "Produce sound"
+      ],
+      "correctIndex": 1,
+      "explanation": "An electric cell converts chemical energy into electrical energy."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Who invented the Voltaic Cell?",
+      "options": ["Newton", "Oersted", "Alessandro Volta", "Edison"],
+      "correctIndex": 2,
+      "explanation": "Alessandro Volta invented the Voltaic Cell."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "What acts as the electrolyte in a lemon cell?",
+      "options": ["Copper wire", "Iron nail", "Lemon juice", "LED"],
+      "correctIndex": 2,
+      "explanation": "Lemon juice acts as the electrolyte in a lemon cell."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "How many terminals does a cell have?",
+      "options": ["One", "Two", "Three", "Four"],
+      "correctIndex": 1,
+      "explanation": "A cell has two terminals: positive and negative."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

@@ -1,0 +1,114 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 3,
+  "chapterName": "Health: The Ultimate Treasure",
+  "topicId": "communicable_non_communicable_diseases",
+  "topicName": "3. Communicable and Non-Communicable Diseases",
+  "explanation": "Diseases can be broadly classified into two main categories: communicable diseases and non-communicable diseases. Understanding the difference helps us take proper preventive measures. Communicable diseases can spread from one person to another and are caused by pathogens such as bacteria, viruses, fungi, and parasites. Examples include common cold, flu, chickenpox, typhoid, cholera, tuberculosis, hepatitis A, and poliomyelitis. Communicable diseases spread through air (when an infected person coughs or sneezes, spreading flu, cold, tuberculosis), contaminated food and water (spreading cholera, typhoid, hepatitis A), insects and vectors (mosquitoes spreading malaria and dengue), and direct contact (touching infected persons or objects, spreading chickenpox). Non-communicable diseases do not spread from one person to another and are caused by lifestyle factors, environmental factors, or genetic factors. Examples include diabetes, asthma, heart disease, and hypertension. Many develop due to unhealthy habits such as a poor diet, smoking, lack of exercise, and inadequate sleep. Prevention is better than cure: important measures include maintaining hygiene (regular handwashing), a healthy diet, regular exercise, vaccination, safe drinking water, and covering the mouth while sneezing. During a flu outbreak, students should wear masks, cover coughs, wash hands, and stay home if seriously ill. To prevent malaria and dengue, use mosquito nets, apply repellents, avoid stagnant water, and wear full-sleeved clothes.",
+  "examples": [
+    "Typhoid and chickenpox are communicable diseases that spread between people.",
+    "Cholera can spread through contaminated drinking water.",
+    "Diabetes and asthma are non-communicable diseases.",
+    "Mosquitoes spread malaria and dengue as vectors."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=fK1_SH3X2ek",
+  "brainstorming": [
+    {
+      "question": "Why do diseases spread faster in crowded places?",
+      "answer": "Because infected people come into close contact with many others, increasing transmission."
+    },
+    {
+      "question": "Why doesn't diabetes spread from one person to another?",
+      "answer": "Diabetes is caused by body-related and lifestyle factors, not infectious pathogens."
+    },
+    {
+      "question": "Why are mosquito-borne diseases more common during rainy seasons?",
+      "answer": "Rainwater collects in stagnant places, creating breeding grounds for mosquitoes."
+    },
+    {
+      "question": "Can a healthy lifestyle prevent diseases?",
+      "answer": "Yes. Healthy habits reduce the risk of many non-communicable diseases.",
+      "videoUrl": "https://youtu.be/yXZAxIHzXLc"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "All diseases spread from person to person.",
+      "correct": "Only communicable diseases spread between people."
+    },
+    {
+      "wrong": "Diabetes is contagious.",
+      "correct": "Diabetes is a non-communicable disease and does not spread."
+    },
+    {
+      "wrong": "Mosquitoes directly create diseases.",
+      "correct": "Mosquitoes act as carriers of disease-causing organisms."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Common Cold",
+      "description": "Spreads through coughing and sneezing."
+    },
+    {
+      "title": "Dengue",
+      "description": "Spreads through mosquito bites."
+    },
+    {
+      "title": "Cholera",
+      "description": "Can spread through contaminated water."
+    },
+    {
+      "title": "Diabetes",
+      "description": "Risk increases due to unhealthy eating habits and inactivity."
+    },
+    {
+      "title": "Smoking",
+      "description": "Can lead to serious non-communicable diseases."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Disease Classification Activity",
+      "instructions": "Classify the following diseases into communicable and non-communicable categories: typhoid, asthma, flu, diabetes, chickenpox. Observation: Students identify different disease groups. Conclusion: Diseases can be classified based on whether they spread between people."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "Which of the following is a communicable disease?",
+      "options": ["Diabetes", "Asthma", "Typhoid", "Hypertension"],
+      "correctIndex": 2,
+      "explanation": "Typhoid is a communicable disease caused by pathogens."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which disease spreads through contaminated water?",
+      "options": ["Asthma", "Cholera", "Diabetes", "Heart Disease"],
+      "correctIndex": 1,
+      "explanation": "Cholera spreads through contaminated food and water."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Which of the following is a non-communicable disease?",
+      "options": ["Flu", "Chickenpox", "Diabetes", "Cholera"],
+      "correctIndex": 2,
+      "explanation": "Diabetes is a non-communicable disease caused by lifestyle factors."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Which insect spreads dengue?",
+      "options": ["Housefly", "Mosquito", "Cockroach", "Ant"],
+      "correctIndex": 1,
+      "explanation": "Mosquitoes act as vectors that spread dengue."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}

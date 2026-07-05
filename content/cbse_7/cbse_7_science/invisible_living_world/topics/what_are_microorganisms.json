@@ -1,0 +1,114 @@
+{
+  "curriculumId": "cbse_7_science",
+  "grade": 7,
+  "subject": "science",
+  "chapterNo": 2,
+  "chapterName": "The Invisible Living World: Beyond Our Naked Eye",
+  "topicId": "what_are_microorganisms",
+  "topicName": "3. What Are Microorganisms?",
+  "explanation": "Microorganisms are tiny living organisms that are so small they cannot be seen with our naked eyes. To observe them we need special instruments such as microscopes. Even though they are extremely small, they are found almost everywhere: in air, water, soil, food, plants, animals, and even inside our bodies. Some microorganisms are beneficial and help humans, while others can cause diseases. They play an important role in decomposition, food production, agriculture, and medicine. A microscope magnifies tiny objects and lets us observe cells, bacteria, fungi, protozoa, and algae. Modern foldable paper microscopes are lightweight and inexpensive, useful in remote areas. Microorganisms are classified into groups: Bacteria are single-celled microorganisms found in soil, water, air, and the human body (examples: Lactobacillus, Rhizobium). Fungi obtain food from dead or decaying matter (examples: bread mould, yeast, mushrooms). Protozoa are single-celled organisms that often live in water (examples: Amoeba, Paramecium). Algae are simple plant-like organisms that contain chlorophyll and make their own food (examples: Chlorella, Spirulina). Viruses are different because they cannot survive or reproduce on their own and multiply only inside living cells (examples: common cold virus, influenza virus). Bacteria occur in different shapes: spherical, rod-shaped, and spiral. Microorganisms can be observed in pond water, soil suspension, and curd.",
+  "examples": [
+    "Bacteria such as Lactobacillus and Rhizobium are single-celled microorganisms.",
+    "Amoeba and Paramecium are protozoa that live in water.",
+    "Viruses like the common cold virus can multiply only inside a living cell.",
+    "A single drop of pond water can contain thousands of microorganisms."
+  ],
+  "videoUrl": "https://www.youtube.com/watch?v=9f55WvF2gBw",
+  "brainstorming": [
+    {
+      "question": "If microorganisms are everywhere, why don't we always get sick?",
+      "answer": "Many microorganisms are harmless or beneficial. Our immune system also protects us from harmful microbes."
+    },
+    {
+      "question": "Can there be millions of microorganisms in a single drop of water?",
+      "answer": "Yes. A single drop of pond water may contain thousands or even millions of microscopic organisms."
+    },
+    {
+      "question": "Are all microorganisms harmful?",
+      "answer": "No. Many microorganisms help produce food, medicines, and improve soil fertility."
+    },
+    {
+      "question": "Why are viruses considered different from other microorganisms?",
+      "answer": "Viruses cannot reproduce independently and require a living host cell to multiply.",
+      "videoUrl": "https://youtu.be/arUygbad1-E"
+    }
+  ],
+  "misconceptions": [
+    {
+      "wrong": "All microorganisms cause diseases.",
+      "correct": "Many microorganisms are useful and beneficial."
+    },
+    {
+      "wrong": "Microorganisms live only in dirty places.",
+      "correct": "Microorganisms can live almost everywhere, including clean environments."
+    },
+    {
+      "wrong": "Viruses are exactly like bacteria.",
+      "correct": "Viruses are different because they cannot reproduce without a host cell."
+    }
+  ],
+  "realLifeConnections": [
+    {
+      "title": "Curd Formation",
+      "description": "Beneficial bacteria convert milk into curd."
+    },
+    {
+      "title": "Bread Making",
+      "description": "Yeast helps bread dough rise."
+    },
+    {
+      "title": "Soil Fertility",
+      "description": "Microorganisms improve soil nutrients and help plant growth."
+    },
+    {
+      "title": "Medicines",
+      "description": "Many antibiotics are produced using microorganisms."
+    },
+    {
+      "title": "Decomposition",
+      "description": "Microorganisms break down dead plants and animals."
+    }
+  ],
+  "activities": [
+    {
+      "title": "Observe Microorganisms in Pond Water",
+      "instructions": "Materials: pond water sample, microscope, glass slide. Procedure: 1. Place a drop of pond water on a slide. 2. Observe under a microscope. Observation: Tiny moving microorganisms can be seen. Conclusion: Many living organisms exist in water but cannot be seen with naked eyes."
+    }
+  ],
+  "quiz": [
+    {
+      "questionId": "q1",
+      "type": "mcq",
+      "question": "What are microorganisms?",
+      "options": ["Large animals", "Tiny living organisms", "Plants only", "Non-living objects"],
+      "correctIndex": 1,
+      "explanation": "Microorganisms are tiny living organisms seen only with a microscope."
+    },
+    {
+      "questionId": "q2",
+      "type": "mcq",
+      "question": "Which instrument is used to observe microorganisms?",
+      "options": ["Telescope", "Magnifying Glass", "Microscope", "Binoculars"],
+      "correctIndex": 2,
+      "explanation": "A microscope provides the magnification needed to observe microorganisms."
+    },
+    {
+      "questionId": "q3",
+      "type": "mcq",
+      "question": "Which of the following is a protozoan?",
+      "options": ["Yeast", "Amoeba", "Mushroom", "Rhizobium"],
+      "correctIndex": 1,
+      "explanation": "Amoeba is a protozoan, a single-celled organism that lives in water."
+    },
+    {
+      "questionId": "q4",
+      "type": "mcq",
+      "question": "Which microorganism can reproduce only inside a living cell?",
+      "options": ["Bacteria", "Algae", "Virus", "Fungi"],
+      "correctIndex": 2,
+      "explanation": "Viruses can multiply only inside a living host cell."
+    }
+  ],
+  "status": "published",
+  "curatedBy": "content_team"
+}
