@@ -31,7 +31,21 @@ declare module '@react-navigation/native' {
   function useNavigation<T = any>(): T;
   function useRoute<T = any>(): T;
 
-  export {NavigationContainer, DefaultTheme, DarkTheme, useNavigation, useRoute};
+  const StackActions: {
+    popToTop(): any;
+    pop(count?: number): any;
+    push(name: string, params?: object): any;
+    replace(name: string, params?: object): any;
+  };
+
+  export {
+    NavigationContainer,
+    DefaultTheme,
+    DarkTheme,
+    useNavigation,
+    useRoute,
+    StackActions,
+  };
   export type {Theme, NavigationContainerProps};
 }
 
@@ -65,6 +79,8 @@ declare module '@react-navigation/native-stack' {
 
   interface NativeStackNavigationProp<ParamList = any, RouteName extends string = string> {
     navigate: (screen: any, params?: any) => void;
+    /** v7: pops back to an existing screen in the stack (navigate now pushes). */
+    popTo: (screen: any, params?: any) => void;
     goBack: () => void;
     reset: (state: any) => void;
     setParams: (params: any) => void;

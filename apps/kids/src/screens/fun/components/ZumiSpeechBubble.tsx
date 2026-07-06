@@ -1,18 +1,19 @@
 /**
  * Shows what Zumi is currently saying, as readable on-screen text alongside
- * the spoken audio (helps early readers + noisy environments). Styled as a
- * clean light card to match the rest of the app.
+ * the spoken audio (helps early readers + noisy environments). A white
+ * rounded "speech bubble" card that pops on the purple fun-mode gradient.
  */
 
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
-import {colors, radius, spacing} from '../../../theme';
+import {spacing} from '../../../theme';
 
 export function ZumiSpeechBubble({text}: {text: string}) {
   if (!text) return null;
   return (
     <View style={styles.bubble}>
+      <View style={styles.tail} />
       <Text style={styles.text}>{text}</Text>
     </View>
   );
@@ -20,24 +21,32 @@ export function ZumiSpeechBubble({text}: {text: string}) {
 
 const styles = StyleSheet.create({
   bubble: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.lg,
+    backgroundColor: '#ffffff',
+    borderRadius: 28,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     maxWidth: '92%',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    shadowOffset: {width: 0, height: 4},
-    elevation: 2,
+    shadowColor: '#4c1d95',
+    shadowOpacity: 0.3,
+    shadowRadius: 14,
+    shadowOffset: {width: 0, height: 6},
+    elevation: 6,
+  },
+  tail: {
+    position: 'absolute',
+    top: -8,
+    alignSelf: 'center',
+    width: 20,
+    height: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 4,
+    transform: [{rotate: '45deg'}],
   },
   text: {
-    color: colors.text,
+    color: '#312e81',
     fontSize: 18,
-    lineHeight: 26,
+    lineHeight: 27,
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

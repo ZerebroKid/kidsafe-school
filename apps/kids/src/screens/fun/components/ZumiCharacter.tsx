@@ -241,7 +241,9 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: ZUMI_ACCENT,
+    // White reads as a soft pulse on the purple fun-mode gradient (the old
+    // purple ring was invisible on it).
+    backgroundColor: '#ffffff',
   },
   dotsBubble: {
     position: 'absolute',

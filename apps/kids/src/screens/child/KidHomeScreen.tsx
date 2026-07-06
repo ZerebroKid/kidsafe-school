@@ -24,7 +24,7 @@ import {
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
+import Svg, {Circle, Defs, LinearGradient, Path, Rect, Stop} from 'react-native-svg';
 import type {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 
 import {useChildProfile} from '../../context/ChildProfileContext';
@@ -82,16 +82,16 @@ export function KidHomeScreen({navigation}: Props) {
           <View style={styles.gridRow}>
             <HomeCard
               color="#f59e0b"
-              icon="🤖"
+              icon="cookie"
               title="Fun"
               subtitle="Play with Zumi"
-              // Land on the stack root (Zumi), not whatever deep screen
-              // (e.g. Reels) was left on the Fun stack earlier.
-              onPress={() => navigation.navigate('StudyTab', {screen: 'ZumiHome'})}
+              // The Fun stack resets to its root (ZumiHome) whenever the tab
+              // blurs (popToTopOnBlur), so a plain tab switch lands on Zumi.
+              onPress={() => navigation.navigate('StudyTab')}
             />
             <HomeCard
               color="#ec4899"
-              icon="📺"
+              icon="video"
               title="Cartoons"
               subtitle="Watch & giggle"
               comingSoon
@@ -100,14 +100,14 @@ export function KidHomeScreen({navigation}: Props) {
           <View style={styles.gridRow}>
             <HomeCard
               color="#3b82f6"
-              icon="🎬"
+              icon="video"
               title="Reels"
               subtitle="Cool clips"
               onPress={() => navigation.navigate('ReelsTab')}
             />
             <HomeCard
               color="#10b981"
-              icon="🎮"
+              icon="gamepad"
               title="Games"
               subtitle="Win coins!"
               comingSoon
@@ -157,6 +157,51 @@ function Sparkle({style, char}: {style: object; char: string}) {
   return <Text style={[styles.sparkle, style]}>{char}</Text>;
 }
 
+type CardIconName = 'cookie' | 'video' | 'gamepad';
+
+/**
+ * White line icons matching the design mockup (cookie / video-play /
+ * gamepad). `accent` is the card color, used for the cookie's chips so they
+ * read as holes punched through the white cookie.
+ */
+function CardIcon({name, accent}: {name: CardIconName; accent: string}) {
+  const stroke = {stroke: '#ffffff', strokeWidth: 1.8, fill: 'none' as const};
+  switch (name) {
+    case 'cookie':
+      return (
+        <Svg width={26} height={26} viewBox="0 0 24 24">
+          <Path
+            d="M12 3a9 9 0 109 9 3.4 3.4 0 01-4-3.3A3.6 3.6 0 0112.6 5 3.4 3.4 0 0112 3z"
+            fill="#ffffff"
+          />
+          <Circle cx={9} cy={10} r={1.3} fill={accent} />
+          <Circle cx={13.5} cy={14.5} r={1.3} fill={accent} />
+          <Circle cx={8.5} cy={15} r={1.1} fill={accent} />
+        </Svg>
+      );
+    case 'video':
+      return (
+        <Svg width={26} height={26} viewBox="0 0 24 24">
+          <Rect x={3.75} y={3.75} width={16.5} height={16.5} rx={4.5} {...stroke} />
+          <Path
+            d="M10.25 9.25l5 2.75-5 2.75v-5.5z"
+            fill="#ffffff"
+            strokeLinejoin="round"
+          />
+        </Svg>
+      );
+    case 'gamepad':
+      return (
+        <Svg width={26} height={26} viewBox="0 0 24 24">
+          <Rect x={2.75} y={7.75} width={18.5} height={9.5} rx={4.75} {...stroke} />
+          <Path d="M7.5 10.5v4M5.5 12.5h4" {...stroke} strokeLinecap="round" />
+          <Circle cx={15.5} cy={13.5} r={1.1} fill="#ffffff" />
+          <Circle cx={18} cy={11.5} r={1.1} fill="#ffffff" />
+        </Svg>
+      );
+  }
+}
+
 function HomeCard({
   color,
   icon,
@@ -166,7 +211,7 @@ function HomeCard({
   comingSoon,
 }: {
   color: string;
-  icon: string;
+  icon: CardIconName;
   title: string;
   subtitle: string;
   onPress?: () => void;
@@ -208,7 +253,7 @@ function HomeCard({
           pressed && !comingSoon && styles.cardPressed,
         ]}>
         <View style={styles.cardIconChip}>
-          <Text style={styles.cardIcon}>{icon}</Text>
+          <CardIcon name={icon} accent={color} />
         </View>
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.cardSubtitle}>{subtitle}</Text>
@@ -307,7 +352,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardIcon: {fontSize: 22},
   cardTitle: {fontSize: 22, fontWeight: '900', color: '#ffffff'},
   cardSubtitle: {
     fontSize: 13,

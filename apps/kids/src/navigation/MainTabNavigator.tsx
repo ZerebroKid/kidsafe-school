@@ -118,19 +118,14 @@ export function MainTabNavigator() {
       <Tab.Screen
         name="StudyTab"
         component={StudyNavigator}
-        // Pressing the tab always lands on the stack root (ZumiHome /
-        // StudyMission). Without this, a stale deep screen (e.g. Reels opened
-        // from ZumiHome) stays on top of the stack and greets the child
-        // instead of Zumi.
-        listeners={({navigation}: {navigation: {navigate: (screen: string, params?: object) => void}}) => ({
-          tabPress: (e: {preventDefault: () => void}) => {
-            e.preventDefault();
-            navigation.navigate('StudyTab', {
-              screen: isFunMode ? 'ZumiHome' : 'StudyMission',
-            });
-          },
-        })}
         options={{
+          // Leaving the tab resets its stack to the root (ZumiHome /
+          // StudyMission), so coming back never lands on a stale deep screen
+          // (e.g. Reels) and never re-pushes duplicate roots. (A tabPress
+          // listener with navigate() did that before, but react-navigation
+          // v7's navigate PUSHES a new ZumiHome each press, which auto-
+          // launched endless new Zumi sessions.)
+          popToTopOnBlur: true,
           tabBarIcon: ({focused}) => (
             <TabItem
               icon={studyIcon}

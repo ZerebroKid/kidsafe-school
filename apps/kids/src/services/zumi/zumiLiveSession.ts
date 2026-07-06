@@ -68,6 +68,18 @@ const HINT_TO_CLIP: Record<string, ZumiClip | null> = {
   none: null,
 };
 
+/**
+ * Teardown of the PREVIOUS session (room disconnect + audio session stop).
+ *
+ * A new session must wait for this before connecting: both sessions use the
+ * same LiveKit identity (child uid), and an old room that is still
+ * disconnecting/auto-reconnecting gets the NEW connection kicked with
+ * DUPLICATE_IDENTITY ("Zumi se connection toot gaya" moments after joining).
+ * The old abort's stopAudioSession could also race after the new session's
+ * startAudioSession, silencing it.
+ */
+let lastTeardown: Promise<void> = Promise.resolve();
+
 export class ZumiLiveSession {
   private room: Room | null = null;
   private aborted = false;
@@ -96,6 +108,9 @@ export class ZumiLiveSession {
       const tokenPromise = zumiLiveKitToken({
         assignmentId: this.config.assignmentId,
       });
+      // Let any previous session finish disconnecting first (see lastTeardown).
+      await lastTeardown;
+      if (this.aborted) return;
       await AudioSession.startAudioSession();
       const {url, token} = await tokenPromise;
       if (this.aborted) return;
@@ -128,7 +143,7 @@ export class ZumiLiveSession {
     this.aborted = true;
     const room = this.room;
     this.room = null;
-    void (async () => {
+    lastTeardown = (async () => {
       try {
         await room?.disconnect();
       } catch {
@@ -147,6 +162,10 @@ export class ZumiLiveSession {
     if (!this.videoShowing) return;
     this.videoShowing = false;
     this.emit({type: 'video', source: null});
+    // Clear the pre-video line so the child doesn't see the stale "chalo
+    // shuru karte hain!" bubble again while the agent moves on to the quiz.
+    this.emit({type: 'bubble', text: ''});
+    this.avatar('thinking');
     const room = this.room;
     if (!room || !this.agentIdentity) return;
     void room.localParticipant
@@ -240,10 +259,13 @@ export class ZumiLiveSession {
 
   private onAgentState(state: string): void {
     if (this.aborted || this.videoShowing || this.doneEmitted) return;
-    if (state === 'speaking' && !this.revealed) {
-      // First audio is about to play: swap the loading screen for Zumi.
+    // Reveal on 'listening' too: when the child rejoins a room where the
+    // agent is already mid-flow waiting for an answer, there is no 'speaking'
+    // transition -- gating the reveal on it left the screen stuck on the
+    // "Zumi aa raha hai" loader forever.
+    if ((state === 'speaking' || state === 'listening') && !this.revealed) {
       this.revealed = true;
-      logInfo('Zumi speaking — revealing UI');
+      logInfo(`Zumi ${state} — revealing UI`);
       this.setState('greeting');
     }
     switch (state) {
@@ -307,6 +329,7 @@ export class ZumiLiveSession {
         if (this.videoShowing) {
           this.videoShowing = false;
           this.emit({type: 'video', source: null});
+          this.emit({type: 'bubble', text: ''});
         }
         break;
       case 'quiz':
