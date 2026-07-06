@@ -35,6 +35,7 @@ import {
   type SessionState,
 } from '../../services/zumi/zumiSessionManager';
 import {ZumiLiveSession, ZUMI_LIVE} from '../../services/zumi/zumiLiveSession';
+import {isMicPromptActive} from '../../services/zumi/zumiSpeech';
 import {ZumiPlayground} from './components/ZumiPlayground';
 import {ZumiSpeechBubble} from './components/ZumiSpeechBubble';
 import {
@@ -108,6 +109,9 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
   const managerRef = useRef<ZumiSessionLike | null>(null);
   const startedRef = useRef(false);
   const closedRef = useRef(false);
+  // True once the session reached its natural end ('done' event) -- reported
+  // back to ZumiHome so it only celebrates genuinely finished sessions.
+  const doneRef = useRef(false);
   const bubbleScrollRef = useRef<ScrollView | null>(null);
 
   // Reset the bubble scroll to the top whenever Zumi says a new line, so the
@@ -175,6 +179,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
             });
             break;
           case 'done':
+            doneRef.current = true;
             setDone({
               percentage: event.percentage,
               passed: event.passed,
@@ -208,7 +213,18 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
       if (closedRef.current) return;
       closedRef.current = true;
       managerRef.current?.abort();
-      if (navigateBack && navigation.canGoBack()) navigation.goBack();
+      if (navigateBack && navigation.canGoBack()) {
+        // If ZumiHome is below us in the stack, return to it WITH the session
+        // outcome so it can distinguish "finished" from "aborted early" (e.g.
+        // exited during the mic-permission prompt).
+        const routes: Array<{name: string}> =
+          navigation.getState?.()?.routes ?? [];
+        if (routes.some(r => r.name === 'ZumiHome')) {
+          navigation.navigate('ZumiHome', {sessionDone: doneRef.current});
+        } else {
+          navigation.goBack();
+        }
+      }
     },
     [navigation],
   );
@@ -228,10 +244,13 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
   }, [navigation, closeSession]);
 
   // Backgrounding/closing the app also fully ends the session (Android keeps
-  // audio playing otherwise).
+  // audio playing otherwise). EXCEPT while the mic-permission dialog is up:
+  // the OS dialog pauses the activity (AppState 'background' on many OEMs),
+  // and killing the session there bounced the child straight back out of a
+  // session that never got to start.
   useEffect(() => {
     const sub = AppState.addEventListener('change', state => {
-      if (state === 'background') closeSession(true);
+      if (state === 'background' && !isMicPromptActive()) closeSession(true);
     });
     return () => sub.remove();
   }, [closeSession]);
@@ -476,7 +495,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
           </Text>
           <Button
             title="Ho gaya"
-            onPress={() => navigation.goBack()}
+            onPress={exit}
             style={{marginTop: 24, maxWidth: 240}}
           />
         </View>

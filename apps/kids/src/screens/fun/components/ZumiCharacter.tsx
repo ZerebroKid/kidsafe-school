@@ -149,16 +149,14 @@ export function ZumiCharacter({state}: {state: AvatarState}) {
   return (
     <View style={styles.wrap}>
       {state === 'listening' ? <ListeningRing /> : null}
-      <View style={styles.imgClip}>
-        <AnimatedImage
-          source={source}
-          resizeMode="contain"
-          style={[
-            styles.img,
-            {transform: [{translateY: bob}, {scale}, {rotate}]},
-          ]}
-        />
-      </View>
+      <AnimatedImage
+        source={source}
+        resizeMode="contain"
+        style={[
+          styles.img,
+          {transform: [{translateY: bob}, {scale}, {rotate}]},
+        ]}
+      />
       {state === 'thinking' ? <ThinkingDots /> : null}
     </View>
   );
@@ -231,15 +229,6 @@ const styles = StyleSheet.create({
   wrap: {
     width: 200,
     height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  imgClip: {
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    overflow: 'hidden',
-    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
   },

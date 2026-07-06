@@ -17,6 +17,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {ActivityIndicator, Pressable, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 import {useAuthStore} from '../../state/authStore';
@@ -27,15 +28,20 @@ import {
   useTodayAssignments,
   type AssignmentCard,
 } from '../../firebase/study';
-import {colors, spacing} from '../../theme';
+import {spacing} from '../../theme';
 import type {StudyStackParamList} from '../../navigation/types';
 import {ZumiCharacter} from './components/ZumiCharacter';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'ZumiHome'>;
 
-type Phase = 'resolving' | 'none' | 'returned';
-
-const ACCENT = '#8b5cf6';
+/**
+ * - resolving: loading today's assignments (auto-launches into ZumiVoice)
+ * - none:      no assignments today
+ * - returned:  a session FINISHED -> celebration ("Shabaash!")
+ * - ready:     a session was aborted early (mic prompt, back button...) ->
+ *              friendly "come play" screen, NOT the celebration.
+ */
+type Phase = 'resolving' | 'none' | 'returned' | 'ready';
 
 /** Pick the earliest-due assignment from today's list. */
 function pickFirstAssignment(assignments: AssignmentCard[]): AssignmentCard | null {
@@ -58,7 +64,7 @@ function toZumiParams(a: AssignmentCard) {
   };
 }
 
-export function ZumiHomeScreen({navigation}: Props) {
+export function ZumiHomeScreen({navigation, route}: Props) {
   const uid = useAuthStore(s => s.firebaseUid);
   const {childName} = useChildProfile();
   const classState = useChildClassId(uid);
@@ -69,13 +75,20 @@ export function ZumiHomeScreen({navigation}: Props) {
   const assignmentsRef = useRef<AssignmentCard[]>([]);
   assignmentsRef.current = assignmentsState.data ?? [];
 
-  // On tab focus: if we already launched a session, show the "play again" screen.
-  // If we're stuck on 'none' but never launched (e.g. a stale state from a
-  // previous render cycle), re-try by resetting to 'resolving'.
+  // Session outcome reported back by ZumiVoice (see closeSession there).
+  // Kept in a ref so the focus listener always reads the latest value.
+  const sessionDone = route.params?.sessionDone === true;
+  const sessionDoneRef = useRef(sessionDone);
+  sessionDoneRef.current = sessionDone;
+
+  // On tab focus after a launch: celebrate ONLY if the session actually
+  // finished; an aborted session (e.g. exited at the mic-permission prompt)
+  // gets the "come play" screen instead. If we're stuck on 'none' but never
+  // launched, re-try by resetting to 'resolving'.
   useEffect(() => {
     const unsub = navigation.addListener('focus', () => {
       if (launchedRef.current) {
-        setPhase('returned');
+        setPhase(sessionDoneRef.current ? 'returned' : 'ready');
       } else if (phase === 'none') {
         setPhase('resolving');
       }
@@ -83,14 +96,29 @@ export function ZumiHomeScreen({navigation}: Props) {
     return unsub;
   }, [navigation, phase]);
 
+  // The sessionDone param can land AFTER the focus event on slow transitions;
+  // upgrade to the celebration as soon as it arrives.
+  useEffect(() => {
+    if (sessionDone && launchedRef.current) setPhase('returned');
+  }, [sessionDone]);
+
   const launch = useCallback(() => {
     const pick = pickFirstAssignment(assignmentsRef.current);
     if (pick) {
       launchedRef.current = true;
+      // Consume the previous outcome so a later aborted session can't reuse
+      // a stale `sessionDone: true`.
+      navigation.setParams({sessionDone: undefined});
       navigation.navigate('ZumiVoice', toZumiParams(pick));
     } else {
       setPhase('none');
     }
+  }, [navigation]);
+
+  // Reels live on their own bottom tab; switch tabs instead of pushing the
+  // Reels screen inside this Fun stack (which kept the Fun tab highlighted).
+  const openReels = useCallback(() => {
+    navigation.getParent()?.navigate('ReelsTab');
   }, [navigation]);
 
   // Auto-launch once today's assignments have loaded.
@@ -131,73 +159,132 @@ export function ZumiHomeScreen({navigation}: Props) {
 
   if (phase === 'returned') {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.stage}>
-          <ZumiCharacter state="celebrating" />
-          <Text style={styles.title}>Shabaash, {childName || 'dost'}!</Text>
-          <Text style={styles.subtitle}>
-            Aaj ka kaam ho gaya. Phir se sunna hai?
-          </Text>
-          <Pressable
-            onPress={launch}
-            android_ripple={{color: 'rgba(139,92,246,0.25)'}}
-            style={({pressed}) => [styles.cta, pressed && styles.ctaPressed]}>
-            <Text style={styles.ctaText}>Phir se! ▶</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => navigation.navigate('Reels')}
-            android_ripple={{color: 'rgba(236,72,153,0.25)'}}
-            style={({pressed}) => [
-              styles.reelsCta,
-              pressed && styles.reelsCtaPressed,
-            ]}>
-            <Text style={styles.ctaText}>Watch Reels</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <GradientBg />
+        <SafeAreaView style={styles.safe}>
+          <View style={styles.stage}>
+            <ZumiCharacter state="celebrating" />
+            <Text style={styles.title}>Shabaash,{'\n'}{childName || 'dost'}!</Text>
+            <Text style={styles.subtitle}>Aaj ka kaam ho gaya ☀️</Text>
+            <View style={styles.coinPill}>
+              <Text style={styles.coinPillText}>🪙 +20 coins!</Text>
+            </View>
+            <Pressable
+              onPress={launch}
+              android_ripple={{color: 'rgba(139,92,246,0.15)'}}
+              style={({pressed}) => [styles.cta, pressed && styles.ctaPressed]}>
+              <Text style={styles.ctaText}>Phir se! ▶</Text>
+            </Pressable>
+            <Pressable
+              onPress={openReels}
+              android_ripple={{color: 'rgba(255,255,255,0.25)'}}
+              style={({pressed}) => [
+                styles.reelsCta,
+                pressed && styles.reelsCtaPressed,
+              ]}>
+              <Text style={styles.reelsCtaText}>Watch Reels</Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  if (phase === 'ready') {
+    return (
+      <View style={styles.container}>
+        <GradientBg />
+        <SafeAreaView style={styles.safe}>
+          <View style={styles.stage}>
+            <ZumiCharacter state="idle" />
+            <Text style={styles.title}>{hello}</Text>
+            <Text style={styles.subtitle}>
+              Zumi tumhara wait kar raha hai. Chalo khelte hain!
+            </Text>
+            <Pressable
+              onPress={launch}
+              android_ripple={{color: 'rgba(139,92,246,0.15)'}}
+              style={({pressed}) => [styles.cta, pressed && styles.ctaPressed]}>
+              <Text style={styles.ctaText}>Chalo shuru karein! ▶</Text>
+            </Pressable>
+            <Pressable
+              onPress={openReels}
+              android_ripple={{color: 'rgba(255,255,255,0.25)'}}
+              style={({pressed}) => [
+                styles.reelsCta,
+                pressed && styles.reelsCtaPressed,
+              ]}>
+              <Text style={styles.reelsCtaText}>Watch Reels</Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </View>
     );
   }
 
   if (phase === 'none') {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.stage}>
-          <ZumiCharacter state="idle" />
-          <Text style={styles.title}>{hello}</Text>
-          <Text style={styles.subtitle}>
-            Aaj koi kaam nahi hai. Tab tak reels dekho!
-          </Text>
-          <Pressable
-            onPress={() => navigation.navigate('Reels')}
-            android_ripple={{color: 'rgba(236,72,153,0.25)'}}
-            style={({pressed}) => [
-              styles.reelsCta,
-              pressed && styles.reelsCtaPressed,
-            ]}>
-            <Text style={styles.ctaText}>Watch Reels</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <GradientBg />
+        <SafeAreaView style={styles.safe}>
+          <View style={styles.stage}>
+            <ZumiCharacter state="idle" />
+            <Text style={styles.title}>{hello}</Text>
+            <Text style={styles.subtitle}>
+              Aaj koi kaam nahi hai. Tab tak reels dekho!
+            </Text>
+            <Pressable
+              onPress={openReels}
+              android_ripple={{color: 'rgba(255,255,255,0.25)'}}
+              style={({pressed}) => [
+                styles.reelsCta,
+                pressed && styles.reelsCtaPressed,
+              ]}>
+              <Text style={styles.reelsCtaText}>Watch Reels</Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </View>
     );
   }
 
   // 'resolving' — Zumi shows while assignments load
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.stage}>
-        <ZumiCharacter state="idle" />
-        <Text style={styles.title}>{hello}</Text>
-        <View style={styles.loadingRow}>
-          <ActivityIndicator color={ACCENT} />
-          <Text style={styles.subtitle}>Zumi aa raha hai…</Text>
+    <View style={styles.container}>
+      <GradientBg />
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.stage}>
+          <ZumiCharacter state="idle" />
+          <Text style={styles.title}>{hello}</Text>
+          <View style={styles.loadingRow}>
+            <ActivityIndicator color="#ffffff" />
+            <Text style={styles.subtitle}>Zumi aa raha hai…</Text>
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
+  );
+}
+
+/** Purple-to-pink full-screen gradient matching the celebration design. */
+function GradientBg() {
+  return (
+    <Svg style={StyleSheet.absoluteFill}>
+      <Defs>
+        <LinearGradient id="zumiBg" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor="#7c3aed" />
+          <Stop offset="0.6" stopColor="#a855f7" />
+          <Stop offset="1" stopColor="#ec4899" />
+        </LinearGradient>
+      </Defs>
+      <Rect width="100%" height="100%" fill="url(#zumiBg)" />
+    </Svg>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: colors.bg},
+  container: {flex: 1, backgroundColor: '#7c3aed'},
+  safe: {flex: 1},
   stage: {
     flex: 1,
     alignItems: 'center',
@@ -206,14 +293,16 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: colors.text,
+    fontSize: 34,
+    fontWeight: '900',
+    color: '#ffffff',
     textAlign: 'center',
+    lineHeight: 42,
   },
   subtitle: {
     fontSize: 16,
-    color: colors.textMuted,
+    fontWeight: '600',
+    color: 'rgba(255,255,255,0.9)',
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -222,31 +311,43 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
+  coinPill: {
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+  },
+  coinPillText: {fontSize: 15, fontWeight: '800', color: '#7c3aed'},
   cta: {
     marginTop: spacing.lg,
-    backgroundColor: ACCENT,
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: 32,
-    shadowColor: ACCENT,
-    shadowOpacity: 0.4,
+    shadowColor: '#4c1d95',
+    shadowOpacity: 0.35,
     shadowRadius: 16,
     shadowOffset: {width: 0, height: 6},
     elevation: 8,
   },
-  ctaPressed: {backgroundColor: '#7c3aed', transform: [{scale: 0.96}]},
-  ctaText: {fontSize: 18, fontWeight: '800', color: '#ffffff'},
+  ctaPressed: {backgroundColor: '#f3e8ff', transform: [{scale: 0.96}]},
+  ctaText: {fontSize: 18, fontWeight: '800', color: '#7c3aed'},
   reelsCta: {
     marginTop: spacing.sm,
+    alignSelf: 'stretch',
+    alignItems: 'center',
     backgroundColor: '#ec4899',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: 32,
-    shadowColor: '#ec4899',
+    shadowColor: '#be185d',
     shadowOpacity: 0.4,
     shadowRadius: 16,
     shadowOffset: {width: 0, height: 6},
     elevation: 8,
   },
   reelsCtaPressed: {backgroundColor: '#db2777', transform: [{scale: 0.96}]},
+  reelsCtaText: {fontSize: 18, fontWeight: '800', color: '#ffffff'},
 });

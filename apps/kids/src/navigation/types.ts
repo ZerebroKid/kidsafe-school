@@ -37,8 +37,12 @@ export type MainTabParamList = {
 
 export type StudyStackParamList = {
   StudyMission: undefined;
-  /** Fun-mode (grade <= 6) landing: opens Zumi the character directly. */
-  ZumiHome: undefined;
+  /**
+   * Fun-mode (grade <= 6) landing: opens Zumi the character directly.
+   * `sessionDone` is set by ZumiVoice on the way back: true = the session
+   * reached its natural end (celebrate), false/absent = aborted early.
+   */
+  ZumiHome: {sessionDone?: boolean} | undefined;
   TopicLearn: {
     assignmentId: string;
     curriculumId: string;

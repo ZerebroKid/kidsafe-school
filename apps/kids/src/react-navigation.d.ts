@@ -124,11 +124,33 @@ declare module '@react-navigation/bottom-tabs' {
     [key: string]: any;
   }
 
+  interface BottomTabNavigationProp<ParamList = any, RouteName extends string = string> {
+    navigate: (screen: any, params?: any) => void;
+    goBack: () => void;
+    jumpTo: (screen: any, params?: any) => void;
+    setParams: (params: any) => void;
+    [key: string]: any;
+  }
+
+  interface BottomTabScreenProps<ParamList = any, RouteName extends string = string> {
+    navigation: BottomTabNavigationProp<ParamList, RouteName>;
+    route: {
+      key: string;
+      name: RouteName;
+      params: any;
+    };
+  }
+
   function createBottomTabNavigator<ParamList = any>(): {
     Navigator: FC<BottomTabNavigatorProps>;
     Screen: FC<TabScreenProps>;
   };
 
   export {createBottomTabNavigator};
-  export type {BottomTabScreenOptions, TabBarIconProps};
+  export type {
+    BottomTabScreenOptions,
+    TabBarIconProps,
+    BottomTabScreenProps,
+    BottomTabNavigationProp,
+  };
 }

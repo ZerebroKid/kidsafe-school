@@ -480,6 +480,19 @@ export function playUrl(url: string): Promise<void> {
   });
 }
 
+/**
+ * True while the Android mic-permission dialog is (likely) on screen.
+ *
+ * The OS dialog pauses the activity, which flips RN's AppState to
+ * 'background' on many devices -- screens (ZumiVoiceScreen) consult this so
+ * they don't mistake the permission prompt for "the child left the app" and
+ * kill the session.
+ */
+let micPromptActive = false;
+export function isMicPromptActive(): boolean {
+  return micPromptActive;
+}
+
 /** Ask for / confirm the microphone permission. Returns true if granted. */
 export async function ensureMicPermission(): Promise<boolean> {
   if (Platform.OS !== 'android') {
@@ -491,7 +504,16 @@ export async function ensureMicPermission(): Promise<boolean> {
   try {
     let status: PermissionStatus = await check(perm);
     if (status === RESULTS.DENIED) {
-      status = await request(perm);
+      micPromptActive = true;
+      try {
+        status = await request(perm);
+      } finally {
+        // Keep the flag up briefly after the dialog closes -- AppState events
+        // ('background' then 'active') can arrive slightly after resolution.
+        setTimeout(() => {
+          micPromptActive = false;
+        }, 1500);
+      }
     }
     return status === RESULTS.GRANTED || status === RESULTS.LIMITED;
   } catch {
