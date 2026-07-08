@@ -13,17 +13,17 @@
 /** RN bundled asset ids are numbers (Metro `require` of an mp4). */
 export type ZumiVideoSource = number;
 
-const CH1_CLASSIFICATION: ZumiVideoSource = require('../../assets/video/zumi_ch1_classification.mp4');
+const CH5_MATTER: ZumiVideoSource = require('../../assets/video/zumi_ch5_matter.mp4');
 
 /**
  * Find the explanation video for a topic, matching loosely on the topic name
- * so both "Classifying Things" and the `classifying_things` slug resolve.
+ * so both "Matter" and the `matter` slug resolve.
  * Returns `null` when the topic has no video (the session just continues).
  */
 export function findTopicVideo(topicName: string): ZumiVideoSource | null {
   const n = (topicName ?? '').toLowerCase();
-  if (n.includes('classif') || n.includes('sorting')) {
-    return CH1_CLASSIFICATION;
+  if (n.includes('matter')) {
+    return CH5_MATTER;
   }
   return null;
 }

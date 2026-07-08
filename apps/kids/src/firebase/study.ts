@@ -378,6 +378,123 @@ export interface TopicContent {
   voiceStory?: VoiceStory;
 }
 
+/**
+ * Fallback for topics imported without a curated `sections` array (all
+ * grades except CBSE 8 Math Powers today): derive the same numbered
+ * collapsible sections from the legacy flat fields. Sections with no
+ * content are skipped and the numbering stays sequential. Quiz is never
+ * included -- it is reached via the fixed "Start Quiz" button.
+ */
+export function sectionsFromLegacyFields(topic: TopicContent): TopicSection[] {
+  const sections: TopicSection[] = [];
+  const push = (heading: string, content: string, videoUrl?: string) => {
+    sections.push({
+      heading: `${sections.length + 1}. ${heading}`,
+      content,
+      ...(videoUrl ? {videoUrl} : {}),
+    });
+  };
+
+  const explanationParts: string[] = [];
+  if (topic.explanation?.trim()) {
+    explanationParts.push(topic.explanation.trim());
+  }
+  if (topic.examples?.length) {
+    explanationParts.push(
+      ['### Examples', ...topic.examples.map(ex => `- ${ex.trim()}`)].join(
+        '\n',
+      ),
+    );
+  }
+  if (explanationParts.length > 0) {
+    push('DETAILED EXPLANATION', explanationParts.join('\n\n'));
+  }
+
+  if (topic.videoUrl) {
+    push(
+      'WATCH & LEARN',
+      'Watch this short video to see the idea in action.',
+      topic.videoUrl,
+    );
+  }
+
+  if (topic.brainstorming?.length) {
+    const content = topic.brainstorming
+      .map((item, i) => {
+        const lines = [
+          `**Curiosity Question ${i + 1}**`,
+          item.question,
+          '',
+          '**Answer**',
+          item.answer,
+        ];
+        if (item.videoUrl) {
+          lines.push('', item.videoUrl);
+        }
+        return lines.join('\n');
+      })
+      .join('\n\n');
+    push('CURIOSITY LAYER', content);
+  }
+
+  if (topic.realLifeConnections?.length) {
+    const content = topic.realLifeConnections
+      .map(item => {
+        const lines = [`**${item.title}**`, item.description];
+        if (item.videoUrl && !item.description.includes(item.videoUrl)) {
+          lines.push('', item.videoUrl);
+        }
+        return lines.join('\n');
+      })
+      .join('\n\n');
+    push('REAL-LIFE CONNECTIONS', content);
+  }
+
+  if (topic.misconceptions?.length) {
+    const content = topic.misconceptions
+      .map(item =>
+        ['**Wrong**', item.wrong, '', '**Correct**', item.correct].join('\n'),
+      )
+      .join('\n\n');
+    push('MISCONCEPTIONS', content);
+  }
+
+  if (topic.activities?.length) {
+    const content = topic.activities
+      .map(item => {
+        const lines = [`**${item.title}**`, item.instructions];
+        if (item.videoUrl) {
+          lines.push('', item.videoUrl);
+        }
+        return lines.join('\n');
+      })
+      .join('\n\n');
+    push('EXPERIMENT / ACTIVITY', content);
+  }
+
+  if (topic.workedProblems?.length) {
+    const content = topic.workedProblems
+      .map(p => {
+        const lines = ['**Question**', p.question];
+        if (p.conceptsUsed?.length) {
+          lines.push('', '**Concept Used**', p.conceptsUsed.join(', '));
+        }
+        if (p.steps?.length) {
+          lines.push('', '**Solution**', ...p.steps.map(s => `- ${s}`));
+        }
+        lines.push('', '**Answer**', p.answer);
+        if (p.commonMistake) {
+          lines.push('', '**Common Mistake**', p.commonMistake);
+        }
+        return lines.join('\n');
+      })
+      .join('\n\n');
+    push('WORKED PROBLEMS', content);
+  }
+
+  return sections;
+}
+
 export function useTopicContent(
   curriculumId: string | null,
   chapterId: string | null,
