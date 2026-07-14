@@ -13,6 +13,7 @@ import {
 } from '@zerebro/shared-firebase/auth';
 import {paths} from '@zerebro/shared-firebase/firestore';
 import {useAuthStore} from '../state/authStore';
+import {AppLogo} from '../components/AppLogo';
 import {colors} from '../theme';
 import {VerifyEmailScreen} from '../screens/auth/VerifyEmailScreen';
 
@@ -94,7 +95,8 @@ export function RootNavigator() {
   if (!bootstrapped || (firebaseUid && userDocLoading && !userDoc)) {
     return (
       <View style={styles.splash}>
-        <ActivityIndicator color={colors.primary} />
+        <AppLogo size={72} />
+        <ActivityIndicator color={colors.primary} style={styles.splashSpinner} />
       </View>
     );
   }
@@ -142,6 +144,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  splashSpinner: {
+    marginTop: 24,
   },
   wrongAppContainer: {
     flex: 1,

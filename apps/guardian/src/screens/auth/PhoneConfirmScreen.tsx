@@ -7,22 +7,13 @@ import Svg, {Path, Rect, Circle, Line} from 'react-native-svg';
 
 import {ensurePhoneUserDoc} from '@zerebro/shared-firebase/auth';
 
+import {AppLogo} from '../../components/AppLogo';
 import {GradientBackground} from '../../components/GradientBackground';
 import {colors, radius, softShadow, spacing} from '../../theme';
 import {stashConfirmation, takeConfirmation} from './phoneConfirmationStore';
 import type {AuthStackParamList} from '../../navigation/types';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'PhoneConfirm'>;
-
-function GraduationCapIcon({size = 20, color = colors.primaryText}: {size?: number; color?: string}) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path d="M2 10l10-5 10 5-10 5-10-5z" stroke={color} strokeWidth={1.8} strokeLinejoin="round" />
-      <Path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M22 10v6" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
-    </Svg>
-  );
-}
 
 function LockIcon({size = 20, color = colors.textMuted}: {size?: number; color?: string}) {
   return (
@@ -119,12 +110,7 @@ export function PhoneConfirmScreen({route, navigation}: Props) {
           keyboardShouldPersistTaps="handled"
           bounces={false}>
           <View style={styles.content}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIcon}>
-                <GraduationCapIcon />
-              </View>
-              <Text style={styles.brandLabel}>Zerebro Connect</Text>
-            </View>
+            <AppLogo size={36} showLabel style={styles.brandRow} />
 
             <Text style={styles.title}>Enter the code</Text>
             <Text style={styles.subtitle}>
@@ -214,21 +200,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     marginBottom: spacing.xl + spacing.md,
-  },
-  brandIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.md,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  brandLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 3.2,
-    color: colors.textMuted,
   },
   title: {
     fontSize: 30,

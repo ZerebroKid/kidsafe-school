@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Alert, Pressable, StyleSheet, Text} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
+import {AppLogo} from '../../components/AppLogo';
 import {Button} from '../../components/Button';
 import {Screen} from '../../components/Screen';
 import {TextInput} from '../../components/TextInput';
@@ -52,6 +53,7 @@ export function SignupScreen({route, navigation}: Props) {
 
   return (
     <Screen title={title} subtitle={subtitle}>
+      <AppLogo size={48} showLabel style={styles.logo} />
       <TextInput
         label="Your name"
         value={name}
@@ -83,6 +85,9 @@ export function SignupScreen({route, navigation}: Props) {
 }
 
 const styles = StyleSheet.create({
+  logo: {
+    marginBottom: spacing.sm,
+  },
   link: {
     color: colors.text,
     textAlign: 'center',

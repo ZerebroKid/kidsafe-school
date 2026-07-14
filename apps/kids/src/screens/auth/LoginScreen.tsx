@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Alert, Pressable, StyleSheet, Text, View} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
+import {AppLogo} from '../../components/AppLogo';
 import {Button} from '../../components/Button';
 import {Screen} from '../../components/Screen';
 import {TextInput} from '../../components/TextInput';
@@ -65,6 +66,7 @@ export function LoginScreen({navigation}: Props) {
 
   return (
     <Screen title="Welcome back" subtitle="Log in to continue managing your family's devices.">
+      <AppLogo size={48} showLabel style={styles.logo} />
       {error ? (
         <View style={styles.errorBanner} accessibilityRole="alert">
           <Text style={styles.errorBannerText}>{error}</Text>
@@ -115,6 +117,9 @@ export function LoginScreen({navigation}: Props) {
 }
 
 const styles = StyleSheet.create({
+  logo: {
+    marginBottom: spacing.sm,
+  },
   errorBanner: {
     backgroundColor: '#fef2f2',
     borderColor: colors.danger,
