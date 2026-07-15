@@ -28,7 +28,7 @@ export interface ZumiSpeakOutput {
 }
 
 export const zumiSpeak = onCall<ZumiSpeakInput, Promise<ZumiSpeakOutput>>(
-  {region: 'asia-south1', minInstances: 1, secrets: [elevenLabsApiKey]},
+  {region: 'asia-south1', minInstances: 0, secrets: [elevenLabsApiKey]},
   async request => {
     const log = stepLogger('zumiSpeak');
     const caller = requireAuth(request);

@@ -83,7 +83,7 @@ export const zumiConverse = onCall<
 >(
   {
     region: 'asia-south1',
-    minInstances: 1,
+    minInstances: 0,
     secrets: [openaiApiKey, elevenLabsApiKey],
   },
   async request => {

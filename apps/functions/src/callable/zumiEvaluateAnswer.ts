@@ -41,7 +41,7 @@ export const zumiEvaluateAnswer = onCall<
   ZumiEvaluateInput,
   Promise<ZumiEvaluateOutput>
 >(
-  {region: 'asia-south1', minInstances: 1, secrets: [openaiApiKey]},
+  {region: 'asia-south1', minInstances: 0, secrets: [openaiApiKey]},
   async request => {
     const log = stepLogger('zumiEvaluateAnswer');
     const caller = requireAuth(request);

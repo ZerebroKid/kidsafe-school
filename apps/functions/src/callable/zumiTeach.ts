@@ -62,7 +62,7 @@ const VALID_PHASES: TeachPhase[] = [
 export const zumiTeach = onCall<ZumiTeachInput, Promise<ZumiTeachOutput>>(
   {
     region: 'asia-south1',
-    minInstances: 1,
+    minInstances: 0,
     secrets: [openaiApiKey, elevenLabsApiKey],
   },
   async request => {
