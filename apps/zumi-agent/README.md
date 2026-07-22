@@ -7,7 +7,7 @@ lesson replaces the old callable round trips (`zumiTeach` + `zumiSpeak` +
 - **Transport**: LiveKit Cloud (WebRTC — echo cancellation, VAD, jitter handling)
 - **STT**: Sarvam Saaras v3, streaming, Hinglish/code-mix native
 - **LLM**: OpenAI gpt-4o-mini, streamed tokens
-- **TTS**: ElevenLabs Flash v2.5, streamed audio
+- **TTS**: Kokoro-82M, self-hosted Kokoro-FastAPI (raw PCM, custom plugin in `kokoro_tts.py`)
 
 The app requests a room token from the `zumiLiveKitToken` Firebase callable
 (which authorizes the child against the assignment), joins the room, and this
@@ -22,11 +22,16 @@ cd apps/zumi-agent
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp .env.example .env   # fill in the keys
+
+# Kokoro TTS server (local, free, faster than real-time)
+sudo docker run -d --name kokoro-tts --restart unless-stopped \
+  -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest
 ```
 
 `.env` needs: `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` (from
 cloud.livekit.io project settings), `SARVAM_API_KEY` (dashboard.sarvam.ai),
-`OPENAI_API_KEY`, `ELEVEN_API_KEY` (same keys the Firebase functions use).
+`OPENAI_API_KEY`, `KOKORO_BASE_URL` (default local :8880), `KOKORO_VOICE`
+(optional, default `hf_alpha`).
 
 Firestore access uses Application Default Credentials
 (`gcloud auth application-default login`, already configured on this machine).
