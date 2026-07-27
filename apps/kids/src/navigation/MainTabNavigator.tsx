@@ -3,8 +3,9 @@ import {StyleSheet, Text, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Svg, {Circle, Path, Rect} from 'react-native-svg';
 
-import {StatusScreen} from '../screens/child/StatusScreen';
+<<<<<<< HEAD
 import {KidHomeScreen} from '../screens/child/KidHomeScreen';
+import {StudentHomeScreen} from '../screens/child/StudentHomeScreen';
 import {colors} from '../theme';
 import {useChildProfile} from '../context/ChildProfileContext';
 import type {MainTabParamList} from './types';
@@ -108,10 +109,15 @@ export function MainTabNavigator() {
       }}>
       <Tab.Screen
         name="HomeTab"
-        component={isFunMode ? KidHomeScreen : StatusScreen}
+        component={isFunMode ? KidHomeScreen : StudentHomeScreen}
         options={{
           tabBarIcon: ({focused}) => (
-            <TabItem icon="home" label="Home" focused={focused} activeColor={activeColor} />
+            <TabItem
+              icon="home"
+              label={isFunMode ? 'Home' : 'Today'}
+              focused={focused}
+              activeColor={activeColor}
+            />
           ),
         }}
       />
