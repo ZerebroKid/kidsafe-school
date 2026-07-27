@@ -2,7 +2,7 @@ import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
-import {StatusScreen} from '../screens/child/StatusScreen';
+import {StudentHomeScreen} from '../screens/child/StudentHomeScreen';
 import {colors} from '../theme';
 import {useChildProfile} from '../context/ChildProfileContext';
 import type {MainTabParamList} from './types';
@@ -39,9 +39,9 @@ export function MainTabNavigator() {
       }}>
       <Tab.Screen
         name="HomeTab"
-        component={StatusScreen}
+        component={StudentHomeScreen}
         options={{
-          tabBarIcon: ({focused}) => <TabItem emoji="🏠" label="Home" focused={focused} />,
+          tabBarIcon: ({focused}) => <TabItem emoji="🏠" label="Today" focused={focused} />,
         }}
       />
       <Tab.Screen
