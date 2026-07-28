@@ -25,6 +25,10 @@ approved parent/teacher role switcher. ZKid rejects non-child accounts.
 - It subscribes to today’s `studyAssignments` for the signed-in child’s class.
 - Topic rows are never static: teacher assignments update the screen live.
 - The call to action opens the existing lesson, topic and quiz stack.
+- `FocusScreen` displays the live parent-managed schedule without giving the
+  child a route to alter that schedule.
+- `ProfileScreen` reads the signed-in child’s display name and `photoURL` from
+  their authenticated user document.
 - ZKid’s pairing, school-link, permission and native safety gates stay intact.
 
 ## Integration contracts

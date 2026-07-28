@@ -32,6 +32,8 @@ export type ChildStackParamList = {
 export type MainTabParamList = {
   HomeTab: undefined;
   StudyTab: undefined;
+  FocusTab: undefined;
+  ProfileTab: undefined;
   ReelsTab: undefined;
 };
 

@@ -6,6 +6,8 @@ import Svg, {Circle, Path, Rect} from 'react-native-svg';
 <<<<<<< HEAD
 import {KidHomeScreen} from '../screens/child/KidHomeScreen';
 import {StudentHomeScreen} from '../screens/child/StudentHomeScreen';
+import {FocusScreen} from '../screens/child/FocusScreen';
+import {ProfileScreen} from '../screens/child/ProfileScreen';
 import {colors} from '../theme';
 import {useChildProfile} from '../context/ChildProfileContext';
 import type {MainTabParamList} from './types';
@@ -142,6 +144,15 @@ export function MainTabNavigator() {
           ),
         }}
       />
+      {!isFunMode && (
+        <Tab.Screen
+          name="FocusTab"
+          component={FocusScreen}
+          options={{
+            tabBarIcon: ({focused}) => <TabItem emoji="🎯" label="Focus" focused={focused} />,
+          }}
+        />
+      )}
       {isFunMode && (
         <Tab.Screen
           name="ReelsTab"
@@ -153,6 +164,13 @@ export function MainTabNavigator() {
           }}
         />
       )}
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileScreen}
+        options={{
+          tabBarIcon: ({focused}) => <TabItem emoji="🙂" label="Me" focused={focused} />,
+        }}
+      />
     </Tab.Navigator>
   );
 }
