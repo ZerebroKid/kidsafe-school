@@ -3,10 +3,10 @@
  *
  * Instead of dropping young kids on the Study Mission list, the Fun tab opens
  * straight onto Zumi the cartoon character. This screen shows Zumi while it
- * loads today's assignments, picks the earliest-due one, and immediately pushes
- * into the full `ZumiVoice` session. When there are no assignments at all it
- * stays here with a friendly idle character; after a session ends (back nav) it
- * shows a "play again" prompt instead of relaunching in a loop.
+ * loads today's assignments and picks the earliest-due one. The child chooses
+ * when to begin the full `ZumiVoice` session; we never force-open a lesson on
+ * landing. When there are no assignments it stays here with a friendly idle
+ * character and a route to the existing reels experience.
  *
  * NOTE: we do NOT pre-check the topic doc for a `voiceStory` field here.
  * `ZumiVoiceScreen` already loads the topic via `useTopicContent` and shows a
@@ -33,7 +33,7 @@ import {ZumiCharacter} from './components/ZumiCharacter';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'ZumiHome'>;
 
-type Phase = 'resolving' | 'none' | 'returned';
+type Phase = 'resolving' | 'ready' | 'none' | 'returned';
 
 const ACCENT = '#8b5cf6';
 
@@ -93,7 +93,8 @@ export function ZumiHomeScreen({navigation}: Props) {
     }
   }, [navigation]);
 
-  // Auto-launch once today's assignments have loaded.
+  // Resolve a topic once today's assignments have loaded. We deliberately
+  // wait for the child to press Start learning before navigating to ZumiVoice.
   // IMPORTANT: `assignmentsState.data` is null (not []) while the hook is
   // transitioning from a null classId to a real one — React runs the re-render
   // before the hook's useEffect fires the new Firestore subscription. We treat
@@ -113,8 +114,7 @@ export function ZumiHomeScreen({navigation}: Props) {
     if (!assignmentsReady) return;
     const pick = pickFirstAssignment(assignmentsState.data ?? []);
     if (pick) {
-      launchedRef.current = true;
-      navigation.navigate('ZumiVoice', toZumiParams(pick));
+      setPhase('ready');
     } else {
       setPhase('none');
     }
@@ -175,6 +175,34 @@ export function ZumiHomeScreen({navigation}: Props) {
               pressed && styles.reelsCtaPressed,
             ]}>
             <Text style={styles.ctaText}>Watch Reels</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (phase === 'ready') {
+    const firstTopic = pickFirstAssignment(assignmentsState.data ?? []);
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.stage}>
+          <ZumiCharacter state="idle" />
+          <Text style={styles.title}>Hello, {childName || 'dost'}!</Text>
+          <Text style={styles.subtitle}>
+            I’m Zumi. Let’s make today’s learning fun.
+          </Text>
+          <View style={styles.topicPill}>
+            <Text style={styles.topicPillLabel}>TODAY’S TOPIC</Text>
+            <Text style={styles.topicPillTitle} numberOfLines={2}>
+              {firstTopic?.topicName ?? 'Your learning adventure'}
+            </Text>
+          </View>
+          <Pressable
+            onPress={launch}
+            android_ripple={{color: 'rgba(139,92,246,0.25)'}}
+            style={({pressed}) => [styles.startCta, pressed && styles.ctaPressed]}>
+            <Text style={styles.startCtaText}>Start learning</Text>
+            <Text style={styles.startCtaArrow}>→</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -249,4 +277,30 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   reelsCtaPressed: {backgroundColor: '#db2777', transform: [{scale: 0.96}]},
+  topicPill: {
+    width: '100%',
+    borderRadius: 18,
+    padding: spacing.md,
+    backgroundColor: '#f0edff',
+    gap: 4,
+  },
+  topicPillLabel: {fontSize: 11, fontWeight: '800', color: ACCENT, letterSpacing: 0.8},
+  topicPillTitle: {fontSize: 15, lineHeight: 21, color: colors.text, fontWeight: '800'},
+  startCta: {
+    width: '100%',
+    minHeight: 58,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: '#ffd84d',
+    borderRadius: 29,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#d6ad11',
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    shadowOffset: {width: 0, height: 6},
+    elevation: 5,
+  },
+  startCtaText: {fontSize: 18, fontWeight: '800', color: '#332600'},
+  startCtaArrow: {fontSize: 25, fontWeight: '800', color: '#332600'},
 });
