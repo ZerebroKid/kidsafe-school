@@ -183,13 +183,22 @@ function SubjectSection({
   subject: SubjectGroup;
   onOpenTopic: (a: AssignmentCard) => void;
 }) {
+  const presentation = subjectPresentation(subject.subjectName);
   return (
-    <View style={styles.subjectSection}>
+    <View style={[styles.subjectSection, {backgroundColor: presentation.background}]}>
       <View style={styles.subjectHeader}>
-        <Text style={styles.subjectTitle}>{subject.subjectLabel}</Text>
-        <Text style={styles.subjectCount}>
-          {subject.topicCount} topic{subject.topicCount > 1 ? 's' : ''}
-        </Text>
+        <View style={styles.subjectTitleRow}>
+          <View style={[styles.subjectGlyph, {backgroundColor: presentation.glyphBackground}]}>
+            <Text style={styles.subjectGlyphText}>{presentation.glyph}</Text>
+          </View>
+          <View>
+            <Text style={styles.subjectTitle}>{subject.subjectLabel}</Text>
+            <Text style={styles.subjectCount}>
+              {subject.topicCount} topic{subject.topicCount > 1 ? 's' : ''} assigned today
+            </Text>
+          </View>
+        </View>
+        <Text style={styles.subjectArrow}>→</Text>
       </View>
       <View style={styles.chapterList}>
         {subject.chapters.map(chapter => (
@@ -202,6 +211,17 @@ function SubjectSection({
       </View>
     </View>
   );
+}
+
+function subjectPresentation(subject: string) {
+  const name = subject.toLowerCase();
+  if (name.includes('math')) return {glyph: '△', background: '#f5f3ff', glyphBackground: '#e7e2ff'};
+  if (name.includes('science')) return {glyph: '◉', background: '#f0f8ff', glyphBackground: '#dcefff'};
+  if (name.includes('social')) return {glyph: '◎', background: '#f1fbf5', glyphBackground: '#ddf3e5'};
+  if (name.includes('english') || name.includes('language')) {
+    return {glyph: 'Aa', background: '#fff8ed', glyphBackground: '#ffead0'};
+  }
+  return {glyph: '✦', background: '#f8f7fb', glyphBackground: '#ece9f4'};
 }
 
 function ChapterAccordion({
@@ -373,22 +393,26 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: spacing.sm,
   },
-  subjectList: {gap: spacing.lg},
-  subjectSection: {gap: spacing.sm},
+  subjectList: {gap: spacing.md},
+  subjectSection: {gap: spacing.sm, padding: spacing.md, borderRadius: radius.lg},
   subjectHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  subjectTitleRow: {flexDirection: 'row', alignItems: 'center', gap: spacing.sm},
+  subjectGlyph: {width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center'},
+  subjectGlyphText: {fontSize: 18, fontWeight: '800', color: colors.primary},
   subjectTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.text,
   },
   subjectCount: {
     fontSize: 12,
     color: colors.textMuted,
   },
+  subjectArrow: {fontSize: 24, fontWeight: '800', color: colors.primary},
   chapterList: {gap: spacing.sm},
   chapterCard: {
     backgroundColor: colors.surface,
