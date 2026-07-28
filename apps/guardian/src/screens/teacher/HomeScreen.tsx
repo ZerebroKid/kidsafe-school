@@ -12,7 +12,6 @@ import {
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 import {signOut} from '@zerebro/shared-firebase/auth';
-import {Button} from '../../components/Button';
 import {
   compareTopicOrder,
   useTeacherActiveSchool,
@@ -77,8 +76,9 @@ export function TeacherHomeScreen({navigation}: Props) {
         />
       }>
       <View>
+        <Text style={styles.date}>{formatToday()}</Text>
         <View style={styles.headerRow}>
-          <Text style={styles.greeting}>Welcome, {teacherName}</Text>
+          <Text style={styles.greeting}>Good morning, {teacherName}</Text>
           <Pressable hitSlop={8} onPress={confirmSignOut}>
             <Text style={styles.signOut}>Sign out</Text>
           </Pressable>
@@ -100,11 +100,24 @@ export function TeacherHomeScreen({navigation}: Props) {
         }
       />
 
-      <Button
-        title="Assign a topic"
-        onPress={() => navigation.navigate('TeacherAssign')}
+      <Pressable
+        accessibilityRole="button"
         disabled={!schoolState.data || (classesState.data?.length ?? 0) === 0}
-      />
+        onPress={() => navigation.navigate('TeacherAssign')}
+        style={({pressed}) => [
+          styles.assignHero,
+          pressed && styles.assignHeroPressed,
+          (!schoolState.data || (classesState.data?.length ?? 0) === 0) && styles.assignHeroDisabled,
+        ]}>
+        <View style={styles.assignHeroIcon}>
+          <Text style={styles.assignHeroIconText}>✓</Text>
+        </View>
+        <View style={styles.assignHeroText}>
+          <Text style={styles.assignHeroTitle}>Mark topics taught today</Text>
+          <Text style={styles.assignHeroCopy}>Assign the full learning loop to your class.</Text>
+        </View>
+        <Text style={styles.assignHeroArrow}>→</Text>
+      </Pressable>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Today's assignments</Text>
@@ -385,16 +398,25 @@ function formatDueAt(epochMs: number): string {
   }
 }
 
+function formatToday(): string {
+  return new Date().toLocaleDateString('en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+}
+
 const styles = StyleSheet.create({
   scroll: {flex: 1, backgroundColor: colors.bg},
   container: {padding: spacing.lg, gap: spacing.lg},
+  date: {color: colors.textMuted, fontSize: 12, fontWeight: '600', marginBottom: 4},
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.md,
   },
-  greeting: {flex: 1, color: colors.text, fontSize: 24, fontWeight: '700'},
+  greeting: {flex: 1, color: colors.text, fontSize: 25, fontWeight: '800', letterSpacing: -0.4},
   signOut: {color: colors.danger, fontSize: 14, fontWeight: '600'},
   bodyMuted: {
     color: colors.textMuted,
@@ -422,6 +444,30 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {color: colors.text, fontSize: 15, fontWeight: '600'},
   emptyBody: {color: colors.textMuted, fontSize: 13, lineHeight: 18},
+  assignHero: {
+    minHeight: 94,
+    borderRadius: radius.lg,
+    backgroundColor: '#4f3bf1',
+    padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  assignHeroPressed: {opacity: 0.86},
+  assignHeroDisabled: {opacity: 0.45},
+  assignHeroIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  assignHeroIconText: {fontSize: 24, fontWeight: '800', color: '#ffffff'},
+  assignHeroText: {flex: 1, gap: 3},
+  assignHeroTitle: {fontSize: 17, fontWeight: '800', color: '#ffffff'},
+  assignHeroCopy: {fontSize: 12, lineHeight: 17, color: '#e6e2ff'},
+  assignHeroArrow: {fontSize: 24, fontWeight: '800', color: '#ffffff'},
   assignmentsList: {gap: spacing.md},
   classCard: {
     backgroundColor: colors.bg,
