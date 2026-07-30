@@ -50,6 +50,7 @@ from livekit.agents import (
     cli,
     function_tool,
     get_job_context,
+    inference,
     llm,
     metrics,
 )
@@ -57,6 +58,7 @@ from livekit.plugins import openai, sarvam
 
 import zumi_firebase as zfb
 from kokoro_tts import LOCAL_SPEECH_URL, KokoroTTS, check_server
+from zumi_latency import TurnLatencyTracker
 
 load_dotenv()
 
@@ -70,6 +72,86 @@ KOKORO_BASE_URL = os.environ.get("KOKORO_BASE_URL", LOCAL_SPEECH_URL)
 
 SCORE_FOR = {"correct": 25, "partial": 12, "incorrect": 0}
 VIDEO_WAIT_TIMEOUT_S = 240
+
+
+# ---------------------------------------------------------------------------
+# Turn-taking tuning (VAD / endpointing / barge-in)
+#
+# These were library defaults before -- which meant a livekit-agents upgrade
+# could silently change how long Zumi waits before answering a child. They are
+# explicit (and env-overridable) so the behaviour is ours, tunable per
+# deployment, and revertable without a code change.
+# ---------------------------------------------------------------------------
+
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.environ[name])
+    except (KeyError, ValueError):
+        return default
+
+
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(os.environ[name])
+    except (KeyError, ValueError):
+        return default
+
+
+# Silero VAD (local, via livekit-local-inference -- no network, no per-minute
+# cost). Silence never reaches STT, which is also the cheapest cost lever we
+# have: a third of a child's session is pauses.
+VAD_MIN_SILENCE_S = _env_float("ZUMI_VAD_MIN_SILENCE", 0.25)
+VAD_MIN_SPEECH_S = _env_float("ZUMI_VAD_MIN_SPEECH", 0.05)
+VAD_ACTIVATION_THRESHOLD = _env_float("ZUMI_VAD_ACTIVATION", 0.5)
+
+# Endpointing: how long after the child goes quiet we call the turn finished.
+# 400ms sits in the middle of the 300-500ms band -- a 6-10 year old pauses
+# mid-sentence far more than an adult, and cutting them off reads as "Zumi
+# doesn't listen to me".
+ENDPOINT_MIN_DELAY_S = _env_float("ZUMI_ENDPOINT_MIN_DELAY", 0.4)
+ENDPOINT_MAX_DELAY_S = _env_float("ZUMI_ENDPOINT_MAX_DELAY", 2.5)
+
+# Barge-in: the child can talk over Zumi and she stops. 600ms of speech (vs the
+# 500ms default) is a deliberate nudge away from classroom noise triggering it;
+# anything that turns out not to be speech resumes the interrupted line instead
+# of leaving the child in silence (resume_false_interruption).
+INTERRUPTIONS_ENABLED = os.environ.get("ZUMI_INTERRUPTIONS", "on").lower() != "off"
+INTERRUPT_MIN_DURATION_S = _env_float("ZUMI_INTERRUPT_MIN_DURATION", 0.6)
+INTERRUPT_MIN_WORDS = _env_int("ZUMI_INTERRUPT_MIN_WORDS", 0)
+FALSE_INTERRUPT_TIMEOUT_S = _env_float("ZUMI_FALSE_INTERRUPT_TIMEOUT", 2.0)
+
+# End-of-turn strategy. "inference" is LiveKit's semantic turn detector (a
+# hosted model that knows "I went to the..." is unfinished) and is what the
+# library picks by default; "vad" is pure silence, fully local, and the
+# fallback if the hosted detector can't be constructed.
+TURN_DETECTOR = os.environ.get("ZUMI_TURN_DETECTOR", "inference").strip().lower()
+
+# The plan's latency target: child stops speaking -> first audio back.
+LATENCY_TARGET_S = _env_float("ZUMI_LATENCY_TARGET", 1.5)
+
+
+def build_vad() -> inference.VAD:
+    return inference.VAD(
+        model="silero",
+        min_speech_duration=VAD_MIN_SPEECH_S,
+        min_silence_duration=VAD_MIN_SILENCE_S,
+        activation_threshold=VAD_ACTIVATION_THRESHOLD,
+    )
+
+
+def build_turn_detection():
+    """Resolve ZUMI_TURN_DETECTOR into a livekit TurnDetectionMode."""
+    if TURN_DETECTOR in ("vad", "stt", "manual"):
+        return TURN_DETECTOR
+    try:
+        return inference.TurnDetector()
+    except Exception:
+        logger.warning(
+            "semantic turn detector unavailable -- falling back to VAD endpointing",
+            exc_info=True,
+        )
+        return "vad"
 
 
 # ---------------------------------------------------------------------------
@@ -593,8 +675,46 @@ async def entrypoint(ctx: JobContext) -> None:
         class_id=str(meta.get("classId", "")),
     )
 
+    # Loaded once per worker process in prewarm; fall back to building it here
+    # if the hook didn't run (e.g. `agent.py console`).
+    vad = ctx.proc.userdata.get("vad") or build_vad()
+    turn_detection = build_turn_detection()
+    logger.info(
+        "[config] vad_silence=%.2fs endpointing=%.2f-%.2fs turn_detection=%s "
+        "interruptions=%s(min %.2fs/%d words) target=%.1fs",
+        VAD_MIN_SILENCE_S,
+        ENDPOINT_MIN_DELAY_S,
+        ENDPOINT_MAX_DELAY_S,
+        turn_detection if isinstance(turn_detection, str) else "inference",
+        "on" if INTERRUPTIONS_ENABLED else "off",
+        INTERRUPT_MIN_DURATION_S,
+        INTERRUPT_MIN_WORDS,
+        LATENCY_TARGET_S,
+    )
+
     session: AgentSession[ZumiUserdata] = AgentSession(
         userdata=userdata,
+        # Explicit local Silero VAD: gates STT (silence is never transcribed)
+        # and is what both endpointing and barge-in detection run on.
+        vad=vad,
+        turn_handling={
+            "turn_detection": turn_detection,
+            "endpointing": {
+                "mode": "fixed",
+                "min_delay": ENDPOINT_MIN_DELAY_S,
+                "max_delay": ENDPOINT_MAX_DELAY_S,
+            },
+            # Scripted intro lines pass allow_interruptions=False per speech
+            # (and mute the mic), so these settings effectively govern the quiz,
+            # where the child SHOULD be able to cut in.
+            "interruption": {
+                "enabled": INTERRUPTIONS_ENABLED,
+                "min_duration": INTERRUPT_MIN_DURATION_S,
+                "min_words": INTERRUPT_MIN_WORDS,
+                "resume_false_interruption": True,
+                "false_interruption_timeout": FALSE_INTERRUPT_TIMEOUT_S,
+            },
+        },
         stt=sarvam.STT(
             model="saaras:v3",
             language="unknown",  # auto-detect: kids code-switch Hindi/English
@@ -614,7 +734,6 @@ async def entrypoint(ctx: JobContext) -> None:
             # e.g. the OpenRouter fallback; the local container ignores it.
             api_key=os.environ.get("OPENROUTER_API_KEY", ""),
         ),
-        # Bundled Silero VAD handles endpointing; Sarvam's server VAD assists.
     )
 
     # RPC from the client when the story video ends / is skipped.
@@ -623,21 +742,16 @@ async def entrypoint(ctx: JobContext) -> None:
         session.userdata.video_done.set()
         return "ok"
 
-    # Per-stage latency logs (EOU -> LLM ttft -> TTS ttfb), the [ZumiPerf] of
-    # the streaming world.
+    # Latency: one line per turn joining the stages (child stopped speaking ->
+    # first audio back), plus a p50/p95 summary at close. This is the baseline
+    # the Whisper/GPU-TTS swaps get measured against.
     usage = metrics.UsageCollector()
+    turn_latency = TurnLatencyTracker(logger, target_s=LATENCY_TARGET_S)
 
     @session.on("metrics_collected")
     def _on_metrics(ev):
         usage.collect(ev.metrics)
-        m = ev.metrics
-        kind = type(m).__name__
-        if kind == "EOUMetrics":
-            logger.info("[perf] end-of-utterance delay %.0fms", m.end_of_utterance_delay * 1000)
-        elif kind == "LLMMetrics":
-            logger.info("[perf] LLM first token %.0fms", m.ttft * 1000)
-        elif kind == "TTSMetrics":
-            logger.info("[perf] TTS first audio %.0fms", m.ttfb * 1000)
+        turn_latency.on_metrics(ev.metrics)
 
     # When the session ends (quiz finished, child left, or error), DELETE the
     # room. Room names are deterministic (zumi_{assignmentId}_{uid}) and LiveKit
@@ -646,6 +760,7 @@ async def entrypoint(ctx: JobContext) -> None:
     # hang forever on the loading screen.
     @session.on("close")
     def _on_session_close(ev) -> None:
+        turn_latency.log_summary()
         logger.info("[flow] session closed -- deleting room so a rejoin redispatches")
         ctx.delete_room()
 
@@ -674,11 +789,16 @@ async def entrypoint(ctx: JobContext) -> None:
 
 def prewarm(proc) -> None:
     """Runs in each idle process before a job arrives: initialize Firestore so
-    the first read of a session doesn't pay the auth handshake."""
+    the first read of a session doesn't pay the auth handshake, and load the VAD
+    model so the first utterance doesn't wait on it."""
     try:
         zfb.warm_up()
     except Exception:
         logger.exception("prewarm failed (will retry lazily in the job)")
+    try:
+        proc.userdata["vad"] = build_vad()
+    except Exception:
+        logger.exception("VAD prewarm failed (will build lazily in the job)")
 
 
 if __name__ == "__main__":
