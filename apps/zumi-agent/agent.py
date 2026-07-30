@@ -557,6 +557,17 @@ async def entrypoint(ctx: JobContext) -> None:
         ctx.room.name, assignment_id, meta.get("childName"),
     )
 
+    # Phase 0: load remote flags (stt/tts/moderation used in later phases).
+    # Kids app already gated live vs legacy before minting a token; we just log.
+    zumi_cfg = await asyncio.to_thread(zfb.load_zumi_config)
+    logger.info(
+        "[config] pipeline=%s stt=%s tts=%s moderation=%s",
+        zumi_cfg.pipeline,
+        zumi_cfg.stt_provider,
+        zumi_cfg.tts_provider,
+        zumi_cfg.moderation_enabled,
+    )
+
     # Load the voiceStory in the BACKGROUND: the intro chat doesn't need it, so
     # Zumi starts talking immediately; only the quiz (after the story video)
     # needs it, which is minutes away.

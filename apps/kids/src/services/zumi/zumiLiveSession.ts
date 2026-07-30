@@ -40,9 +40,6 @@ import type {
   ZumiSessionConfig,
 } from './zumiSessionManager';
 
-/** Flip to false to fall back to the old callable pipeline. */
-export const ZUMI_LIVE = true;
-
 // Installed at runtime by @livekit/react-native's registerGlobals() (bundled
 // EncoderDecoderTogether polyfill); the RN TS lib doesn't declare it.
 declare const TextDecoder: new () => {decode(input: Uint8Array): string};

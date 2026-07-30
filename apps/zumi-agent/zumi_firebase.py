@@ -41,6 +41,38 @@ def warm_up() -> None:
 
 
 @dataclass
+class ZumiConfig:
+    """Remote flags from `appConfig/zumi` (Phase 0 kill switch + later stages).
+
+    Phase 0 only logs these. Phases 2/5/6 will act on moderation / STT / TTS.
+    Missing doc or read failure returns safe defaults (today's behavior).
+    """
+
+    pipeline: str = "live"  # "live" | "legacy" (kids app chooses; agent is live)
+    stt_provider: str = "sarvam"  # Phase 5: whisper | deepgram | sarvam
+    tts_provider: str = "kokoro-cpu"  # Phase 6: kokoro-cpu | kokoro-gpu
+    moderation_enabled: bool = False  # Phase 2
+
+
+def load_zumi_config() -> ZumiConfig:
+    """Read `appConfig/zumi`. Never raises -- defaults on missing/error."""
+    try:
+        snap = _db().collection("appConfig").document("zumi").get()
+        data = snap.to_dict() if snap.exists else None
+    except Exception:
+        return ZumiConfig()
+    if not isinstance(data, dict):
+        return ZumiConfig()
+    pipeline = data.get("pipeline")
+    return ZumiConfig(
+        pipeline="legacy" if pipeline == "legacy" else "live",
+        stt_provider=str(data.get("sttProvider") or "sarvam"),
+        tts_provider=str(data.get("ttsProvider") or "kokoro-cpu"),
+        moderation_enabled=data.get("moderationEnabled") is True,
+    )
+
+
+@dataclass
 class QuizQuestion:
     question_id: str
     question_text: str

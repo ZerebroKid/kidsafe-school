@@ -33,7 +33,8 @@ import {
   type AvatarState,
   type SessionState,
 } from '../../services/zumi/zumiSessionManager';
-import {ZumiLiveSession, ZUMI_LIVE} from '../../services/zumi/zumiLiveSession';
+import {isZumiLive} from '../../services/zumi/zumiConfig';
+import {ZumiLiveSession} from '../../services/zumi/zumiLiveSession';
 import {isMicPromptActive} from '../../services/zumi/zumiSpeech';
 import {FunBackground} from './components/FunBackground';
 import {ZumiPlayground} from './components/ZumiPlayground';
@@ -114,77 +115,90 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
   const voiceStory = topic?.voiceStory ?? null;
 
   // Start the session exactly once, after the topic + profile have resolved.
+  // Pipeline choice comes from Firestore appConfig/zumi (see zumiConfig.ts)
+  // so we can flip live <-> legacy without an app release.
   useEffect(() => {
     if (startedRef.current) return;
     if (loading || profileLoading) return;
     if (!voiceStory) return;
 
-    startedRef.current = true;
-    // ZUMI_LIVE: streaming LiveKit session (sub-second turns via the Python
-    // agent); otherwise the original callable-based state machine.
-    const SessionImpl = ZUMI_LIVE ? ZumiLiveSession : ZumiSessionManager;
-    const manager = new SessionImpl(
-      {assignmentId, topicName, story: voiceStory, childName},
-      event => {
-        switch (event.type) {
-          case 'state':
-            setSessionState(event.state);
-            break;
-          case 'avatar':
-            setAvatar(event.avatar);
-            break;
-          case 'bubble':
-            setBubble(event.text);
-            break;
-          case 'cue':
-            setCue(event.cue);
-            break;
-          case 'video':
-            setVideo(event.source);
-            break;
-          case 'listening':
-            setListening(event.on);
-            if (event.on) {
-              setListenMode(event.mode ?? 'tap');
-              setSpeaking(!!event.speaking);
-            } else {
-              setSpeaking(false);
-            }
-            break;
-          case 'transcribing':
-            setTranscribing(event.on);
-            break;
-          case 'prompt':
-            setPrompt(
-              event.waiting
-                ? {skippable: event.skippable, hint: event.hint}
-                : null,
-            );
-            break;
-          case 'quiz':
-            setQuiz({
-              current: event.current,
-              total: event.total,
-              score: event.score,
-            });
-            break;
-          case 'done':
-            doneRef.current = true;
-            setDone({
-              percentage: event.percentage,
-              passed: event.passed,
-              score: event.score,
-              maxScore: event.maxScore,
-            });
-            break;
-          case 'error':
-            setSessionError(event.message);
-            break;
-        }
-      },
-    );
-    managerRef.current = manager;
-    void manager.start();
+    let cancelled = false;
+
+    void (async () => {
+      const live = await isZumiLive();
+      if (cancelled || closedRef.current || startedRef.current) return;
+      startedRef.current = true;
+
+      // live: streaming LiveKit session (Python agent); legacy: callable
+      // ZumiSessionManager. Both share the same event surface for this screen.
+      const SessionImpl = live ? ZumiLiveSession : ZumiSessionManager;
+      const manager = new SessionImpl(
+        {assignmentId, topicName, story: voiceStory, childName},
+        event => {
+          switch (event.type) {
+            case 'state':
+              setSessionState(event.state);
+              break;
+            case 'avatar':
+              setAvatar(event.avatar);
+              break;
+            case 'bubble':
+              setBubble(event.text);
+              break;
+            case 'cue':
+              setCue(event.cue);
+              break;
+            case 'video':
+              setVideo(event.source);
+              break;
+            case 'listening':
+              setListening(event.on);
+              if (event.on) {
+                setListenMode(event.mode ?? 'tap');
+                setSpeaking(!!event.speaking);
+              } else {
+                setSpeaking(false);
+              }
+              break;
+            case 'transcribing':
+              setTranscribing(event.on);
+              break;
+            case 'prompt':
+              setPrompt(
+                event.waiting
+                  ? {skippable: event.skippable, hint: event.hint}
+                  : null,
+              );
+              break;
+            case 'quiz':
+              setQuiz({
+                current: event.current,
+                total: event.total,
+                score: event.score,
+              });
+              break;
+            case 'done':
+              doneRef.current = true;
+              setDone({
+                percentage: event.percentage,
+                passed: event.passed,
+                score: event.score,
+                maxScore: event.maxScore,
+              });
+              break;
+            case 'error':
+              setSessionError(event.message);
+              break;
+          }
+        },
+      );
+      managerRef.current = manager;
+      void manager.start();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     loading,
     profileLoading,
