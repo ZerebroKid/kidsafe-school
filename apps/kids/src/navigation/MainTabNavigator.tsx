@@ -107,13 +107,12 @@ function TabItem({
 }
 
 export function MainTabNavigator() {
-  // Grade <= 6 children see the playful kid dashboard on Home and the "Fun"
-  // tab (Zumi); everyone else keeps the StatusScreen + standard "Study" tab.
-  // The Study tab still hosts the same StudyNavigator -- only the label/icon
-  // changes, and per-topic routing decides Zumi vs lesson.
+  // Grade <= 6 children start on the playful Junior "Fun" home. Their second
+  // tab is deliberately named "Learn" so real teacher-assigned lessons remain
+  // easy to find; older children retain the standard Today / Study wording.
   const {isFunMode} = useChildProfile();
-  const studyIcon: IconName = isFunMode ? 'fun' : 'study';
-  const studyLabel = isFunMode ? 'Fun' : 'Study';
+  const studyIcon: IconName = 'study';
+  const studyLabel = isFunMode ? 'Learn' : 'Study';
   const activeColor = isFunMode ? FUN_ACTIVE : colors.primary;
 
   return (
@@ -130,7 +129,7 @@ export function MainTabNavigator() {
           tabBarIcon: ({focused}) => (
             <TabItem
               icon="home"
-              label={isFunMode ? 'Home' : 'Today'}
+              label={isFunMode ? 'Fun' : 'Today'}
               focused={focused}
               activeColor={activeColor}
             />
