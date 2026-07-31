@@ -5,10 +5,8 @@
  * is live profile data; navigation continues to use the existing Zumi and
  * Reels flows rather than a static demo.
  */
-import React, {useRef} from 'react';
+import React from 'react';
 import {
-  Animated,
-  Easing,
   Pressable,
   StyleSheet,
   Text,
@@ -19,6 +17,7 @@ import type {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 
 import {useChildProfile} from '../../context/ChildProfileContext';
 import type {MainTabParamList} from '../../navigation/types';
+import {ZiboMascot} from '../fun/components/ZiboMascot';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'HomeTab'>;
 
@@ -33,7 +32,7 @@ export function KidHomeScreen({navigation}: Props) {
         <Text style={styles.subGreeting}>Let’s learn something fun today</Text>
 
         <View style={styles.mascotArea}>
-          <JuniorMascot />
+          <ZiboMascot />
           <View style={styles.topicBubble}>
             <Text style={styles.topicBubbleText}>Today: let’s explore! ★</Text>
           </View>
@@ -91,54 +90,12 @@ function Mood({emoji, label, color, border}: {emoji: string; label: string; colo
   );
 }
 
-/** A lightweight native Zibo mascot; no remote image is needed. */
-function JuniorMascot() {
-  const bob = useRef(new Animated.Value(0)).current;
-
-  React.useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(bob, {toValue: -8, duration: 1300, easing: Easing.inOut(Easing.ease), useNativeDriver: true}),
-        Animated.timing(bob, {toValue: 0, duration: 1300, easing: Easing.inOut(Easing.ease), useNativeDriver: true}),
-      ]),
-    );
-    animation.start();
-    return () => animation.stop();
-  }, [bob]);
-
-  return (
-    <Animated.View style={[styles.mascot, {transform: [{translateY: bob}]}]}>
-      <View style={styles.antennaStem} />
-      <View style={styles.antennaLight} />
-      <View style={styles.mascotFace}>
-        <View style={[styles.eye, styles.leftEye]}><View style={styles.pupil} /></View>
-        <View style={[styles.eye, styles.rightEye]}><View style={styles.pupil} /></View>
-        <View style={[styles.cheek, styles.leftCheek]} />
-        <View style={[styles.cheek, styles.rightCheek]} />
-        <View style={styles.smile} />
-      </View>
-    </Animated.View>
-  );
-}
-
 const styles = StyleSheet.create({
   root: {flex: 1, backgroundColor: '#fff7ee'},
   safe: {flex: 1, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 18},
   greeting: {textAlign: 'center', color: '#4c3ae3', fontSize: 23, fontWeight: '900'},
   subGreeting: {textAlign: 'center', color: '#c2870f', fontSize: 14, fontWeight: '700', marginTop: 2},
   mascotArea: {height: 194, alignItems: 'center', justifyContent: 'flex-end', marginTop: 2},
-  mascot: {width: 150, height: 154, position: 'relative', alignItems: 'center'},
-  antennaStem: {position: 'absolute', top: 0, width: 7, height: 29, borderRadius: 6, backgroundColor: '#ffd54a'},
-  antennaLight: {position: 'absolute', top: -13, width: 22, height: 22, borderRadius: 11, backgroundColor: '#ffd54a', shadowColor: '#ffd54a', shadowOpacity: 0.9, shadowRadius: 12, elevation: 6},
-  mascotFace: {position: 'absolute', bottom: 0, width: 150, height: 138, borderRadius: 75, backgroundColor: '#45b8ef', shadowColor: '#38b6f2', shadowOpacity: 0.35, shadowRadius: 18, shadowOffset: {width: 0, height: 10}, elevation: 6},
-  eye: {position: 'absolute', top: 43, width: 35, height: 35, borderRadius: 18, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center'},
-  leftEye: {left: 32},
-  rightEye: {right: 32},
-  pupil: {width: 16, height: 16, borderRadius: 8, backgroundColor: '#22243f'},
-  cheek: {position: 'absolute', top: 85, width: 21, height: 12, borderRadius: 10, backgroundColor: '#ff9ec4', opacity: 0.85},
-  leftCheek: {left: 25},
-  rightCheek: {right: 25},
-  smile: {position: 'absolute', top: 88, left: 57, width: 36, height: 20, borderBottomWidth: 5, borderColor: '#22243f', borderRadius: 24},
   topicBubble: {position: 'absolute', right: 7, top: 4, borderWidth: 2, borderColor: '#ffd54a', borderRadius: 16, borderBottomLeftRadius: 4, backgroundColor: '#ffffff', paddingHorizontal: 10, paddingVertical: 7, shadowColor: '#4c3ae3', shadowOpacity: 0.12, shadowRadius: 8, elevation: 3},
   topicBubbleText: {fontSize: 11, fontWeight: '800', color: '#4c3ae3'},
   playCard: {flexDirection: 'row', alignItems: 'center', borderRadius: 27, backgroundColor: '#ff735e', paddingHorizontal: 21, paddingVertical: 19, marginTop: 4, shadowColor: '#ff6b5c', shadowOpacity: 0.38, shadowRadius: 14, shadowOffset: {width: 0, height: 7}, elevation: 6},

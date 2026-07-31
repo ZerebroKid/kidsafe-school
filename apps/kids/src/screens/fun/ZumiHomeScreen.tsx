@@ -30,7 +30,7 @@ import {
 } from '../../firebase/study';
 import {spacing} from '../../theme';
 import type {StudyStackParamList} from '../../navigation/types';
-import {ZumiCharacter} from './components/ZumiCharacter';
+import {ZiboMascot} from './components/ZiboMascot';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'ZumiHome'>;
 
@@ -163,7 +163,7 @@ export function ZumiHomeScreen({navigation, route}: Props) {
         <GradientBg />
         <SafeAreaView style={styles.safe}>
           <View style={styles.stage}>
-            <ZumiCharacter state="celebrating" />
+            <ZiboMascot size={170} />
             <Text style={styles.title}>Shabaash,{'\n'}{childName || 'dost'}!</Text>
             <Text style={styles.subtitle}>Aaj ka kaam ho gaya ☀️</Text>
             <View style={styles.coinPill}>
@@ -196,7 +196,7 @@ export function ZumiHomeScreen({navigation, route}: Props) {
         <GradientBg />
         <SafeAreaView style={styles.safe}>
           <View style={styles.stage}>
-            <ZumiCharacter state="idle" />
+            <ZiboMascot size={170} />
             <Text style={styles.title}>{hello}</Text>
             <Text style={styles.subtitle}>
               Zumi tumhara wait kar raha hai. Chalo khelte hain!
@@ -228,7 +228,7 @@ export function ZumiHomeScreen({navigation, route}: Props) {
         <GradientBg />
         <SafeAreaView style={styles.safe}>
           <View style={styles.stage}>
-            <ZumiCharacter state="idle" />
+            <ZiboMascot size={170} />
             <Text style={styles.title}>{hello}</Text>
             <Text style={styles.subtitle}>
               Aaj koi kaam nahi hai. Tab tak reels dekho!
@@ -254,7 +254,7 @@ export function ZumiHomeScreen({navigation, route}: Props) {
       <GradientBg />
       <SafeAreaView style={styles.safe}>
         <View style={styles.stage}>
-          <ZumiCharacter state="idle" />
+          <ZiboMascot size={170} />
           <Text style={styles.title}>{hello}</Text>
           <View style={styles.loadingRow}>
             <ActivityIndicator color="#ffffff" />
