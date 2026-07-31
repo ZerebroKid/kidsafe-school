@@ -3,7 +3,6 @@ import {StyleSheet, Text, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Svg, {Circle, Path, Rect} from 'react-native-svg';
 
-<<<<<<< HEAD
 import {KidHomeScreen} from '../screens/child/KidHomeScreen';
 import {StudentHomeScreen} from '../screens/child/StudentHomeScreen';
 import {FocusScreen} from '../screens/child/FocusScreen';
@@ -19,7 +18,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 /** Zumi's signature purple -- active tab tint in fun mode. */
 const FUN_ACTIVE = '#8b5cf6';
 
-type IconName = 'home' | 'fun' | 'study' | 'reels';
+type IconName = 'home' | 'fun' | 'study' | 'focus' | 'profile' | 'reels';
 
 /** Outline tab icons matching the design mockup (tintable, stroke-based). */
 function TabIcon({name, tint}: {name: IconName; tint: string}) {
@@ -54,6 +53,21 @@ function TabIcon({name, tint}: {name: IconName; tint: string}) {
             strokeLinejoin="round"
           />
           <Path d="M5 20a2 2 0 012-2h12v3" {...stroke} strokeLinejoin="round" />
+        </Svg>
+      );
+    case 'focus':
+      return (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <Circle cx={12} cy={12} r={7.5} {...stroke} />
+          <Circle cx={12} cy={12} r={3} {...stroke} />
+          <Path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2" {...stroke} strokeLinecap="round" />
+        </Svg>
+      );
+    case 'profile':
+      return (
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <Circle cx={12} cy={8} r={3.25} {...stroke} />
+          <Path d="M5.5 20c.7-3.25 3.1-5 6.5-5s5.8 1.75 6.5 5" {...stroke} strokeLinecap="round" />
         </Svg>
       );
     case 'reels':
@@ -149,7 +163,14 @@ export function MainTabNavigator() {
           name="FocusTab"
           component={FocusScreen}
           options={{
-            tabBarIcon: ({focused}) => <TabItem emoji="🎯" label="Focus" focused={focused} />,
+            tabBarIcon: ({focused}) => (
+              <TabItem
+                icon="focus"
+                label="Focus"
+                focused={focused}
+                activeColor={activeColor}
+              />
+            ),
           }}
         />
       )}
@@ -168,7 +189,14 @@ export function MainTabNavigator() {
         name="ProfileTab"
         component={ProfileScreen}
         options={{
-          tabBarIcon: ({focused}) => <TabItem emoji="🙂" label="Me" focused={focused} />,
+          tabBarIcon: ({focused}) => (
+            <TabItem
+              icon="profile"
+              label="Me"
+              focused={focused}
+              activeColor={activeColor}
+            />
+          ),
         }}
       />
     </Tab.Navigator>
