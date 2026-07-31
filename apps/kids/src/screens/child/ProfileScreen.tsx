@@ -1,7 +1,8 @@
 import React from 'react';
-import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Alert, Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import {signOut} from '@zerebro/shared-firebase/auth';
 import {useChildProfile} from '../../context/ChildProfileContext';
 import {useAuthStore} from '../../state/authStore';
 import {colors, radius, spacing} from '../../theme';
@@ -18,6 +19,21 @@ export function ProfileScreen() {
   const userDoc = useAuthStore(s => s.userDoc);
   const displayName = childName || userDoc?.displayName || userDoc?.name || 'Student';
   const initial = displayName.trim().charAt(0).toUpperCase() || 'S';
+
+  const confirmSignOut = () => {
+    Alert.alert(
+      'Switch account?',
+      'You will return to the ZerebroKid sign-in screen.',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Sign out',
+          style: 'destructive',
+          onPress: () => signOut().catch(error => console.warn('signOut failed', error)),
+        },
+      ],
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
@@ -57,6 +73,14 @@ export function ProfileScreen() {
           <Text style={styles.helpCopy}>Ask your parent, teacher or school coordinator for support.</Text>
           <Text style={styles.helpEmail}>help@zerebrokid.com</Text>
         </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Sign out of ZerebroKid"
+          style={styles.signOutButton}
+          onPress={confirmSignOut}>
+          <Text style={styles.signOutText}>Sign out</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -84,4 +108,13 @@ const styles = StyleSheet.create({
   helpTitle: {fontSize: 16, fontWeight: '800', color: '#16633f'},
   helpCopy: {fontSize: 13, lineHeight: 19, color: '#397358'},
   helpEmail: {fontSize: 14, fontWeight: '800', color: '#16633f', marginTop: 2},
+  signOutButton: {
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e8b4b4',
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    backgroundColor: '#fff7f7',
+  },
+  signOutText: {fontSize: 15, fontWeight: '800', color: '#b42318'},
 });
