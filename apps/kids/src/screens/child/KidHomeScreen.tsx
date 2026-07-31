@@ -1,117 +1,80 @@
 /**
- * KidHomeScreen -- the fun-mode (grade <= 6) Home tab.
+ * Junior home for children in grade 6 and below.
  *
- * Replaces the parental StatusScreen for young kids with the playful purple
- * dashboard from the design: coin + heart pills up top, Zumi the mascot with a
- * breathing bob, a speech-bubble greeting, and a 2x2 grid of action cards
- * (Fun / Cartoons / Reels / Games). Grade 7+ children still get StatusScreen
- * (see MainTabNavigator).
- *
- * Coins and hearts are STATIC placeholders for now -- the real economy comes
- * later. Cartoons and Games are card-only: tapping gives a playful bounce and
- * a "coming soon" toast instead of navigating.
+ * This is the native version of the approved beta Zumi design. The child name
+ * is live profile data; navigation continues to use the existing Zumi and
+ * Reels flows rather than a static demo.
  */
-
 import React, {useRef} from 'react';
 import {
   Animated,
   Easing,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
-  ToastAndroid,
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import Svg, {Circle, Defs, LinearGradient, Path, Rect, Stop} from 'react-native-svg';
 import type {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 
 import {useChildProfile} from '../../context/ChildProfileContext';
-import {spacing} from '../../theme';
 import type {MainTabParamList} from '../../navigation/types';
-
-const ZUMI_IDLE = require('../../assets/zumi/zumi_idle.png');
-
-// Placeholder economy values -- wire to Firestore later.
-const COINS = 240;
-const HEARTS = '3/10';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'HomeTab'>;
 
 export function KidHomeScreen({navigation}: Props) {
   const {childName} = useChildProfile();
-  const greeting = `Hi ${childName || 'dost'}! Kaise ho? 🎉`;
+  const name = childName || 'dost';
 
   return (
     <View style={styles.root}>
-      <Svg style={StyleSheet.absoluteFill}>
-        <Defs>
-          <LinearGradient id="homeBg" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#7c3aed" />
-            <Stop offset="0.55" stopColor="#8b5cf6" />
-            <Stop offset="1" stopColor="#a855f7" />
-          </LinearGradient>
-        </Defs>
-        <Rect width="100%" height="100%" fill="url(#homeBg)" />
-      </Svg>
-      <Sparkle style={{top: '12%', left: '8%'}} char="✦" />
-      <Sparkle style={{top: '9%', right: '10%'}} char="＋" />
-      <Sparkle style={{top: '30%', left: '5%'}} char="＋" />
-      <Sparkle style={{top: '27%', right: '6%'}} char="✦" />
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <Text style={styles.greeting}>Hi {name}! ☀️</Text>
+        <Text style={styles.subGreeting}>Let’s learn something fun today</Text>
 
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.pillRow}>
-          <View style={styles.pill}>
-            <Text style={styles.pillIcon}>🪙</Text>
-            <Text style={styles.pillText}>{COINS}</Text>
-          </View>
-          <View style={styles.pill}>
-            <Text style={styles.pillIcon}>💜</Text>
-            <Text style={styles.pillText}>{HEARTS}</Text>
+        <View style={styles.mascotArea}>
+          <JuniorMascot />
+          <View style={styles.topicBubble}>
+            <Text style={styles.topicBubbleText}>Today: let’s explore! ★</Text>
           </View>
         </View>
 
-        <BreathingZumi />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Start a fun learning activity"
+          onPress={() => navigation.navigate('StudyTab')}
+          style={({pressed}) => [styles.playCard, pressed && styles.pressed]}>
+          <Text style={styles.playIcon}>🎮</Text>
+          <View style={styles.playCopy}>
+            <Text style={styles.playTitle}>Let’s play!</Text>
+            <Text style={styles.playSubtitle}>A fun learning activity</Text>
+          </View>
+          <Text style={styles.playArrow}>▶</Text>
+        </Pressable>
 
-        <View style={styles.bubble}>
-          <Text style={styles.bubbleText}>{greeting}</Text>
+        <View style={styles.moodRow}>
+          <Mood emoji="😀" label="Happy" color="#f08a32" border="#ffe0c2" />
+          <Mood emoji="🤔" label="Curious" color="#38a9f2" border="#d7ecff" />
+          <Mood emoji="🥳" label="Excited" color="#f26b9b" border="#ffe0ee" />
         </View>
 
-        <View style={styles.grid}>
-          <View style={styles.gridRow}>
-            <HomeCard
-              color="#f59e0b"
-              icon="cookie"
-              title="Fun"
-              subtitle="Play with Zumi"
-              // The Fun stack resets to its root (ZumiHome) whenever the tab
-              // blurs (popToTopOnBlur), so a plain tab switch lands on Zumi.
+        <View style={styles.exploreCard}>
+          <Text style={styles.exploreTitle}>Choose your adventure</Text>
+          <View style={styles.exploreRow}>
+            <Pressable
+              accessibilityRole="button"
               onPress={() => navigation.navigate('StudyTab')}
-            />
-            <HomeCard
-              color="#ec4899"
-              icon="video"
-              title="Cartoons"
-              subtitle="Watch & giggle"
-              comingSoon
-            />
-          </View>
-          <View style={styles.gridRow}>
-            <HomeCard
-              color="#3b82f6"
-              icon="video"
-              title="Reels"
-              subtitle="Cool clips"
+              style={({pressed}) => [styles.exploreAction, pressed && styles.pressed]}>
+              <Text style={styles.exploreEmoji}>✨</Text>
+              <Text style={styles.exploreLabel}>Learn</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
               onPress={() => navigation.navigate('ReelsTab')}
-            />
-            <HomeCard
-              color="#10b981"
-              icon="gamepad"
-              title="Games"
-              subtitle="Win coins!"
-              comingSoon
-            />
+              style={({pressed}) => [styles.exploreAction, pressed && styles.pressed]}>
+              <Text style={styles.exploreEmoji}>🎬</Text>
+              <Text style={styles.exploreLabel}>Reels</Text>
+            </Pressable>
           </View>
         </View>
       </SafeAreaView>
@@ -119,244 +82,80 @@ export function KidHomeScreen({navigation}: Props) {
   );
 }
 
-/** Zumi idle art with the same gentle breathing bob as ZumiCharacter. */
-function BreathingZumi() {
-  const bob = useRef(new Animated.Value(0)).current;
-
-  React.useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(bob, {
-          toValue: -8,
-          duration: 1300,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(bob, {
-          toValue: 0,
-          duration: 1300,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [bob]);
-
+function Mood({emoji, label, color, border}: {emoji: string; label: string; color: string; border: string}) {
   return (
-    <Animated.Image
-      source={ZUMI_IDLE}
-      resizeMode="contain"
-      style={[styles.zumi, {transform: [{translateY: bob}]}]}
-    />
+    <View style={[styles.mood, {borderColor: border}]}>
+      <Text style={styles.moodEmoji}>{emoji}</Text>
+      <Text style={[styles.moodLabel, {color}]}>{label}</Text>
+    </View>
   );
 }
 
-function Sparkle({style, char}: {style: object; char: string}) {
-  return <Text style={[styles.sparkle, style]}>{char}</Text>;
-}
+/** A lightweight native Zibo mascot; no remote image is needed. */
+function JuniorMascot() {
+  const bob = useRef(new Animated.Value(0)).current;
 
-type CardIconName = 'cookie' | 'video' | 'gamepad';
-
-/**
- * White line icons matching the design mockup (cookie / video-play /
- * gamepad). `accent` is the card color, used for the cookie's chips so they
- * read as holes punched through the white cookie.
- */
-function CardIcon({name, accent}: {name: CardIconName; accent: string}) {
-  const stroke = {stroke: '#ffffff', strokeWidth: 1.8, fill: 'none' as const};
-  switch (name) {
-    case 'cookie':
-      return (
-        <Svg width={26} height={26} viewBox="0 0 24 24">
-          <Path
-            d="M12 3a9 9 0 109 9 3.4 3.4 0 01-4-3.3A3.6 3.6 0 0112.6 5 3.4 3.4 0 0112 3z"
-            fill="#ffffff"
-          />
-          <Circle cx={9} cy={10} r={1.3} fill={accent} />
-          <Circle cx={13.5} cy={14.5} r={1.3} fill={accent} />
-          <Circle cx={8.5} cy={15} r={1.1} fill={accent} />
-        </Svg>
-      );
-    case 'video':
-      return (
-        <Svg width={26} height={26} viewBox="0 0 24 24">
-          <Rect x={3.75} y={3.75} width={16.5} height={16.5} rx={4.5} {...stroke} />
-          <Path
-            d="M10.25 9.25l5 2.75-5 2.75v-5.5z"
-            fill="#ffffff"
-            strokeLinejoin="round"
-          />
-        </Svg>
-      );
-    case 'gamepad':
-      return (
-        <Svg width={26} height={26} viewBox="0 0 24 24">
-          <Rect x={2.75} y={7.75} width={18.5} height={9.5} rx={4.75} {...stroke} />
-          <Path d="M7.5 10.5v4M5.5 12.5h4" {...stroke} strokeLinecap="round" />
-          <Circle cx={15.5} cy={13.5} r={1.1} fill="#ffffff" />
-          <Circle cx={18} cy={11.5} r={1.1} fill="#ffffff" />
-        </Svg>
-      );
-  }
-}
-
-function HomeCard({
-  color,
-  icon,
-  title,
-  subtitle,
-  onPress,
-  comingSoon,
-}: {
-  color: string;
-  icon: CardIconName;
-  title: string;
-  subtitle: string;
-  onPress?: () => void;
-  comingSoon?: boolean;
-}) {
-  const scale = useRef(new Animated.Value(1)).current;
-
-  const handlePress = () => {
-    if (comingSoon) {
-      // Playful bounce + toast instead of navigation.
+  React.useEffect(() => {
+    const animation = Animated.loop(
       Animated.sequence([
-        Animated.timing(scale, {
-          toValue: 1.06,
-          duration: 90,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scale, {
-          toValue: 1,
-          friction: 3,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      if (Platform.OS === 'android') {
-        ToastAndroid.show('Jald aa raha hai! 🚀', ToastAndroid.SHORT);
-      }
-      return;
-    }
-    onPress?.();
-  };
+        Animated.timing(bob, {toValue: -8, duration: 1300, easing: Easing.inOut(Easing.ease), useNativeDriver: true}),
+        Animated.timing(bob, {toValue: 0, duration: 1300, easing: Easing.inOut(Easing.ease), useNativeDriver: true}),
+      ]),
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [bob]);
 
   return (
-    <Animated.View style={[styles.cardWrap, {transform: [{scale}]}]}>
-      <Pressable
-        onPress={handlePress}
-        android_ripple={{color: 'rgba(255,255,255,0.25)'}}
-        style={({pressed}) => [
-          styles.card,
-          {backgroundColor: color},
-          pressed && !comingSoon && styles.cardPressed,
-        ]}>
-        <View style={styles.cardIconChip}>
-          <CardIcon name={icon} accent={color} />
-        </View>
-        <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardSubtitle}>{subtitle}</Text>
-      </Pressable>
+    <Animated.View style={[styles.mascot, {transform: [{translateY: bob}]}]}>
+      <View style={styles.antennaStem} />
+      <View style={styles.antennaLight} />
+      <View style={styles.mascotFace}>
+        <View style={[styles.eye, styles.leftEye]}><View style={styles.pupil} /></View>
+        <View style={[styles.eye, styles.rightEye]}><View style={styles.pupil} /></View>
+        <View style={[styles.cheek, styles.leftCheek]} />
+        <View style={[styles.cheek, styles.rightCheek]} />
+        <View style={styles.smile} />
+      </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {flex: 1, backgroundColor: '#8b5cf6'},
-  safe: {
-    flex: 1,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
-  },
-  pillRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  pill: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#ffffff',
-    borderRadius: 999,
-    paddingVertical: 8,
-    elevation: 4,
-    shadowColor: '#4c1d95',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    shadowOffset: {width: 0, height: 3},
-  },
-  pillIcon: {fontSize: 15},
-  pillText: {fontSize: 16, fontWeight: '800', color: '#7c3aed'},
-  zumi: {
-    alignSelf: 'center',
-    width: 180,
-    height: 180,
-    marginTop: spacing.md,
-  },
-  sparkle: {
-    position: 'absolute',
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 16,
-    pointerEvents: 'none',
-  },
-  bubble: {
-    alignSelf: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 22,
-    marginTop: spacing.md,
-    elevation: 4,
-    shadowColor: '#4c1d95',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    shadowOffset: {width: 0, height: 3},
-  },
-  bubbleText: {fontSize: 17, fontWeight: '800', color: '#312e81'},
-  grid: {
-    flex: 1,
-    marginTop: spacing.lg,
-    gap: spacing.md,
-  },
-  gridRow: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  cardWrap: {flex: 1},
-  card: {
-    flex: 1,
-    borderRadius: 24,
-    padding: spacing.md,
-    justifyContent: 'flex-end',
-    elevation: 6,
-    shadowColor: '#4c1d95',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: {width: 0, height: 4},
-  },
-  cardPressed: {opacity: 0.9},
-  cardIconChip: {
-    position: 'absolute',
-    top: spacing.md,
-    left: spacing.md,
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardTitle: {fontSize: 22, fontWeight: '900', color: '#ffffff'},
-  cardSubtitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.9)',
-    marginTop: 2,
-  },
+  root: {flex: 1, backgroundColor: '#fff7ee'},
+  safe: {flex: 1, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 18},
+  greeting: {textAlign: 'center', color: '#4c3ae3', fontSize: 23, fontWeight: '900'},
+  subGreeting: {textAlign: 'center', color: '#c2870f', fontSize: 14, fontWeight: '700', marginTop: 2},
+  mascotArea: {height: 194, alignItems: 'center', justifyContent: 'flex-end', marginTop: 2},
+  mascot: {width: 150, height: 154, position: 'relative', alignItems: 'center'},
+  antennaStem: {position: 'absolute', top: 0, width: 7, height: 29, borderRadius: 6, backgroundColor: '#ffd54a'},
+  antennaLight: {position: 'absolute', top: -13, width: 22, height: 22, borderRadius: 11, backgroundColor: '#ffd54a', shadowColor: '#ffd54a', shadowOpacity: 0.9, shadowRadius: 12, elevation: 6},
+  mascotFace: {position: 'absolute', bottom: 0, width: 150, height: 138, borderRadius: 75, backgroundColor: '#45b8ef', shadowColor: '#38b6f2', shadowOpacity: 0.35, shadowRadius: 18, shadowOffset: {width: 0, height: 10}, elevation: 6},
+  eye: {position: 'absolute', top: 43, width: 35, height: 35, borderRadius: 18, backgroundColor: '#ffffff', alignItems: 'center', justifyContent: 'center'},
+  leftEye: {left: 32},
+  rightEye: {right: 32},
+  pupil: {width: 16, height: 16, borderRadius: 8, backgroundColor: '#22243f'},
+  cheek: {position: 'absolute', top: 85, width: 21, height: 12, borderRadius: 10, backgroundColor: '#ff9ec4', opacity: 0.85},
+  leftCheek: {left: 25},
+  rightCheek: {right: 25},
+  smile: {position: 'absolute', top: 88, left: 57, width: 36, height: 20, borderBottomWidth: 5, borderColor: '#22243f', borderRadius: 24},
+  topicBubble: {position: 'absolute', right: 7, top: 4, borderWidth: 2, borderColor: '#ffd54a', borderRadius: 16, borderBottomLeftRadius: 4, backgroundColor: '#ffffff', paddingHorizontal: 10, paddingVertical: 7, shadowColor: '#4c3ae3', shadowOpacity: 0.12, shadowRadius: 8, elevation: 3},
+  topicBubbleText: {fontSize: 11, fontWeight: '800', color: '#4c3ae3'},
+  playCard: {flexDirection: 'row', alignItems: 'center', borderRadius: 27, backgroundColor: '#ff735e', paddingHorizontal: 21, paddingVertical: 19, marginTop: 4, shadowColor: '#ff6b5c', shadowOpacity: 0.38, shadowRadius: 14, shadowOffset: {width: 0, height: 7}, elevation: 6},
+  playIcon: {fontSize: 36, marginRight: 13},
+  playCopy: {flex: 1},
+  playTitle: {fontSize: 23, color: '#ffffff', fontWeight: '900'},
+  playSubtitle: {fontSize: 14, color: '#ffffff', opacity: 0.92, fontWeight: '700'},
+  playArrow: {fontSize: 25, color: '#ffffff'},
+  moodRow: {flexDirection: 'row', gap: 11, marginTop: 15},
+  mood: {flex: 1, alignItems: 'center', paddingVertical: 11, borderRadius: 21, borderWidth: 2, backgroundColor: '#ffffff'},
+  moodEmoji: {fontSize: 28},
+  moodLabel: {fontSize: 11, fontWeight: '900', marginTop: 3},
+  exploreCard: {marginTop: 17, borderRadius: 22, padding: 14, backgroundColor: '#ffffff'},
+  exploreTitle: {fontSize: 14, fontWeight: '900', color: '#3a3a55'},
+  exploreRow: {flexDirection: 'row', gap: 12, marginTop: 10},
+  exploreAction: {flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 16, paddingVertical: 10, backgroundColor: '#f1edff'},
+  exploreEmoji: {fontSize: 18},
+  exploreLabel: {fontSize: 13, fontWeight: '900', color: '#4c3ae3'},
+  pressed: {opacity: 0.78, transform: [{scale: 0.98}]},
 });
