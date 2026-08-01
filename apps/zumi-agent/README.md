@@ -7,6 +7,7 @@ lesson replaces the old callable round trips (`zumiTeach` + `zumiSpeak` +
 - **Transport**: LiveKit Cloud (WebRTC — echo cancellation, jitter handling)
 - **Turn-taking**: local Silero VAD + LiveKit semantic turn detector, 400ms endpointing, barge-in on
 - **STT**: Sarvam Saaras v3, streaming, Hinglish/code-mix native
+- **Safety**: moderation on the child's transcript AND Zumi's reply before TTS (`safety.py`), remote-killable
 - **LLM**: OpenAI gpt-4o-mini, streamed tokens
 - **TTS**: Kokoro-82M, self-hosted Kokoro-FastAPI (raw PCM, custom plugin in `kokoro_tts.py`)
 
@@ -76,6 +77,31 @@ Barge-in is on for the quiz (the child can talk over Zumi and she stops). The
 scripted intro deliberately keeps the mic muted with `allow_interruptions=False`
 per line, so room noise can't derail the lesson script; `ZUMI_INTERRUPTIONS=off`
 disables interruptions everywhere.
+
+## Safety layer
+
+Two moderation checkpoints wrap the LLM (`SafeAgent.llm_node` + `safety.py`),
+both using OpenAI's free `omni-moderation-latest`:
+
+- **Input**: the child's final transcript, checked IN PARALLEL with the LLM
+  writing its reply (the ~0.5-1.5s moderation latency hides behind generation).
+- **Output**: Zumi's reply, checked before it reaches TTS or the speech bubble.
+  This is the one serial cost per turn — watch the `[safety] out ok (...)` ms
+  next to the `[perf]` lines.
+
+Flagged content is replaced with a pre-written redirect (never improvised):
+generic deflection for inappropriate content, a special caring line for
+self-harm/distress categories, and the quiz re-asks the current question so a
+blocked answer is never graded and never stalls the flow. Moderation failures
+FAIL OPEN (logged `[safety] ... FAILED OPEN`) so an OpenAI hiccup can't freeze
+a lesson. Prompt-level guardrails (`safety.SAFETY_RULES`) cover what moderation
+can't, e.g. "ignore your rules" persona attacks and personal-info probing.
+
+**Kill switch**: `appConfig/zumi.moderationEnabled` in Firestore (read once per
+session). `false` (default) = checkpoints fully inert, zero added latency.
+Flip to `true` from the Firebase console to enforce — no deploy needed.
+Tuning: `ZUMI_MODERATION_TIMEOUT` (default 2.5s), `ZUMI_MODERATION_STRICT_SCORE`
+(default 0.4 — any category at/above this flags, stricter than OpenAI's own bit).
 
 Console mode (talk to Zumi from this terminal, no app needed — note the
 teaching context comes from participant metadata, so console mode will fail

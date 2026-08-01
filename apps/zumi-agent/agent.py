@@ -56,6 +56,7 @@ from livekit.agents import (
 )
 from livekit.plugins import openai, sarvam
 
+import safety
 import zumi_firebase as zfb
 from kokoro_tts import LOCAL_SPEECH_URL, KokoroTTS, check_server
 from zumi_latency import TurnLatencyTracker
@@ -185,6 +186,12 @@ class ZumiUserdata:
     score: int = 0
     last_graded_transcript: str = ""
     video_done: asyncio.Event = field(default_factory=asyncio.Event)
+    # Phase 2 safety: remote kill switch (appConfig/zumi.moderationEnabled),
+    # the input check racing the LLM (see SafeAgent.llm_node), and a counter
+    # of blocked turns for the session summary (Phase 3 persists it).
+    moderation_enabled: bool = False
+    pending_input_check: asyncio.Task[safety.SafetyVerdict] | None = None
+    safety_events: int = 0
 
 
 def _room() -> rtc.Room:
@@ -199,6 +206,94 @@ async def send_ui(payload: dict) -> None:
         )
     except Exception:
         logger.exception("send_ui failed: %s", payload.get("type"))
+
+
+# ---------------------------------------------------------------------------
+# Safety checkpoints (Phase 2) -- shared by both agents
+# ---------------------------------------------------------------------------
+
+
+class SafeAgent(Agent):
+    """Base class wrapping the LLM stage with the two moderation checkpoints.
+
+    Timing design (moderation measures 0.4-1.5s per call, so placement is
+    everything):
+
+      - INPUT check: started by `_start_input_check` the moment the child's
+        final transcript lands, so it runs IN PARALLEL with the LLM writing
+        the reply -- by the time the reply is buffered the verdict is
+        usually already in. Costs ~nothing.
+      - OUTPUT check: the reply (1-2 short sentences by prompt rule) is
+        buffered and checked before anything reaches TTS or the client's
+        speech bubble. This is the one serial cost; its duration shows up as
+        a `[safety] out ok (...)` line next to the `[perf]` numbers.
+
+    A flagged turn yields a pre-written redirect instead of the LLM's chunks
+    -- including any tool calls, so e.g. a flagged quiz answer is never
+    graded. `_blocked_follow_up()` lets subclasses append a re-engagement
+    line (the quiz re-asks the current question) so the lesson never stalls.
+
+    Everything is inert while `moderation_enabled` is off (the default):
+    llm_node degrades to a plain pass-through stream.
+    """
+
+    def _start_input_check(self, text: str) -> None:
+        u: ZumiUserdata = self.session.userdata
+        if not u.moderation_enabled:
+            return
+        u.pending_input_check = asyncio.create_task(
+            safety.check_text(text, direction="in")
+        )
+
+    def _blocked_follow_up(self) -> str:
+        return ""
+
+    async def llm_node(self, chat_ctx, tools, model_settings):
+        u: ZumiUserdata = self.session.userdata
+        input_check = u.pending_input_check
+        u.pending_input_check = None
+
+        if not u.moderation_enabled:
+            async for chunk in Agent.default.llm_node(
+                self, chat_ctx, tools, model_settings
+            ):
+                yield chunk
+            return
+
+        chunks: list = []
+        text_parts: list[str] = []
+        async for chunk in Agent.default.llm_node(
+            self, chat_ctx, tools, model_settings
+        ):
+            chunks.append(chunk)
+            if isinstance(chunk, str):
+                text_parts.append(chunk)
+            else:
+                delta = getattr(chunk, "delta", None)
+                if delta is not None and delta.content:
+                    text_parts.append(delta.content)
+        text = "".join(text_parts)
+
+        if input_check is not None:
+            verdict = await input_check
+            if verdict.flagged:
+                u.safety_events += 1
+                yield safety.redirect_line(
+                    verdict, direction="in", follow_up=self._blocked_follow_up()
+                )
+                return
+
+        if text.strip():
+            verdict = await safety.check_text(text, direction="out")
+            if verdict.flagged:
+                u.safety_events += 1
+                yield safety.redirect_line(
+                    verdict, direction="out", follow_up=self._blocked_follow_up()
+                )
+                return
+
+        for chunk in chunks:
+            yield chunk
 
 
 # ---------------------------------------------------------------------------
@@ -241,10 +336,11 @@ def intro_instructions(u: ZumiUserdata) -> str:
         "एक turn में सिर्फ एक सवाल पूछो। बच्चे की EXACT बात पर हमेशा react करो -- उसके शब्दों "
         f"और नामों को अपने reply में इस्तेमाल करो। अच्छी बात पर genuinely खुश हो, बुरी बात पर care दिखाओ। "
         f"अगर बच्चा off-topic जाए तो प्यार से वापस लाओ। Lesson या पढ़ाई का ज़िक्र मत करो -- यह सिर्फ दोस्ती वाली बात है।"
+        f"{safety.SAFETY_RULES}"
     )
 
 
-class IntroAgent(Agent):
+class IntroAgent(SafeAgent):
     """Runs the scripted 4-step intro with strict, code-driven turn-taking:
 
     - Zumi NEVER speaks with the mic open: every line is non-interruptible and
@@ -304,6 +400,10 @@ class IntroAgent(Agent):
 
         u.intro_retry_used = False
         u.intro_step += 1
+
+        # The answer will be used -> moderate it in parallel with the reaction
+        # being generated; SafeAgent.llm_node gates on the verdict.
+        self._start_input_check(text)
 
         if u.intro_step >= 3:
             u.video_flow_started = True
@@ -488,12 +588,29 @@ def quiz_instructions(u: ZumiUserdata) -> str:
         "3. Tool result तुम्हें बताएगा आगे क्या करना है (feedback + अगला question, या closing)।\n"
         "4. Feedback हमेशा warm हो (Devanagari में): सही पर celebrate, गलत पर प्यार से सही idea बताओ, कभी डाँटो मत।\n"
         "5. जब tool बोले कि quiz खत्म हो गया, एक warm closing line बोलो (Devanagari) और finish_session tool call करो।"
+        f"{safety.SAFETY_RULES}"
     )
 
 
-class QuizAgent(Agent):
+class QuizAgent(SafeAgent):
     def __init__(self, u: ZumiUserdata) -> None:
         super().__init__(instructions=quiz_instructions(u))
+
+    async def on_user_turn_completed(
+        self, turn_ctx: llm.ChatContext, new_message: llm.ChatMessage
+    ) -> None:
+        # Unlike the intro, the quiz uses the default auto-reply pipeline; we
+        # only kick off the input check so it races the LLM (see SafeAgent).
+        self._start_input_check(new_message.text_content or "")
+
+    def _blocked_follow_up(self) -> str:
+        """Re-ask the current question so a blocked answer never stalls or
+        skips the quiz (the answer is also never graded -- the record_answer
+        tool call is dropped with the rest of the LLM's reply)."""
+        u: ZumiUserdata = self.session.userdata
+        if u.story and u.quiz_index < len(u.story.quiz):
+            return f"अच्छा, अब बताओ: {u.story.quiz[u.quiz_index].question_text}"
+        return ""
 
     async def on_enter(self) -> None:
         u: ZumiUserdata = self.session.userdata
@@ -673,6 +790,9 @@ async def entrypoint(ctx: JobContext) -> None:
         child_name=str(meta.get("childName", "")).split(" ")[0][:40],
         grade=int(meta.get("grade", 3) or 3),
         class_id=str(meta.get("classId", "")),
+        # Phase 2: both moderation checkpoints, killable from the Firebase
+        # console (appConfig/zumi.moderationEnabled) without a deploy.
+        moderation_enabled=zumi_cfg.moderation_enabled,
     )
 
     # Loaded once per worker process in prewarm; fall back to building it here
@@ -799,6 +919,10 @@ def prewarm(proc) -> None:
         proc.userdata["vad"] = build_vad()
     except Exception:
         logger.exception("VAD prewarm failed (will build lazily in the job)")
+    try:
+        safety.warm_up()
+    except Exception:
+        logger.exception("safety prewarm failed (will build lazily in the job)")
 
 
 if __name__ == "__main__":
