@@ -103,6 +103,31 @@ Flip to `true` from the Firebase console to enforce — no deploy needed.
 Tuning: `ZUMI_MODERATION_TIMEOUT` (default 2.5s), `ZUMI_MODERATION_STRICT_SCORE`
 (default 0.4 — any category at/above this flags, stricter than OpenAI's own bit).
 
+## Memory, session summary, and daily quota
+
+At session end (quiz done, child left, or worker draining) the agent makes ONE
+batched Firestore write — never per turn:
+
+- `zumiSessions/{assignmentId}_{childUid}_{startedAtMs}` — audit doc: duration,
+  turn count, last 12 turns, latency p50/p95, safety-event count, quiz score.
+- `zumiMemory/{childUid}` — fixed per-child doc with the last turns, read back
+  at the start of the NEXT session so Zumi can greet like a friend who
+  remembers ("Rahul aur Priya kaise hain?"). Loaded in parallel with the
+  config read, capped at 2s — a slow read never delays Zumi's first word.
+  Kill switch: `appConfig/zumi.memoryEnabled: false` (default on).
+- `children/{childUid}/zumiUsage/{YYYY-MM-DD}` — `minutes` + `sessions`
+  increments (school day = Asia/Kolkata, same as the education stack).
+
+The quota is enforced at the DOOR, not mid-session: `zumiLiveKitToken` refuses
+to mint a token (`resource-exhausted`, kid-friendly Hinglish message) once
+today's `minutes` reach `appConfig/zumi.dailyMinutesLimit`. Unset or `<= 0`
+means unlimited — the meter ships inert until the console sets a limit. All
+three collections are client-read-only (child + their parent); only the agent
+writes them.
+
+Look for `[flow] memory loaded: ...` at start and
+`[flow] session summary persisted: ...` at end.
+
 Console mode (talk to Zumi from this terminal, no app needed — note the
 teaching context comes from participant metadata, so console mode will fail
 at story load unless you stub it):
@@ -110,6 +135,14 @@ at story load unless you stub it):
 ```bash
 .venv/bin/python agent.py console
 ```
+
+## GPU inference services (Phase 4)
+
+A separate spot GPU VM (`zumi-gpu-1`, GCP project `zumi-gpu`, asia-south1,
+T4) hosts GPU Kokoro TTS and faster-whisper STT for Phases 5–6. Compose
+file, full recreate/start/stop runbook, and benchmark numbers live in
+[infra/](infra/). Nothing uses it until the `sttProvider`/`ttsProvider`
+flags flip — rollback is "stop the VM".
 
 ## Deploying later
 

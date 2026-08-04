@@ -36,6 +36,7 @@ import asyncio
 import json
 import logging
 import os
+import time
 from dataclasses import dataclass, field
 
 from dotenv import load_dotenv
@@ -192,6 +193,11 @@ class ZumiUserdata:
     moderation_enabled: bool = False
     pending_input_check: asyncio.Task[safety.SafetyVerdict] | None = None
     safety_events: int = 0
+    # Phase 3: what Zumi remembers from the child's previous session (loaded
+    # in the background at start), plus fields the session summary needs.
+    memory: zfb.SessionMemory | None = None
+    topic_name: str = ""
+    finished: bool = False
 
 
 def _room() -> rtc.Room:
@@ -319,6 +325,31 @@ SPEAK_SCRIPT_RULE = (
 )
 
 
+def memory_note(u: ZumiUserdata) -> str:
+    """Cross-session recall for the intro prompt (Phase 3).
+
+    Only the CHILD's own words from the last session are surfaced (their day,
+    their friends' names) -- Zumi's old lines add nothing. Kept to a few short
+    quotes so the prompt stays cheap and the model can't recite a transcript.
+    """
+    mem = u.memory
+    if not mem:
+        return ""
+    child_lines = [
+        t["text"][:100] for t in mem.turns if t.get("role") == "user"
+    ][-4:]
+    if not child_lines:
+        return ""
+    quoted = "; ".join(f"'{line}'" for line in child_lines)
+    topic = mem.topic_name or "एक topic"
+    return (
+        f"\n\nपिछली मुलाक़ात की याद ({topic} वाले session से) -- बच्चे ने ये बातें कही थीं: {quoted}। "
+        "तुम उसकी पुरानी दोस्त हो: जहाँ NATURAL लगे वहाँ इनका इस्तेमाल करो "
+        "(जैसे दोस्तों के नाम लेकर पूछना)। लेकिन रटी हुई list की तरह मत सुनाओ, "
+        "और ज़रूरी नहीं कि हर बात का ज़िक्र हो।"
+    )
+
+
 def intro_instructions(u: ZumiUserdata) -> str:
     name = u.child_name or "दोस्त"
     return (
@@ -336,6 +367,7 @@ def intro_instructions(u: ZumiUserdata) -> str:
         "एक turn में सिर्फ एक सवाल पूछो। बच्चे की EXACT बात पर हमेशा react करो -- उसके शब्दों "
         f"और नामों को अपने reply में इस्तेमाल करो। अच्छी बात पर genuinely खुश हो, बुरी बात पर care दिखाओ। "
         f"अगर बच्चा off-topic जाए तो प्यार से वापस लाओ। Lesson या पढ़ाई का ज़िक्र मत करो -- यह सिर्फ दोस्ती वाली बात है।"
+        f"{memory_note(u)}"
         f"{safety.SAFETY_RULES}"
     )
 
@@ -717,6 +749,7 @@ class QuizAgent(SafeAgent):
         """End the session. Call this after your closing line, when the quiz is
         done and you have said goodbye."""
         u: ZumiUserdata = context.session.userdata
+        u.finished = True
         total = len(u.story.quiz)
         max_score = max(1, total * 25)
         pct = round(u.score * 100 / max_score)
@@ -756,16 +789,39 @@ async def entrypoint(ctx: JobContext) -> None:
         ctx.room.name, assignment_id, meta.get("childName"),
     )
 
-    # Phase 0: load remote flags (stt/tts/moderation used in later phases).
-    # Kids app already gated live vs legacy before minting a token; we just log.
-    zumi_cfg = await asyncio.to_thread(zfb.load_zumi_config)
+    child_uid = str(meta.get("childUid", ""))
+    started_at_ms = int(time.time() * 1000)
+
+    # Phase 0 config + Phase 3 memory: two independent Firestore reads, run
+    # concurrently so session start pays for the slower one only.
+    cfg_task = asyncio.create_task(asyncio.to_thread(zfb.load_zumi_config))
+    memory_task = asyncio.create_task(asyncio.to_thread(zfb.load_memory, child_uid))
+
+    zumi_cfg = await cfg_task
     logger.info(
-        "[config] pipeline=%s stt=%s tts=%s moderation=%s",
+        "[config] pipeline=%s stt=%s tts=%s moderation=%s memory=%s",
         zumi_cfg.pipeline,
         zumi_cfg.stt_provider,
         zumi_cfg.tts_provider,
         zumi_cfg.moderation_enabled,
+        zumi_cfg.memory_enabled,
     )
+
+    # Last-session recall for the intro prompt. Best-effort: a slow/failed
+    # read must never delay Zumi's first word, so cap the wait.
+    memory: zfb.SessionMemory | None = None
+    if zumi_cfg.memory_enabled:
+        try:
+            memory = await asyncio.wait_for(memory_task, timeout=2)
+            if memory:
+                logger.info(
+                    "[flow] memory loaded: %d turns from '%s'",
+                    len(memory.turns), memory.topic_name,
+                )
+        except Exception:
+            logger.warning("memory load failed/slow -- starting without it")
+    else:
+        memory_task.cancel()
 
     # Load the voiceStory in the BACKGROUND: the intro chat doesn't need it, so
     # Zumi starts talking immediately; only the quiz (after the story video)
@@ -786,13 +842,16 @@ async def entrypoint(ctx: JobContext) -> None:
 
     userdata = ZumiUserdata(
         assignment_id=assignment_id,
-        child_uid=str(meta.get("childUid", "")),
+        child_uid=child_uid,
         child_name=str(meta.get("childName", "")).split(" ")[0][:40],
         grade=int(meta.get("grade", 3) or 3),
         class_id=str(meta.get("classId", "")),
         # Phase 2: both moderation checkpoints, killable from the Firebase
         # console (appConfig/zumi.moderationEnabled) without a deploy.
         moderation_enabled=zumi_cfg.moderation_enabled,
+        # Phase 3: previous-session recall + summary fields.
+        memory=memory,
+        topic_name=str(meta.get("topicName", "")),
     )
 
     # Loaded once per worker process in prewarm; fall back to building it here
@@ -883,6 +942,48 @@ async def entrypoint(ctx: JobContext) -> None:
         turn_latency.log_summary()
         logger.info("[flow] session closed -- deleting room so a rejoin redispatches")
         ctx.delete_room()
+
+    # Phase 3: ONE batched Firestore write when the job ends (quiz done, child
+    # left, or worker draining) -- audit doc, memory doc, usage counter. Never
+    # per turn. Runs in the shutdown grace period, so it can't add turn latency.
+    async def _persist_summary() -> None:
+        u = session.userdata
+        if not u.child_uid:
+            return  # console/dev session -- nothing to meter
+        turns: list[dict[str, str]] = []
+        for item in session.history.items:
+            if getattr(item, "role", None) not in ("user", "assistant"):
+                continue
+            text = (item.text_content or "").strip()
+            if text:
+                turns.append({"role": item.role, "text": text[:200]})
+        quiz_total = len(u.story.quiz) if u.story else 0
+        try:
+            await asyncio.to_thread(
+                zfb.persist_session_summary,
+                assignment_id=u.assignment_id,
+                child_uid=u.child_uid,
+                class_id=u.class_id,
+                topic_name=u.topic_name,
+                started_at_ms=started_at_ms,
+                ended_at_ms=int(time.time() * 1000),
+                turns=turns,
+                safety_events=u.safety_events,
+                latency=turn_latency.stats(),
+                completed=u.finished,
+                score=u.score,
+                max_score=quiz_total * 25,
+            )
+            logger.info(
+                "[flow] session summary persisted: %.1f min, %d turns, "
+                "completed=%s, safety_events=%d",
+                (time.time() * 1000 - started_at_ms) / 60000,
+                len(turns), u.finished, u.safety_events,
+            )
+        except Exception:
+            logger.exception("session summary write failed (usage not metered)")
+
+    ctx.add_shutdown_callback(_persist_summary)
 
     # The intro starts NOW (it doesn't need the voiceStory) -- no Firestore wait.
     intro_agent = IntroAgent(userdata)

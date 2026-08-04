@@ -159,6 +159,18 @@ class TurnLatencyTracker:
 
     # ---- summary ----------------------------------------------------------
 
+    def stats(self) -> dict[str, float | int]:
+        """Distribution snapshot for persistence (Phase 3 session summary)."""
+        if not self._totals:
+            return {"turns": 0}
+        return {
+            "turns": len(self._totals),
+            "p50Ms": round(_percentile(self._totals, 0.50) * 1000),
+            "p95Ms": round(_percentile(self._totals, 0.95) * 1000),
+            "maxMs": round(max(self._totals) * 1000),
+            "overTarget": sum(1 for t in self._totals if t > self._target_s),
+        }
+
     def log_summary(self) -> None:
         """One line with the session's latency distribution (the baseline)."""
         if not self._totals:

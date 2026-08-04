@@ -1,0 +1,38 @@
+# GPU inference services for the Zumi pipeline (Phase 4).
+#
+# Runs on the `zumi-gpu-1` VM (GCP, asia-south1, spot n1-standard-4 + T4).
+# See RUNBOOK.md in this directory for how to (re)create the VM and verify.
+#
+# Both services share the single T4; combined GPU memory use is well under
+# its 15 GB. Nothing in production points at these until Phase 5 (whisper)
+# and Phase 6 (kokoro-gpu) flip the sttProvider/ttsProvider flags.
+
+services:
+  # Text-to-speech: same Kokoro-FastAPI the worker already uses on CPU, GPU
+  # build. Same API, same voices (hf_alpha) -- a drop-in faster backend.
+  kokoro:
+    image: ghcr.io/remsky/kokoro-fastapi-gpu:latest
+    ports: ["8880:8880"]
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Speech-to-text: faster-whisper behind an OpenAI-compatible API.
+  # Models are installed once per VM disk via:
+  #   curl -X POST "http://localhost:8000/v1/models/Systran%2Ffaster-whisper-medium.en"
+  whisper:
+    image: ghcr.io/speaches-ai/speaches:latest-cuda
+    ports: ["8000:8000"]
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

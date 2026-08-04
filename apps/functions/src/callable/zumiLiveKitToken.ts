@@ -14,6 +14,11 @@
  *      participant metadata, signed into the token, so the agent trusts it
  *      without a second lookup round trip (it still loads the voiceStory
  *      itself from Firestore).
+ *   4. Daily quota (Phase 3): if `appConfig/zumi.dailyMinutesLimit` is set
+ *      (> 0) and the child's `children/{uid}/zumiUsage/{today}` minutes have
+ *      reached it, the token is refused with `resource-exhausted`. The agent
+ *      writes the usage doc at session end, so enforcement is at the door --
+ *      an in-flight session is never cut mid-sentence.
  *
  * LiveKit credentials come from secrets (`LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET`)
  * and the `LIVEKIT_URL` param, so nothing lives in source or the client.
@@ -23,8 +28,10 @@ import {HttpsError, onCall} from 'firebase-functions/v2/https';
 import {defineSecret, defineString} from 'firebase-functions/params';
 import {AccessToken} from 'livekit-server-sdk';
 
+import {db} from '../lib/admin';
 import {requireAuth, requireRole} from '../lib/auth';
 import {stepLogger} from '../lib/perf';
+import {todayYmdInTz} from '../lib/schoolTime';
 import {resolveVoiceContext} from '../lib/zumiSession';
 
 export const livekitApiKey = defineSecret('LIVEKIT_API_KEY');
@@ -90,6 +97,41 @@ export const zumiLiveKitToken = onCall<
       () => resolveVoiceContext(caller.uid, assignmentId as string),
       c => `topic=${c.topicId} child=${c.childName || '(no name)'}`,
     );
+
+    // Daily minutes quota. No limit configured (missing doc/field or <= 0)
+    // means unlimited -- the feature ships inert until the console sets it.
+    // Any read failure fails OPEN: a broken quota check must not take Zumi
+    // down for every child.
+    const quota = await log.step(
+      'quotaCheck',
+      async () => {
+        try {
+          const cfg = await db().doc('appConfig/zumi').get();
+          const limit = Number(cfg.get('dailyMinutesLimit') ?? 0);
+          if (!Number.isFinite(limit) || limit <= 0) {
+            return {blocked: false, minutes: 0, limit: 0};
+          }
+          const day = todayYmdInTz();
+          const usage = await db()
+            .doc(`children/${caller.uid}/zumiUsage/${day}`)
+            .get();
+          const minutes = Number(usage.get('minutes') ?? 0);
+          return {blocked: minutes >= limit, minutes, limit};
+        } catch (err) {
+          console.error('[zumiLiveKitToken] quota check failed (failing open):', err);
+          return {blocked: false, minutes: 0, limit: 0};
+        }
+      },
+      q => (q.limit > 0 ? `used=${q.minutes}/${q.limit}min` : 'no limit set'),
+    );
+    // The message surfaces verbatim in the kids app error bubble
+    // (zumiLiveSession.ts uses err.message), so keep it kid-friendly.
+    if (quota.blocked) {
+      throw new HttpsError(
+        'resource-exhausted',
+        'Aaj ka Zumi time khatam ho gaya! Kal phir milte hain, pakka.',
+      );
+    }
 
     const room = `zumi_${ctx.assignmentId}_${caller.uid}`;
     const metadata: ZumiParticipantMetadata = {

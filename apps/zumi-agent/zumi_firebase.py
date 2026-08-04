@@ -2,10 +2,17 @@
 
 Mirrors the server-side guarantees of the Firebase callables:
   - the teaching material (voiceStory) is loaded server-side from the topic doc
-    (the client never supplies it), and
+    (the client never supplies it),
   - quiz verdicts are persisted to `quizVoiceEvals/{assignmentId}_{childUid}`
     in the exact schema `submitQuizAttempt` reads, so final scoring stays
-    server-authoritative.
+    server-authoritative, and
+  - session summaries / usage / memory (Phase 3) are written in ONE batch at
+    session end -- never per turn (cost rule from the plan):
+      zumiSessions/{assignmentId}_{childUid}_{startedAtMs}  audit + dashboards
+      zumiMemory/{childUid}                                 last-session recall
+      children/{childUid}/zumiUsage/{YYYY-MM-DD}            quota counters
+    `zumiMemory` is a fixed per-child doc (overwritten each session) so the
+    session-start read needs no query/index; `zumiSessions` is append-only.
 
 Uses Application Default Credentials (or GOOGLE_APPLICATION_CREDENTIALS).
 firebase-admin is synchronous; call these via asyncio.to_thread from the agent.
@@ -17,9 +24,20 @@ import os
 import time
 from dataclasses import dataclass, field
 from typing import Any
+from zoneinfo import ZoneInfo
+from datetime import datetime
 
 import firebase_admin
 from firebase_admin import credentials, firestore
+
+# Same school-day anchor as the Functions side (lib/schoolTime.ts).
+SCHOOL_TIMEZONE = ZoneInfo("Asia/Kolkata")
+
+
+def school_day(ts_ms: int | None = None) -> str:
+    """`YYYY-MM-DD` in the school timezone (matches todayYmdInTz on server)."""
+    ts = (ts_ms / 1000) if ts_ms else time.time()
+    return datetime.fromtimestamp(ts, SCHOOL_TIMEZONE).strftime("%Y-%m-%d")
 
 _app: firebase_admin.App | None = None
 
@@ -52,6 +70,9 @@ class ZumiConfig:
     stt_provider: str = "sarvam"  # Phase 5: whisper | deepgram | sarvam
     tts_provider: str = "kokoro-cpu"  # Phase 6: kokoro-cpu | kokoro-gpu
     moderation_enabled: bool = False  # Phase 2
+    # Phase 3: inject last-session recall into the intro. Remote-killable in
+    # case a bad memory makes intros weird; the write side always runs.
+    memory_enabled: bool = True
 
 
 def load_zumi_config() -> ZumiConfig:
@@ -69,6 +90,7 @@ def load_zumi_config() -> ZumiConfig:
         stt_provider=str(data.get("sttProvider") or "sarvam"),
         tts_provider=str(data.get("ttsProvider") or "kokoro-cpu"),
         moderation_enabled=data.get("moderationEnabled") is True,
+        memory_enabled=data.get("memoryEnabled") is not False,
     )
 
 
@@ -182,3 +204,117 @@ def persist_quiz_eval(
         },
         merge=True,
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase 3: session summary + usage metering + conversation memory
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class SessionMemory:
+    """What Zumi remembers about the child from their previous session."""
+
+    topic_name: str = ""
+    ended_at_ms: int = 0
+    turns: list[dict[str, str]] = field(default_factory=list)  # {role, text}
+
+
+def load_memory(child_uid: str) -> SessionMemory | None:
+    """Read `zumiMemory/{childUid}` (single doc, no query). None if absent."""
+    if not child_uid:
+        return None
+    snap = _db().collection("zumiMemory").document(child_uid).get()
+    if not snap.exists:
+        return None
+    data = snap.to_dict() or {}
+    turns = [
+        {"role": str(t.get("role", "")), "text": str(t.get("text", ""))}
+        for t in (data.get("turns") or [])
+        if isinstance(t, dict) and t.get("text")
+    ]
+    return SessionMemory(
+        topic_name=str(data.get("topicName", "")),
+        ended_at_ms=int(data.get("endedAtMs", 0) or 0),
+        turns=turns,
+    )
+
+
+def persist_session_summary(
+    *,
+    assignment_id: str,
+    child_uid: str,
+    class_id: str,
+    topic_name: str,
+    started_at_ms: int,
+    ended_at_ms: int,
+    turns: list[dict[str, str]],
+    safety_events: int,
+    latency: dict[str, Any] | None,
+    completed: bool,
+    score: int,
+    max_score: int,
+) -> None:
+    """One atomic batch at session end: audit doc + memory doc + usage counter.
+
+    Deliberately the ONLY Firestore write of the whole conversation (quiz
+    verdicts aside) -- per-turn writes are the Firebase cost trap the plan
+    calls out.
+    """
+    duration_minutes = round(max(0, ended_at_ms - started_at_ms) / 60000, 2)
+    day = school_day(ended_at_ms)
+    last_turns = turns[-12:]
+
+    db = _db()
+    batch = db.batch()
+
+    batch.set(
+        db.collection("zumiSessions").document(
+            f"{assignment_id}_{child_uid}_{started_at_ms}"
+        ),
+        {
+            "assignmentId": assignment_id,
+            "childUid": child_uid,
+            "classId": class_id,
+            "topicName": topic_name,
+            "day": day,
+            "startedAtMs": started_at_ms,
+            "endedAtMs": ended_at_ms,
+            "durationMinutes": duration_minutes,
+            "turnCount": len(turns),
+            "lastTurns": last_turns,
+            "safetyEvents": safety_events,
+            "latency": latency or {},
+            "completed": completed,
+            "score": score,
+            "maxScore": max_score,
+            "createdAt": firestore.SERVER_TIMESTAMP,
+        },
+    )
+
+    batch.set(
+        db.collection("zumiMemory").document(child_uid),
+        {
+            "childUid": child_uid,
+            "topicName": topic_name,
+            "endedAtMs": ended_at_ms,
+            "turns": last_turns,
+            "updatedAt": firestore.SERVER_TIMESTAMP,
+        },
+    )
+
+    batch.set(
+        db.collection("children")
+        .document(child_uid)
+        .collection("zumiUsage")
+        .document(day),
+        {
+            "date": day,
+            "minutes": firestore.Increment(duration_minutes),
+            "sessions": firestore.Increment(1),
+            "updatedAt": firestore.SERVER_TIMESTAMP,
+        },
+        merge=True,
+    )
+
+    batch.commit()

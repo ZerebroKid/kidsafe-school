@@ -52,6 +52,9 @@ rules_version = '2';
 //                                                      (bootstrapping branch; the user is still blocked by RoleOnboardingGate until roles[] is non-empty.)
 // 22. signed-in user reads Zumi remote config          READ  /appConfig/zumi           as any signed-in -- allow
 // 23. client writes Zumi remote config                 UPDATE /appConfig/zumi          as any client -- deny  (console / Admin SDK only)
+// 24. child reads own Zumi session summary             READ  /zumiSessions/S (childUid=CHILD_A) as CHILD_A -- allow; as CHILD_B -- deny
+// 25. client writes Zumi session/memory/usage          WRITE /zumiSessions/S, /zumiMemory/C, /children/C/zumiUsage/D as any client -- deny (agent Admin SDK only)
+// 26. child resets own Zumi usage meter                DELETE /children/CHILD_A/zumiUsage/D as CHILD_A -- deny (quota integrity)
 //
 // If any row breaks: revert the deploy and dig in. Don't merge rules-only
 // changes through the production deploy path without working this list.
@@ -317,6 +320,17 @@ service cloud.firestore {
 
         allow delete: if isSelf(childUid);
       }
+
+      // zumiUsage subcollection --------------------------------------------
+      // One doc per child-local-day, id = `YYYY-MM-DD`: minutes + session
+      // count for Zumi voice. Written ONLY by the agent (Admin SDK) at
+      // session end; `zumiLiveKitToken` reads it to enforce the daily quota.
+      // Clients never write -- a child must not be able to reset their own
+      // meter.
+      match /zumiUsage/{day} {
+        allow read: if isSelf(childUid) || isParentOf(childUid);
+        allow create, update, delete: if false;
+      }
     }
 
     // =====================================================================
@@ -538,6 +552,30 @@ service cloud.firestore {
     //   -- a tampered client must never flip pipelines for itself.
     match /appConfig/{doc} {
       allow read: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
+    // zumiSessions/{assignmentId}_{childUid}_{startedAtMs}
+    //   Append-only session summaries (duration, turn count, last turns,
+    //   latency stats, safety events) written ONLY by the Zumi agent (Admin
+    //   SDK) at session end. Child and their parent may read (parent
+    //   dashboard, Phase 8); nobody else -- transcripts of a child talking
+    //   about their day are sensitive.
+    match /zumiSessions/{id} {
+      allow read: if isAdmin()
+        || isSelf(resource.data.childUid)
+        || (isParent() && isOwnChild(resource.data.childUid));
+      allow create, update, delete: if false;
+    }
+
+    // zumiMemory/{childUid}
+    //   Fixed per-child doc holding the last session's final turns so Zumi
+    //   can greet like a friend who remembers. Agent-written only; same
+    //   read audience as zumiSessions.
+    match /zumiMemory/{childUid} {
+      allow read: if isAdmin()
+        || isSelf(childUid)
+        || (isParent() && isOwnChild(childUid));
       allow create, update, delete: if false;
     }
 
