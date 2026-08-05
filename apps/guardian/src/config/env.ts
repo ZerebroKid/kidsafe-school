@@ -7,7 +7,7 @@ export const ENV = {
    * OAuth Web client id from Firebase console (Project settings → General → Web SDK configuration).
    * Required for Google Sign-in via `@react-native-google-signin/google-signin`.
    */
-  GOOGLE_WEB_CLIENT_ID: '132122944163-8i7ki7kl99u1rfua52e6odoqqtlhrmmc.apps.googleusercontent.com',
+  GOOGLE_WEB_CLIENT_ID: '132122944163-6ckfuh02lf62n0a118hnc7aedbou0v05.apps.googleusercontent.com',
 
   /**
    * Pairing code length and TTL in minutes. 6 digits = 1M combinations; with global rate limiting

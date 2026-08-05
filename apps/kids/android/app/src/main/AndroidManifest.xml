@@ -79,11 +79,6 @@
         android:theme="@style/AppTheme"
         android:supportsRtl="true">
 
-        <!-- TODO: replace with the kids' own Maps API key (Firebase console). -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCwjRl8d1pOxMFsYAv3vcK3s8NfAHAaO0Q" />
-
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
