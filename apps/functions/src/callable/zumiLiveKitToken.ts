@@ -129,7 +129,7 @@ export const zumiLiveKitToken = onCall<
     if (quota.blocked) {
       throw new HttpsError(
         'resource-exhausted',
-        'Aaj ka Zumi time khatam ho gaya! Kal phir milte hain, pakka.',
+        "Your Zumi time for today is over! See you tomorrow, promise.",
       );
     }
 

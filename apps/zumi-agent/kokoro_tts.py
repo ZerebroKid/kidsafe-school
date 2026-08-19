@@ -21,6 +21,7 @@ only as an emergency fallback via KOKORO_BASE_URL + api_key.
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 
 import httpx
@@ -41,7 +42,7 @@ LOCAL_SPEECH_URL = "http://localhost:8880/v1/audio/speech"
 SAMPLE_RATE = 24000
 NUM_CHANNELS = 1
 DEFAULT_MODEL = "kokoro"
-DEFAULT_VOICE = "hf_alpha"
+DEFAULT_VOICE = "af_heart"
 
 
 @dataclass
@@ -126,6 +127,8 @@ class _KokoroChunkedStream(tts.ChunkedStream):
             "response_format": "pcm",
         }
 
+        started_at = time.perf_counter()
+        ttfb_s: float | None = None
         try:
             async with self._tts._client.stream(
                 "POST",
@@ -146,6 +149,8 @@ class _KokoroChunkedStream(tts.ChunkedStream):
                 pushed = 0
                 async for chunk in resp.aiter_bytes():
                     if chunk:
+                        if ttfb_s is None:
+                            ttfb_s = time.perf_counter() - started_at
                         output_emitter.push(chunk)
                         pushed += len(chunk)
 
@@ -153,8 +158,13 @@ class _KokoroChunkedStream(tts.ChunkedStream):
                     raise APIConnectionError("Kokoro TTS returned an empty audio body")
 
             output_emitter.flush()
-            logger.debug(
-                "kokoro ok chars=%d pcm_bytes=%d voice=%s",
+            # TTFB (request sent -> first PCM chunk) is the number Phase 6 is
+            # about: it is what the GPU endpoint cuts vs CPU. total = full
+            # synthesis; audio starts playing at ttfb, not total.
+            logger.info(
+                "kokoro ttfb=%.2fs total=%.2fs chars=%d pcm_bytes=%d voice=%s",
+                ttfb_s if ttfb_s is not None else -1.0,
+                time.perf_counter() - started_at,
                 len(self.input_text),
                 pushed,
                 opts.voice,

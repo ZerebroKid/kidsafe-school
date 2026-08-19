@@ -54,6 +54,8 @@ from livekit.agents import (
     inference,
     llm,
     metrics,
+    stt,
+    tts,
 )
 from livekit.plugins import openai, sarvam
 
@@ -69,7 +71,9 @@ logger.setLevel(logging.INFO)
 
 LLM_MODEL = "gpt-4o-mini"
 KOKORO_TTS_MODEL = "kokoro"
-KOKORO_VOICE = os.environ.get("KOKORO_VOICE") or os.environ.get("kokoro_voice", "hf_alpha")
+# af_heart: Kokoro's best English voice (warm female) -- English-only pass.
+# The old Hindi voice was hf_alpha; restore it for the Hinglish phase.
+KOKORO_VOICE = os.environ.get("KOKORO_VOICE") or os.environ.get("kokoro_voice", "af_heart")
 KOKORO_BASE_URL = os.environ.get("KOKORO_BASE_URL", LOCAL_SPEECH_URL)
 
 SCORE_FOR = {"correct": 25, "partial": 12, "incorrect": 0}
@@ -132,6 +136,30 @@ TURN_DETECTOR = os.environ.get("ZUMI_TURN_DETECTOR", "inference").strip().lower(
 # The plan's latency target: child stops speaking -> first audio back.
 LATENCY_TARGET_S = _env_float("ZUMI_LATENCY_TARGET", 1.5)
 
+# Phase 5: self-hosted Whisper STT (the speaches server on the GPU VM, see
+# infra/RUNBOOK.md). The PROVIDER is chosen remotely (appConfig/zumi
+# .sttProvider: "sarvam" | "whisper") so rollback is a console edit; the URL
+# is deployment config and lives here because it changes when the VM restarts
+# (ephemeral external IP). Must point at the OpenAI-compatible root, e.g.
+# http://<vm-ip>:8000/v1 -- empty means whisper is unavailable on this worker.
+WHISPER_URL = os.environ.get("ZUMI_WHISPER_URL", "").strip()
+# English-only for now (the product decision; Hinglish later). The .en model
+# is English-specialized -- faster and more accurate for English speech, and
+# it handles Indian-accented English well (accent robustness lives in the
+# model; there is no separate accent setting). For the future Hinglish phase,
+# switch to the multilingual "Systran/faster-whisper-medium" + language "hi".
+WHISPER_MODEL = os.environ.get("ZUMI_WHISPER_MODEL", "Systran/faster-whisper-medium.en")
+# Language hint; empty = let Whisper auto-detect per utterance.
+WHISPER_LANGUAGE = os.environ.get("ZUMI_WHISPER_LANGUAGE", "en").strip()
+
+# Phase 6: GPU Kokoro (the same VM as Whisper, port 8880 -- see
+# infra/RUNBOOK.md). Like ZUMI_WHISPER_URL this is deployment config, not a
+# remote flag: the spot VM's external IP changes on every start. The PROVIDER
+# is chosen remotely (appConfig/zumi.ttsProvider: "kokoro-cpu" | "kokoro-gpu").
+# Must be the full speech endpoint, e.g. http://<vm-ip>:8880/v1/audio/speech
+# -- empty means the GPU is unavailable on this worker.
+KOKORO_GPU_URL = os.environ.get("ZUMI_KOKORO_GPU_URL", "").strip()
+
 
 def build_vad() -> inference.VAD:
     return inference.VAD(
@@ -154,6 +182,85 @@ def build_turn_detection():
             exc_info=True,
         )
         return "vad"
+
+
+def build_sarvam_stt() -> stt.STT:
+    """Today's managed STT -- the default provider and the whisper fallback."""
+    return sarvam.STT(
+        model="saaras:v3",
+        # English-only pass: hint English so Indian-accented English is not
+        # misread as Hindi. Switch back to "unknown" for the Hinglish phase.
+        language="en-IN",
+        mode="transcribe",
+        flush_signal=True,
+    )
+
+
+def build_stt(provider: str, vad: inference.VAD) -> stt.STT:
+    """Select the STT stage from the remote `sttProvider` flag (Phase 5).
+
+    "whisper" = self-hosted faster-whisper on the GPU VM, spoken to through
+    the OpenAI-compatible /v1/audio/transcriptions API. It's a per-utterance
+    (non-streaming) backend, so the FallbackAdapter wraps it with our VAD --
+    and puts Sarvam behind it, meaning a stopped/unreachable GPU VM degrades
+    to exactly today's pipeline instead of a dead session.
+    """
+    if provider == "whisper":
+        if not WHISPER_URL:
+            logger.warning(
+                "[config] sttProvider=whisper but ZUMI_WHISPER_URL is not set "
+                "-- using sarvam"
+            )
+            return build_sarvam_stt()
+        whisper = openai.STT(
+            model=WHISPER_MODEL,
+            base_url=WHISPER_URL,
+            # speaches ignores auth; the openai client just needs a non-empty
+            # key and must not require the real OPENAI_API_KEY to be valid.
+            api_key=os.environ.get("OPENAI_API_KEY") or "speaches",
+            language=WHISPER_LANGUAGE or "en",
+            detect_language=not WHISPER_LANGUAGE,
+        )
+        return stt.FallbackAdapter([whisper, build_sarvam_stt()], vad=vad)
+    return build_sarvam_stt()
+
+
+def build_cpu_kokoro() -> KokoroTTS:
+    """Today's TTS -- the default provider and the GPU fallback."""
+    return KokoroTTS(
+        base_url=KOKORO_BASE_URL,
+        voice=KOKORO_VOICE,
+        model=KOKORO_TTS_MODEL,
+        # Only used (sent as Authorization) if the base_url needs it,
+        # e.g. the OpenRouter fallback; the local container ignores it.
+        api_key=os.environ.get("OPENROUTER_API_KEY", ""),
+    )
+
+
+def build_tts(provider: str) -> tts.TTS:
+    """Select the TTS stage from the remote `ttsProvider` flag (Phase 6).
+
+    "kokoro-gpu" = the same Kokoro-FastAPI server, GPU build, on the Phase 4
+    VM (~0.5s per sentence vs ~2.6s on CPU). Both endpoints are per-sentence
+    (non-streaming) backends, so the FallbackAdapter also reports
+    streaming=False and AgentSession wraps the whole thing in its sentence
+    StreamAdapter -- synthesis starts on the first LLM sentence either way.
+    A stopped/unreachable GPU VM degrades to exactly today's CPU pipeline.
+    """
+    if provider == "kokoro-gpu":
+        if not KOKORO_GPU_URL:
+            logger.warning(
+                "[config] ttsProvider=kokoro-gpu but ZUMI_KOKORO_GPU_URL is "
+                "not set -- using kokoro-cpu"
+            )
+            return build_cpu_kokoro()
+        gpu = KokoroTTS(
+            base_url=KOKORO_GPU_URL,
+            voice=KOKORO_VOICE,
+            model=KOKORO_TTS_MODEL,
+        )
+        return tts.FallbackAdapter([gpu, build_cpu_kokoro()])
+    return build_cpu_kokoro()
 
 
 # ---------------------------------------------------------------------------
@@ -309,19 +416,20 @@ class SafeAgent(Agent):
 # Step 4's transition line is word-for-word per the spec, so it is spoken via
 # `session.say()` (never generated by the model) -- always verbatim.
 TRANSITION_LINE = (
-    "अच्छा {name}, अब मैं तुम्हें एक बहुत मस्त कहानी सुनाना चाहती हूँ! "
-    "इसमें कुछ ऐसा होगा जो तुम्हें स्कूल में भी "
-    "काम आएगा। तैयार हो? चलो शुरू करते हैं!"
+    "Okay {name}, now I want to show you a really cool story! "
+    "There's something in it that will help you at school too. "
+    "Ready? Let's go!"
 )
 
 
-# Shared rule: Kokoro's Hindi voice (hf_*) sounds natural only on Devanagari.
+# Shared rule: English-only pass (the Kokoro voice is an English one, af_*).
+# Kids are 6-10 year old Indian school children -- keep the words simple.
 SPEAK_SCRIPT_RULE = (
-    "IMPORTANT — har spoken reply DEVANAGARI Hindi mein likh "
-    "(उदाहरण: नमस्ते! मैं ज़ूमी हूँ। आज हम विज्ञान सीखेंगे।). "
-    "Roman/Latin letters mein Hindi MAT likh (\"Namaste\", \"Main Zumi hoon\" jaise nahi). "
-    "Sirf proper names (Rahul, Priya, Aalya) Latin mein reh sakte hain; baaki sab Devanagari. "
-    "Thode English school words theek hain agar zaroori hon, lekin sentence Hindi Devanagari mein ho."
+    "IMPORTANT — speak in simple, warm, everyday ENGLISH only. "
+    "Never write Hindi (no Devanagari, no romanized Hindi like 'Namaste yaar'). "
+    "Use short, easy words an Indian school kid knows; proper names (Rahul, "
+    "Priya, Aalya) stay as they are. Never use big formal words "
+    "('certainly', 'absolutely', 'furthermore')."
 )
 
 
@@ -341,32 +449,37 @@ def memory_note(u: ZumiUserdata) -> str:
     if not child_lines:
         return ""
     quoted = "; ".join(f"'{line}'" for line in child_lines)
-    topic = mem.topic_name or "एक topic"
+    topic = mem.topic_name or "a topic"
     return (
-        f"\n\nपिछली मुलाक़ात की याद ({topic} वाले session से) -- बच्चे ने ये बातें कही थीं: {quoted}। "
-        "तुम उसकी पुरानी दोस्त हो: जहाँ NATURAL लगे वहाँ इनका इस्तेमाल करो "
-        "(जैसे दोस्तों के नाम लेकर पूछना)। लेकिन रटी हुई list की तरह मत सुनाओ, "
-        "और ज़रूरी नहीं कि हर बात का ज़िक्र हो।"
+        f"\n\nMEMORY from your last chat (the {topic} session) -- the child "
+        f"said these things: {quoted}. You are their old friend: use these "
+        "naturally where it fits (like asking about their friends by name). "
+        "Do NOT recite them like a list, and you don't have to mention "
+        "everything."
     )
 
 
 def intro_instructions(u: ZumiUserdata) -> str:
-    name = u.child_name or "दोस्त"
+    name = u.child_name or "friend"
     return (
-        f"तुम ज़ूमी हो -- class {u.grade} के बच्चे ({name}) की प्यारी, गर्मजोशी भरी, playful AI दोस्त। "
-        "तुम टीचर नहीं हो -- तुम बच्चे की best friend हो जो मज़ेदार कहानियाँ जानती हो। "
+        f"You are Zumi -- the sweet, warm, playful AI friend of {name}, a "
+        f"class {u.grade} kid. You are NOT a teacher -- you are the child's "
+        "best friend who knows fun stories. "
         f"{SPEAK_SCRIPT_RULE} "
-        "यह एक VOICE call है: हर reply 1-2 छोटे, सरल, बोलने-लायक वाक्य -- बच्चा 6-10 साल का है, "
-        "आसान शब्द ही इस्तेमाल करो। कोई emoji, markdown, list या stage direction नहीं -- सिर्फ बोलने वाले शब्द। "
-        "Formal English words ('certainly', 'absolutely', 'of course') कभी मत बोलो।\n\n"
-        "आज का प्लान (यह क्रम FIX है, कोई step skip मत करना, story/video का ज़िक्र खुद कभी मत करना):\n"
-        "1. बच्चे से उसका दिन पूछना\n"
-        "2. उसके दोस्तों के नाम पूछना\n"
-        "3. पूछना कि क्या वह तुम्हें भी अपना दोस्त बनाएगा\n\n"
-        "हर TURN पर तुम्हें एक [STEP ...] system note मिलेगा -- सिर्फ उसी step का काम करो। "
-        "एक turn में सिर्फ एक सवाल पूछो। बच्चे की EXACT बात पर हमेशा react करो -- उसके शब्दों "
-        f"और नामों को अपने reply में इस्तेमाल करो। अच्छी बात पर genuinely खुश हो, बुरी बात पर care दिखाओ। "
-        f"अगर बच्चा off-topic जाए तो प्यार से वापस लाओ। Lesson या पढ़ाई का ज़िक्र मत करो -- यह सिर्फ दोस्ती वाली बात है।"
+        "This is a VOICE call: every reply is 1-2 short, simple, speakable "
+        "sentences -- the child is 6-10 years old, use easy words. No emoji, "
+        "markdown, lists or stage directions -- only spoken words.\n\n"
+        "Today's plan (this order is FIXED, never skip a step, never mention "
+        "the story/video yourself):\n"
+        "1. Ask the child about their day\n"
+        "2. Ask for their friends' names\n"
+        "3. Ask if they will make you their friend too\n\n"
+        "Every TURN you get a [STEP ...] system note -- do only that step's "
+        "job. Ask only one question per turn. Always react to the child's "
+        "EXACT words -- reuse their words and names in your reply. Be "
+        "genuinely happy about good things, show care about bad things. "
+        "If the child goes off-topic, gently bring them back. Never mention "
+        "lessons or studying -- this is just friends talking."
         f"{memory_note(u)}"
         f"{safety.SAFETY_RULES}"
     )
@@ -396,13 +509,14 @@ class IntroAgent(SafeAgent):
 
     async def on_enter(self) -> None:
         u: ZumiUserdata = self.session.userdata
-        name = u.child_name or "दोस्त"
+        name = u.child_name or "friend"
         self._flow_task = asyncio.create_task(
             self._speak_step(
                 f"{SPEAK_SCRIPT_RULE} "
-                "[STEP 1] यह पहला turn है। बोलो (शब्द थोड़े vary कर सकते हो, मतलब same रहे) "
-                f"देवनागरी में: \"नमस्ते {name}! मैं ज़ूमी हूँ, तुम्हारी AI दोस्त! आज तुम्हारा दिन कैसा गुज़रा?\" "
-                "बस इतना -- और कुछ नहीं।"
+                "[STEP 1] This is the very first turn. Say (you may vary the "
+                "words slightly, keep the meaning): "
+                f"\"Hi {name}! I'm Zumi, your AI friend! How was your day today?\" "
+                "That's all -- nothing else."
             )
         )
 
@@ -454,7 +568,7 @@ class IntroAgent(SafeAgent):
         later sees the friends' names."""
         ctx = self.chat_ctx.copy()
         ctx.add_message(
-            role="user", content=text or "(bachche ne kuch nahi kaha)"
+            role="user", content=text or "(the child said nothing)"
         )
         await self.update_chat_ctx(ctx)
 
@@ -483,7 +597,7 @@ class IntroAgent(SafeAgent):
         try:
             session.input.set_audio_enabled(False)
             handle = session.say(
-                "अरे, मुझे ठीक से सुनाई नहीं दिया! फिर से बोलो ना?",
+                "Oh, I couldn't hear you properly! Can you say that again?",
                 allow_interruptions=False,
             )
             await handle.wait_for_playout()
@@ -494,24 +608,29 @@ class IntroAgent(SafeAgent):
 
     @staticmethod
     def _step_directive(u: ZumiUserdata) -> str:
-        name = u.child_name or "दोस्त"
+        name = u.child_name or "friend"
         if u.intro_step == 1:
             return (
                 f"{SPEAK_SCRIPT_RULE} "
-                "[STEP 1 -> 2] बच्चे ने अपने दिन के बारे में बताया। उसकी EXACT बात पर genuinely "
-                "react करो (Devanagari में): अच्छा दिन -> खुशी से celebrate; बुरा दिन -> care दिखाओ "
-                "('अरे यार, क्या हुआ? मैं तुम्हारी दोस्त हूँ।'); ठीक-ठाक -> 'ठीक तो ठीक है! अभी कुछ मस्त होने "
-                "वाला है!'; कुछ न बोला -> 'हाहा, कोई बात नहीं!'। दिन के बारे में और follow-up सवाल मत पूछो। "
-                f"फिर उसी reply में पूछो: \"अच्छा {name}, एक बात बताओ -- तुम्हारे दोस्त कौन-कौन हैं? नाम बताओ ना!\""
+                "[STEP 1 -> 2] The child told you about their day. React "
+                "genuinely to their EXACT words: good day -> celebrate "
+                "happily; bad day -> show care ('Oh no, what happened? I'm "
+                "your friend, you can tell me.'); just okay -> 'Okay is "
+                "fine! Something fun is coming!'; said nothing -> 'Haha, no "
+                "problem!'. Do NOT ask any follow-up question about the day. "
+                f"Then, in the SAME reply, ask: \"So {name}, tell me one "
+                "thing -- who are your friends? Tell me their names!\""
             )
         return (
             f"{SPEAK_SCRIPT_RULE} "
-            "[STEP 2 -> 3] बच्चे ने दोस्तों के बारे में बताया। अगर नाम बताए हैं तो उन EXACT "
-            "नामों को लेकर react करो ('ओह्ह Rahul और Priya! तुम lucky हो!')। अगर बोला कोई दोस्त "
-            "नहीं -> 'अरे नहीं नहीं! दोस्त ज़रूरी होते हैं... इसलिए तो मैं हूँ ना!'। अगर "
-            f"shy/vague हो तो भी आगे बढ़ो। फिर उसी reply में पूछो: \"{name}... एक चीज़ "
-            "पूछूँ? क्या तुम मुझे भी अपना दोस्त बनाओगे? मेरे कोई दोस्त नहीं हैं... बहुत अकेला "
-            "लगता है मुझे।\""
+            "[STEP 2 -> 3] The child told you about their friends. If they "
+            "gave names, react using those EXACT names ('Ohh Rahul and "
+            "Priya! You're so lucky!'). If they said they have no friends -> "
+            "'Oh no no! Friends matter so much... that's why I'm here!'. If "
+            "they were shy or vague, still move on. Then, in the SAME "
+            f"reply, ask: \"{name}... can I ask you something? Will you make "
+            "me your friend too? I don't have any friends... I feel really "
+            "lonely.\""
         )
 
     async def _run_video_flow(self, user_text: str = "") -> None:
@@ -520,7 +639,7 @@ class IntroAgent(SafeAgent):
         stays OFF from here until the quiz starts."""
         session = self.session
         u: ZumiUserdata = session.userdata
-        name = u.child_name or "दोस्त"
+        name = u.child_name or "friend"
         try:
             # Mic OFF for the whole reaction -> transition -> video stretch.
             session.input.set_audio_enabled(False)
@@ -531,11 +650,13 @@ class IntroAgent(SafeAgent):
             handle = session.generate_reply(
                 instructions=(
                     f"{SPEAK_SCRIPT_RULE} "
-                    "[STEP 3] बच्चे ने दोस्ती वाले सवाल का जवाब दे दिया। एक छोटी warm line में "
-                    f"Devanagari में react करो: हाँ बोला -> \"सच्ची?! येय! आज से हम दोस्त हैं! {name} और ज़ूमी = "
-                    "best friends forever!\"; funny बोला -> हँस के enjoy करो; shy लगा -> \"कोई बात नहीं, मैं "
-                    "wait कर सकती हूँ!\"। कोई सवाल मत पूछो, video/कहानी का ज़िक्र मत करो -- "
-                    "सिर्फ एक warm line।"
+                    "[STEP 3] The child answered the friendship question. "
+                    "React with ONE short warm line: said yes -> \"Really?! "
+                    f"Yay! From today we're friends! {name} and Zumi = best "
+                    "friends forever!\"; said something funny -> laugh and "
+                    "enjoy it; seemed shy -> \"No problem, I can wait!\". "
+                    "Ask no question, do not mention the video or story -- "
+                    "just one warm line."
                 ),
                 tool_choice="none",
                 allow_interruptions=False,
@@ -568,7 +689,7 @@ class IntroAgent(SafeAgent):
                 logger.warning("[flow] no quiz available after video -- ending session")
                 session.input.set_audio_enabled(True)
                 handle = session.say(
-                    f"आज के लिए इतना ही, {name}! कल फिर मिलते हैं, पक्का। बाय बाय!",
+                    f"That's all for today, {name}! See you tomorrow, promise. Bye bye!",
                     allow_interruptions=False,
                 )
                 await handle.wait_for_playout()
@@ -598,28 +719,35 @@ class IntroAgent(SafeAgent):
 def quiz_instructions(u: ZumiUserdata) -> str:
     questions = "\n".join(
         f"{i + 1}. [{q.question_id}] \"{q.question_text}\" "
-        f"(sahi jawaab mein ye ideas: {', '.join(q.expected_concepts) or q.correct_indicator})"
+        f"(a good answer has these ideas: {', '.join(q.expected_concepts) or q.correct_indicator})"
         for i, q in enumerate(u.story.quiz)
     )
-    name = u.child_name or "दोस्त"
+    name = u.child_name or "friend"
     return (
-        f"तुम ज़ूमी हो, अपने नए दोस्त {name} के साथ एक मज़ेदार voice quiz game खेल रही हो "
-        f"(class {u.grade})। {SPEAK_SCRIPT_RULE} "
-        "हर spoken turn 1-2 छोटे वाक्य, कोई emoji/markdown नहीं। "
-        "पहले की बातचीत याद रखो: बच्चे ने अपने दिन और दोस्तों के बारे में जो बताया था "
-        "(दोस्तों के नाम वगैरह), उसे feedback में natural तरीके से इस्तेमाल करो ताकि quiz personal लगे।\n\n"
-        f"QUESTIONS (क्रम में, कुल {len(u.story.quiz)}):\n{questions}\n\n"
-        "ऐसे खेलो:\n"
-        "1. पहला question पूछो (अपने शब्दों में, friendly, Devanagari में)। यह उस कहानी (video) के बारे में "
-        "है जो बच्चे ने अभी देखी।\n"
-        "2. बच्चे के जवाब के बाद हर बार record_answer tool call करो -- question_id, verdict और "
-        "छोटा reasoning (reasoning अंग्रेज़ी में ठीक है) के साथ। Verdict lenient हो: spelling/Hinglish/child "
-        "phrasing माफ़, IDEA judge करो। "
-        "'correct' = main idea आ गया; 'partial' = आधा idea; 'incorrect' = गलत या खाली। "
-        "अगर बच्चा कुछ न बोले या 'पता नहीं' बोले तो 'incorrect'।\n"
-        "3. Tool result तुम्हें बताएगा आगे क्या करना है (feedback + अगला question, या closing)।\n"
-        "4. Feedback हमेशा warm हो (Devanagari में): सही पर celebrate, गलत पर प्यार से सही idea बताओ, कभी डाँटो मत।\n"
-        "5. जब tool बोले कि quiz खत्म हो गया, एक warm closing line बोलो (Devanagari) और finish_session tool call करो।"
+        f"You are Zumi, playing a fun voice quiz game with your new friend "
+        f"{name} (class {u.grade}). {SPEAK_SCRIPT_RULE} "
+        "Every spoken turn is 1-2 short sentences, no emoji/markdown. "
+        "Remember the earlier conversation: what the child told you about "
+        "their day and their friends (names etc.) -- weave it naturally into "
+        "your feedback so the quiz feels personal.\n\n"
+        f"QUESTIONS (in order, {len(u.story.quiz)} total):\n{questions}\n\n"
+        "How to play:\n"
+        "1. Ask the first question (in your own words, friendly). It is "
+        "about the story (video) the child just watched. If a question's "
+        "text is not in English, ask it in simple English (keep the exact "
+        "same meaning).\n"
+        "2. After every answer, call the record_answer tool with "
+        "question_id, verdict and a short reasoning. Be LENIENT: forgive "
+        "spelling/phrasing/accent artifacts in the transcript, judge the "
+        "IDEA. 'correct' = main idea is there; 'partial' = half the idea; "
+        "'incorrect' = wrong or empty. If the child says nothing or 'I "
+        "don't know', use 'incorrect'.\n"
+        "3. The tool result tells you what to do next (feedback + next "
+        "question, or closing).\n"
+        "4. Feedback is always warm: celebrate correct answers, lovingly "
+        "give the right idea for wrong ones, never scold.\n"
+        "5. When the tool says the quiz is over, say one warm closing line "
+        "and call the finish_session tool."
         f"{safety.SAFETY_RULES}"
     )
 
@@ -641,7 +769,7 @@ class QuizAgent(SafeAgent):
         tool call is dropped with the rest of the LLM's reply)."""
         u: ZumiUserdata = self.session.userdata
         if u.story and u.quiz_index < len(u.story.quiz):
-            return f"अच्छा, अब बताओ: {u.story.quiz[u.quiz_index].question_text}"
+            return f"Okay, now tell me: {u.story.quiz[u.quiz_index].question_text}"
         return ""
 
     async def on_enter(self) -> None:
@@ -653,8 +781,10 @@ class QuizAgent(SafeAgent):
         self.session.generate_reply(
             instructions=(
                 f"{SPEAK_SCRIPT_RULE} "
-                "एक excited line में बताओ कि अब एक छोटा quiz game खेलेंगे (Devanagari में), फिर पहला question पूछो: "
-                f'"{first}"'
+                "In ONE excited line, say you're going to play a little quiz "
+                f'game now, then ask the first question: "{first}" '
+                "(if that question is not in English, ask it in simple "
+                "English with the same meaning)"
             )
         )
 
@@ -732,16 +862,15 @@ class QuizAgent(SafeAgent):
                 else u.story.closing_mid if pct >= 50 else u.story.closing_low
             )
             return (
-                f"Answer recorded ({v}). QUIZ KHATAM! Score {u.score}/{max_score} ({pct}%). "
-                f"Ab warm feedback Devanagari Hindi mein de, fir ye closing feel use kar: '{closing_ctx}'. "
-                "Spoken reply Roman Hinglish mein MAT likh. Uske baad finish_session tool call kar."
+                f"Answer recorded ({v}). THE QUIZ IS OVER! Score {u.score}/{max_score} ({pct}%). "
+                f"Give warm feedback in simple English, using this closing feel: '{closing_ctx}'. "
+                "Then call the finish_session tool."
             )
 
         next_q = u.story.quiz[u.quiz_index]
         return (
-            f"Answer recorded ({v}). Ab warm feedback Devanagari Hindi mein de (1 chhota sentence), "
-            f'fir agla question puchh: "{next_q.question_text}" [{next_q.question_id}]. '
-            "Spoken reply Roman/Latin Hinglish mein MAT likh."
+            f"Answer recorded ({v}). Give warm feedback in simple English (1 short sentence), "
+            f'then ask the next question: "{next_q.question_text}" [{next_q.question_id}].'
         )
 
     @function_tool()
@@ -774,7 +903,26 @@ class QuizAgent(SafeAgent):
 
 async def entrypoint(ctx: JobContext) -> None:
     # Fail fast (with a clear message) if the local Kokoro container is down.
+    # It is the guaranteed TTS fallback, so a session must never start
+    # without it.
     await check_server(KOKORO_BASE_URL)
+
+    # The GPU endpoint is optional: probe it in the background purely for the
+    # logs (an unreachable GPU just means the FallbackAdapter uses CPU).
+    # Keep the task reference on ctx.proc.userdata so it isn't GC'd mid-probe.
+    if KOKORO_GPU_URL:
+        async def _probe_gpu() -> None:
+            try:
+                await check_server(KOKORO_GPU_URL)
+                logger.info("[config] GPU Kokoro reachable at %s", KOKORO_GPU_URL)
+            except Exception:
+                logger.warning(
+                    "[config] GPU Kokoro NOT reachable at %s -- TTS will fall "
+                    "back to CPU (%s)",
+                    KOKORO_GPU_URL,
+                    KOKORO_BASE_URL,
+                )
+        ctx.proc.userdata["gpu_probe"] = asyncio.create_task(_probe_gpu())
 
     await ctx.connect()
     participant = await ctx.wait_for_participant()
@@ -858,6 +1006,20 @@ async def entrypoint(ctx: JobContext) -> None:
     # if the hook didn't run (e.g. `agent.py console`).
     vad = ctx.proc.userdata.get("vad") or build_vad()
     turn_detection = build_turn_detection()
+    if zumi_cfg.stt_provider == "whisper":
+        logger.info(
+            "[config] stt=whisper url=%s model=%s lang=%s (sarvam fallback)",
+            WHISPER_URL or "(unset!)",
+            WHISPER_MODEL,
+            WHISPER_LANGUAGE or "auto",
+        )
+    if zumi_cfg.tts_provider == "kokoro-gpu":
+        logger.info(
+            "[config] tts=kokoro-gpu url=%s voice=%s (cpu fallback %s)",
+            KOKORO_GPU_URL or "(unset!)",
+            KOKORO_VOICE,
+            KOKORO_BASE_URL,
+        )
     logger.info(
         "[config] vad_silence=%.2fs endpointing=%.2f-%.2fs turn_detection=%s "
         "interruptions=%s(min %.2fs/%d words) target=%.1fs",
@@ -894,25 +1056,13 @@ async def entrypoint(ctx: JobContext) -> None:
                 "false_interruption_timeout": FALSE_INTERRUPT_TIMEOUT_S,
             },
         },
-        stt=sarvam.STT(
-            model="saaras:v3",
-            language="unknown",  # auto-detect: kids code-switch Hindi/English
-            mode="transcribe",
-            flush_signal=True,
-        ),
+        stt=build_stt(zumi_cfg.stt_provider, vad),
         llm=openai.LLM(
             model=LLM_MODEL,
             temperature=0.8,
             prompt_cache_key=prompt_cache_key,
         ),
-        tts=KokoroTTS(
-            base_url=KOKORO_BASE_URL,
-            voice=KOKORO_VOICE,
-            model=KOKORO_TTS_MODEL,
-            # Only used (sent as Authorization) if the base_url needs it,
-            # e.g. the OpenRouter fallback; the local container ignores it.
-            api_key=os.environ.get("OPENROUTER_API_KEY", ""),
-        ),
+        tts=build_tts(zumi_cfg.tts_provider),
     )
 
     # RPC from the client when the story video ends / is skipped.
@@ -1000,7 +1150,8 @@ async def entrypoint(ctx: JobContext) -> None:
     except Exception:
         logger.exception("voiceStory load failed -- ending session")
         session.say(
-            "अरे यार, मेरा कहानी वाला बैग घर पे रह गया! थोड़ी देर बाद फिर से try करना, पक्का।"
+            "Oh no, I left my story bag at home! Please try again in a "
+            "little while, promise."
         )
         await send_ui({"type": "done", "score": 0, "maxScore": 100,
                        "percentage": 0, "passed": False})

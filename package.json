@@ -14,6 +14,7 @@
     "import:curriculum": "pnpm --filter @zerebro/functions import:curriculum",
     "seed:voice-stories": "pnpm --filter @zerebro/functions seed:voice-stories",
     "seed:reels": "pnpm --filter @zerebro/functions seed:reels",
+    "seed:zumi-config": "pnpm --filter @zerebro/functions seed:zumi-config",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules .turbo apps/*/.turbo packages/*/.turbo"
   },
   "engines": {

@@ -6,7 +6,7 @@ lesson replaces the old callable round trips (`zumiTeach` + `zumiSpeak` +
 
 - **Transport**: LiveKit Cloud (WebRTC — echo cancellation, jitter handling)
 - **Turn-taking**: local Silero VAD + LiveKit semantic turn detector, 400ms endpointing, barge-in on
-- **STT**: Sarvam Saaras v3, streaming, Hinglish/code-mix native
+- **STT**: Sarvam Saaras v3 (English hint, `en-IN`) or self-hosted Whisper `medium.en` -- English-only pass, Indian-accent robust
 - **Safety**: moderation on the child's transcript AND Zumi's reply before TTS (`safety.py`), remote-killable
 - **LLM**: OpenAI gpt-4o-mini, streamed tokens
 - **TTS**: Kokoro-82M, self-hosted Kokoro-FastAPI (raw PCM, custom plugin in `kokoro_tts.py`)
@@ -33,7 +33,8 @@ sudo docker run -d --name kokoro-tts --restart unless-stopped \
 `.env` needs: `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` (from
 cloud.livekit.io project settings), `SARVAM_API_KEY` (dashboard.sarvam.ai),
 `OPENAI_API_KEY`, `KOKORO_BASE_URL` (default local :8880), `KOKORO_VOICE`
-(optional, default `hf_alpha`).
+(optional, default `af_heart` -- English voice; `hf_alpha` is the Hindi
+voice for the future Hinglish phase).
 
 Firestore access uses Application Default Credentials
 (`gcloud auth application-default login`, already configured on this machine).
@@ -103,6 +104,62 @@ Flip to `true` from the Firebase console to enforce — no deploy needed.
 Tuning: `ZUMI_MODERATION_TIMEOUT` (default 2.5s), `ZUMI_MODERATION_STRICT_SCORE`
 (default 0.4 — any category at/above this flags, stricter than OpenAI's own bit).
 
+## STT providers (Phase 5)
+
+The STT stage is chosen per session by `appConfig/zumi.sttProvider`:
+
+- `sarvam` (default) — today's managed streaming STT, unchanged.
+- `whisper` — self-hosted faster-whisper on the GPU VM (`ZUMI_WHISPER_URL`,
+  see [infra/](infra/)), spoken to through its OpenAI-compatible API. It is
+  per-utterance rather than streaming, so the session VAD segments speech
+  for it, and it is always wrapped in a `FallbackAdapter` with Sarvam behind
+  it: a stopped or unreachable GPU VM degrades to exactly today's pipeline
+  mid-session instead of killing the conversation. Default model is
+  `medium.en` (English-only, handles Indian-accented English well); the
+  multilingual `medium` + `ZUMI_WHISPER_LANGUAGE=hi` is the documented
+  switch for the future Hinglish phase.
+
+Look for `[config] stt=whisper url=... model=... (sarvam fallback)` at
+session start, and compare `[perf]` lines between providers — that's the
+side-by-side latency/accuracy check this phase is reviewed on.
+**Rollback**: set `sttProvider: "sarvam"` in the Firebase console (no deploy).
+
+## TTS providers (Phase 6)
+
+The TTS stage is chosen per session by `appConfig/zumi.ttsProvider`:
+
+- `kokoro-cpu` (default) — today's local Kokoro-FastAPI container, unchanged.
+- `kokoro-gpu` — the SAME Kokoro-FastAPI server, GPU build, on the Phase 4
+  VM (`ZUMI_KOKORO_GPU_URL`, port 8880, see [infra/](infra/)). Benchmarked
+  at ~0.5s per sentence vs ~2.6s on CPU. Always wrapped in a
+  `FallbackAdapter` with the CPU endpoint behind it, so a stopped VM
+  degrades to today's pipeline mid-session.
+
+Synthesis is sentence-streaming either way: the session's `StreamAdapter`
+splits the LLM token stream into sentences and synthesizes each as soon as
+it's complete, so Zumi's first audio starts after the FIRST sentence — the
+GPU cuts the per-sentence wait, which is the time-to-first-audio win.
+
+Look for `[config] tts=kokoro-gpu url=... (cpu fallback ...)` at session
+start and per-request `kokoro ttfb=...s total=...s` lines to compare
+providers against the `[perf]`/`[latency]` target (first audio < 1.5s).
+**Rollback**: set `ttsProvider: "kokoro-cpu"` in the Firebase console (no deploy).
+
+## Remote config (`appConfig/zumi`)
+
+All the flags above live in ONE Firestore doc, seeded/updated with:
+
+```bash
+pnpm seed:zumi-config -- --apply --target=prod                      # safe defaults
+pnpm seed:zumi-config -- --apply --target=prod --stt=whisper --tts=kokoro-gpu
+```
+
+(or edit the doc in the Firebase console — same effect, no deploy). Until the
+doc exists, every reader falls back to code defaults, which notably means
+`moderationEnabled=false`. The seed defaults are: `pipeline=live`,
+`sttProvider=sarvam`, `ttsProvider=kokoro-cpu`, `moderationEnabled=true`,
+`memoryEnabled=true`, `dailyMinutesLimit=20`.
+
 ## Memory, session summary, and daily quota
 
 At session end (quiz done, child left, or worker draining) the agent makes ONE
@@ -112,14 +169,14 @@ batched Firestore write — never per turn:
   turn count, last 12 turns, latency p50/p95, safety-event count, quiz score.
 - `zumiMemory/{childUid}` — fixed per-child doc with the last turns, read back
   at the start of the NEXT session so Zumi can greet like a friend who
-  remembers ("Rahul aur Priya kaise hain?"). Loaded in parallel with the
+  remembers ("How are Rahul and Priya?"). Loaded in parallel with the
   config read, capped at 2s — a slow read never delays Zumi's first word.
   Kill switch: `appConfig/zumi.memoryEnabled: false` (default on).
 - `children/{childUid}/zumiUsage/{YYYY-MM-DD}` — `minutes` + `sessions`
   increments (school day = Asia/Kolkata, same as the education stack).
 
 The quota is enforced at the DOOR, not mid-session: `zumiLiveKitToken` refuses
-to mint a token (`resource-exhausted`, kid-friendly Hinglish message) once
+to mint a token (`resource-exhausted`, kid-friendly message) once
 today's `minutes` reach `appConfig/zumi.dailyMinutesLimit`. Unset or `<= 0`
 means unlimited — the meter ships inert until the console sets a limit. All
 three collections are client-read-only (child + their parent); only the agent

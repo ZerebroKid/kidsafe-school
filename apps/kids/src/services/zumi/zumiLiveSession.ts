@@ -98,7 +98,7 @@ export class ZumiLiveSession {
 
       const granted = await ensureMicPermission();
       if (!granted) {
-        throw new Error('Mic permission chahiye Zumi se baat karne ke liye.');
+        throw new Error('Zumi needs the mic permission to talk with you.');
       }
 
       // Token minting runs in parallel with the native audio session setup.
@@ -130,7 +130,7 @@ export class ZumiLiveSession {
         type: 'error',
         message:
           (err as {message?: string} | null)?.message ??
-          'Zumi se connect nahi ho paya. Baad mein try karo!',
+          "Couldn't connect to Zumi. Please try again later!",
       });
     }
   }
@@ -218,7 +218,7 @@ export class ZumiLiveSession {
         this.setState('error');
         this.emit({
           type: 'error',
-          message: 'Zumi se connection toot gaya. Phir se try karo!',
+          message: 'Lost connection to Zumi. Please try again!',
         });
       }
     });

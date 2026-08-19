@@ -323,9 +323,9 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
         <FunBackground />
         <SafeAreaView style={styles.center}>
           <Text style={styles.bigEmoji}>😕</Text>
-          <Text style={styles.title}>Zumi abhi ready nahi hai</Text>
+          <Text style={styles.title}>Zumi is not ready yet</Text>
           <Text style={styles.mutedText}>
-            {error ?? 'Is topic ke liye Zumi story nahi mili.'}
+            {error ?? 'No Zumi story found for this topic.'}
           </Text>
           <Pressable
             onPress={() => navigation.goBack()}

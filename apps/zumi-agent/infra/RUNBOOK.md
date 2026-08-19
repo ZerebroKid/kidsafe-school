@@ -115,10 +115,12 @@ VM_IP=$(gcloud compute instances describe zumi-gpu-1 --zone=asia-south1-a \
 curl -s http://$VM_IP:8880/v1/audio/voices | head -c 200     # Kokoro up
 curl -s http://$VM_IP:8000/v1/models                          # Whisper up
 
-# TTS timing:
-curl -s -o /tmp/gpu.wav -w 'TTS: %{time_total}s\n' -X POST http://$VM_IP:8880/v1/audio/speech \
+# TTS timing. time_starttransfer = TTFB (when audio STARTS streaming -- the
+# number Phase 6 cares about); time_total = full synthesis.
+curl -s -o /tmp/gpu.wav -w 'TTS ttfb: %{time_starttransfer}s total: %{time_total}s\n' \
+  -X POST http://$VM_IP:8880/v1/audio/speech \
   -H 'Content-Type: application/json' \
-  -d '{"model":"kokoro","voice":"hf_alpha","input":"अरे वाह! आज हम पौधों के बारे में सीखेंगे।"}'
+  -d '{"model":"kokoro","voice":"af_heart","input":"Oh wow! Today we are going to learn about plants.","response_format":"pcm"}'
 
 # STT timing:
 curl -s -w '\nSTT: %{time_total}s\n' -X POST http://$VM_IP:8000/v1/audio/transcriptions \

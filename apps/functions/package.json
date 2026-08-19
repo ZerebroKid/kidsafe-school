@@ -23,6 +23,7 @@
     "set-school-grades": "pnpm build && node dist/scripts/setSchoolGrades.js",
     "create:plan": "pnpm build && node dist/scripts/createRazorpayPlan.js",
     "seed:reels": "pnpm build && node dist/scripts/seedReels.js",
+    "seed:zumi-config": "pnpm build && node dist/scripts/seedZumiConfig.js",
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
