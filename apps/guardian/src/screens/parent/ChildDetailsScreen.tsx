@@ -1,12 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
-import Svg, {Path} from 'react-native-svg';
 
-import {GradientBackground} from '../../components/GradientBackground';
-import {colors, radius, softShadow, spacing} from '../../theme';
-import type {ParentStackParamList} from '../../navigation/types';
 import {paths} from '@zerebro/shared-firebase/firestore';
+import {useParentTheme} from '../../state/themeStore';
+import type {ParentStackParamList} from '../../navigation/types';
 import {AppsTab} from './AppsTab';
 import {CurrentAppPill} from './CurrentAppPill';
 import {LocationTab} from './LocationTab';
@@ -14,19 +12,21 @@ import {PinTab} from './PinTab';
 import {ScheduleTab} from './ScheduleTab';
 import {ReelsInsightsTab} from './ReelsInsightsTab';
 import {StudyTab} from './StudyTab';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {ParentBackground} from './components/ParentBackground';
+import {ParentHeader} from './components/ParentHeader';
+import {parentRadius, parentSpacing} from './theme/parentTheme';
 
 type Props = NativeStackScreenProps<ParentStackParamList, 'ChildDetails'>;
 
 type Tab = 'apps' | 'schedule' | 'location' | 'pin' | 'study' | 'reels';
 
-const TABS: Array<{key: Tab; label: string}> = [
-  {key: 'apps', label: 'Apps'},
-  {key: 'schedule', label: 'Schedule'},
-  {key: 'location', label: 'Location'},
-  {key: 'study', label: 'Study'},
-  {key: 'reels', label: 'Reels'},
-  {key: 'pin', label: 'PIN'},
+const TABS: Array<{key: Tab; label: string; glyph: string}> = [
+  {key: 'apps', label: 'Apps', glyph: '📱'},
+  {key: 'schedule', label: 'Schedule', glyph: '⏰'},
+  {key: 'location', label: 'Location', glyph: '📍'},
+  {key: 'study', label: 'Study', glyph: '📚'},
+  {key: 'reels', label: 'Reels', glyph: '🎬'},
+  {key: 'pin', label: 'PIN', glyph: '🔒'},
 ];
 
 interface TamperEvent {
@@ -37,14 +37,19 @@ interface TamperEvent {
 }
 
 export function ChildDetailsScreen({route, navigation}: Props) {
-  const {childUid, childName} = route.params;
-  const [tab, setTab] = useState<Tab>('apps');
+  const {childUid, childName = 'Child', initialTab} = route.params || {};
+  const [tab, setTab] = useState<Tab>(
+    (initialTab as Tab) && TABS.some(t => t.key === initialTab)
+      ? (initialTab as Tab)
+      : 'apps',
+  );
   const [tamperEvents, setTamperEvents] = useState<TamperEvent[]>([]);
+  const {theme, isDark} = useParentTheme();
+
+  const isValidChild = Boolean(childUid && childUid !== 'default' && childUid !== 'new');
 
   useEffect(() => {
-    // Single most-recent tamper attempt — historical list lives in Firestore for audit, but
-    // the parent UI only surfaces "what just happened" on the Apps tab. Switching from limit(5)
-    // to limit(1) cuts both the on-the-wire payload and the rendered noise.
+    if (!isValidChild) return;
     const unsub = paths
       .events(childUid)
       .where('type', '==', 'tamper_attempt')
@@ -59,7 +64,8 @@ export function ChildDetailsScreen({route, navigation}: Props) {
                 id: d.id,
                 kind: typeof data.kind === 'string' ? data.kind : 'unknown',
                 success: data.success === true,
-                timestamp: typeof data.timestamp === 'number' ? data.timestamp : 0,
+                timestamp:
+                  typeof data.timestamp === 'number' ? data.timestamp : 0,
               };
             }),
           );
@@ -67,54 +73,92 @@ export function ChildDetailsScreen({route, navigation}: Props) {
         err => console.warn('tamper events sub error', err),
       );
     return unsub;
-  }, [childUid]);
+  }, [childUid, isValidChild]);
+
+  if (!isValidChild) {
+    return (
+      <ParentBackground>
+        <ParentHeader
+          title="Child Controls"
+          subtitle="Device & Safety Controls"
+          onBack={() => navigation.goBack()}
+        />
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24}}>
+          <Text style={{color: theme.text, fontSize: 18, fontWeight: '700', marginBottom: 8, textAlign: 'center'}}>
+            No Child Selected
+          </Text>
+          <Text style={{color: theme.textMuted, fontSize: 14, textAlign: 'center', marginBottom: 20}}>
+            Pair a child device first from Settings to view and manage device controls.
+          </Text>
+          <Pressable
+            onPress={() => navigation.navigate('Settings')}
+            style={{backgroundColor: theme.primary, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12}}>
+            <Text style={{color: '#FFFFFF', fontWeight: '700', fontSize: 14}}>
+              Generate Pairing Code
+            </Text>
+          </Pressable>
+        </View>
+      </ParentBackground>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-      <GradientBackground />
-      {/* Custom large header — the native stack header is hidden for this screen because the
-          default title was too small to read. The child name is the hero of this screen. */}
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => navigation.goBack()}
-          hitSlop={8}
-          style={({pressed}) => [styles.backButton, pressed && styles.backButtonPressed]}
-          accessibilityRole="button"
-          accessibilityLabel="Go back">
-          <BackArrowIcon />
-        </Pressable>
-        <View style={styles.headerText}>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {childName}
-          </Text>
-          <Text style={styles.headerSubtitle}>Device Controls</Text>
-        </View>
-      </View>
-      {/* Sticky status strip — sits OUTSIDE the tab body so the live "Currently using"
-          card stays visible regardless of which tab is selected or how far the user has
-          scrolled inside scrollable tabs. */}
+    <ParentBackground>
+      <ParentHeader
+        title={childName}
+        subtitle="Device & Safety Controls"
+        onBack={() => navigation.goBack()}
+      />
+
+      {/* Sticky status strip */}
       <View style={styles.statusStrip}>
         <CurrentAppPill childUid={childUid} />
       </View>
-      {/* `body` is a column: fixed tab bar + flex-fill content. The Location tab needs the
-          flex-fill region — `MapView` with flex:1 does not expand inside an outer ScrollView
-          whose content height is only `minHeight: 360`, which produced the half-empty map. */}
+
+      {/* Body with Tabs */}
       <View style={styles.body}>
-        {/* Horizontally scrollable pill chips: seven tabs no longer fit a fixed segmented
-            bar at a readable font size, so chips scroll instead of shrinking. */}
+        {/* Horizontal Chips Bar */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.tabbar}
           contentContainerStyle={styles.tabbarContent}>
-          {TABS.map(t => (
-            <TabChip
-              key={t.key}
-              label={t.label}
-              active={tab === t.key}
-              onPress={() => setTab(t.key)}
-            />
-          ))}
+          {TABS.map(t => {
+            const active = tab === t.key;
+            return (
+              <Pressable
+                key={t.key}
+                onPress={() => setTab(t.key)}
+                style={[
+                  styles.chip,
+                  {
+                    backgroundColor: active
+                      ? theme.primary
+                      : isDark
+                      ? 'rgba(255, 255, 255, 0.08)'
+                      : '#FFFFFF',
+                    borderColor: active ? theme.primary : theme.cardBorder,
+                  },
+                ]}>
+                <Text style={{fontSize: 13}}>{t.glyph}</Text>
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.chipLabel,
+                    {
+                      color: active
+                        ? '#FFFFFF'
+                        : isDark
+                        ? theme.textMuted
+                        : theme.text,
+                      fontWeight: active ? '700' : '500',
+                    },
+                  ]}>
+                  {t.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </ScrollView>
 
         {tab === 'location' ? (
@@ -124,11 +168,6 @@ export function ChildDetailsScreen({route, navigation}: Props) {
             style={styles.scrollableTab}
             contentContainerStyle={styles.scrollableTabContent}
             keyboardShouldPersistTaps="handled">
-            {/* Tamper panel is Apps-tab-only by design: it talks about "uninstall attempts"
-                which is the same surface the parent reviews when deciding whether to tighten
-                the blocklist or rotate the PIN. The Firestore listener stays mounted at the
-                screen level (see useEffect above) so switching tabs back to Apps shows the
-                latest row immediately with no re-subscribe lag. */}
             {tab === 'apps' && (
               <>
                 <TamperPanel events={tamperEvents} />
@@ -137,47 +176,58 @@ export function ChildDetailsScreen({route, navigation}: Props) {
             )}
             {tab === 'schedule' && <ScheduleTab childUid={childUid} />}
             {tab === 'study' && <StudyTab childUid={childUid} />}
-            {tab === 'reels' && <ReelsInsightsTab childUid={childUid} childName={childName} />}
-            {tab === 'pin' && <PinTab childUid={childUid} childName={childName} />}
+            {tab === 'reels' && (
+              <ReelsInsightsTab
+                childUid={childUid}
+                childName={childName}
+              />
+            )}
+            {tab === 'pin' && (
+              <PinTab childUid={childUid} childName={childName} />
+            )}
           </ScrollView>
         )}
       </View>
-    </SafeAreaView>
-  );
-}
-
-function BackArrowIcon() {
-  return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M19 12H5M11 18l-6-6 6-6"
-        stroke={colors.text}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
+    </ParentBackground>
   );
 }
 
 function TamperPanel({events}: {events: TamperEvent[]}) {
+  const {theme, isDark} = useParentTheme();
   if (events.length === 0) {
     return null;
   }
   return (
-    <View style={styles.tamperCard}>
-      <Text style={styles.tamperTitle}>Latest uninstall attempt</Text>
+    <View
+      style={[
+        styles.tamperCard,
+        {
+          backgroundColor: isDark
+            ? 'rgba(23, 19, 79, 0.88)'
+            : theme.cardBg,
+          borderColor: theme.cardBorder,
+        },
+      ]}>
+      <Text style={[styles.tamperTitle, {color: theme.text}]}>
+        Latest uninstall attempt
+      </Text>
       {events.map(e => (
         <View key={e.id} style={styles.tamperRow}>
           <View
             style={[
               styles.tamperDot,
-              {backgroundColor: e.success ? colors.warning : colors.danger},
+              {
+                backgroundColor: e.success
+                  ? theme.warning
+                  : theme.danger,
+              },
             ]}
           />
           <View style={styles.tamperRowText}>
-            <Text style={styles.tamperKind}>{labelForKind(e.kind)}</Text>
-            <Text style={styles.tamperMeta}>
+            <Text style={[styles.tamperKind, {color: theme.text}]}>
+              {labelForKind(e.kind)}
+            </Text>
+            <Text style={[styles.tamperMeta, {color: theme.textMuted}]}>
               {e.success ? 'Unlocked with PIN' : 'PIN gate blocked'} ·{' '}
               {formatRelative(e.timestamp)}
             </Text>
@@ -214,129 +264,61 @@ function formatRelative(ts: number): string {
   return `${Math.floor(diff / 86_400_000)} d ago`;
 }
 
-function TabChip({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable onPress={onPress} style={[styles.chip, active && styles.chipActive]}>
-      <Text
-        numberOfLines={1}
-        style={[styles.chipLabel, active && styles.chipLabelActive]}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
-  safe: {flex: 1, backgroundColor: colors.bg},
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...softShadow,
-  },
-  backButtonPressed: {
-    opacity: 0.6,
-  },
-  headerText: {
-    flex: 1,
-    minWidth: 0,
-  },
-  headerTitle: {
-    color: colors.text,
-    fontSize: 24,
-    lineHeight: 30,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-  },
-  headerSubtitle: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 19,
-    marginTop: 1,
-  },
   statusStrip: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
+    paddingHorizontal: parentSpacing.lg,
+    paddingTop: parentSpacing.xs,
     width: '100%',
     overflow: 'hidden',
   },
-  /** Column below the status card — tab bar is fixed; Location fills remainder. */
   body: {
     flex: 1,
   },
-  /** Scrollable region for every tab except Location (which needs flex-fill for the map). */
   scrollableTab: {
     flex: 1,
   },
   scrollableTabContent: {
-    paddingBottom: spacing.xl,
+    paddingBottom: parentSpacing.xl,
     flexGrow: 1,
   },
   tabbar: {
     flexGrow: 0,
-    marginVertical: spacing.md,
+    marginVertical: parentSpacing.sm,
   },
   tabbarContent: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    gap: spacing.sm,
+    paddingHorizontal: parentSpacing.lg,
+    paddingVertical: parentSpacing.xs,
+    gap: parentSpacing.sm,
     alignItems: 'center',
   },
   chip: {
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    ...softShadow,
+    borderRadius: parentRadius.pill,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  chipActive: {backgroundColor: colors.primary},
   chipLabel: {
-    color: colors.text,
-    fontSize: 14,
-    lineHeight: 19,
-    fontWeight: '500',
-  },
-  chipLabelActive: {
-    color: colors.primaryText,
-    fontWeight: '600',
+    fontSize: 13,
   },
   tamperCard: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg - 4,
-    padding: spacing.md,
-    gap: spacing.sm,
-    ...softShadow,
+    marginHorizontal: parentSpacing.lg,
+    marginBottom: parentSpacing.md,
+    borderRadius: parentRadius.lg,
+    borderWidth: 1,
+    padding: parentSpacing.md,
+    gap: parentSpacing.sm,
   },
   tamperTitle: {
-    color: colors.text,
     fontSize: 14,
     fontWeight: '700',
   },
   tamperRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: parentSpacing.sm,
   },
   tamperRowText: {flex: 1},
   tamperDot: {
@@ -345,12 +327,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   tamperKind: {
-    color: colors.text,
     fontSize: 13,
     fontWeight: '600',
   },
   tamperMeta: {
-    color: colors.textMuted,
     fontSize: 11,
     marginTop: 1,
   },

@@ -1,12 +1,25 @@
-import React, {useCallback, useMemo, useState} from 'react';
+/**
+ * QuizScreen — Class 6–12 Quiz Experience (Grade 7+).
+ *
+ * Bound to useTopicContent hook (topic.quiz[] array).
+ * Submits raw answers to `submitQuizAttempt` Cloud Function.
+ * Scoring and pass/fail evaluation happen exclusively server-side.
+ */
+
+import React, {useMemo, useState} from 'react';
 import {
   ActivityIndicator,
+  Alert,
+  Image,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import Svg, {Circle, Path, Rect} from 'react-native-svg';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {callFn} from '@zerebro/shared-firebase';
 import type {
@@ -14,340 +27,503 @@ import type {
   SubmitQuizAttemptOutput,
 } from '@zerebro/shared-types';
 
-import {Button} from '../../components/Button';
+import {AIDoubtModal} from './components/AIDoubtModal';
 import {useTopicContent} from '../../firebase/study';
-import {colors, radius, spacing} from '../../theme';
+import {fonts, radius, spacing} from '../../theme';
+import {useTheme} from '../../context/ThemeContext';
 import type {StudyStackParamList} from '../../navigation/types';
-import {TopicMarkdownContent} from './components/TopicMarkdownContent';
 
 type Props = NativeStackScreenProps<StudyStackParamList, 'Quiz'>;
 
-/**
- * P4.9.1 -- one-question-at-a-time quiz.
- *
- * Loads the quiz from the topic doc (live), presents one MCQ per screen with
- * Back/Next, tracks the child's selections locally, and on the final question
- * calls the `submitQuizAttempt` callable. The SERVER grades (the client never
- * computes the score), then we replace the route with the result screen so the
- * back button doesn't return into a finished quiz.
- */
 export function QuizScreen({route, navigation}: Props) {
-  const {assignmentId, curriculumId, chapterId, topicId, topicName} =
-    route.params;
-  const {data: topic, loading, error} = useTopicContent(
+  const {assignmentId, curriculumId, chapterId, topicId, topicName} = route.params;
+  const {theme} = useTheme();
+  const {colors, images} = theme;
+
+  const {data: topic, loading: topicLoading, error} = useTopicContent(
     curriculumId,
     chapterId,
     topicId,
   );
 
   const quiz = useMemo(() => topic?.quiz ?? [], [topic]);
+  const total = quiz.length;
 
   const [current, setCurrent] = useState(0);
-  // questionId -> selectedIndex
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [showAiModal, setShowAiModal] = useState<boolean>(false);
 
-  const total = quiz.length;
-  const isLast = current === total - 1;
+  // 1. Loading State
+  if (topicLoading) {
+    return (
+      <View style={[styles.centerBg, {backgroundColor: colors.bg}]}>
+        <ActivityIndicator color={colors.primary} size="large" />
+        <Text style={[styles.loadingText, {color: colors.mutedText}]}>
+          Loading quiz questions…
+        </Text>
+      </View>
+    );
+  }
+
+  // 2. Error / No Quiz Questions
+  if (error || !topic || total === 0) {
+    return (
+      <View style={[styles.centerBg, {backgroundColor: colors.bg}]}>
+        <Text style={styles.errorEmoji}>⚠️</Text>
+        <Text style={[styles.errorTitle, {color: '#EF4444'}]}>
+          Quiz not available
+        </Text>
+        <Text style={[styles.errorBody, {color: colors.mutedText}]}>
+          {error || 'No quiz questions are assigned for this topic yet.'}
+        </Text>
+        <Pressable
+          style={[styles.outlineBtn, {borderColor: colors.border, backgroundColor: colors.surface}]}
+          onPress={() => navigation.goBack()}>
+          <Text style={[styles.outlineBtnText, {color: colors.text}]}>Go back</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   const question = quiz[current];
-  const selectedIndex = question ? answers[question.questionId] : undefined;
-  const answeredCount = Object.keys(answers).length;
+  const selectedIdx = answers[question.questionId] ?? null;
+  const isLast = current === total - 1;
 
-  const select = useCallback(
-    (questionId: string, index: number) => {
-      setAnswers(prev => ({...prev, [questionId]: index}));
-    },
-    [],
-  );
+  const onSelectOption = (index: number) => {
+    setAnswers(prev => ({
+      ...prev,
+      [question.questionId]: index,
+    }));
+  };
 
-  const submit = useCallback(async () => {
-    if (submitting) return;
+  const onNextOrSubmit = async () => {
+    if (selectedIdx === null) {
+      Alert.alert('Please select an answer', 'Choose an option before continuing.');
+      return;
+    }
+
+    if (!isLast) {
+      setCurrent(c => c + 1);
+      return;
+    }
+
+    // Submit Attempt
     setSubmitting(true);
-    setSubmitError(null);
     try {
       const payload: SubmitQuizAttemptInput = {
         assignmentId,
         answers: quiz.map(q => ({
           questionId: q.questionId,
-          selectedIndex:
-            typeof answers[q.questionId] === 'number'
-              ? answers[q.questionId]
-              : -1,
+          selectedIndex: answers[q.questionId] ?? -1,
         })),
       };
-      const result = await callFn<
-        SubmitQuizAttemptInput,
-        SubmitQuizAttemptOutput
-      >('submitQuizAttempt', payload);
+
+      const result = await callFn<SubmitQuizAttemptInput, SubmitQuizAttemptOutput>(
+        'submitQuizAttempt',
+        payload,
+      );
+
       navigation.replace('QuizResult', {
         result,
-        topicName,
+        topicName: topic.topicName || topicName,
         assignmentId,
         curriculumId,
         chapterId,
         topicId,
       });
-    } catch (err) {
-      setSubmitError(
-        (err as {message?: string} | null)?.message ??
-          'Could not submit your quiz. Check your connection and try again.',
-      );
-    } finally {
+    } catch (err: any) {
       setSubmitting(false);
+      Alert.alert(
+        'Submission Failed',
+        err?.message || 'Unable to submit your quiz attempt. Please check your internet connection and try again.',
+      );
     }
-  }, [
-    submitting,
-    assignmentId,
-    quiz,
-    answers,
-    navigation,
-    topicName,
-    curriculumId,
-    chapterId,
-    topicId,
-  ]);
+  };
 
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.mutedText}>Loading quiz…</Text>
-      </View>
-    );
-  }
-
-  if (error || !topic) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.emoji}>⚠️</Text>
-        <Text style={styles.errorTitle}>Could not load quiz</Text>
-        <Text style={styles.mutedText}>{error ?? 'Topic not found.'}</Text>
-        <Button
-          title="Go back"
-          variant="secondary"
-          onPress={() => navigation.goBack()}
-          style={{marginTop: spacing.md}}
-        />
-      </View>
-    );
-  }
-
-  if (total === 0 || !question) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.emoji}>📭</Text>
-        <Text style={styles.errorTitle}>No quiz for this topic</Text>
-        <Text style={styles.mutedText}>
-          There aren&apos;t any questions here yet. Try again after the next
-          update.
-        </Text>
-        <Button
-          title="Go back"
-          variant="secondary"
-          onPress={() => navigation.goBack()}
-          style={{marginTop: spacing.md}}
-        />
-      </View>
-    );
-  }
+  const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   return (
-    <View style={styles.root}>
-      {/* Progress */}
-      <View style={styles.progressHeader}>
-        <Text style={styles.progressText}>
-          Question {current + 1} of {total}
-        </Text>
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              {width: `${((current + 1) / total) * 100}%`},
-            ]}
-          />
-        </View>
-      </View>
+    <View style={[styles.root, {backgroundColor: colors.bg}]}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.bg} />
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled">
-        <TopicMarkdownContent style={styles.question}>
-          {question.question}
-        </TopicMarkdownContent>
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
 
-        <View style={styles.options}>
-          {question.options.map((opt, idx) => {
-            const isSelected = selectedIndex === idx;
-            return (
-              <Pressable
-                key={idx}
-                onPress={() => select(question.questionId, idx)}
-                android_ripple={{color: 'rgba(0,0,0,0.06)'}}
-                style={[styles.option, isSelected && styles.optionSelected]}>
-                <View
-                  style={[
-                    styles.radio,
-                    isSelected && styles.radioSelected,
-                  ]}>
-                  {isSelected ? <View style={styles.radioDot} /> : null}
-                </View>
-                <TopicMarkdownContent
-                  style={[
-                    styles.optionText,
-                    isSelected && styles.optionTextSelected,
-                  ]}>
-                  {opt}
-                </TopicMarkdownContent>
+        {/* Hero Header with Background Image */}
+        <View style={styles.quizHeaderBox}>
+          <Image source={images.quizHeader} style={styles.quizHeaderImg} resizeMode="cover" />
+          <View style={[styles.quizOverlay, {backgroundColor: colors.isDark ? 'rgba(10,7,22,0.72)' : 'rgba(30,10,60,0.55)'}]} />
+
+          <SafeAreaView edges={['top']} style={styles.quizSafeTop}>
+            <View style={styles.quizTopRow}>
+              <Pressable onPress={() => navigation.goBack()} style={styles.iconBtn} hitSlop={12}>
+                <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <Path d="M6 6l12 12M18 6L6 18" />
+                </Svg>
               </Pressable>
-            );
-          })}
+              <Text style={[styles.quizQuestionCount, {color: '#FFFFFF'}]}>
+                Question {current + 1} of {total}
+              </Text>
+              <Pressable
+                style={styles.askAiBtn}
+                onPress={() => setShowAiModal(true)}>
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <Path d="M12 5a4 4 0 0 0-4 4 3 3 0 0 0 0 6 3.5 3.5 0 0 0 4 3.4z" />
+                  <Path d="M12 5a4 4 0 0 1 4 4 3 3 0 0 1 0 6 3.5 3.5 0 0 1-4 3.4z" />
+                </Svg>
+              </Pressable>
+            </View>
+
+            {/* Segmented Progress Bar */}
+            <View style={styles.segmentedBar}>
+              {Array.from({length: total}).map((_, idx) => {
+                const isAnswered = answers[quiz[idx]?.questionId] !== undefined;
+                const isCurrent = idx === current;
+                return (
+                  <View
+                    key={idx}
+                    style={[
+                      styles.segmentPill,
+                      {
+                        backgroundColor: isCurrent
+                          ? colors.primary
+                          : isAnswered
+                            ? (colors.isDark ? colors.textAccentMuted : '#FFFFFF')
+                            : 'rgba(255,255,255,0.24)',
+                      },
+                    ]}
+                  />
+                );
+              })}
+            </View>
+          </SafeAreaView>
         </View>
 
-        {submitError ? (
-          <Text style={styles.submitError}>{submitError}</Text>
-        ) : null}
-      </ScrollView>
+        {/* Question & Options Body */}
+        <View style={styles.quizBody}>
+          <Text style={[styles.questionText, {color: colors.text}]}>
+            {question.question}
+          </Text>
 
-      {/* Footer nav */}
-      <View style={styles.footer}>
-        <View style={styles.footerRow}>
-          {current > 0 ? (
-            <View style={styles.footerBtn}>
-              <Button
-                title="Back"
-                variant="secondary"
-                onPress={() => setCurrent(c => Math.max(0, c - 1))}
-                disabled={submitting}
-              />
-            </View>
-          ) : null}
-          <View style={styles.footerBtn}>
-            {isLast ? (
-              <Button
-                title={
-                  answeredCount < total ? 'Answer all to submit' : 'Submit quiz'
-                }
-                onPress={submit}
-                loading={submitting}
-                disabled={answeredCount < total}
-              />
-            ) : (
-              <Button
-                title="Next"
-                onPress={() => setCurrent(c => Math.min(total - 1, c + 1))}
-                disabled={selectedIndex === undefined}
-              />
-            )}
+          {/* Options List */}
+          <View style={styles.optionsWrap}>
+            {question.options.map((opt, index) => {
+              const isSelected = selectedIdx === index;
+              return (
+                <Pressable
+                  key={index}
+                  style={[
+                    styles.optionCard,
+                    isSelected
+                      ? {
+                          backgroundColor: colors.isDark ? 'rgba(0,229,255,0.1)' : 'rgba(109,59,255,0.08)',
+                          borderColor: colors.primary,
+                          borderWidth: 2,
+                        }
+                      : {
+                          backgroundColor: colors.surface,
+                          borderColor: colors.border,
+                          borderWidth: 1.5,
+                        },
+                  ]}
+                  onPress={() => onSelectOption(index)}>
+                  <View
+                    style={[
+                      styles.letterBox,
+                      {
+                        backgroundColor: isSelected ? colors.primary : colors.cardInner,
+                      },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.letterText,
+                        {
+                          color: isSelected ? colors.onPrimary : colors.mutedText,
+                        },
+                      ]}>
+                      {optionLetters[index] || String(index + 1)}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.optionText,
+                      {
+                        color: colors.text,
+                        fontWeight: isSelected ? '600' : '500',
+                      },
+                    ]}>
+                    {opt}
+                  </Text>
+                  {isSelected && (
+                    <Text style={[styles.selectedPillText, {color: colors.textAccentMuted}]}>
+                      SELECTED
+                    </Text>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {/* Teacher & Parent Info Notice */}
+          <View
+            style={[
+              styles.noticeBox,
+              {
+                backgroundColor: colors.isDark ? 'rgba(124,77,255,0.12)' : 'rgba(109,59,255,0.08)',
+                borderColor: colors.isDark ? 'rgba(124,77,255,0.3)' : 'rgba(109,59,255,0.2)',
+              },
+            ]}>
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.secondary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <Circle cx={12} cy={8} r={4} />
+              <Path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" />
+            </Svg>
+            <Text style={[styles.noticeText, {color: colors.textSecondary}]}>
+              Your result goes to your parent & teacher. Pass mark is 60%.
+            </Text>
           </View>
         </View>
-      </View>
+
+        <View style={{height: 120}} />
+      </ScrollView>
+
+      {/* Sticky Bottom Bar */}
+      <SafeAreaView edges={['bottom']} style={[styles.bottomSafeArea, {backgroundColor: colors.navBg}]}>
+        <View style={[styles.bottomBar, {backgroundColor: colors.navBg, borderTopColor: colors.border}]}>
+          <Pressable
+            disabled={submitting}
+            style={({pressed}) => [
+              styles.nextBtn,
+              {backgroundColor: colors.primary},
+              pressed && styles.btnPressed,
+              submitting && {opacity: 0.7},
+            ]}
+            onPress={onNextOrSubmit}>
+            {submitting ? (
+              <ActivityIndicator color={colors.onPrimary} size="small" />
+            ) : (
+              <>
+                <Text style={[styles.nextBtnText, {color: colors.onPrimary}]}>
+                  {isLast ? 'Submit Quiz' : 'Next question'}
+                </Text>
+                <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={colors.onPrimary} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+                  <Path d="M5 12h14M13 6l6 6-6 6" />
+                </Svg>
+              </>
+            )}
+          </Pressable>
+        </View>
+      </SafeAreaView>
+
+      {/* AI Doubt Modal */}
+      {showAiModal && (
+        <AIDoubtModal
+          visible={showAiModal}
+          onClose={() => setShowAiModal(false)}
+          topicTitle={topic.topicName || topicName || 'Quiz Question'}
+          sectionTitle={`Question ${current + 1}: ${question.question}`}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {flex: 1, backgroundColor: colors.bg},
-  centered: {
+  root: {
     flex: 1,
-    backgroundColor: colors.bg,
+  },
+  centerBg: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: spacing.lg,
-    gap: spacing.sm,
+    padding: spacing.pagePad,
+    gap: spacing.md,
   },
-  progressHeader: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    gap: spacing.sm,
+  loadingText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 14,
   },
-  progressText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textMuted,
+  errorEmoji: {
+    fontSize: 44,
   },
-  progressTrack: {
-    height: 6,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
-  },
-  scroll: {flex: 1},
-  content: {padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl},
-  question: {
+  errorTitle: {
+    fontFamily: fonts.heading,
     fontSize: 20,
     fontWeight: '700',
-    color: colors.text,
-    lineHeight: 28,
+    textAlign: 'center',
   },
-  options: {gap: spacing.sm},
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.md,
-    borderRadius: radius.md,
+  errorBody: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+    maxWidth: 300,
+  },
+  outlineBtn: {
+    marginTop: spacing.sm,
+    paddingHorizontal: 20,
+    height: 44,
+    borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  optionSelected: {
-    borderColor: colors.text,
-    backgroundColor: colors.surfaceAlt,
-  },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: colors.textMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioSelected: {borderColor: colors.text},
-  radioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.text,
+  outlineBtnText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
+  },
+
+  // Quiz Header
+  quizHeaderBox: {
+    position: 'relative',
+    height: 160,
+  },
+  quizHeaderImg: {
+    width: '100%',
+    height: 160,
+    position: 'absolute',
+  },
+  quizOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  quizSafeTop: {
+    flex: 1,
+    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    paddingBottom: 16,
+  },
+  quizTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingTop: 8,
+  },
+  iconBtn: {
+    padding: 4,
+  },
+  quizQuestionCount: {
+    flex: 1,
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  askAiBtn: {
+    padding: 6,
+  },
+  segmentedBar: {
+    flexDirection: 'row',
+    gap: 5,
+    paddingTop: 8,
+  },
+  segmentPill: {
+    flex: 1,
+    height: 6,
+    borderRadius: radius.pill,
+  },
+
+  // Body
+  quizBody: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    gap: 16,
+  },
+  questionText: {
+    fontFamily: fonts.heading,
+    fontSize: 20,
+    lineHeight: 27,
+    fontWeight: '700',
+  },
+  optionsWrap: {
+    gap: 12,
+    paddingTop: 4,
+  },
+  optionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    borderRadius: 18,
+  },
+  letterBox: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  letterText: {
+    fontFamily: fonts.mono,
+    fontSize: 14,
+    fontWeight: '700',
   },
   optionText: {
     flex: 1,
+    fontFamily: fonts.bodyMedium,
     fontSize: 15,
-    color: colors.text,
     lineHeight: 21,
   },
-  optionTextSelected: {fontWeight: '600'},
-  submitError: {
-    fontSize: 13,
-    color: colors.danger,
-    textAlign: 'center',
-  },
-  footer: {
-    padding: spacing.md,
-    paddingBottom: spacing.lg,
-    backgroundColor: colors.bg,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  footerRow: {flexDirection: 'row', gap: spacing.md},
-  footerBtn: {flex: 1},
-  emoji: {fontSize: 40},
-  errorTitle: {
-    fontSize: 18,
+  selectedPillText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 11,
     fontWeight: '700',
-    color: colors.text,
-    textAlign: 'center',
+    letterSpacing: 0.5,
   },
-  mutedText: {
+
+  noticeBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 13,
+    paddingHorizontal: 15,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginTop: 4,
+  },
+  noticeText: {
+    flex: 1,
+    fontFamily: fonts.bodyMedium,
     fontSize: 13,
-    color: colors.textMuted,
-    textAlign: 'center',
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+
+  // Sticky Bottom Bar
+  bottomSafeArea: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  bottomBar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 14,
+    borderTopWidth: 1,
+  },
+  nextBtn: {
+    height: 54,
+    borderRadius: radius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  nextBtnText: {
+    fontFamily: fonts.bodySemiBold,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  btnPressed: {
+    opacity: 0.9,
+    transform: [{scale: 0.98}],
   },
 });

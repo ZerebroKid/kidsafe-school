@@ -82,6 +82,41 @@ declare module 'react-native-svg' {
     [key: string]: any;
   }
 
+  interface DefsProps {
+    children?: React.ReactNode;
+    [key: string]: any;
+  }
+
+  interface LinearGradientProps {
+    id?: string;
+    x1?: number | string;
+    y1?: number | string;
+    x2?: number | string;
+    y2?: number | string;
+    gradientUnits?: string;
+    children?: React.ReactNode;
+    [key: string]: any;
+  }
+
+  interface RadialGradientProps {
+    id?: string;
+    cx?: number | string;
+    cy?: number | string;
+    r?: number | string;
+    fx?: number | string;
+    fy?: number | string;
+    gradientUnits?: string;
+    children?: React.ReactNode;
+    [key: string]: any;
+  }
+
+  interface StopProps {
+    offset?: number | string;
+    stopColor?: string;
+    stopOpacity?: number | string;
+    [key: string]: any;
+  }
+
   const Svg: FC<SvgProps>;
   const Path: FC<PathProps>;
   const Circle: FC<CircleProps>;
@@ -89,8 +124,36 @@ declare module 'react-native-svg' {
   const Line: FC<LineProps>;
   const G: FC<GProps>;
   const Text: FC<TextProps>;
+  const Defs: FC<DefsProps>;
+  const LinearGradient: FC<LinearGradientProps>;
+  const RadialGradient: FC<RadialGradientProps>;
+  const Stop: FC<StopProps>;
 
   export default Svg;
-  export {Svg, Path, Circle, Rect, Line, G, Text};
-  export type {SvgProps, PathProps, CircleProps, RectProps, LineProps, GProps, TextProps};
+  export {
+    Svg,
+    Path,
+    Circle,
+    Rect,
+    Line,
+    G,
+    Text,
+    Defs,
+    LinearGradient,
+    RadialGradient,
+    Stop,
+  };
+  export type {
+    SvgProps,
+    PathProps,
+    CircleProps,
+    RectProps,
+    LineProps,
+    GProps,
+    TextProps,
+    DefsProps,
+    LinearGradientProps,
+    RadialGradientProps,
+    StopProps,
+  };
 }

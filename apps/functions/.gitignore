@@ -3,3 +3,5 @@ node_modules/
 *.log
 .runtimeconfig.json
 serviceAccountKey.json
+.secret.local
+.secret.*.local

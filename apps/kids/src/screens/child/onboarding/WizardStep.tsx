@@ -49,10 +49,15 @@ export function WizardStep({
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
       <View style={styles.header}>
+        <View style={styles.headerTopRow}>
+          <Text style={styles.stepBadge}>
+            Step {stepIndex + 1} of {totalSteps}
+          </Text>
+          {timeRemaining ? (
+            <Text style={styles.timeRemaining}>{timeRemaining}</Text>
+          ) : null}
+        </View>
         <ProgressBar total={totalSteps} index={stepIndex} />
-        {timeRemaining && (
-          <Text style={styles.timeRemaining}>{timeRemaining}</Text>
-        )}
       </View>
 
       <ScrollView
@@ -100,8 +105,7 @@ export function WizardStep({
 }
 
 function ProgressBar({total, index}: {total: number; index: number}) {
-  // Segments are rendered as flex children with a small gap. Completed = success green; current =
-  // primary blue; upcoming = surfaceAlt.
+  // Segments: Completed = Success Green (#12B76A), Current = Primary Violet (#6D3BFF), Upcoming = Clearly visible Soft Purple (#DCD6F7)
   return (
     <View style={progressStyles.bar}>
       {Array.from({length: total}, (_, i) => {
@@ -115,19 +119,23 @@ function ProgressBar({total, index}: {total: number; index: number}) {
 
 const progressStyles = StyleSheet.create({
   bar: {
-    flex: 1,
     flexDirection: 'row',
-    gap: 4,
-    height: 6,
+    gap: 6,
+    height: 7,
+    width: '100%',
   },
   seg: {
     flex: 1,
-    height: 6,
-    borderRadius: 3,
+    height: 7,
+    borderRadius: 4,
   },
   done: {backgroundColor: colors.success},
   current: {backgroundColor: colors.primary},
-  upcoming: {backgroundColor: colors.surfaceAlt},
+  upcoming: {
+    backgroundColor: '#DCD6F7',
+    borderWidth: 1,
+    borderColor: '#CCC4F0',
+  },
 });
 
 const styles = StyleSheet.create({
@@ -136,18 +144,26 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.md,
-    gap: spacing.md,
+    gap: spacing.sm,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  stepBadge: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.primary,
+    letterSpacing: 0.3,
   },
   timeRemaining: {
     color: colors.textMuted,
     fontSize: 12,
     fontWeight: '600',
-    minWidth: 60,
     textAlign: 'right',
   },
   body: {

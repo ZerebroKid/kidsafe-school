@@ -40,11 +40,15 @@ initGoogleSignIn(ENV.GOOGLE_WEB_CLIENT_ID);
 // FCM background handler — runs even if the app is killed. Child uses this to react to
 // parent commands pushed via FCM data messages (the parent app writes Firestore; a
 // Cloud Function / server sends the push).
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-  if (__DEV__) {
-    console.log('[ZKid] FCM bg message', remoteMessage?.data);
-  }
-});
+try {
+  messaging().setBackgroundMessageHandler(async remoteMessage => {
+    if (__DEV__) {
+      console.log('[ZKid] FCM bg message', remoteMessage?.data);
+    }
+  });
+} catch (e) {
+  console.warn('[ZKid] FCM background handler skipped (Firebase GoogleService-Info.plist not initialized):', e);
+}
 
 // Native receivers (PackageReceiver, GeofenceTransitionReceiver) start these services so JS
 // can write Firestore without requiring the UI to be active.

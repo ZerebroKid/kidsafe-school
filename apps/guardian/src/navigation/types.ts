@@ -22,30 +22,96 @@ export type AuthStackParamList = {
   PhoneConfirm: {verificationId: string; phone: string};
 };
 
-export type ParentStackParamList = {
-  ParentTabs: undefined;
-  ChildDetails: {childUid: string; childName: string};
-};
-
 export type ParentTabsParamList = {
+  ParentHomeTab: undefined;
+  ParentControlsTab: {childUid?: string; childName?: string} | undefined;
+  ParentReportsTab: {childUid?: string; childName?: string} | undefined;
+  ParentSettingsTab: undefined;
+  /** Legacy alias for backwards compatibility */
   Children: undefined;
   Settings: undefined;
 };
 
+export type ParentStackParamList = {
+  ParentTabs: undefined;
+  ChildDetails: {childUid: string; childName?: string; initialTab?: string};
+  JoinSchool: undefined;
+  ParentHome: undefined;
+  ParentControls: {childUid?: string; childName?: string} | undefined;
+  ParentReports: {childUid?: string; childName?: string} | undefined;
+  ParentSettings: undefined;
+  Controls: {childUid?: string; childName?: string} | undefined;
+  Reports: {childUid?: string; childName?: string} | undefined;
+  Settings: undefined;
+  Schedule: {childUid?: string} | undefined;
+  Apps: {childUid?: string} | undefined;
+  Location: {childUid?: string} | undefined;
+  ReelsInsights: {childUid?: string} | undefined;
+  Study: {childUid?: string} | undefined;
+  Pin: {childUid?: string} | undefined;
+};
+
+export type TeacherTabsParamList = {
+  TeacherHomeTab: undefined;
+  TeacherClassesTab: undefined;
+  TeacherReportsTab: undefined;
+  TeacherMoreTab: undefined;
+};
+
 /**
- * P4.5 — ZConnect teacher mode stack.
- *
- * `TeacherHome` is the landing screen (today's assignments + Assign CTA);
- * `TeacherAssign` is the cascading topic picker screen that calls the
- * `assignTopic` callable. The home screen pushes the assign screen via
- * `navigation.navigate('TeacherAssign')` -- no params today, but the
- * `undefined` shape keeps the contract explicit.
+ * Teacher mode stack navigation contracts.
  */
 export type TeacherStackParamList = {
+  TeacherTabs: undefined;
   TeacherHome: undefined;
-  TeacherAssign: undefined;
-  /** P4.11 -- per-class study report (aggregated charts + stats). */
+  TeacherClasses: undefined;
+  TeacherClassDetail: {
+    classId: string;
+    className: string;
+    subject?: string;
+    grade?: number;
+    section?: string;
+    board?: string;
+  };
+  TeacherAssign:
+    | {
+        classId?: string;
+        className?: string;
+        curriculumId?: string;
+        chapterId?: string;
+        chapterName?: string;
+        initialTopics?: Array<{
+          id: string;
+          name: string;
+          chapterId?: string;
+          chapterName?: string;
+        }>;
+      }
+    | undefined;
+  TeacherLiveQuiz: {
+    classId: string;
+    className: string;
+    chapterName?: string;
+    roomCode?: string;
+  };
+  TeacherDone: {
+    kind: 'assign' | 'quiz';
+    classId?: string;
+    className: string;
+    summary: string;
+  };
+  TeacherReports: undefined;
   TeacherClassReport: {classId: string; className: string};
-  /** P4.11 -- full per-student roster for a class (reached from the report). */
   TeacherClassStudents: {classId: string; className: string};
+  TeacherStudentsNeedingHelp: undefined;
+  TeacherStudentDetail: {
+    studentUid?: string;
+    studentName: string;
+    rollNo?: string;
+    classId?: string;
+    className?: string;
+    score?: number;
+  };
+  TeacherNotifications: undefined;
+  TeacherMore: undefined;
 };

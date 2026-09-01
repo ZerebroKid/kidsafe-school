@@ -311,7 +311,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
         <FunBackground />
         <SafeAreaView style={styles.center}>
           <ActivityIndicator size="large" color="#ffffff" />
-          <Text style={styles.mutedText}>Zumi aa raha hai…</Text>
+          <Text style={styles.mutedText}>Connecting to Zumi…</Text>
         </SafeAreaView>
       </View>
     );
@@ -334,7 +334,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
               styles.whiteCta,
               pressed && styles.whiteCtaPressed,
             ]}>
-            <Text style={styles.whiteCtaText}>Wapas jao</Text>
+            <Text style={styles.whiteCtaText}>Go back</Text>
           </Pressable>
         </SafeAreaView>
       </View>
@@ -379,7 +379,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
               />
             </View>
             <Text style={styles.videoCaption}>
-              🍿 Video dekho, phir aage badhenge!
+              🍿 Watch the video, then let's continue!
             </Text>
           </View>
         ) : (
@@ -416,7 +416,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
                 styles.videoSkipButton,
                 pressed && styles.micButtonPressed,
               ]}>
-              <Text style={styles.videoSkipButtonText}>Aage badho ▶</Text>
+              <Text style={styles.videoSkipButtonText}>Continue ▶</Text>
             </Pressable>
           </View>
         ) : (
@@ -434,7 +434,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
             <View style={[styles.micButton, styles.micButtonThinking]}>
               <ActivityIndicator size="large" color="#ffffff" />
             </View>
-            <Text style={styles.listenHint}>Samajh raha hoon…</Text>
+            <Text style={styles.listenHint}>Thinking…</Text>
           </View>
         ) : listening && listenMode === 'auto' ? (
           <View style={styles.micArea}>
@@ -454,9 +454,9 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
               <Text style={styles.micGlyph}>⏹</Text>
             </Pressable>
             <Text style={styles.recordingLabel}>
-              {speaking ? '● Sun raha hoon…' : '🎧 Bolo, main sun raha hoon'}
+              {speaking ? '● Listening…' : '🎧 Speak, I am listening'}
             </Text>
-            <Text style={styles.autoHint}>Bol ke ruk jao — main samajh jaunga</Text>
+            <Text style={styles.autoHint}>Speak and pause — I'll understand</Text>
           </View>
         ) : listening ? (
           <View style={styles.micArea}>
@@ -474,7 +474,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
               ]}>
               <Text style={styles.micGlyph}>⏹</Text>
             </Pressable>
-            <Text style={styles.recordingLabel}>● Sun raha hoon… ho gaya? Tap karo</Text>
+            <Text style={styles.recordingLabel}>● Listening… done? Tap here</Text>
           </View>
         ) : prompt ? (
           <View style={styles.micArea}>
@@ -492,7 +492,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
               <Text style={styles.micGlyph}>🎙️</Text>
             </Pressable>
             <Text style={styles.micLabel}>
-              {prompt.hint ?? 'Bolne ke liye dabao'}
+              {prompt.hint ?? 'Tap to speak'}
             </Text>
             {prompt.skippable ? (
               <Pressable
@@ -500,7 +500,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
                 hitSlop={10}
                 android_ripple={{color: 'rgba(0,0,0,0.06)'}}
                 style={styles.skipButton}>
-                <Text style={styles.skipText}>Aage badho ▶</Text>
+                <Text style={styles.skipText}>Continue ▶</Text>
               </Pressable>
             ) : null}
           </View>
@@ -522,7 +522,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
               styles.whiteCta,
               pressed && styles.whiteCtaPressed,
             ]}>
-            <Text style={styles.whiteCtaText}>Theek hai</Text>
+            <Text style={styles.whiteCtaText}>Okay</Text>
           </Pressable>
         </View>
       ) : null}
@@ -535,12 +535,12 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
             {done.score} / {done.maxScore}
           </Text>
           <Text style={styles.doneTitle}>
-            {done.passed ? 'Shabaash!' : 'Acchi koshish!'}
+            {done.passed ? 'Great Job!' : 'Good Effort!'}
           </Text>
           <Text style={styles.overlayText}>
             {done.passed
-              ? 'Tumne kamaal kar diya! Kal phir milte hain.'
-              : 'Tum bahut brave ho! Kal phir try karenge.'}
+              ? 'You did amazing! See you next time.'
+              : 'You tried so well! Let’s try again next time.'}
           </Text>
           <Pressable
             onPress={exit}
@@ -549,7 +549,7 @@ export function ZumiVoiceScreen({route, navigation}: Props) {
               styles.whiteCta,
               pressed && styles.whiteCtaPressed,
             ]}>
-            <Text style={styles.whiteCtaText}>Ho gaya ▶</Text>
+            <Text style={styles.whiteCtaText}>Done ▶</Text>
           </Pressable>
         </View>
       ) : null}

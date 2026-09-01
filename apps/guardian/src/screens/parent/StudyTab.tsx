@@ -1,13 +1,16 @@
 import React, {useMemo, useState} from 'react';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 
-import {colors, radius, spacing} from '../../theme';
+import {useParentTheme} from '../../state/themeStore';
+import {parentRadius, parentSpacing} from './theme/parentTheme';
+import {CosmicAssets} from '../../assets/cosmic';
 import {
   useChildQuizAttemptsAll,
   useChildRewardUnlocks,
@@ -38,11 +41,6 @@ function avg(values: number[]): number {
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
-/**
- * Recent-vs-earlier improvement signal for a subject. Median-split the topics
- * (already ordered oldest -> newest) and compare average best %. Needs >= 2
- * topics to be meaningful; small deltas read as "flat" to avoid noise.
- */
 function computeTrend(ordered: QuizAttemptRow[]): Trend | null {
   if (ordered.length < 2) return null;
   const mid = Math.floor(ordered.length / 2);
@@ -64,8 +62,6 @@ function buildGroups(rows: QuizAttemptRow[]): SubjectGroup[] {
   }
   const groups: SubjectGroup[] = [];
   for (const [subject, list] of bySubject) {
-    // Oldest -> newest for the trend split; display list mirrors this so the
-    // most recent topic shows last (parents read top-down chronologically).
     const ordered = [...list].sort((a, b) => {
       if (a.assignedDate !== b.assignedDate) {
         return a.assignedDate < b.assignedDate ? -1 : 1;
@@ -85,16 +81,8 @@ function buildGroups(rows: QuizAttemptRow[]): SubjectGroup[] {
   return groups.sort((a, b) => a.subject.localeCompare(b.subject));
 }
 
-/**
- * P4.11.1 -- parent Study sub-tab inside `ChildDetailsScreen`.
- *
- * Subject-organized view of a linked child's quiz performance. A Today/Overall
- * toggle switches the scope; results are grouped into collapsible per-subject
- * cards (avg best %, passed X/Y, progress bar, and a recent-vs-earlier
- * improvement trend). Built entirely from `quizAttempts` + `rewardUnlocks`,
- * both parent-readable via `isOwnChild(childUid)`.
- */
 export function StudyTab({childUid}: {childUid: string}) {
+  const {theme, isDark} = useParentTheme();
   const attempts = useChildQuizAttemptsAll(childUid);
   const rewards = useChildRewardUnlocks(childUid);
 
@@ -120,34 +108,46 @@ export function StudyTab({childUid}: {childUid: string}) {
   const groups = useMemo(() => buildGroups(activeRows), [activeRows]);
 
   const summary = useMemo(() => {
-    const topics = activeRows.length;
+    const totalTopics = activeRows.length;
     const passed = activeRows.filter(r => r.passed).length;
-    const avgBest =
-      topics > 0
-        ? Math.round(avg(activeRows.map(r => r.bestPercentage)))
-        : 0;
-    return {topics, passed, avgBest};
+    const avgBest = Math.round(avg(activeRows.map(r => r.bestPercentage)));
+    return {topics: totalTopics, passed, avgBest};
   }, [activeRows]);
 
-  if (attempts.loading && !attempts.data) {
+  if (attempts.loading || rewards.loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator color={colors.primary} />
+        <ActivityIndicator color={theme.primary} />
       </View>
     );
   }
 
   if (attempts.error) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorBanner}>{attempts.error}</Text>
+      <View style={styles.centered}>
+        <Text style={[styles.errorBanner, {color: theme.danger}]}>
+          {attempts.error}
+        </Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.toggle}>
+      <Image
+        source={CosmicAssets.tStudy}
+        style={styles.heroBannerImg}
+        resizeMode="cover"
+      />
+      <View
+        style={[
+          styles.toggle,
+          {
+            backgroundColor: isDark
+              ? 'rgba(255, 255, 255, 0.08)'
+              : '#EFE7F8',
+          },
+        ]}>
         <ToggleButton
           label="Today"
           active={scope === 'today'}
@@ -161,13 +161,22 @@ export function StudyTab({childUid}: {childUid: string}) {
       </View>
 
       {activeRows.length === 0 ? (
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyTitle}>
+        <View
+          style={[
+            styles.emptyCard,
+            {
+              backgroundColor: isDark
+                ? 'rgba(23, 19, 79, 0.88)'
+                : theme.cardBg,
+              borderColor: theme.cardBorder,
+            },
+          ]}>
+          <Text style={[styles.emptyTitle, {color: theme.text}]}>
             {scope === 'today' ? 'No quizzes yet today' : 'No quizzes yet'}
           </Text>
-          <Text style={styles.emptyBody}>
+          <Text style={[styles.emptyBody, {color: theme.textMuted}]}>
             {scope === 'today'
-              ? "When your child completes a topic quiz today, their score and any reward they unlock will show up here."
+              ? 'When your child completes a topic quiz today, their score and any reward they unlock will show up here.'
               : 'When your child completes topic quizzes, their subject-wise performance will appear here.'}
           </Text>
         </View>
@@ -179,7 +188,7 @@ export function StudyTab({childUid}: {childUid: string}) {
             <StatCard
               value={`${summary.passed}`}
               label="Passed"
-              valueColor={colors.success}
+              valueColor={theme.successGreen}
             />
           </View>
 
@@ -214,33 +223,55 @@ function SubjectCard({
   onToggle: () => void;
   rewardByAttempt: Map<string, string>;
 }) {
+  const {theme, isDark} = useParentTheme();
   const passRate = group.total > 0 ? group.passed / group.total : 0;
-  const barColor = passRate >= 0.5 ? colors.success : colors.warning;
+  const barColor = passRate >= 0.5 ? theme.successGreen : theme.warning;
   const pct = Math.max(0, Math.min(100, group.avgBest));
   return (
-    <View style={styles.subjectCard}>
+    <View
+      style={[
+        styles.subjectCard,
+        {
+          backgroundColor: isDark
+            ? 'rgba(23, 19, 79, 0.88)'
+            : theme.cardBg,
+          borderColor: theme.cardBorder,
+        },
+      ]}>
       <Pressable onPress={onToggle} style={styles.subjectHeader}>
         <View style={styles.subjectHeaderText}>
-          <Text style={styles.subjectName} numberOfLines={1}>
+          <Text
+            style={[styles.subjectName, {color: theme.text}]}
+            numberOfLines={1}>
             {group.subject}
           </Text>
-          <Text style={styles.subjectMeta}>
+          <Text style={[styles.subjectMeta, {color: theme.textMuted}]}>
             {group.passed}/{group.total} passed
           </Text>
         </View>
         <TrendChip trend={group.trend} />
-        <Text style={styles.subjectPct}>{pct}%</Text>
-        <Text style={styles.chevron}>{expanded ? '▾' : '▸'}</Text>
+        <Text style={[styles.subjectPct, {color: theme.text}]}>{pct}%</Text>
+        <Text style={[styles.chevron, {color: theme.textSubtle}]}>
+          {expanded ? '▾' : '▸'}
+        </Text>
       </Pressable>
 
-      <View style={styles.track}>
+      <View
+        style={[
+          styles.track,
+          {backgroundColor: theme.trackBg},
+        ]}>
         <View
           style={[styles.fill, {width: `${pct}%`, backgroundColor: barColor}]}
         />
       </View>
 
       {expanded ? (
-        <View style={styles.topicList}>
+        <View
+          style={[
+            styles.topicList,
+            {borderTopColor: theme.cardBorderSubtle},
+          ]}>
           {group.topics.map(row => (
             <TopicBar
               key={row.id}
@@ -261,28 +292,39 @@ function TopicBar({
   row: QuizAttemptRow;
   rewardTitle?: string;
 }) {
+  const {theme, isDark} = useParentTheme();
   const pct = Math.max(0, Math.min(100, row.bestPercentage));
-  const barColor = row.passed ? colors.success : colors.warning;
+  const barColor = row.passed ? theme.successGreen : theme.warning;
   return (
     <View style={styles.topicBlock}>
       {row.chapterName ? (
-        <Text style={styles.eyebrow} numberOfLines={1}>
+        <Text
+          style={[styles.eyebrow, {color: theme.textSubtle}]}
+          numberOfLines={1}>
           {row.chapterName}
         </Text>
       ) : null}
       <View style={styles.topicHeader}>
-        <Text style={styles.topicName} numberOfLines={1}>
+        <Text
+          style={[styles.topicName, {color: theme.text}]}
+          numberOfLines={1}>
           {row.topicName}
         </Text>
         <Text style={[styles.topicPct, {color: barColor}]}>{pct}%</Text>
       </View>
-      <View style={styles.trackSm}>
+      <View
+        style={[
+          styles.trackSm,
+          {backgroundColor: theme.trackBg},
+        ]}>
         <View
           style={[styles.fill, {width: `${pct}%`, backgroundColor: barColor}]}
         />
       </View>
       <View style={styles.metaRow}>
-        <Text style={styles.meta} numberOfLines={1}>
+        <Text
+          style={[styles.meta, {color: theme.textMuted}]}
+          numberOfLines={1}>
           {row.attemptCount} {row.attemptCount === 1 ? 'attempt' : 'attempts'}
         </Text>
         <Text style={[styles.statusText, {color: barColor}]}>
@@ -290,8 +332,18 @@ function TopicBar({
         </Text>
       </View>
       {rewardTitle ? (
-        <View style={styles.rewardChip}>
-          <Text style={styles.rewardChipText} numberOfLines={1}>
+        <View
+          style={[
+            styles.rewardChip,
+            {
+              backgroundColor: isDark
+                ? 'rgba(109, 63, 231, 0.25)'
+                : '#EFE7F8',
+            },
+          ]}>
+          <Text
+            style={[styles.rewardChipText, {color: theme.text}]}
+            numberOfLines={1}>
             🎁 {rewardTitle}
           </Text>
         </View>
@@ -301,13 +353,14 @@ function TopicBar({
 }
 
 function TrendChip({trend}: {trend: Trend | null}) {
+  const {theme} = useParentTheme();
   if (!trend) return null;
   const color =
     trend.direction === 'up'
-      ? colors.success
+      ? theme.successGreen
       : trend.direction === 'down'
-        ? colors.warning
-        : colors.textMuted;
+        ? theme.warning
+        : theme.textMuted;
   const arrow =
     trend.direction === 'up' ? '↑' : trend.direction === 'down' ? '↓' : '→';
   const label =
@@ -332,12 +385,28 @@ function StatCard({
   label: string;
   valueColor?: string;
 }) {
+  const {theme, isDark} = useParentTheme();
   return (
-    <View style={styles.statCard}>
-      <Text style={[styles.statValue, valueColor ? {color: valueColor} : null]}>
+    <View
+      style={[
+        styles.statCard,
+        {
+          backgroundColor: isDark
+            ? 'rgba(23, 19, 79, 0.88)'
+            : theme.cardBg,
+          borderColor: theme.cardBorder,
+        },
+      ]}>
+      <Text
+        style={[
+          styles.statValue,
+          {color: valueColor ?? theme.text},
+        ]}>
         {value}
       </Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statLabel, {color: theme.textMuted}]}>
+        {label}
+      </Text>
     </View>
   );
 }
@@ -351,12 +420,28 @@ function ToggleButton({
   active: boolean;
   onPress: () => void;
 }) {
+  const {theme, isDark} = useParentTheme();
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.toggleButton, active && styles.toggleButtonActive]}>
+      style={[
+        styles.toggleButton,
+        active && {
+          backgroundColor: theme.primary,
+        },
+      ]}>
       <Text
-        style={[styles.toggleLabel, active && styles.toggleLabelActive]}>
+        style={[
+          styles.toggleLabel,
+          {
+            color: active
+              ? '#FFFFFF'
+              : isDark
+              ? theme.textMuted
+              : theme.text,
+            fontWeight: active ? '700' : '600',
+          },
+        ]}>
         {label}
       </Text>
     </Pressable>
@@ -365,132 +450,126 @@ function ToggleButton({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    gap: spacing.md,
+    paddingHorizontal: parentSpacing.lg,
+    paddingTop: parentSpacing.xs,
+    gap: parentSpacing.md,
   },
   centered: {
-    paddingVertical: spacing.xl,
+    paddingVertical: parentSpacing.xl,
     alignItems: 'center',
   },
   toggle: {
     flexDirection: 'row',
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.pill,
+    borderRadius: parentRadius.pill,
     padding: 4,
   },
   toggleButton: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: radius.pill,
+    paddingVertical: 9,
+    borderRadius: parentRadius.pill,
   },
-  toggleButtonActive: {backgroundColor: colors.primary},
-  toggleLabel: {color: colors.textMuted, fontSize: 13, fontWeight: '600'},
-  toggleLabelActive: {color: colors.primaryText},
-  statsRow: {flexDirection: 'row', gap: spacing.sm},
+  toggleLabel: {fontSize: 13},
+  statsRow: {flexDirection: 'row', gap: 10},
   statCard: {
     flex: 1,
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
     borderWidth: 1,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
+    borderRadius: parentRadius.lg,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
   },
-  statValue: {color: colors.text, fontSize: 20, fontWeight: '700'},
-  statLabel: {color: colors.textMuted, fontSize: 11},
+  statValue: {fontSize: 19, fontWeight: '800'},
+  statLabel: {fontSize: 11, fontWeight: '600'},
   subjectCard: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
     borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
+    borderRadius: parentRadius.lg,
+    padding: parentSpacing.md,
+    gap: parentSpacing.sm,
   },
   subjectHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: parentSpacing.sm,
   },
   subjectHeaderText: {flex: 1},
-  subjectName: {color: colors.text, fontSize: 16, fontWeight: '700'},
-  subjectMeta: {color: colors.textMuted, fontSize: 12, marginTop: 1},
-  subjectPct: {color: colors.text, fontSize: 16, fontWeight: '700'},
-  chevron: {color: colors.textMuted, fontSize: 14, width: 14, textAlign: 'center'},
+  subjectName: {fontSize: 15, fontWeight: '700'},
+  subjectMeta: {fontSize: 12, marginTop: 1},
+  subjectPct: {fontSize: 15, fontWeight: '700'},
+  chevron: {fontSize: 14, width: 14, textAlign: 'center'},
   trendChip: {
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: parentSpacing.sm,
     paddingVertical: 2,
-    borderRadius: radius.pill,
+    borderRadius: parentRadius.pill,
   },
   trendText: {fontSize: 11, fontWeight: '700'},
   track: {
-    height: 8,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
+    height: 7,
+    borderRadius: parentRadius.pill,
     overflow: 'hidden',
   },
   trackSm: {
     height: 6,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
+    borderRadius: parentRadius.pill,
     overflow: 'hidden',
   },
-  fill: {height: '100%', borderRadius: radius.pill},
+  fill: {height: '100%', borderRadius: parentRadius.pill},
   topicList: {
-    gap: spacing.md,
-    marginTop: spacing.xs,
-    paddingTop: spacing.sm,
+    gap: parentSpacing.md,
+    marginTop: parentSpacing.xs,
+    paddingTop: parentSpacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
   },
-  topicBlock: {gap: spacing.xs},
+  topicBlock: {gap: 4},
   eyebrow: {
-    color: colors.textMuted,
-    fontSize: 11,
+    fontSize: 10,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    fontWeight: '700',
   },
   topicHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.sm,
+    gap: parentSpacing.sm,
   },
-  topicName: {flex: 1, color: colors.text, fontSize: 14, fontWeight: '600'},
-  topicPct: {fontSize: 14, fontWeight: '700'},
+  topicName: {flex: 1, fontSize: 13.5, fontWeight: '600'},
+  topicPct: {fontSize: 13.5, fontWeight: '700'},
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.sm,
+    gap: parentSpacing.sm,
   },
-  meta: {flex: 1, color: colors.textMuted, fontSize: 12},
-  statusText: {fontSize: 12, fontWeight: '700'},
+  meta: {flex: 1, fontSize: 11},
+  statusText: {fontSize: 11, fontWeight: '700'},
   rewardChip: {
     alignSelf: 'flex-start',
     marginTop: 2,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
+    paddingHorizontal: parentSpacing.sm,
+    paddingVertical: 3,
+    borderRadius: parentRadius.pill,
   },
-  rewardChipText: {color: colors.text, fontSize: 12, fontWeight: '600'},
+  rewardChipText: {fontSize: 11, fontWeight: '600'},
   emptyCard: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
     borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.xs,
+    borderRadius: parentRadius.lg,
+    padding: parentSpacing.lg,
+    gap: 4,
   },
-  emptyTitle: {color: colors.text, fontSize: 14, fontWeight: '700'},
-  emptyBody: {color: colors.textMuted, fontSize: 13, lineHeight: 19},
+  emptyTitle: {fontSize: 15, fontWeight: '700'},
+  emptyBody: {fontSize: 13, lineHeight: 19},
   errorBanner: {
-    color: colors.danger,
     fontSize: 13,
-    padding: spacing.md,
+    padding: parentSpacing.md,
+  },
+  heroBannerImg: {
+    width: '100%',
+    height: 140,
+    borderRadius: 22,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(85,217,139,0.24)',
   },
 });

@@ -1,17 +1,8 @@
-/**
- * ReelsInsightsTab — parent-facing view of the child's reel watch data.
- *
- * Layout (matching the reference mockup):
- *   1. Hero banner — dark card with child name + topic in bold, playful subtitle
- *   2. Section header — "Ask them these N questions tonight" + subtitle
- *   3. Numbered question cards — one per question, with a number circle
- *   4. Footer tagline — warm closing line
- */
-
 import React, {useMemo} from 'react';
 import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
 
-import {colors, radius, spacing} from '../../theme';
+import {useParentTheme} from '../../state/themeStore';
+import {parentRadius, parentSpacing} from './theme/parentTheme';
 import {formatDateKey} from '@zerebro/shared-firebase/firestore';
 import {
   useChildReelInsights,
@@ -34,7 +25,11 @@ function formatWatchTime(ms: number): string {
   return `${min}m ${sec}s`;
 }
 
+import {Image} from 'react-native';
+import {CosmicAssets} from '../../assets/cosmic';
+
 export function ReelsInsightsTab({childUid, childName}: Props) {
+  const {theme, isDark} = useParentTheme();
   const insightsState = useChildReelInsights(childUid);
   const topicsState = useReelTopics();
 
@@ -73,7 +68,7 @@ export function ReelsInsightsTab({childUid, childName}: Props) {
   if (insightsState.loading || topicsState.loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={colors.primary} />
+        <ActivityIndicator color={theme.primary} />
       </View>
     );
   }
@@ -81,9 +76,25 @@ export function ReelsInsightsTab({childUid, childName}: Props) {
   if (!insightsState.data || insightsState.data.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyTitle}>No reel data yet</Text>
-          <Text style={styles.emptyBody}>
+        <Image
+          source={CosmicAssets.tReels}
+          style={styles.heroBannerImg}
+          resizeMode="cover"
+        />
+        <View
+          style={[
+            styles.emptyCard,
+            {
+              backgroundColor: isDark
+                ? 'rgba(23, 19, 79, 0.88)'
+                : theme.cardBg,
+              borderColor: theme.cardBorder,
+            },
+          ]}>
+          <Text style={[styles.emptyTitle, {color: theme.text}]}>
+            No reel data yet
+          </Text>
+          <Text style={[styles.emptyBody, {color: theme.textMuted}]}>
             Your child hasn't watched any educational reels yet. Once they do,
             you'll see how much time they spent on each topic and get questions
             to discuss with them.
@@ -95,18 +106,32 @@ export function ReelsInsightsTab({childUid, childName}: Props) {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={CosmicAssets.tReels}
+        style={styles.heroBannerImg}
+        resizeMode="cover"
+      />
       {/* Section A — Hero banner */}
-      <View style={styles.heroBanner}>
-        <Text style={styles.heroTitle}>
+      <View
+        style={[
+          styles.heroBanner,
+          {
+            backgroundColor: isDark
+              ? 'rgba(109, 63, 231, 0.28)'
+              : theme.primary,
+            borderColor: isDark ? 'rgba(168, 85, 247, 0.45)' : theme.primary,
+          },
+        ]}>
+        <Text style={[styles.heroTitle, {color: '#FFFFFF'}]}>
           {displayName} completed today's lesson on{' '}
-          <Text style={styles.heroTopicName}>
+          <Text style={[styles.heroTopicName, {color: theme.liveCyan}]}>
             {primaryTopic?.name ?? 'reels'}
           </Text>
         </Text>
-        <Text style={styles.heroSubtitle}>
+        <Text style={[styles.heroSubtitle, {color: isDark ? '#E4DEFF' : 'rgba(255, 255, 255, 0.8)'}]}>
           ...and they don't even know it
         </Text>
-        <Text style={styles.heroWatchTime}>
+        <Text style={[styles.heroWatchTime, {color: isDark ? '#C4B5FD' : 'rgba(255, 255, 255, 0.7)'}]}>
           Watched {formatWatchTime(todayDoc?.totalWatchedMs ?? 0)}
         </Text>
       </View>
@@ -114,10 +139,10 @@ export function ReelsInsightsTab({childUid, childName}: Props) {
       {/* Section B — Questions header */}
       {primaryQuestions && (
         <View style={styles.questionsHeader}>
-          <Text style={styles.questionsTitle}>
+          <Text style={[styles.questionsTitle, {color: theme.text}]}>
             Ask them these {primaryQuestions.questions.length} questions tonight
           </Text>
-          <Text style={styles.questionsSubtitle}>
+          <Text style={[styles.questionsSubtitle, {color: theme.textMuted}]}>
             A 2-minute chat at dinner tells you if they truly get it.
           </Text>
         </View>
@@ -127,26 +152,74 @@ export function ReelsInsightsTab({childUid, childName}: Props) {
       {primaryQuestions ? (
         <View style={styles.questionList}>
           {primaryQuestions.questions.map((q, i) => (
-            <View key={i} style={styles.questionCard}>
-              <View style={styles.numberCircle}>
-                <Text style={styles.numberText}>{i + 1}</Text>
+            <View
+              key={i}
+              style={[
+                styles.questionCard,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(23, 19, 79, 0.88)'
+                    : theme.cardBg,
+                  borderColor: theme.cardBorder,
+                },
+              ]}>
+              <View
+                style={[
+                  styles.numberCircle,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(109, 63, 231, 0.25)'
+                      : '#EFE7F8',
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.numberText,
+                    {color: isDark ? '#E4DEFF' : theme.primary},
+                  ]}>
+                  {i + 1}
+                </Text>
               </View>
-              <Text style={styles.questionText}>{q}</Text>
+              <Text style={[styles.questionText, {color: theme.text}]}>
+                {q}
+              </Text>
             </View>
           ))}
         </View>
       ) : topicRows.length > 0 ? (
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyTitle}>No questions for today's topics</Text>
-          <Text style={styles.emptyBody}>
+        <View
+          style={[
+            styles.emptyCard,
+            {
+              backgroundColor: isDark
+                ? 'rgba(23, 19, 79, 0.88)'
+                : theme.cardBg,
+              borderColor: theme.cardBorder,
+            },
+          ]}>
+          <Text style={[styles.emptyTitle, {color: theme.text}]}>
+            No questions for today's topics
+          </Text>
+          <Text style={[styles.emptyBody, {color: theme.textMuted}]}>
             Your child watched some reels, but no discussion questions are
             available for those topics yet.
           </Text>
         </View>
       ) : (
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyTitle}>No reels watched today</Text>
-          <Text style={styles.emptyBody}>
+        <View
+          style={[
+            styles.emptyCard,
+            {
+              backgroundColor: isDark
+                ? 'rgba(23, 19, 79, 0.88)'
+                : theme.cardBg,
+              borderColor: theme.cardBorder,
+            },
+          ]}>
+          <Text style={[styles.emptyTitle, {color: theme.text}]}>
+            No reels watched today
+          </Text>
+          <Text style={[styles.emptyBody, {color: theme.textMuted}]}>
             Check back later once your child watches some reels.
           </Text>
         </View>
@@ -154,8 +227,10 @@ export function ReelsInsightsTab({childUid, childName}: Props) {
 
       {/* Section D — Footer */}
       <View style={styles.footer}>
-        <Text style={styles.footerHeart}>&#x2764;</Text>
-        <Text style={styles.footerText}>
+        <Text style={[styles.footerHeart, {color: theme.danger}]}>
+          &#x2764;
+        </Text>
+        <Text style={[styles.footerText, {color: theme.textMuted}]}>
           Learning becomes a warm family moment.
         </Text>
       </View>
@@ -165,126 +240,113 @@ export function ReelsInsightsTab({childUid, childName}: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: spacing.md,
-    gap: spacing.md,
+    paddingHorizontal: parentSpacing.lg,
+    paddingTop: parentSpacing.xs,
+    paddingBottom: parentSpacing.lg,
+    gap: parentSpacing.md,
   },
   center: {
-    padding: spacing.xl,
+    padding: parentSpacing.xl,
     alignItems: 'center',
   },
-
-  // Section A — Hero banner
   heroBanner: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    gap: spacing.sm,
+    borderRadius: parentRadius.xl,
+    padding: parentSpacing.lg,
+    gap: parentSpacing.xs,
+    borderWidth: 1,
   },
   heroTitle: {
-    color: colors.primaryText,
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '800',
-    lineHeight: 28,
+    lineHeight: 26,
   },
   heroTopicName: {
     fontStyle: 'italic',
+    fontWeight: '800',
   },
   heroSubtitle: {
-    color: colors.primaryText,
-    fontSize: 14,
-    opacity: 0.7,
+    fontSize: 13.5,
+    marginTop: 2,
   },
   heroWatchTime: {
-    color: colors.primaryText,
     fontSize: 12,
-    opacity: 0.6,
-    marginTop: spacing.xs,
+    fontWeight: '600',
+    marginTop: parentSpacing.xs,
   },
-
-  // Section B — Questions header
   questionsHeader: {
-    gap: spacing.xs,
-    marginTop: spacing.sm,
+    gap: parentSpacing.xs,
+    marginTop: parentSpacing.xs,
   },
   questionsTitle: {
-    color: colors.text,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
   },
   questionsSubtitle: {
-    color: colors.textMuted,
-    fontSize: 13,
+    fontSize: 12.5,
     lineHeight: 18,
   },
-
-  // Section C — Numbered question cards
   questionList: {
-    gap: spacing.sm,
+    gap: 10,
   },
   questionCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.md,
+    borderRadius: parentRadius.lg,
+    padding: parentSpacing.md,
+    gap: 12,
+    borderWidth: 1,
   },
   numberCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
   },
   numberText: {
-    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '700',
   },
   questionText: {
-    color: colors.text,
     fontSize: 14,
     lineHeight: 20,
     flex: 1,
   },
-
-  // Section D — Footer
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
-    marginTop: spacing.lg,
-    paddingBottom: spacing.md,
+    gap: parentSpacing.sm,
+    marginTop: parentSpacing.md,
+    paddingBottom: parentSpacing.sm,
   },
   footerHeart: {
-    color: colors.danger,
     fontSize: 14,
   },
   footerText: {
-    color: colors.textMuted,
     fontSize: 12,
   },
-
-  // Empty / error states
   emptyCard: {
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
+    borderRadius: parentRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    gap: spacing.xs,
+    padding: parentSpacing.lg,
+    gap: parentSpacing.xs,
   },
   emptyTitle: {
-    color: colors.text,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
   },
   emptyBody: {
-    color: colors.textMuted,
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  heroBannerImg: {
+    width: '100%',
+    height: 140,
+    borderRadius: 22,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(233,92,255,0.24)',
   },
 });

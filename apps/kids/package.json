@@ -5,6 +5,7 @@
   "description": "ZKid — student-facing Android app (KidSafe child mode + Zerebro education).",
   "scripts": {
     "android": "react-native run-android",
+    "ios": "react-native run-ios",
     "start": "react-native start",
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit",

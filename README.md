@@ -5,12 +5,12 @@ kids' phones, with a parallel education/AI track. The v2 codebase is a
 pnpm + Turborepo monorepo with two React Native apps and (later) two
 Next.js webs sharing one Firebase backend.
 
-| App | What it is | Audience | Tech |
-| --- | --- | --- | --- |
-| **ZKid** (`apps/kids/`) | Child phone agent: app blocking, schedule, location, usage, PIN. Hosts every Kotlin native module. | Kids | RN 0.76 + Kotlin |
-| **ZConnect** (`apps/guardian/`) | Parent + teacher dashboard: pairing, lock, schedule, location map, usage charts. Zero native modules. | Parents / teachers | RN 0.76 |
-| Zerebro Campus *(later)* | Principal / school admin console. | Schools | Next.js (not started) |
-| Zerebro Admin *(later)* | Internal ops console for content + tenants. | Zerebro staff | Next.js (not started) |
+| App                             | What it is                                                                                            | Audience           | Tech                  |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------ | --------------------- |
+| **ZKid** (`apps/kids/`)         | Child phone agent: app blocking, schedule, location, usage, PIN. Hosts every Kotlin native module.    | Kids               | RN 0.76 + Kotlin      |
+| **ZConnect** (`apps/guardian/`) | Parent + teacher dashboard: pairing, lock, schedule, location map, usage charts. Zero native modules. | Parents / teachers | RN 0.76               |
+| Zerebro Campus*(later)*         | Principal / school admin console.                                                                     | Schools            | Next.js (not started) |
+| Zerebro Admin*(later)*          | Internal ops console for content + tenants.                                                           | Zerebro staff      | Next.js (not started) |
 
 > The v1 "single shared phone" mode was removed in Phase 1.6. Zerebro is
 > now two-device only: ZKid on the kid's phone, ZConnect on the parent's.
@@ -58,27 +58,125 @@ For knowledge transfer to a new developer, read in this order:
 ```bash
 pnpm install
 
+# Install CocoaPods for iOS (macOS only - requires existing ios/ directory)
+cd apps/kids/ios && pod install && cd ../../..
+cd apps/guardian/ios && pod install && cd ../../..
+
 # ZKid (child phone)
 pnpm --filter @zerebro/zkid start                # Metro on :8081
-pnpm --filter @zerebro/zkid android              # build + install on attached device
+pnpm --filter @zerebro/zkid android              # Android build + install on attached device/emulator
+pnpm --filter @zerebro/zkid ios                  # iOS simulator build
 
 # ZConnect (parent phone)
 pnpm --filter @zerebro/zconnect start --port 8082
-pnpm --filter @zerebro/zconnect android --port 8082
+pnpm --filter @zerebro/zconnect android --port 8082 # Android build on port 8082
+pnpm --filter @zerebro/zconnect ios --port 8082     # iOS simulator build on port 8082
+```
+
+### Running on Real Physical Android Device via USB
+
+1. **Enable USB Debugging** on your phone (`Settings` -> `Developer Options` -> `USB Debugging`).
+2. **Verify Connected Device**:
+   ```bash
+   adb devices
+   ```
+3. **Port Forwarding / Reverse Metro Port** (connects physical phone to laptop Metro bundler):
+   ```bash
+   adb reverse tcp:8081 tcp:8081
+   ```
+4. **Start Metro & Build on Device**:
+
+   ```bash
+   # Terminal 1: Start Metro Bundler
+   pnpm --filter @zerebro/zkid start
+
+   # Terminal 2: Build & Install on connected USB device
+   pnpm --filter @zerebro/zkid android
+   ```
+
+5. **Target Specific Connected Device (if multiple devices are connected)**:
+   ```bash
+   pnpm --filter @zerebro/zkid android --deviceId=RZ8RC1FA7JH
+   ```
+
+### Important iOS Commands & Troubleshooting
+
+```bash
+# 1. Open Projects in Xcode
+# Open ZKid (Child app) in Xcode:
+open apps/kids/ios/kids.xcworkspace
+# or
+xed apps/kids/ios
+
+# Open ZConnect (Parent app) in Xcode:
+open apps/guardian/ios/guardian.xcworkspace
+# or
+xed apps/guardian/ios
+
+# 2. CocoaPods Setup & Reset
+# Install Pods for ZKid / ZConnect:
+cd apps/kids/ios && pod install && cd ../../..
+cd apps/guardian/ios && pod install && cd ../../..
+
+# Clean & Re-install Pods (If facing Pod errors):
+cd apps/kids/ios && pod deintegrate && rm -rf Pods Podfile.lock && pod install --repo-update && cd ../../..
+cd apps/guardian/ios && pod deintegrate && rm -rf Pods Podfile.lock && pod install --repo-update && cd ../../..
+
+# 3. Clear iOS Cache & Xcode DerivedData:
+rm -rf ~/Library/Developer/Xcode/DerivedData/*
+rm -rf apps/kids/ios/build apps/guardian/ios/build
+
+# 4. Run on Specific iOS Simulator Device:
+pnpm --filter @zerebro/zkid ios --simulator="iPhone 15"
+pnpm --filter @zerebro/zconnect ios --port 8082 --simulator="iPhone 15"
 ```
 
 To run release builds:
 
+### Android Release Builds
+
+#### 1. APK Build (`assembleRelease` - Direct APK testing/sideloading)
+
 ```bash
-cd apps/kids/android      && ./gradlew assembleRelease
-cd apps/guardian/android  && ./gradlew assembleRelease
+# ZKid APK
+cd apps/kids/android && ./gradlew assembleRelease && cd ../../..
+
+# ZConnect APK
+cd apps/guardian/android && ./gradlew assembleRelease && cd ../../..
 ```
 
-APK output:
+**APK Outputs:**
 
-```
+```text
 apps/kids/android/app/build/outputs/apk/release/app-release.apk
 apps/guardian/android/app/build/outputs/apk/release/app-release.apk
+```
+
+#### 2. Android App Bundle (`bundleRelease` - Google Play Store Upload)
+
+```bash
+# ZKid App Bundle (.aab)
+cd apps/kids/android && ./gradlew bundleRelease && cd ../../..
+
+# ZConnect App Bundle (.aab)
+cd apps/guardian/android && ./gradlew bundleRelease && cd ../../..
+```
+
+**AAB Outputs:**
+
+```text
+apps/kids/android/app/build/outputs/bundle/release/app-release.aab
+apps/guardian/android/app/build/outputs/bundle/release/app-release.aab
+```
+
+### iOS Release Builds
+
+```bash
+# ZKid iOS Release Build
+xcodebuild -workspace apps/kids/ios/kids.xcworkspace -scheme kids -configuration Release -sdk iphoneos
+
+# ZConnect iOS Release Build
+xcodebuild -workspace apps/guardian/ios/guardian.xcworkspace -scheme guardian -configuration Release -sdk iphoneos
 ```
 
 ## Firebase emulator (local dev)
@@ -87,7 +185,7 @@ apps/guardian/android/app/build/outputs/apk/release/app-release.apk
 pnpm dev:emulator        # auth + firestore + UI (no functions yet)
 ```
 
-The emulator UI runs at <http://localhost:4000>. Rules live in
+The emulator UI runs at [http://localhost:4000](http://localhost:4000). Rules live in
 `firestore/rules`. JDK 21+ is required (the script will error out otherwise).
 
 ## Code Map (by responsibility)

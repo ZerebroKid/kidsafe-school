@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   ActivityIndicator,
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -11,149 +12,204 @@ import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 import {useClassStudentRows} from '../../firebase/studyReports';
 import {useAuthStore} from '../../state/authStore';
-import {colors, radius, spacing} from '../../theme';
 import type {TeacherStackParamList} from '../../navigation/types';
+import {cosmicColors, cosmicRadius, cosmicSpacing} from './theme';
+import {CosmicBackground} from './components/CosmicBackground';
+import {CosmicHeader} from './components/CosmicHeader';
 
 type Props = NativeStackScreenProps<
   TeacherStackParamList,
   'TeacherClassStudents'
 >;
 
-/**
- * P4.11.4 -- full per-student roster for a class, reached from the class
- * report's "See full student list" link. Each row shows the student's most
- * recent attempt (topic + score + passed badge) or "Not attempted yet". Uses
- * the same `useClassStudentRows` source as the report so the two stay in sync.
- */
-export function ClassStudentListScreen({route}: Props) {
+export function ClassStudentListScreen({route, navigation}: Props) {
   const {classId, className} = route.params;
   const uid = useAuthStore(s => s.firebaseUid);
 
   const {rows, loading, error} = useClassStudentRows(classId, uid);
-
   const attemptedCount = rows.filter(r => r.latest !== null).length;
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={loading}
-          onRefresh={() => {}}
-          tintColor={colors.primary}
-        />
-      }>
-      <View>
-        <Text style={styles.title}>Class {className}</Text>
-        {!loading && !error ? (
-          <Text style={styles.subtitle}>
-            {rows.length} {rows.length === 1 ? 'student' : 'students'} •{' '}
-            {attemptedCount} attempted
-          </Text>
-        ) : null}
-      </View>
-
-      {error ? (
-        <Text style={styles.errorBanner}>{error}</Text>
-      ) : loading ? (
-        <ActivityIndicator color={colors.primary} />
-      ) : rows.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No students in this class yet.</Text>
-          <Text style={styles.emptyBody}>
-            Ask your principal to add students to this class. Their quiz results
-            will appear here once they start.
-          </Text>
-        </View>
-      ) : (
-        <View style={styles.list}>
-          {rows.map(row => (
-            <View key={row.childUid} style={styles.card}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardName}>{row.name}</Text>
-                {row.latest ? (
-                  <View
-                    style={[
-                      styles.badge,
-                      row.latest.passed ? styles.badgePass : styles.badgeFail,
-                    ]}>
-                    <Text
+    <CosmicBackground>
+      <CosmicHeader
+        title={`Class ${className} Students`}
+        subtitle={`${rows.length} students • ${attemptedCount} attempted`}
+        onBack={() => navigation.goBack()}
+      />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => {}}
+            tintColor={cosmicColors.purple}
+          />
+        }>
+        {error ? (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : loading ? (
+          <ActivityIndicator color={cosmicColors.purple} />
+        ) : rows.length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyTitle}>No students in this class yet.</Text>
+            <Text style={styles.emptyBody}>
+              Ask your principal to add students to this class. Their quiz results
+              will appear here once they start.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {rows.map((row, index) => (
+              <Pressable
+                key={row.childUid}
+                style={styles.card}
+                onPress={() =>
+                  navigation.navigate('TeacherStudentDetail', {
+                    studentUid: row.childUid,
+                    studentName: row.name,
+                    rollNo: String(index + 1).padStart(2, '0'),
+                    classId,
+                    className,
+                    score: row.latest ? row.latest.bestPercentage : 0,
+                  })
+                }>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.cardName}>{row.name}</Text>
+                  {row.latest ? (
+                    <View
                       style={[
-                        styles.badgeText,
-                        row.latest.passed
-                          ? styles.badgeTextPass
-                          : styles.badgeTextFail,
+                        styles.badge,
+                        row.latest.passed ? styles.badgePass : styles.badgeFail,
                       ]}>
-                      {row.latest.lastPercentage}%
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-              {row.latest ? (
-                <Text style={styles.cardMeta}>
-                  {row.latest.topicName}
-                  {row.latest.passed ? ' • Passed' : ' • Keep going'}
-                </Text>
-              ) : (
-                <Text style={styles.cardMetaMuted}>Not attempted yet</Text>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-    </ScrollView>
+                      <Text
+                        style={[
+                          styles.badgeText,
+                          row.latest.passed
+                            ? styles.badgeTextPass
+                            : styles.badgeTextFail,
+                        ]}>
+                        {row.latest.lastPercentage}%
+                      </Text>
+                    </View>
+                  ) : null}
+                  <Text style={styles.chevron}>›</Text>
+                </View>
+                {row.latest ? (
+                  <Text style={styles.cardMeta}>
+                    {row.latest.topicName}
+                    {row.latest.passed ? ' • Passed' : ' • Keep going'}
+                  </Text>
+                ) : (
+                  <Text style={styles.cardMetaMuted}>Not attempted yet</Text>
+                )}
+              </Pressable>
+            ))}
+          </View>
+        )}
+        <View style={{height: 40}} />
+      </ScrollView>
+    </CosmicBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {flex: 1, backgroundColor: colors.bg},
-  container: {padding: spacing.lg, gap: spacing.lg},
-  title: {color: colors.text, fontSize: 22, fontWeight: '700'},
-  subtitle: {color: colors.textMuted, fontSize: 13, marginTop: spacing.xs},
+  scroll: {
+    flex: 1,
+  },
+  container: {
+    paddingHorizontal: cosmicSpacing.lg,
+    paddingTop: cosmicSpacing.xs,
+    gap: cosmicSpacing.md,
+  },
   errorBanner: {
-    padding: spacing.sm,
-    borderRadius: radius.sm,
-    backgroundColor: 'rgba(231, 0, 11, 0.08)',
-    color: colors.danger,
+    padding: cosmicSpacing.sm + 4,
+    borderRadius: cosmicRadius.md,
+    backgroundColor: cosmicColors.pinkBg,
+    borderWidth: 1,
+    borderColor: cosmicColors.pinkBorder,
+  },
+  errorText: {
+    color: cosmicColors.pinkLight,
     fontSize: 13,
   },
   empty: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
+    backgroundColor: cosmicColors.cardBg,
+    borderColor: cosmicColors.cardBorder,
     borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    gap: spacing.xs,
+    borderRadius: cosmicRadius.xl,
+    padding: cosmicSpacing.lg,
+    gap: cosmicSpacing.xs,
   },
-  emptyTitle: {color: colors.text, fontSize: 15, fontWeight: '600'},
-  emptyBody: {color: colors.textMuted, fontSize: 13, lineHeight: 18},
-  list: {gap: spacing.sm},
+  emptyTitle: {
+    color: cosmicColors.text,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  emptyBody: {
+    color: cosmicColors.textMuted,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  list: {
+    gap: 10,
+  },
   card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
+    backgroundColor: cosmicColors.cardBgSubtle,
+    borderColor: cosmicColors.cardBorderSubtle,
     borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.xs,
+    borderRadius: cosmicRadius.lg,
+    padding: 16,
+    gap: cosmicSpacing.xs,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.sm,
+    gap: cosmicSpacing.sm,
   },
-  cardName: {flex: 1, color: colors.text, fontSize: 15, fontWeight: '600'},
-  cardMeta: {color: colors.textMuted, fontSize: 12},
-  cardMetaMuted: {color: colors.textMuted, fontSize: 12, fontStyle: 'italic'},
+  cardName: {
+    flex: 1,
+    color: cosmicColors.text,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  cardMeta: {
+    color: cosmicColors.textMuted,
+    fontSize: 12,
+  },
+  cardMetaMuted: {
+    color: cosmicColors.textSubtle,
+    fontSize: 12,
+    fontStyle: 'italic',
+  },
   badge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: radius.pill,
+    paddingHorizontal: cosmicSpacing.sm + 2,
+    paddingVertical: 3,
+    borderRadius: cosmicRadius.pill,
   },
-  badgePass: {backgroundColor: 'rgba(74, 222, 128, 0.12)'},
-  badgeFail: {backgroundColor: 'rgba(250, 204, 21, 0.12)'},
-  badgeText: {fontSize: 12, fontWeight: '700'},
-  badgeTextPass: {color: colors.success},
-  badgeTextFail: {color: colors.warning},
+  badgePass: {
+    backgroundColor: 'rgba(6, 182, 212, 0.16)',
+  },
+  badgeFail: {
+    backgroundColor: 'rgba(236, 72, 153, 0.16)',
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  badgeTextPass: {
+    color: cosmicColors.cyanLight,
+  },
+  badgeTextFail: {
+    color: cosmicColors.pinkLight,
+  },
+  chevron: {
+    color: cosmicColors.textSubtle,
+    fontSize: 18,
+    marginLeft: 4,
+  },
 });

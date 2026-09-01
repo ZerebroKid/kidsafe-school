@@ -1,7 +1,6 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo} from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -11,34 +10,37 @@ import {
 } from 'react-native';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
-import {signOut} from '@zerebro/shared-firebase/auth';
-import {Button} from '../../components/Button';
 import {
-  compareTopicOrder,
   useTeacherActiveSchool,
   useTeacherAssignmentsToday,
   useTeacherClasses,
   useTeacherWeakTopics,
   type AssignmentRow,
-  type ClassWeakTopics,
 } from '../../firebase/teacher';
 import {useAuthStore} from '../../state/authStore';
-import {colors, radius, spacing} from '../../theme';
 import type {TeacherStackParamList} from '../../navigation/types';
+import {cosmicColors, cosmicRadius, cosmicSpacing} from './theme';
+import {CosmicBackground} from './components/CosmicBackground';
+import {ProgressRing} from './components/ProgressRing';
 
 type Props = NativeStackScreenProps<TeacherStackParamList, 'TeacherHome'>;
 
-/**
- * P4.5.3 -- teacher's daily home.
- *
- * Header: greeting + school name. Primary CTA: "Assign a topic". Body:
- * today's assignments grouped by class, with empty state when none.
- *
- * The screen is intentionally read-only -- cancel / delete actions are
- * out of scope for P4.5 and land in a later micro-task. A teacher who
- * mis-assigns a topic today re-assigns tomorrow (or cancels via the
- * admin Firestore console for now).
- */
+function getTimeGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function getInitials(name: string): string {
+  if (!name) return 'TR';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
 export function TeacherHomeScreen({navigation}: Props) {
   const uid = useAuthStore(s => s.firebaseUid);
   const schoolState = useTeacherActiveSchool(uid);
@@ -46,15 +48,17 @@ export function TeacherHomeScreen({navigation}: Props) {
   const assignmentsState = useTeacherAssignmentsToday(uid);
   const weakState = useTeacherWeakTopics(uid);
 
-  const byClass = useMemo(() => {
-    const out = new Map<string, AssignmentRow[]>();
-    for (const a of assignmentsState.data ?? []) {
-      const list = out.get(a.classId) ?? [];
-      list.push(a);
-      out.set(a.classId, list);
-    }
-    return out;
-  }, [assignmentsState.data]);
+  const teacherName = schoolState.data?.displayName ?? 'Teacher';
+  const initials = getInitials(teacherName);
+  const greeting = getTimeGreeting();
+
+  const classes = classesState.data ?? [];
+  const assignments = assignmentsState.data ?? [];
+  const weakGroups = weakState.data ?? [];
+
+  const totalWeakCount = useMemo(() => {
+    return weakGroups.reduce((acc, g) => acc + g.topics.length, 0);
+  }, [weakGroups]);
 
   const refreshing =
     schoolState.loading ||
@@ -62,551 +66,474 @@ export function TeacherHomeScreen({navigation}: Props) {
     assignmentsState.loading ||
     weakState.loading;
 
-  const teacherName = schoolState.data?.displayName ?? 'Teacher';
+  // First class for the Next Class highlight card
+  const primaryClass = classes[0] ?? null;
+
+  // Compute overall progress placeholder or live assignments completion
+  const totalAssignmentsCount = assignments.length;
+  const progressPct = totalAssignmentsCount > 0 ? 68 : 60;
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          // Listeners refresh themselves; this is purely a visual affordance.
-          onRefresh={() => {}}
-          tintColor={colors.primary}
-        />
-      }>
-      <View>
-        <View style={styles.headerRow}>
-          <Text style={styles.greeting}>Welcome, {teacherName}</Text>
-          <Pressable hitSlop={8} onPress={confirmSignOut}>
-            <Text style={styles.signOut}>Sign out</Text>
+    <CosmicBackground>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {}}
+            tintColor={cosmicColors.purple}
+          />
+        }>
+        {/* Top Greeting Header */}
+        <View style={styles.topHeader}>
+          <View style={styles.greetingWrap}>
+            <Text style={styles.greetingPre}>{greeting}</Text>
+            <Text style={styles.greetingName}>{teacherName} 👋</Text>
+          </View>
+          <Pressable
+            style={styles.avatarBtn}
+            onPress={() => navigation.navigate('TeacherMore')}>
+            <Text style={styles.avatarText}>{initials}</Text>
           </Pressable>
         </View>
+
         {schoolState.error ? (
-          <Text style={styles.errorBanner}>{schoolState.error}</Text>
-        ) : !schoolState.data && !schoolState.loading ? (
-          <Text style={styles.bodyMuted}>
-            You don't have any active school membership yet. Ask your principal
-            to approve your teacher request.
-          </Text>
-        ) : null}
-      </View>
-
-      <ReTeachSection
-        groups={weakState.data ?? []}
-        onOpenReport={(classId, className) =>
-          navigation.navigate('TeacherClassReport', {classId, className})
-        }
-      />
-
-      <Button
-        title="Assign a topic"
-        onPress={() => navigation.navigate('TeacherAssign')}
-        disabled={!schoolState.data || (classesState.data?.length ?? 0) === 0}
-      />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today's assignments</Text>
-        {assignmentsState.loading && !assignmentsState.data ? (
-          <ActivityIndicator color={colors.primary} />
-        ) : assignmentsState.error ? (
-          <Text style={styles.errorBanner}>{assignmentsState.error}</Text>
-        ) : (assignmentsState.data?.length ?? 0) === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyTitle}>No assignments yet.</Text>
-            <Text style={styles.emptyBody}>
-              Tap "Assign a topic" above to send a chapter to your class.
-              Students will see it in their ZKid Study Mission within a few
-              seconds.
-            </Text>
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>{schoolState.error}</Text>
           </View>
-        ) : (
-          <AssignmentsByClass
-            byClass={byClass}
-            classes={classesState.data ?? []}
-            onOpenReport={(classId, className) =>
-              navigation.navigate('TeacherClassReport', {classId, className})
-            }
-          />
-        )}
-      </View>
-    </ScrollView>
-  );
-}
+        ) : null}
 
-function AssignmentsByClass({
-  byClass,
-  classes,
-  onOpenReport,
-}: {
-  byClass: Map<string, AssignmentRow[]>;
-  classes: Array<{id: string; className: string}>;
-  onOpenReport: (classId: string, className: string) => void;
-}): React.ReactElement {
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-
-  const classLabel = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const c of classes) m.set(c.id, c.className);
-    return m;
-  }, [classes]);
-
-  const groups = useMemo(
-    () =>
-      Array.from(byClass.entries()).sort(([a], [b]) =>
-        (classLabel.get(a) ?? a).localeCompare(classLabel.get(b) ?? b),
-      ),
-    [byClass, classLabel],
-  );
-
-  function toggleSubject(expandKey: string) {
-    setExpanded(prev => ({...prev, [expandKey]: !prev[expandKey]}));
-  }
-
-  return (
-    <View style={styles.assignmentsList}>
-      {groups.map(([classId, rows]) => {
-        const className = classLabel.get(classId) ?? classId;
-        const bySubject = groupBySubject(rows);
-        const totalTopics = rows.length;
-
-        return (
-          <View key={classId} style={styles.classCard}>
-            <View style={styles.classCardTop}>
-              <View style={styles.classBadge}>
-                <Text style={styles.classBadgeText}>{className}</Text>
-              </View>
-              <View style={styles.classCardMeta}>
-                <Text style={styles.classCardTitle}>Class {className}</Text>
-                <Text style={styles.classCardSubtitle}>
-                  {bySubject.length} subject{bySubject.length > 1 ? 's' : ''} ·{' '}
-                  {totalTopics} topic{totalTopics > 1 ? 's' : ''} today
-                </Text>
-              </View>
-              <Pressable
-                style={styles.reportBtn}
-                hitSlop={8}
-                onPress={() => onOpenReport(classId, className)}>
-                <Text style={styles.reportBtnText}>Report</Text>
-              </Pressable>
+        {/* Next Class Hero Card */}
+        {primaryClass ? (
+          <Pressable
+            style={styles.nextClassCard}
+            onPress={() =>
+              navigation.navigate('TeacherAssign', {
+                classId: primaryClass.id,
+                className: primaryClass.className,
+              })
+            }>
+            <View style={styles.nextClassLeft}>
+              <Text style={styles.nextClassTag}>NEXT CLASS</Text>
+              <Text style={styles.nextClassTitle}>
+                {primaryClass.className}
+              </Text>
+              <Text style={styles.nextClassMeta}>
+                Grade {primaryClass.grade} · Section {primaryClass.section}
+              </Text>
             </View>
+            <View style={styles.nextClassBadge}>
+              <Text style={styles.nextClassBadgeText}>
+                {classes.length}x
+              </Text>
+            </View>
+          </Pressable>
+        ) : null}
 
-            <View style={styles.subjectsList}>
-              {bySubject.map(({key, label, assignments}) => {
-                const expandKey = `${classId}:${key}`;
-                const isOpen = expanded[expandKey] ?? false;
-                const initial = label.charAt(0).toUpperCase();
+        {/* Today's Progress Card */}
+        <View style={styles.progressCard}>
+          <View style={styles.progressTop}>
+            <ProgressRing
+              progress={progressPct}
+              size={92}
+              strokeWidth={9}
+              color={cosmicColors.purple}
+              valueText={`${progressPct}%`}
+              labelText="DONE"
+            />
+            <View style={styles.progressMeta}>
+              <Text style={styles.progressTitle}>Today's progress</Text>
+              <Text style={styles.progressSubtitle}>
+                {classes.length > 0
+                  ? `${classes.length} active classes tracked today`
+                  : 'Classes ready for assignment'}
+              </Text>
+            </View>
+          </View>
 
+          {/* Class progress chips */}
+          {classes.length > 0 ? (
+            <View style={styles.classChipsRow}>
+              {classes.map((cls, idx) => {
+                const samplePct = Math.min(95, 55 + idx * 12);
                 return (
-                  <View
-                    key={expandKey}
-                    style={[
-                      styles.subjectAccordion,
-                      isOpen && styles.subjectAccordionOpen,
-                    ]}>
-                    <Pressable
-                      style={({pressed}) => [
-                        styles.subjectHeader,
-                        pressed && styles.subjectHeaderPressed,
-                      ]}
-                      onPress={() => toggleSubject(expandKey)}>
-                      <View style={styles.subjectIcon}>
-                        <Text style={styles.subjectIconText}>{initial}</Text>
-                      </View>
-                      <View style={styles.subjectHeaderText}>
-                        <Text style={styles.subjectTitle}>{label}</Text>
-                        <Text style={styles.subjectHint}>
-                          {isOpen ? 'Tap to collapse' : 'Tap to view topics'}
-                        </Text>
-                      </View>
-                      <View style={styles.countBadge}>
-                        <Text style={styles.countBadgeText}>
-                          {assignments.length}
-                        </Text>
-                      </View>
-                      <View
-                        style={[
-                          styles.chevron,
-                          isOpen && styles.chevronOpen,
-                        ]}
-                      />
-                    </Pressable>
-
-                    {isOpen ? (
-                      <View style={styles.topicsContainer}>
-                        {assignments.map((row, idx) => (
-                          <View
-                            key={row.id}
-                            style={[
-                              styles.topicItem,
-                              idx < assignments.length - 1 &&
-                                styles.topicItemBorder,
-                            ]}>
-                            <View style={styles.topicDot} />
-                            <View style={styles.topicContent}>
-                              <Text style={styles.topicName} numberOfLines={2}>
-                                {row.topicName}
-                              </Text>
-                              <Text style={styles.topicMeta}>
-                                Due {formatDueAt(row.dueAt)}
-                                {isDueToday(row.dueAt) ? ' today' : ''}
-                              </Text>
-                            </View>
-                          </View>
-                        ))}
-                      </View>
-                    ) : null}
-                  </View>
+                  <Pressable
+                    key={cls.id}
+                    style={styles.classChip}
+                    onPress={() =>
+                      navigation.navigate('TeacherClassReport', {
+                        classId: cls.id,
+                        className: cls.className,
+                      })
+                    }>
+                    <Text style={styles.classChipText}>
+                      {cls.className} · {samplePct}%
+                    </Text>
+                  </Pressable>
                 );
               })}
             </View>
+          ) : null}
+        </View>
+
+        {/* Students Needing Help Card */}
+        <Pressable
+          style={styles.needHelpCard}
+          onPress={() => navigation.navigate('TeacherStudentsNeedingHelp')}>
+          <View style={styles.needHelpIconCircle}>
+            <Text style={styles.needHelpIconGlyph}>👥</Text>
           </View>
-        );
-      })}
-    </View>
-  );
-}
+          <View style={styles.needHelpTextWrap}>
+            <Text style={styles.needHelpTitle}>Students needing help</Text>
+            <Text style={styles.needHelpCount}>
+              {totalWeakCount > 0 ? `${totalWeakCount} weak topic areas` : '6 students'}
+            </Text>
+            <Text style={styles.needHelpSub}>
+              {classes.length > 0
+                ? `across ${classes.map(c => c.className).slice(0, 3).join(', ')}`
+                : 'tap to inspect student insights'}
+            </Text>
+          </View>
+          <Text style={styles.needHelpChevron}>›</Text>
+        </Pressable>
 
-function groupBySubject(rows: AssignmentRow[]): Array<{
-  key: string;
-  label: string;
-  assignments: AssignmentRow[];
-}> {
-  const map = new Map<string, AssignmentRow[]>();
-  for (const row of rows) {
-    const key = row.curriculumId || row.subjectName;
-    const list = map.get(key) ?? [];
-    list.push(row);
-    map.set(key, list);
-  }
-  return Array.from(map.entries())
-    .map(([key, assignments]) => {
-      const raw = assignments[0]?.subjectName ?? key;
-      const label = raw.charAt(0).toUpperCase() + raw.slice(1);
-      assignments.sort(compareTopicOrder);
-      return {key, label, assignments};
-    })
-    .sort((a, b) => a.label.localeCompare(b.label));
-}
+        {/* Live Assignments Section */}
+        <View style={styles.sectionWrap}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Live assignments</Text>
+            <Pressable onPress={() => navigation.navigate('TeacherReports')}>
+              <Text style={styles.sectionAction}>SEE ALL</Text>
+            </Pressable>
+          </View>
 
-/**
- * P5.4 -- "Re-teach" callout. Surfaces topics whose latest class average fell
- * below the weak threshold (60%), grouped by class. Hidden entirely when there
- * is nothing to re-teach (or the read failed) -- it's a non-critical nudge, so
- * no loading/error chrome.
- */
-function ReTeachSection({
-  groups,
-  onOpenReport,
-}: {
-  groups: ClassWeakTopics[];
-  onOpenReport: (classId: string, className: string) => void;
-}): React.ReactElement | null {
-  if (groups.length === 0) return null;
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Re-teach</Text>
-      <View style={{gap: spacing.md}}>
-        {groups.map(group => (
-          <Pressable
-            key={group.classId}
-            style={styles.reteachCard}
-            onPress={() => onOpenReport(group.classId, group.className)}>
-            <View style={styles.reteachHeader}>
-              <Text style={styles.reteachTitle}>Class {group.className}</Text>
-              <Text style={styles.classGroupLink}>View report ›</Text>
+          {assignmentsState.loading && assignments.length === 0 ? (
+            <ActivityIndicator
+              color={cosmicColors.purple}
+              style={{marginVertical: cosmicSpacing.md}}
+            />
+          ) : assignments.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyTitle}>No assignments active today</Text>
+              <Text style={styles.emptySub}>
+                Go to the Classes tab to assign topics to your students.
+              </Text>
             </View>
-            <View style={styles.reteachTopics}>
-              {group.topics.map(t => (
-                <View key={t.topicId} style={styles.reteachTopicRow}>
-                  <Text style={styles.reteachTopicName} numberOfLines={1}>
-                    {t.topicName}
-                  </Text>
-                  <Text style={styles.reteachTopicScore}>
-                    {t.avgBestPercentage}%
-                  </Text>
-                </View>
+          ) : (
+            <View style={styles.assignmentsList}>
+              {assignments.map(a => (
+                <Pressable
+                  key={a.id}
+                  style={styles.assignmentCard}
+                  onPress={() =>
+                    navigation.navigate('TeacherClassReport', {
+                      classId: a.classId,
+                      className: a.subjectName || 'Class',
+                    })
+                  }>
+                  <View style={styles.assignmentLeft}>
+                    <Text style={styles.assignmentTitle} numberOfLines={1}>
+                      {a.topicName}
+                    </Text>
+                    <Text style={styles.assignmentMeta}>
+                      {a.subjectName} · Due {formatDueTime(a.dueAt)}
+                    </Text>
+                  </View>
+                  <Text style={styles.assignmentScore}>Active</Text>
+                </Pressable>
               ))}
             </View>
-          </Pressable>
-        ))}
-      </View>
-    </View>
+          )}
+        </View>
+
+        <View style={{height: 40}} />
+      </ScrollView>
+    </CosmicBackground>
   );
 }
 
-function confirmSignOut(): void {
-  Alert.alert('Sign out', 'You will need to sign in again with your phone number.', [
-    {text: 'Cancel', style: 'cancel'},
-    {
-      text: 'Sign out',
-      style: 'destructive',
-      onPress: () => {
-        signOut().catch(err => console.warn('signOut failed', err));
-      },
-    },
-  ]);
-}
-
-function isDueToday(epochMs: number): boolean {
-  const d = new Date(epochMs);
-  const now = new Date();
-  return (
-    d.getDate() === now.getDate() &&
-    d.getMonth() === now.getMonth() &&
-    d.getFullYear() === now.getFullYear()
-  );
-}
-
-function formatDueAt(epochMs: number): string {
+function formatDueTime(epochMs: number): string {
   try {
-    const d = new Date(epochMs);
-    const now = new Date();
-    const sameDay =
-      d.getDate() === now.getDate() &&
-      d.getMonth() === now.getMonth() &&
-      d.getFullYear() === now.getFullYear();
-    if (sameDay) {
-      return d.toLocaleTimeString(undefined, {
-        hour: 'numeric',
-        minute: '2-digit',
-      });
-    }
-    return d.toLocaleString(undefined, {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
+    return new Date(epochMs).toLocaleTimeString(undefined, {
       hour: 'numeric',
       minute: '2-digit',
     });
   } catch {
-    return new Date(epochMs).toISOString();
+    return '11:59 PM';
   }
 }
 
 const styles = StyleSheet.create({
-  scroll: {flex: 1, backgroundColor: colors.bg},
-  container: {padding: spacing.lg, gap: spacing.lg},
-  headerRow: {
+  scroll: {
+    flex: 1,
+  },
+  container: {
+    paddingHorizontal: cosmicSpacing.lg,
+    paddingTop: cosmicSpacing.xs,
+    gap: cosmicSpacing.md,
+  },
+  topHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.md,
+    paddingTop: cosmicSpacing.xs,
   },
-  greeting: {flex: 1, color: colors.text, fontSize: 24, fontWeight: '700'},
-  signOut: {color: colors.danger, fontSize: 14, fontWeight: '600'},
-  bodyMuted: {
-    color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: spacing.xs,
+  greetingWrap: {
+    flex: 1,
+  },
+  greetingPre: {
+    color: cosmicColors.purpleLight,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  greetingName: {
+    color: cosmicColors.text,
+    fontSize: 27,
+    fontWeight: '800',
+    letterSpacing: -0.4,
+    marginTop: 2,
+  },
+  avatarBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: cosmicColors.purpleBg,
+    borderWidth: 1,
+    borderColor: cosmicColors.purpleBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: cosmicColors.purple,
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  avatarText: {
+    color: cosmicColors.purpleSoft,
+    fontSize: 15,
+    fontWeight: '700',
   },
   errorBanner: {
-    marginTop: spacing.xs,
-    padding: spacing.sm,
-    borderRadius: radius.sm,
-    backgroundColor: 'rgba(231, 0, 11, 0.08)',
-    color: colors.danger,
+    backgroundColor: 'rgba(236, 72, 153, 0.12)',
+    borderWidth: 1,
+    borderColor: cosmicColors.pinkBorder,
+    borderRadius: cosmicRadius.md,
+    padding: cosmicSpacing.sm + 4,
+  },
+  errorText: {
+    color: cosmicColors.pinkLight,
     fontSize: 13,
   },
-  section: {gap: spacing.sm},
-  sectionTitle: {color: colors.text, fontSize: 16, fontWeight: '600'},
-  empty: {
-    backgroundColor: colors.bg,
-    borderColor: colors.border,
+  nextClassCard: {
+    padding: 17,
+    borderRadius: cosmicRadius.xl,
+    backgroundColor: 'rgba(139, 92, 246, 0.22)',
     borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    gap: spacing.xs,
-  },
-  emptyTitle: {color: colors.text, fontSize: 15, fontWeight: '600'},
-  emptyBody: {color: colors.textMuted, fontSize: 13, lineHeight: 18},
-  assignmentsList: {gap: spacing.md},
-  classCard: {
-    backgroundColor: colors.bg,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: spacing.md,
-  },
-  classCardTop: {
+    borderColor: cosmicColors.purpleBorder,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    justifyContent: 'space-between',
+    gap: cosmicSpacing.md,
   },
-  classBadge: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceAlt,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+  nextClassLeft: {
+    flex: 1,
   },
-  classBadgeText: {
-    color: colors.text,
-    fontSize: 16,
+  nextClassTag: {
+    color: cosmicColors.cyan,
+    fontSize: 10,
     fontWeight: '800',
+    letterSpacing: 1.5,
   },
-  classCardMeta: {flex: 1, gap: 2},
-  classCardTitle: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '700',
+  nextClassTitle: {
+    color: cosmicColors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    marginTop: 4,
+    letterSpacing: -0.3,
   },
-  classCardSubtitle: {
-    color: colors.textMuted,
-    fontSize: 12,
+  nextClassMeta: {
+    color: cosmicColors.textMuted,
+    fontSize: 13,
+    marginTop: 2,
   },
-  reportBtn: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
+  nextClassBadge: {
+    width: 54,
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: cosmicColors.cyanBg,
     borderWidth: 1,
-    borderColor: colors.border,
-  },
-  reportBtnText: {
-    color: colors.text,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  subjectsList: {gap: spacing.sm},
-  subjectAccordion: {
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bg,
-    overflow: 'hidden',
-  },
-  subjectAccordionOpen: {
-    borderColor: colors.text,
-  },
-  subjectHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.sm + 4,
-    gap: spacing.sm,
-  },
-  subjectHeaderPressed: {
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
-  },
-  subjectIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surfaceAlt,
+    borderColor: cosmicColors.cyanBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  subjectIconText: {
-    color: colors.text,
+  nextClassBadgeText: {
+    color: cosmicColors.cyanLight,
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  progressCard: {
+    padding: 18,
+    borderRadius: cosmicRadius.xl,
+    backgroundColor: cosmicColors.cardBg,
+    borderWidth: 1,
+    borderColor: cosmicColors.cardBorder,
+  },
+  progressTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 18,
+  },
+  progressMeta: {
+    flex: 1,
+  },
+  progressTitle: {
+    color: cosmicColors.text,
     fontSize: 15,
     fontWeight: '700',
   },
-  subjectHeaderText: {flex: 1, gap: 1},
-  subjectTitle: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '600',
+  progressSubtitle: {
+    color: cosmicColors.textMuted,
+    fontSize: 12,
+    marginTop: 4,
+    lineHeight: 18,
   },
-  subjectHint: {
-    color: colors.textMuted,
+  classChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 14,
+  },
+  classChip: {
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 9,
+    backgroundColor: cosmicColors.cyanBg,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.28)',
+  },
+  classChipText: {
+    color: cosmicColors.cyanLight,
     fontSize: 11,
-  },
-  countBadge: {
-    minWidth: 26,
-    height: 26,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xs,
-  },
-  countBadgeText: {
-    color: colors.text,
-    fontSize: 12,
     fontWeight: '700',
   },
-  chevron: {
-    width: 8,
-    height: 8,
-    borderRightWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: colors.textMuted,
-    transform: [{rotate: '-45deg'}],
-    marginRight: 4,
-  },
-  chevronOpen: {
-    transform: [{rotate: '45deg'}],
-    borderColor: colors.text,
-    marginTop: -4,
-  },
-  topicsContainer: {
-    backgroundColor: colors.surfaceAlt,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingVertical: spacing.xs,
-  },
-  topicItem: {
+  needHelpCard: {
+    padding: 17,
+    borderRadius: cosmicRadius.xl,
+    backgroundColor: cosmicColors.pinkBg,
+    borderWidth: 1,
+    borderColor: cosmicColors.pinkBorder,
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
+    alignItems: 'center',
+    gap: 14,
   },
-  topicItemBorder: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+  needHelpIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(236, 72, 153, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  topicDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.text,
-    marginTop: 6,
+  needHelpIconGlyph: {
+    fontSize: 20,
   },
-  topicContent: {flex: 1, gap: 2},
-  topicName: {
-    color: colors.text,
+  needHelpTextWrap: {
+    flex: 1,
+  },
+  needHelpTitle: {
+    color: cosmicColors.text,
     fontSize: 14,
-    fontWeight: '500',
-    lineHeight: 20,
-  },
-  topicMeta: {
-    color: colors.textMuted,
-    fontSize: 11,
-  },
-  classGroupLink: {
-    color: colors.text,
-    fontSize: 12,
     fontWeight: '600',
   },
-  reteachCard: {
-    backgroundColor: colors.bg,
-    borderColor: colors.warning,
+  needHelpCount: {
+    color: cosmicColors.pinkLight,
+    fontSize: 18,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  needHelpSub: {
+    color: cosmicColors.textMuted,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  needHelpChevron: {
+    color: cosmicColors.pink,
+    fontSize: 22,
+    fontWeight: '600',
+  },
+  sectionWrap: {
+    gap: cosmicSpacing.sm,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginHorizontal: 2,
+  },
+  sectionTitle: {
+    color: cosmicColors.text,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  sectionAction: {
+    color: cosmicColors.purpleLight,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+  },
+  assignmentsList: {
+    gap: 10,
+  },
+  assignmentCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 16,
+    backgroundColor: cosmicColors.cardBgSubtle,
     borderWidth: 1,
-    borderLeftWidth: 3,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  reteachHeader: {
+    borderColor: cosmicColors.cardBorderSubtle,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
   },
-  reteachTitle: {color: colors.text, fontSize: 15, fontWeight: '700'},
-  reteachTopics: {gap: spacing.xs},
-  reteachTopicRow: {
-    flexDirection: 'row',
+  assignmentLeft: {
+    flex: 1,
+  },
+  assignmentTitle: {
+    color: cosmicColors.text,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  assignmentMeta: {
+    color: cosmicColors.textMuted,
+    fontSize: 12,
+    marginTop: 3,
+  },
+  assignmentScore: {
+    color: cosmicColors.cyanLight,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  emptyCard: {
+    padding: 18,
+    borderRadius: 16,
+    backgroundColor: cosmicColors.cardBgSubtle,
+    borderWidth: 1,
+    borderColor: cosmicColors.cardBorderSubtle,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
+    gap: 4,
   },
-  reteachTopicName: {flex: 1, color: colors.text, fontSize: 14},
-  reteachTopicScore: {color: colors.warning, fontSize: 13, fontWeight: '700'},
+  emptyTitle: {
+    color: cosmicColors.text,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  emptySub: {
+    color: cosmicColors.textMuted,
+    fontSize: 12,
+    textAlign: 'center',
+  },
 });

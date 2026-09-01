@@ -24,10 +24,14 @@ import {initGoogleSignIn} from '@zerebro/shared-firebase/auth';
 
 initGoogleSignIn(ENV.GOOGLE_WEB_CLIENT_ID);
 
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-  if (__DEV__) {
-    console.log('[ZConnect] FCM bg message', remoteMessage?.data);
-  }
-});
+try {
+  messaging().setBackgroundMessageHandler(async remoteMessage => {
+    if (__DEV__) {
+      console.log('[ZConnect] FCM bg message', remoteMessage?.data);
+    }
+  });
+} catch (e) {
+  console.warn('[ZConnect] FCM background handler skipped (Firebase GoogleService-Info.plist not initialized):', e);
+}
 
 AppRegistry.registerComponent(appName, () => App);

@@ -174,7 +174,7 @@ export function FinalStep({
     while (Date.now() - startedAt < maxMs) {
       const running = await ForegroundService.isRunning().catch(() => false);
       if (running) {return true;}
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(() => r(null), 300));
     }
     return false;
   }

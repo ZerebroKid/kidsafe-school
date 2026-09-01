@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>body{margin:0;background:#07040f;font-family:'Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh}a{color:#A78BFA}a:hover{color:#C4B5FD}</style></helmet>
+
+<div style="padding:12px;border-radius:56px;background:#05030f;box-shadow:0 30px 70px rgba(139,92,246,.3),inset 0 0 0 1px rgba(255,255,255,.09)">
+<div style="width:390px;height:844px;max-width:100vw;border-radius:44px;overflow:hidden;position:relative;background:#0B0620;color:#fff;font-family:'Space Grotesk','Plus Jakarta Sans',system-ui,sans-serif">
+
+<div style="position:absolute;top:-80px;left:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.4),rgba(139,92,246,0) 68%)"></div>
+<div style="position:absolute;bottom:120px;right:-90px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(236,72,153,.3),rgba(236,72,153,0) 68%)"></div>
+<div style="position:absolute;top:200px;right:40px;width:6px;height:6px;border-radius:50%;background:#fff;opacity:.7"></div>
+<div style="position:absolute;top:320px;left:36px;width:4px;height:4px;border-radius:50%;background:#06B6D4"></div>
+<div style="position:absolute;bottom:300px;left:120px;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.5"></div>
+
+<div style="position:relative;height:100%;display:flex;flex-direction:column">
+
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:16px 26px 0;font-size:13px;font-weight:600"><span>9:41</span><span style="font-size:11px;letter-spacing:.06em">▪▪▪ ⌁ ▮</span></div>
+
+<sc-if value="{{ showTopBar }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;display:flex;align-items:center;gap:14px;padding:16px 20px 4px">
+<div onClick="{{ back }}" style="width:38px;height:38px;flex:none;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer" style-hover="background:rgba(139,92,246,.2)">‹</div>
+<div style="flex:1;min-width:0"><div style="font-size:18px;font-weight:600;letter-spacing:-.01em">{{ title }}</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">{{ subtitle }}</div></div>
+</div>
+</sc-if>
+
+<div style="flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;padding:0 18px 18px">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div style="padding-top:20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+<div>
+<div style="font-size:12px;font-weight:600;letter-spacing:.1em;color:#A78BFA;text-transform:uppercase">Good evening</div>
+<div style="font-size:27px;font-weight:700;letter-spacing:-.02em;margin-top:2px">Teacher 👋</div>
+</div>
+<div onClick="{{ goMore }}" style="width:46px;height:46px;flex:none;border-radius:16px;background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.55);box-shadow:0 0 22px rgba(139,92,246,.35);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#C4B5FD;cursor:pointer">RS</div>
+</div>
+
+<div onClick="{{ goClasses }}" style="padding:17px;border-radius:20px;background:linear-gradient(150deg,rgba(139,92,246,.22),rgba(30,27,75,.5));border:1px solid rgba(139,92,246,.45);display:flex;align-items:center;gap:12px;cursor:pointer" style-hover="border-color:rgba(139,92,246,.75)">
+<div style="flex:1">
+<div style="font-size:10px;font-weight:700;letter-spacing:.16em;color:#06B6D4">NEXT CLASS</div>
+<div style="font-size:22px;font-weight:700;margin-top:6px">8A · Math</div>
+<div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px">10:30 AM · Ch 2 Linear Equations</div>
+</div>
+<div style="width:54px;height:54px;flex:none;border-radius:16px;background:rgba(6,182,212,.16);border:1px solid rgba(6,182,212,.5);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:500;color:#67E8F9">2x</div>
+</div>
+
+<div style="padding:18px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12)">
+<div style="display:flex;align-items:center;gap:18px">
+<div style="width:96px;height:96px;flex:none;border-radius:50%;background:conic-gradient(#8B5CF6 0 {{ pctTurn }},rgba(255,255,255,.12) {{ pctTurn }} 1turn);display:flex;align-items:center;justify-content:center">
+<div style="width:74px;height:74px;border-radius:50%;background:#0B0620;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-size:20px;font-weight:700">{{ pctLabel }}</span><span style="font-size:9px;letter-spacing:.1em;color:rgba(255,255,255,.5)">DONE</span></div>
+</div>
+<div style="flex:1">
+<div style="font-size:14px;font-weight:700">Today's progress</div>
+<div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:4px;line-height:1.5">{{ doneLabel }} students finished yesterday's topic quiz</div>
+</div>
+</div>
+<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+<sc-for list="{{ progressByClass }}" as="p" hint-placeholder-count="3">
+<span onClick="{{ p.onClick }}" style="padding:6px 11px;border-radius:9px;font-size:11px;font-weight:700;background:rgba(6,182,212,.14);border:1px solid rgba(6,182,212,.28);color:#67E8F9;cursor:pointer">{{ p.label }}</span>
+</sc-for>
+</div>
+</div>
+
+<div onClick="{{ goHelpList }}" style="padding:17px;border-radius:20px;background:rgba(236,72,153,.12);border:1px solid rgba(236,72,153,.42);display:flex;align-items:center;gap:14px;cursor:pointer" style-hover="border-color:rgba(236,72,153,.7)">
+<div style="width:44px;height:44px;flex:none;border-radius:14px;background:rgba(236,72,153,.2);display:flex;align-items:center;justify-content:center"><svg width="26" height="22" viewBox="0 0 26 22" fill="none" stroke="#F9A8D4" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="7" r="3.8"></circle><path d="M3.4 18.6c0-3.6 3-5.8 6.6-5.8s6.6 2.2 6.6 5.8"></path><circle cx="20" cy="8.4" r="2.8" stroke="rgba(196,181,253,.8)"></circle><path d="M16 18.2c.3-2.8 2.2-4.5 4.5-4.5 1.4 0 2.7.6 3.5 1.7" stroke="rgba(196,181,253,.8)"></path></svg></div>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">Students needing help</div><div style="font-size:18px;font-weight:700;color:#F9A8D4;margin-top:3px">{{ needCount }} students</div><div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:2px">across 8A, 8B and 7C</div></div>
+<div style="font-size:18px;color:#EC4899">›</div>
+</div>
+
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin:4px 2px 10px"><div style="font-size:14px;font-weight:700">Live assignments</div><div onClick="{{ goReports }}" style="font-size:11px;letter-spacing:.08em;color:#A78BFA;cursor:pointer">SEE ALL</div></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ liveAssignments }}" as="a" hint-placeholder-count="3">
+<div onClick="{{ a.onClick }}" style="padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer" style-hover="background:rgba(139,92,246,.12)">
+<div style="min-width:0"><div style="font-size:14px;font-weight:600">{{ a.name }}</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px">{{ a.meta }}</div></div>
+<div style="font-size:13px;font-weight:700;color:{{ a.fg }}">{{ a.score }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isClasses }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:12px">
+<div style="font-size:13px;color:rgba(255,255,255,.55);padding:0 2px 2px">{{ classCount }} classes registered at signup · tap one to assign</div>
+<sc-for list="{{ classes }}" as="c" hint-placeholder-count="3">
+<div onClick="{{ c.onClick }}" style="padding:17px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);cursor:pointer" style-hover="border-color:rgba(139,92,246,.6)">
+<div style="display:flex;align-items:center;gap:12px">
+<div style="width:48px;height:48px;flex:none;border-radius:14px;background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.4);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#C4B5FD">{{ c.id }}</div>
+<div style="flex:1"><div style="font-size:17px;font-weight:700">{{ c.name }}</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px">{{ c.sub }}</div></div>
+<div style="font-size:18px;color:rgba(255,255,255,.4)">›</div>
+</div>
+<div style="margin-top:14px;height:8px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden"><div style="height:100%;width:{{ c.pctWidth }};border-radius:99px;background:linear-gradient(90deg,#8B5CF6,#06B6D4)"></div></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+<span style="font-size:12px;color:rgba(255,255,255,.55)">{{ c.pctLabel }} mastery · {{ c.live }} live</span>
+<span style="padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;background:{{ c.chipBg }};color:{{ c.chipFg }}">{{ c.chip }}</span>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isClass }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;gap:10px">
+<div style="flex:1;padding:14px 8px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);text-align:center"><div style="font-size:20px;font-weight:700;color:#C4B5FD">{{ cls.pctLabel }}</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">Mastery</div></div>
+<div style="flex:1;padding:14px 8px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);text-align:center"><div style="font-size:20px;font-weight:700;color:#67E8F9">{{ cls.strength }}</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">Students</div></div>
+<div style="flex:1;padding:14px 8px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);text-align:center"><div style="font-size:20px;font-weight:700;color:#F9A8D4">{{ cls.need }}</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px">Need help</div></div>
+</div>
+
+<div style="display:flex;gap:10px">
+<div onClick="{{ goReportClass }}" style="flex:1;height:46px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);font-size:13px;font-weight:600;color:#C4B5FD;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="border-color:rgba(139,92,246,.6)">Class report</div>
+<div onClick="{{ goQuiz }}" style="flex:1;height:46px;border-radius:14px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.35);font-size:13px;font-weight:600;color:#67E8F9;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="border-color:rgba(6,182,212,.7)">Live quiz</div>
+</div>
+
+<div style="font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.5);margin:2px 2px -4px">SYLLABUS · {{ cls.board }}</div>
+<sc-for list="{{ chapters }}" as="ch" hint-placeholder-count="3">
+<div style="border-radius:18px;background:rgba(255,255,255,.045);border:1px solid {{ ch.bd }};overflow:hidden">
+<div onClick="{{ ch.onClick }}" style="padding:15px 16px;display:flex;align-items:center;gap:12px;cursor:pointer">
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ ch.name }}</div><div style="font-size:11.5px;color:rgba(255,255,255,.5);margin-top:3px">{{ ch.meta }}</div></div>
+<div style="font-size:13px;color:#A78BFA">{{ ch.caret }}</div>
+</div>
+<sc-if value="{{ ch.open }}" hint-placeholder-val="{{ false }}">
+<div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ ch.topics }}" as="t" hint-placeholder-count="3">
+<div onClick="{{ t.onClick }}" style="padding:13px 14px;border-radius:14px;background:{{ t.bg }};border:1px solid {{ t.bd }};display:flex;align-items:center;gap:12px;cursor:pointer">
+<span style="width:21px;height:21px;flex:none;border-radius:7px;border:1.5px solid {{ t.boxBd }};background:{{ t.boxBg }};display:flex;align-items:center;justify-content:center;font-size:12px;color:#0B0620">{{ t.tick }}</span>
+<span style="flex:1;font-size:13.5px;font-weight:600;color:{{ t.fg }}">{{ t.name }}</span>
+<span style="font-size:11px;color:{{ t.hintFg }}">{{ t.hint }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+
+<div onClick="{{ goAssign }}" style="height:56px;border-radius:18px;background:{{ assignBg }};color:{{ assignFg }};font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:{{ assignShadow }};cursor:pointer" style-hover="filter:brightness(1.08)">{{ assignCta }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAssign }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:15px">
+<div style="padding:16px;border-radius:18px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.4)">
+<div style="font-size:11px;letter-spacing:.14em;color:#A78BFA">ASSIGNING TO</div>
+<div style="font-size:20px;font-weight:700;margin-top:7px">{{ cls.name }} · {{ cls.subject }}</div>
+<div style="font-size:12.5px;color:rgba(255,255,255,.6);margin-top:3px">{{ chapterName }}</div>
+</div>
+<div>
+<div style="font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.5);margin:0 2px 10px">SELECTED TOPICS · {{ topicCount }}</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ selectedTopics }}" as="t" hint-placeholder-count="2">
+<div style="padding:14px 16px;border-radius:16px;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.4);display:flex;align-items:center;justify-content:space-between;gap:10px">
+<span style="font-size:13.5px;font-weight:600">{{ t.name }}</span>
+<span onClick="{{ t.onRemove }}" style="font-size:12px;font-weight:700;color:#F9A8D4;cursor:pointer">Remove</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div>
+<div style="font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.5);margin:0 2px 10px">QUESTIONS PER TOPIC</div>
+<div style="display:flex;gap:9px">
+<sc-for list="{{ qCounts }}" as="q" hint-placeholder-count="4">
+<div onClick="{{ q.onClick }}" style="flex:1;padding:13px 6px;border-radius:14px;text-align:center;background:{{ q.bg }};border:1px solid {{ q.bd }};cursor:pointer"><div style="font-size:15px;font-weight:700;color:{{ q.fg }}">{{ q.label }}</div></div>
+</sc-for>
+</div>
+</div>
+<div>
+<div style="font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.5);margin:0 2px 10px">DUE</div>
+<div style="display:flex;gap:9px">
+<sc-for list="{{ dues }}" as="d" hint-placeholder-count="3">
+<div onClick="{{ d.onClick }}" style="flex:1;padding:13px 8px;border-radius:14px;text-align:center;background:{{ d.bg }};border:1px solid {{ d.bd }};cursor:pointer">
+<div style="font-size:13px;font-weight:700;color:{{ d.fg }}">{{ d.label }}</div>
+<div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:3px">{{ d.sub }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div onClick="{{ submitAssign }}" style="height:58px;border-radius:18px;background:linear-gradient(90deg,#8B5CF6,#EC4899);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(139,92,246,.4);cursor:pointer" style-hover="filter:brightness(1.1)">Assign to {{ cls.id }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isQuiz }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:15px">
+<div style="padding:16px;border-radius:18px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.35)">
+<div style="font-size:11px;letter-spacing:.14em;color:#67E8F9">LIVE QUIZ</div>
+<div style="font-size:20px;font-weight:700;margin-top:7px">{{ cls.name }} · {{ chapterName }}</div>
+<div style="font-size:12.5px;color:rgba(255,255,255,.6);margin-top:3px">Runs in class · students join with the room code</div>
+</div>
+<div>
+<div style="font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.5);margin:0 2px 10px">QUESTIONS</div>
+<div style="display:flex;gap:9px">
+<sc-for list="{{ qCounts }}" as="q" hint-placeholder-count="4">
+<div onClick="{{ q.onClick }}" style="flex:1;padding:13px 6px;border-radius:14px;text-align:center;background:{{ q.bg }};border:1px solid {{ q.bd }};cursor:pointer"><div style="font-size:15px;font-weight:700;color:{{ q.fg }}">{{ q.label }}</div></div>
+</sc-for>
+</div>
+</div>
+<div style="padding:16px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between">
+<div><div style="font-size:14px;font-weight:600">Room code</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px">Share on the board</div></div>
+<div style="font-size:22px;font-weight:700;letter-spacing:.22em;color:#67E8F9">{{ roomCode }}</div>
+</div>
+<div onClick="{{ submitQuiz }}" style="height:58px;border-radius:18px;background:linear-gradient(90deg,#8B5CF6,#EC4899);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(139,92,246,.4);cursor:pointer">Start quiz</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:30px 10px;text-align:center">
+<div style="width:96px;height:96px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.35),rgba(6,182,212,0) 70%);display:flex;align-items:center;justify-content:center">
+<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(140deg,#06B6D4,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:28px">✓</div>
+</div>
+<div style="font-size:24px;font-weight:700">{{ doneTitle }}</div>
+<div style="font-size:14px;color:rgba(255,255,255,.6);line-height:1.55;max-width:290px">{{ doneSummary }}</div>
+<div style="width:100%;display:flex;flex-direction:column;gap:11px;margin-top:10px">
+<div onClick="{{ goReportClass }}" style="height:54px;border-radius:16px;background:linear-gradient(90deg,#8B5CF6,#EC4899);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer">Track in class report</div>
+<div onClick="{{ goHome }}" style="height:54px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer">Back to Home</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:13px">
+<div style="font-size:13px;color:rgba(255,255,255,.55);padding:0 2px">Pick a class to see every student's marks</div>
+<sc-for list="{{ classes }}" as="c" hint-placeholder-count="3">
+<div onClick="{{ c.onReport }}" style="padding:16px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:13px;cursor:pointer" style-hover="border-color:rgba(139,92,246,.6)">
+<div style="width:44px;height:44px;flex:none;border-radius:14px;background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.4);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#C4B5FD">{{ c.id }}</div>
+<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">{{ c.name }}</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px">{{ c.strength }} students · avg {{ c.pctLabel }}</div></div>
+<div style="font-size:18px;color:rgba(255,255,255,.4)">›</div>
+</div>
+</sc-for>
+<div style="padding:18px;border-radius:20px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.11);margin-top:4px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font-size:14px;font-weight:700">This week</div><div style="font-size:12px;color:#67E8F9;font-weight:700">+8% vs last</div></div>
+<div style="display:flex;align-items:flex-end;gap:11px;height:104px;margin-top:16px">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px"><div style="width:100%;height:44%;border-radius:6px;background:rgba(139,92,246,.5)"></div><span style="font-size:10px;color:rgba(255,255,255,.45)">Mon</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px"><div style="width:100%;height:66%;border-radius:6px;background:#8B5CF6"></div><span style="font-size:10px;color:rgba(255,255,255,.45)">Tue</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px"><div style="width:100%;height:32%;border-radius:6px;background:rgba(139,92,246,.4)"></div><span style="font-size:10px;color:rgba(255,255,255,.45)">Wed</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px"><div style="width:100%;height:78%;border-radius:6px;background:linear-gradient(180deg,#06B6D4,#8B5CF6)"></div><span style="font-size:10px;color:rgba(255,255,255,.45)">Thu</span></div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px"><div style="width:100%;height:{{ friBar }};border-radius:6px;background:#EC4899"></div><span style="font-size:10px;font-weight:700;color:#F9A8D4">Fri</span></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isClassReport }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:13px">
+<div style="padding:18px;border-radius:20px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.11);display:flex;align-items:center;gap:18px">
+<div style="width:96px;height:96px;flex:none;border-radius:50%;background:conic-gradient(#06B6D4 0 .6turn,#EC4899 .6turn .8turn,rgba(255,255,255,.12) .8turn 1turn);display:flex;align-items:center;justify-content:center">
+<div style="width:74px;height:74px;border-radius:50%;background:#0B0620;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-size:17px;font-weight:700">{{ cls.passed }}</span><span style="font-size:9px;letter-spacing:.1em;color:rgba(255,255,255,.5)">PASSED</span></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;font-size:13px">
+<div style="display:flex;align-items:center;gap:9px"><span style="width:9px;height:9px;border-radius:50%;background:#06B6D4"></span><span style="flex:1;color:rgba(255,255,255,.7)">Passed</span><b>{{ cls.nPass }}</b></div>
+<div style="display:flex;align-items:center;gap:9px"><span style="width:9px;height:9px;border-radius:50%;background:#EC4899"></span><span style="flex:1;color:rgba(255,255,255,.7)">Keep going</span><b>{{ cls.nKeep }}</b></div>
+<div style="display:flex;align-items:center;gap:9px"><span style="width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.25)"></span><span style="flex:1;color:rgba(255,255,255,.7)">Not attempted</span><b>{{ cls.nNone }}</b></div>
+</div>
+</div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin:2px 2px 0"><div style="font-size:13px;font-weight:700">Student marks</div><div style="font-size:11px;color:{{ rosterNoteFg }}">{{ rosterNote }}</div></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ roster }}" as="s" hint-placeholder-count="6">
+<div onClick="{{ s.onClick }}" style="padding:13px 15px;border-radius:16px;background:{{ s.bg }};border:1px solid {{ s.bd }};display:flex;align-items:center;gap:12px;cursor:pointer" style-hover="background:rgba(139,92,246,.12)">
+<div style="width:38px;height:38px;flex:none;border-radius:50%;background:{{ s.avBg }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:{{ s.fg }}">{{ s.ini }}</div>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ s.name }}</div><div style="font-size:11.5px;color:rgba(255,255,255,.5);margin-top:2px">Roll {{ s.roll }} · {{ s.note }}</div></div>
+<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:{{ s.fg }}">{{ s.score }}</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">{{ s.marks }}</div></div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStudents }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ helpList }}" as="s" hint-placeholder-count="6">
+<div onClick="{{ s.onClick }}" style="padding:14px 16px;border-radius:18px;background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.3);display:flex;align-items:center;gap:12px;cursor:pointer" style-hover="border-color:rgba(236,72,153,.65)">
+<div style="width:42px;height:42px;flex:none;border-radius:50%;background:rgba(236,72,153,.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#F9A8D4">{{ s.ini }}</div>
+<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">{{ s.name }}</div><div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:2px">{{ s.cls }} · {{ s.note }}</div></div>
+<div style="font-size:14px;font-weight:700;color:#F9A8D4">{{ s.score }}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStudent }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:14px">
+<div style="width:64px;height:64px;flex:none;border-radius:22px;background:rgba(236,72,153,.18);border:1px solid rgba(236,72,153,.38);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#F9A8D4">{{ stu.ini }}</div>
+<div><div style="font-size:22px;font-weight:700">{{ stu.name }}</div><div style="font-size:13px;color:rgba(255,255,255,.55);margin-top:3px">{{ stu.cls }} · Roll {{ stu.roll }}</div></div>
+</div>
+<div style="padding:18px;border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:18px">
+<div style="width:88px;height:88px;flex:none;border-radius:50%;background:conic-gradient(#EC4899 0 {{ stu.turn }},rgba(255,255,255,.12) {{ stu.turn }} 1turn);display:flex;align-items:center;justify-content:center">
+<div style="width:68px;height:68px;border-radius:50%;background:#0B0620;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">{{ stu.score }}</div>
+</div>
+<div style="flex:1"><div style="font-size:14px;font-weight:700">Latest quiz</div><div style="font-size:12px;color:rgba(255,255,255,.55);margin-top:4px;line-height:1.5">{{ stu.marks }} marks · class average {{ cls.pctLabel }}</div></div>
+</div>
+<div>
+<div style="font-size:13px;font-weight:700;margin:2px 2px 10px">Topic-wise marks</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ stuTopics }}" as="t" hint-placeholder-count="3">
+<div style="padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font-size:13.5px;font-weight:600">{{ t.name }}</span><span style="font-size:13px;font-weight:700;color:{{ t.fg }}">{{ t.score }}</span></div>
+<div style="margin-top:10px;height:7px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden"><div style="height:100%;width:{{ t.width }};border-radius:99px;background:{{ t.bar }}"></div></div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="padding:16px;border-radius:18px;background:linear-gradient(150deg,rgba(139,92,246,.2),rgba(236,72,153,.14));border:1px solid rgba(139,92,246,.4)">
+<div style="font-size:11px;letter-spacing:.14em;color:#A78BFA">RECOMMENDED</div>
+<div style="font-size:15px;font-weight:600;margin-top:8px;line-height:1.45">Re-teach <b>{{ stu.weak }}</b>, then assign a short practice set to {{ stu.cls }}.</div>
+<div onClick="{{ goClassOfStudent }}" style="margin-top:14px;height:48px;border-radius:14px;background:linear-gradient(90deg,#8B5CF6,#EC4899);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer">Open {{ stu.cls }} to assign</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isNotifs }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ notifs }}" as="n" hint-placeholder-count="4">
+<div style="padding:15px 16px;border-radius:18px;background:{{ n.bg }};border:1px solid {{ n.bd }}">
+<div style="font-size:14px;font-weight:600;line-height:1.4">{{ n.title }}</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:5px">{{ n.time }}</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMore }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:6px;display:flex;flex-direction:column;gap:14px">
+<div style="padding:18px;border-radius:20px;background:linear-gradient(150deg,rgba(139,92,246,.22),rgba(30,27,75,.5));border:1px solid rgba(139,92,246,.4);display:flex;align-items:center;gap:14px">
+<div style="width:58px;height:58px;flex:none;border-radius:20px;background:rgba(139,92,246,.25);border:1px solid rgba(139,92,246,.45);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#C4B5FD">RS</div>
+<div><div style="font-size:19px;font-weight:700">Teacher1</div><div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">Math · Sunrise Public School</div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ moreRows }}" as="r" hint-placeholder-count="6">
+<div onClick="{{ r.onClick }}" style="padding:16px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:space-between;cursor:pointer" style-hover="background:rgba(139,92,246,.12)"><span style="font-size:14px;font-weight:600">{{ r.label }}</span><span style="font-size:12px;color:rgba(255,255,255,.45)">{{ r.meta }}</span></div>
+</sc-for>
+</div>
+<div style="height:54px;border-radius:16px;border:1px solid rgba(236,72,153,.4);background:rgba(236,72,153,.1);color:#F9A8D4;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:rgba(236,72,153,.2)">Sign out</div>
+<div style="text-align:center;font-size:11px;color:rgba(255,255,255,.3);padding:4px 0 8px">ZerebroKid Teacher · v2.0</div>
+</div>
+</sc-if>
+
+</div>
+
+<div style="flex:none;padding:10px 10px 14px;background:rgba(11,6,32,.9);backdrop-filter:blur(14px);border-top:1px solid rgba(139,92,246,.25);display:flex">
+<sc-for list="{{ nav }}" as="it" hint-placeholder-count="4">
+<div onClick="{{ it.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding-top:4px">
+<div style="width:40px;height:26px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;background:{{ it.bg }};box-shadow:{{ it.glow }};color:{{ it.fg }}">{{ it.icon }}</div>
+<div style="font-size:10px;font-weight:700;color:{{ it.fg }}">{{ it.label }}</div>
+</div>
+</sc-for>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:440,&quot;height&quot;:890},&quot;progressPct&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:60,&quot;min&quot;:0,&quot;max&quot;:100,&quot;step&quot;:1,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Data&quot;}}">
+const TABS = [['◱','Home','home'],['▤','Classes','classes'],['◔','Reports','reports'],['≡','More','more']];
+
+const CLASSES = [
+  { id:'8A', name:'Class 8A', subject:'Math', board:'CBSE · Grade 8', sub:'Grade 8 · Section A · Math', strength:30, pct:60, live:2, need:6, code:'8A2X' },
+  { id:'8B', name:'Class 8B', subject:'Math', board:'CBSE · Grade 8', sub:'Grade 8 · Section B · Math', strength:28, pct:78, live:1, need:4, code:'8B7K' },
+  { id:'7C', name:'Class 7C', subject:'Math', board:'CBSE · Grade 7', sub:'Grade 7 · Section C · Math', strength:32, pct:44, live:1, need:9, code:'7C4M' }
+];
+
+const SYLLABUS = {
+  '8A': [
+    { name:'Ch 2. Linear Equations in One Variable', topics:[
+      { name:'Solving Basic Linear Equations', hint:'72% avg' },
+      { name:'Variables on Both Sides', hint:'45% avg' },
+      { name:'Word Problems on Linear Equations', hint:'20% avg' } ] },
+    { name:'Ch 3. Understanding Quadrilaterals', topics:[
+      { name:'Types of Quadrilaterals', hint:'not started' },
+      { name:'Angle Sum Property', hint:'not started' } ] },
+    { name:'Ch 4. Data Handling', topics:[
+      { name:'Reading Bar Graphs', hint:'81% avg' },
+      { name:'Probability Basics', hint:'not started' } ] }
+  ],
+  '8B': [
+    { name:'Ch 2. Linear Equations in One Variable', topics:[
+      { name:'Solving Basic Linear Equations', hint:'88% avg' },
+      { name:'Variables on Both Sides', hint:'64% avg' } ] },
+    { name:'Ch 6. Squares and Square Roots', topics:[
+      { name:'Finding Square Roots', hint:'57% avg' },
+      { name:'Patterns in Squares', hint:'not started' } ] }
+  ],
+  '7C': [
+    { name:'Ch 1. Integers', topics:[
+      { name:'Multiplying Integers', hint:'39% avg' },
+      { name:'Dividing Integers', hint:'32% avg' } ] },
+    { name:'Ch 2. Fractions and Decimals', topics:[
+      { name:'Multiplying Fractions', hint:'48% avg' },
+      { name:'Decimal Word Problems', hint:'not started' } ] },
+    { name:'Ch 5. Lines and Angles', topics:[
+      { name:'Pairs of Angles', hint:'not started' } ] }
+  ]
+};
+
+const ROSTER = {
+  '8A': [
+    { ini:'AK', name:'Aarav Kapoor', roll:'04', score:35, note:'Word problems', marks:'7/20' },
+    { ini:'MS', name:'Meera Sharma', roll:'11', score:38, note:'Variables both sides', marks:'8/20' },
+    { ini:'RV', name:'Rohan Verma', roll:'19', score:0, note:'Not attempted', marks:'—' },
+    { ini:'IS', name:'Isha Singh', roll:'07', score:82, note:'Steady this week', marks:'16/20' },
+    { ini:'DN', name:'Dev Nair', roll:'12', score:76, note:'Improved +12%', marks:'15/20' },
+    { ini:'PT', name:'Priya Tiwari', roll:'22', score:94, note:'Top of class', marks:'19/20' }
+  ],
+  '8B': [
+    { ini:'KG', name:'Kabir Gupta', roll:'02', score:39, note:'Square roots', marks:'8/20' },
+    { ini:'AN', name:'Anaya Nanda', roll:'09', score:71, note:'Steady', marks:'14/20' },
+    { ini:'VR', name:'Vivaan Rao', roll:'14', score:88, note:'Strong', marks:'18/20' },
+    { ini:'SD', name:'Sara Dutta', roll:'21', score:66, note:'Improving', marks:'13/20' }
+  ],
+  '7C': [
+    { ini:'NM', name:'Nitya Menon', roll:'03', score:28, note:'Integers', marks:'6/20' },
+    { ini:'AY', name:'Arjun Yadav', roll:'08', score:33, note:'Dividing integers', marks:'7/20' },
+    { ini:'RB', name:'Riya Bose', roll:'15', score:58, note:'Fractions ok', marks:'12/20' },
+    { ini:'HS', name:'Harsh Saini', roll:'26', score:72, note:'Improved +9%', marks:'14/20' }
+  ]
+};
+
+const DUES = [['Today','11:59 PM'],['Tomorrow','11:59 PM'],['In 3 days','Fri 11:59 PM']];
+const QCOUNTS = [5, 10, 15, 20];
+const NOTIFS = [
+  { title:'6 students in 8A scored below 40% on Word Problems', time:'12 min ago', hot:true },
+  { title:'Class 8B completed “Solving Basic Linear Equations”', time:'1 hour ago' },
+  { title:'Weekly report for Class 7C is ready', time:'Yesterday' },
+  { title:'Timetable updated: Math 8A moved to 10:30 AM', time:'2 days ago' }
+];
+const MORE_ROWS = [
+  { label:'My classes', meta:'3', to:'classes' },
+  { label:'Notifications', meta:'3 new', to:'notifs' },
+  { label:'Reports & insights', meta:'', to:'reports' },
+  { label:'Curriculum & board', meta:'CBSE' },
+  { label:'School timetable', meta:'Mon–Sat' },
+  { label:'Help & support', meta:'' }
+];
+
+class Component extends DCLogic {
+  state = {
+    screen:'home', stack:[], classId:'8A', chapter:0, openChapter:0,
+    topics:{}, due:0, qCount:1, studentKey:null, doneKind:'assign'
+  };
+
+  go(screen, extra) {
+    this.setState(s => ({ screen, stack: s.screen === screen ? s.stack : s.stack.concat([s.screen]), ...(extra || {}) }));
+  }
+  tab(screen) { this.setState({ screen, stack: [] }); }
+  back() {
+    this.setState(s => {
+      if (!s.stack.length) return { screen:'home' };
+      const st = s.stack.slice();
+      return { screen: st.pop(), stack: st };
+    });
+  }
+  selKey(ci, ti) { return this.state.classId + ':' + ci + ':' + ti; }
+  selectedList() {
+    const out = [];
+    (SYLLABUS[this.state.classId] || []).forEach((ch, ci) => ch.topics.forEach((t, ti) => {
+      if (this.state.topics[this.selKey(ci, ti)]) out.push({ ci, ti, name: t.name });
+    }));
+    return out;
+  }
+
+  renderVals() {
+    const sc = this.state.screen;
+    const cls = CLASSES.find(c => c.id === this.state.classId) || CLASSES[0];
+    const roster = ROSTER[cls.id] || [];
+    const chapters = SYLLABUS[cls.id] || [];
+    const sel = this.selectedList();
+    const pct = Math.max(0, Math.min(100, this.props.progressPct ?? 60));
+    const totalStudents = CLASSES.reduce((n, c) => n + c.strength, 0);
+    const needTotal = CLASSES.reduce((n, c) => n + c.need, 0);
+    // roster is a sample of the class — scale its shape up to the real strength
+    const sPass = roster.filter(s => s.score >= 60).length;
+    const sNone = roster.filter(s => s.score === 0).length;
+    const nPass = roster.length ? Math.round(sPass / roster.length * cls.strength) : 0;
+    const nNone = roster.length ? Math.round(sNone / roster.length * cls.strength) : 0;
+    const nKeep = cls.strength - nPass - nNone;
+
+    const TITLES = {
+      classes:['Classes','Your registered classes'],
+      class:[cls.name, cls.board + ' · ' + cls.subject],
+      assign:['Assign a topic', cls.name],
+      quiz:['Take quiz', cls.name],
+      reports:['Reports','Class-wise performance'],
+      classreport:[cls.name + ' report', cls.strength + ' students · avg ' + cls.pct + '%'],
+      students:['Students needing help', needTotal + ' across all classes'],
+      student:['Student report', cls.name],
+      notifs:['Notifications',''], more:['More','Account & settings'], done:['','']
+    };
+    const t = TITLES[sc] || null;
+    const tabFor = { home:'home', classes:'classes', class:'classes', assign:'classes', quiz:'classes', done:'classes', students:'home', student:'reports', reports:'reports', classreport:'reports', notifs:'more', more:'more' }[sc];
+
+    const helpList = [];
+    CLASSES.forEach(c => (ROSTER[c.id] || []).filter(s => s.score < 50).forEach(s => helpList.push({
+      ...s, cls: c.id, score: s.score ? s.score + '%' : '—',
+      onClick: () => this.go('student', { classId: c.id, studentKey: c.id + s.roll })
+    })));
+
+    const stuRaw = roster.find(s => cls.id + s.roll === this.state.studentKey) || roster[0] || { ini:'', name:'', roll:'', score:0, marks:'' };
+    const stuChapters = chapters[0] ? chapters[0].topics : [];
+
+    const scoreColor = v => v === 0 ? 'rgba(255,255,255,.45)' : v < 50 ? '#F9A8D4' : v < 75 ? '#C4B5FD' : '#67E8F9';
+
+    return {
+      isHome: sc === 'home', isClasses: sc === 'classes', isClass: sc === 'class',
+      isAssign: sc === 'assign', isQuiz: sc === 'quiz', isDone: sc === 'done',
+      isReports: sc === 'reports', isClassReport: sc === 'classreport',
+      isStudents: sc === 'students', isStudent: sc === 'student',
+      isNotifs: sc === 'notifs', isMore: sc === 'more',
+      showTopBar: !!t, title: t ? t[0] : '', subtitle: t ? t[1] : '',
+      back: () => this.back(),
+      goHome: () => this.tab('home'), goClasses: () => this.tab('classes'),
+      goReports: () => this.tab('reports'), goMore: () => this.tab('more'),
+      goNotifs: () => this.go('notifs'), goHelpList: () => this.go('students'),
+      goQuiz: () => this.go('quiz'),
+      goAssign: () => { if (sel.length) this.go('assign'); },
+      goReportClass: () => this.go('classreport'),
+      goClassOfStudent: () => this.go('class'),
+      submitAssign: () => this.setState(s => ({ screen:'done', doneKind:'assign', stack: s.stack.concat(['assign']) })),
+      submitQuiz: () => this.setState(s => ({ screen:'done', doneKind:'quiz', stack: s.stack.concat(['quiz']) })),
+
+      pctLabel: pct + '%', pctTurn: (pct / 100).toFixed(3) + 'turn',
+      doneLabel: Math.round(pct / 100 * totalStudents) + '/' + totalStudents,
+      needCount: needTotal,
+      friBar: Math.round(24 + pct * 0.66) + '%',
+      classCount: CLASSES.length,
+      roomCode: cls.code,
+
+      progressByClass: CLASSES.map(c => ({
+        label: c.id + ' · ' + c.pct + '%',
+        onClick: () => this.go('classreport', { classId: c.id })
+      })),
+      liveAssignments: [
+        { name:'Word Problems on Linear Equations', meta:'8A · due 11:59 PM', score:'18/30', fg:'#67E8F9', onClick: () => this.go('classreport', { classId:'8A' }) },
+        { name:'Finding Square Roots', meta:'8B · due tomorrow', score:'9/28', fg:'#C4B5FD', onClick: () => this.go('classreport', { classId:'8B' }) },
+        { name:'Multiplying Integers', meta:'7C · closed', score:'30/32', fg:'rgba(255,255,255,.45)', onClick: () => this.go('classreport', { classId:'7C' }) }
+      ],
+
+      classes: CLASSES.map(c => ({
+        id:c.id, name:c.name, sub:c.sub, strength:c.strength, live:c.live,
+        pctWidth:c.pct + '%', pctLabel:c.pct + '%',
+        chip: c.need + ' need help',
+        chipBg: c.need > 5 ? 'rgba(236,72,153,.16)' : 'rgba(6,182,212,.16)',
+        chipFg: c.need > 5 ? '#F9A8D4' : '#67E8F9',
+        onClick: () => this.go('class', { classId: c.id, openChapter: 0 }),
+        onReport: () => this.go('classreport', { classId: c.id })
+      })),
+
+      cls: { id:cls.id, name:cls.name, subject:cls.subject, board:cls.board,
+        strength:cls.strength, need:cls.need, pctLabel:cls.pct + '%',
+        passed: nPass + '/' + cls.strength, nPass, nKeep, nNone },
+
+      chapters: chapters.map((ch, ci) => {
+        const open = this.state.openChapter === ci;
+        const count = ch.topics.filter((_, ti) => this.state.topics[this.selKey(ci, ti)]).length;
+        return {
+          name: ch.name,
+          meta: ch.topics.length + ' topics' + (count ? ' · ' + count + ' selected' : ''),
+          caret: open ? '▲' : '▼', open,
+          bd: count ? 'rgba(139,92,246,.5)' : 'rgba(255,255,255,.1)',
+          onClick: () => this.setState(s => ({ openChapter: s.openChapter === ci ? -1 : ci })),
+          topics: ch.topics.map((tp, ti) => {
+            const key = this.selKey(ci, ti);
+            const on = !!this.state.topics[key];
+            const weak = /^[0-3]?[0-9]% avg$/.test(tp.hint);
+            return { name:tp.name, hint:tp.hint, tick: on ? '✓' : '',
+              bg: on ? 'rgba(139,92,246,.16)' : 'rgba(255,255,255,.04)',
+              bd: on ? 'rgba(139,92,246,.5)' : 'rgba(255,255,255,.1)',
+              fg: on ? '#fff' : 'rgba(255,255,255,.72)',
+              boxBd: on ? '#8B5CF6' : 'rgba(255,255,255,.28)',
+              boxBg: on ? '#8B5CF6' : 'transparent',
+              hintFg: weak ? '#F9A8D4' : 'rgba(255,255,255,.45)',
+              onClick: () => this.setState(s => {
+                const nx = { ...s.topics };
+                if (nx[key]) delete nx[key]; else nx[key] = true;
+                return { topics: nx };
+              }) };
+          })
+        };
+      }),
+
+      assignCta: sel.length ? 'Assign ' + sel.length + (sel.length > 1 ? ' topics to ' : ' topic to ') + cls.id : 'Select topics to assign',
+      assignBg: sel.length ? 'linear-gradient(90deg,#8B5CF6,#EC4899)' : 'rgba(255,255,255,.06)',
+      assignFg: sel.length ? '#fff' : 'rgba(255,255,255,.45)',
+      assignShadow: sel.length ? '0 10px 30px rgba(139,92,246,.4)' : 'none',
+      topicCount: sel.length,
+      chapterName: (chapters[Math.max(0, this.state.openChapter)] || chapters[0] || { name:'' }).name,
+      selectedTopics: sel.map(t => ({ name: t.name, onRemove: () => this.setState(s => {
+        const nx = { ...s.topics }; delete nx[this.selKey(t.ci, t.ti)]; return { topics: nx };
+      }) })),
+      qCounts: QCOUNTS.map((n, i) => {
+        const on = this.state.qCount === i;
+        return { label:n, bg: on ? 'rgba(139,92,246,.18)' : 'rgba(255,255,255,.04)',
+          bd: on ? 'rgba(139,92,246,.55)' : 'rgba(255,255,255,.1)',
+          fg: on ? '#fff' : 'rgba(255,255,255,.7)',
+          onClick: () => this.setState({ qCount: i }) };
+      }),
+      dues: DUES.map((d, i) => {
+        const on = this.state.due === i;
+        return { label:d[0], sub:d[1],
+          bg: on ? 'rgba(139,92,246,.18)' : 'rgba(255,255,255,.04)',
+          bd: on ? 'rgba(139,92,246,.55)' : 'rgba(255,255,255,.1)',
+          fg: on ? '#fff' : 'rgba(255,255,255,.7)',
+          onClick: () => this.setState({ due: i }) };
+      }),
+      doneTitle: this.state.doneKind === 'quiz' ? 'Quiz is live for ' + cls.id : 'Assigned to ' + cls.name,
+      doneSummary: this.state.doneKind === 'quiz'
+        ? QCOUNTS[this.state.qCount] + ' questions · room code ' + cls.code + '. Students join from their app.'
+        : sel.length + (sel.length > 1 ? ' topics' : ' topic') + ' · ' + QCOUNTS[this.state.qCount] + ' questions each · due ' + DUES[this.state.due][0].toLowerCase() + ' ' + DUES[this.state.due][1] + '.',
+
+      rosterNote: 'Showing ' + roster.length + ' of ' + cls.strength + ' · latest quiz',
+      rosterNoteFg: 'rgba(255,255,255,.45)',
+      roster: roster.map(s => ({
+        ini:s.ini, name:s.name, roll:s.roll, note:s.note, marks:s.marks,
+        score: s.score ? s.score + '%' : '—',
+        fg: scoreColor(s.score),
+        avBg: s.score && s.score < 50 ? 'rgba(236,72,153,.2)' : 'rgba(139,92,246,.18)',
+        bg: s.score && s.score < 50 ? 'rgba(236,72,153,.08)' : 'rgba(255,255,255,.045)',
+        bd: s.score && s.score < 50 ? 'rgba(236,72,153,.28)' : 'rgba(255,255,255,.1)',
+        onClick: () => this.go('student', { studentKey: cls.id + s.roll })
+      })),
+      helpList,
+      stu: { ini:stuRaw.ini, name:stuRaw.name, roll:stuRaw.roll, cls:cls.id,
+        score: stuRaw.score ? stuRaw.score + '%' : '—', marks: stuRaw.marks,
+        turn: (stuRaw.score / 100) + 'turn',
+        weak: (stuChapters[stuChapters.length - 1] || { name:'this chapter' }).name },
+      stuTopics: stuChapters.map((tp, i) => {
+        const v = Math.max(5, Math.min(98, stuRaw.score + (i === 0 ? 22 : i === 1 ? 2 : -14)));
+        return { name:tp.name, score:v + '%', width:v + '%', fg: scoreColor(v),
+          bar: v < 50 ? 'linear-gradient(90deg,#EC4899,#F9A8D4)' : 'linear-gradient(90deg,#8B5CF6,#06B6D4)' };
+      }),
+
+      notifs: NOTIFS.map(n => ({ title:n.title, time:n.time,
+        bg: n.hot ? 'rgba(236,72,153,.1)' : 'rgba(255,255,255,.045)',
+        bd: n.hot ? 'rgba(236,72,153,.3)' : 'rgba(255,255,255,.1)' })),
+      moreRows: MORE_ROWS.map(r => ({ label:r.label, meta:r.meta, onClick: r.to ? () => this.tab(r.to) : () => {} })),
+
+      nav: TABS.map(tb => {
+        const on = tabFor === tb[2];
+        return { icon:tb[0], label:tb[1],
+          bg: on ? 'rgba(139,92,246,.28)' : 'transparent',
+          glow: on ? '0 0 16px rgba(139,92,246,.35)' : 'none',
+          fg: on ? '#C4B5FD' : 'rgba(255,255,255,.42)',
+          onClick: () => this.tab(tb[2]) };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

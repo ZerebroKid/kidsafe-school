@@ -46,16 +46,36 @@ def _db() -> Any:
     global _app
     if _app is None:
         project_id = os.environ.get("FIREBASE_PROJECT_ID", "kidsafe-e5eac")
-        _app = firebase_admin.initialize_app(
-            credentials.ApplicationDefault(), {"projectId": project_id}
+        cred_path = (
+            os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+            or os.environ.get("FIREBASE_SERVICE_ACCOUNT_KEY")
         )
+        if not cred_path:
+            for candidate in ("serviceAccountKey.json", "firebase-service-account.json", "service-account.json"):
+                if os.path.exists(candidate):
+                    cred_path = candidate
+                    break
+
+        if cred_path and os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+        else:
+            cred = credentials.ApplicationDefault()
+
+        _app = firebase_admin.initialize_app(cred, {"projectId": project_id})
     return firestore.client()
 
 
 def warm_up() -> None:
     """Initialize the Firebase app + credential handshake ahead of the first
     real read (called from the worker's prewarm hook)."""
-    _db()
+    try:
+        _db()
+    except Exception as e:
+        import logging
+        logging.getLogger("zumi-firebase").warning(
+            f"Firebase warm_up skipped (credentials not found: {e}). "
+            "To enable Firestore sync, add serviceAccountKey.json or set GOOGLE_APPLICATION_CREDENTIALS."
+        )
 
 
 @dataclass

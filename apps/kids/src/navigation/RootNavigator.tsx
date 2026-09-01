@@ -92,7 +92,7 @@ export function RootNavigator() {
     return sub;
   }, [firebaseUid, setUserDoc]);
 
-  if (!bootstrapped || (firebaseUid && userDocLoading && !userDoc)) {
+  if (!bootstrapped) {
     return (
       <View style={styles.splash}>
         <AppLogo size={72} />
@@ -103,7 +103,12 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer theme={navTheme}>
-      {!firebaseUid ? (
+      {firebaseUid && userDocLoading && !userDoc ? (
+        <View style={styles.splash}>
+          <AppLogo size={72} />
+          <ActivityIndicator color={colors.primary} style={styles.splashSpinner} />
+        </View>
+      ) : !firebaseUid ? (
         <AuthNavigator />
       ) : !emailVerified ? (
         <VerifyEmailScreen />

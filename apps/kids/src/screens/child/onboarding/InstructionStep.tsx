@@ -73,19 +73,16 @@ export function InstructionStep({
       if (!returningFromSettings.current) {return;}
       returningFromSettings.current = false;
       // Tiny delay — some OEMs (Xiaomi) take a moment to flush the secure-setting write.
-      await new Promise(r => setTimeout(r, 400));
-      // `requireExplicitConfirm` skips the silent advance and always shows the verification
-      // sheet so the user must tap "Yes". A dishonest "Yes" is caught by the honest-check in
-      // handleVerifyYes (same path as `strict: true`).
-      if (step.requireExplicitConfirm) {
-        setShowVerify(true);
-        return;
-      }
+      await new Promise(r => setTimeout(() => r(null), 500));
+
+      // Always recheck first — if granted, recheck() calls onComplete() and advances.
       const granted = await recheck();
-      if (!granted) {setShowVerify(true);}
+      if (!granted) {
+        setShowVerify(true);
+      }
     });
     return () => sub.remove();
-  }, [recheck, step.requireExplicitConfirm]);
+  }, [recheck]);
 
   async function handleOpen() {
     setOpening(true);
@@ -138,7 +135,7 @@ export function InstructionStep({
     // to propagate the permission write. Common on accessibility toggles with Xiaomi's "Danger"
     // 7s confirmation: by the time the user is back in the app the secure setting is already
     // flipped but we may have re-checked too early.
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(() => r(null), 600));
     try {
       const ok = await step.check();
       if (ok) {
@@ -154,26 +151,28 @@ export function InstructionStep({
     // gets the same treatment so device-admin protection can't be claimed without actually
     // being on; the FinalStep parent-PIN escape hatch remains the documented skip path.
     if (step.strict || step.requireExplicitConfirm) {
+      returningFromSettings.current = false;
       Alert.alert(
         "We still can't detect that change",
         'Please flip the switch in Settings and then come back. KidSafe will check again automatically.',
         [
           {text: 'Cancel', style: 'cancel'},
-          {text: 'Open Settings', onPress: handleOpen},
+          {
+            text: 'Open Settings',
+            onPress: () => {
+              handleOpen();
+            },
+          },
         ],
       );
       return;
     }
-    // For unverifiable steps (no public read-back API like MIUI pop-up) we have to trust the
-    // user. For verifiable but optional steps (e.g. battery), we also let them through — the
-    // FinalStep's authoritative check will warn if it's still missing.
-    // For required-but-verifiable steps we still advance: the FinalStep blocks Finish until
-    // it really passes, so the user can't accidentally leak past the gate.
     onComplete();
   }
 
   function handleVerifyNo() {
     setShowVerify(false);
+    returningFromSettings.current = false;
     handleOpen();
   }
 

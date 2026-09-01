@@ -1,3 +1,15 @@
+/**
+ * StudyNavigator — Stack navigator for the Study tab.
+ *
+ * Initial screen selection:
+ *  - isFunMode (grade ≤ 6): ZumiHome (unchanged)
+ *  - !isFunMode (grade 7+): SubjectList (new Class 6–12 design)
+ *
+ * All existing screens (StudyMission, TopicLearn, ZumiVoice, Quiz,
+ * QuizResult, RewardUnlock, RewardWebView, VideoPlayer, Reels) are
+ * PRESERVED — new screens are added alongside them.
+ */
+
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
@@ -11,26 +23,56 @@ import {RewardUnlockScreen} from '../screens/learn/RewardUnlockScreen';
 import {RewardWebViewScreen} from '../screens/learn/RewardWebViewScreen';
 import {VideoPlayerScreen} from '../screens/learn/VideoPlayerScreen';
 import {ReelsScreen} from '../screens/reels/ReelsScreen';
+import {SubjectListScreen} from '../screens/learn/SubjectListScreen';
+import {SubjectDetailScreen} from '../screens/learn/SubjectDetailScreen';
+import {TopicDetailScreen} from '../screens/learn/TopicDetailScreen';
+import {FocusModeScreen} from '../screens/focus/FocusModeScreen';
+import {ExamPredictorScreen} from '../screens/predictor/ExamPredictorScreen';
+import {SettingsScreen} from '../screens/profile/SettingsScreen';
+import {ChooseWorldScreen} from '../screens/theme/ChooseWorldScreen';
+
 import {useChildProfile} from '../context/ChildProfileContext';
-import {colors} from '../theme';
+import {brand, neutral} from '../theme';
 import type {StudyStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<StudyStackParamList>();
 
 export function StudyNavigator() {
-  // Fun-mode kids (grade <= 6) land straight on Zumi the character; everyone
-  // else keeps the standard Study Mission list as the stack's entry point.
+  // Fun-mode kids (grade ≤ 6) land straight on Zumi; everyone
+  // else lands on the new Subject List screen.
   const {isFunMode} = useChildProfile();
 
   return (
     <Stack.Navigator
-      initialRouteName={isFunMode ? 'ZumiHome' : 'StudyMission'}
+      initialRouteName={isFunMode ? 'ZumiHome' : 'SubjectList'}
       screenOptions={{
-        headerStyle: {backgroundColor: colors.bg},
-        headerTintColor: colors.text,
+        headerStyle: {backgroundColor: neutral.surface},
+        headerTintColor: neutral.ink900,
         headerShadowVisible: false,
-        contentStyle: {backgroundColor: colors.bg},
+        contentStyle: {backgroundColor: neutral.bgApp},
+        headerTitleStyle: {
+          fontWeight: '700',
+          fontSize: 18,
+        },
       }}>
+      {/* ── Class 6–12 screens ─────────────────────────── */}
+      <Stack.Screen
+        name="SubjectList"
+        component={SubjectListScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="SubjectDetail"
+        component={SubjectDetailScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="TopicDetail"
+        component={TopicDetailScreen}
+        options={{headerShown: false}}
+      />
+
+      {/* ── Fun-mode (Zumi) screens — unchanged ────────── */}
       <Stack.Screen
         name="ZumiHome"
         component={ZumiHomeScreen}
@@ -44,7 +86,7 @@ export function StudyNavigator() {
       <Stack.Screen
         name="TopicLearn"
         component={TopicScreen}
-        options={({route}) => ({headerTitle: route.params.topicName})}
+        options={{headerShown: false}}
       />
       <Stack.Screen
         name="ZumiVoice"
@@ -54,12 +96,12 @@ export function StudyNavigator() {
       <Stack.Screen
         name="Quiz"
         component={QuizScreen}
-        options={{headerTitle: 'Quiz'}}
+        options={{headerShown: false}}
       />
       <Stack.Screen
         name="QuizResult"
         component={QuizResultScreen}
-        options={{headerTitle: 'Results', headerBackVisible: false}}
+        options={{headerShown: false}}
       />
       <Stack.Screen
         name="RewardUnlock"
@@ -83,6 +125,26 @@ export function StudyNavigator() {
       <Stack.Screen
         name="Reels"
         component={ReelsScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="FocusMode"
+        component={FocusModeScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="ExamPredictor"
+        component={ExamPredictorScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="ChooseWorld"
+        component={ChooseWorldScreen}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

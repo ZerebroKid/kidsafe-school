@@ -46,13 +46,36 @@ export function formatDateKey(d: Date): string {
 
 // --- Parent-side helpers -----------------------------------------------------
 
+function toChildUserDoc(docId: string, raw: Partial<UserDoc>): (UserDoc & {uid: string}) | null {
+  const roles =
+    Array.isArray(raw.roles) && raw.roles.length > 0
+      ? raw.roles
+      : raw.role
+        ? [raw.role]
+        : [];
+  const primaryRole = raw.primaryRole ?? roles[0] ?? (raw.role as any) ?? 'child';
+  const isChild = roles.includes('child') || primaryRole === 'child' || raw.role === 'child';
+  if (!isChild) return null;
+  return {
+    ...raw,
+    uid: docId,
+    roles,
+    primaryRole,
+    createdAt: raw.createdAt ?? 0,
+  } as UserDoc & {uid: string};
+}
+
 export async function getLinkedChildren(parentUid: string): Promise<Array<UserDoc & {uid: string}>> {
   const query = await paths
     .users()
-    .where('role', '==', 'child')
     .where('parentUid', '==', parentUid)
     .get();
-  return query.docs.map(d => ({uid: d.id, ...(d.data() as UserDoc)}));
+  const list: Array<UserDoc & {uid: string}> = [];
+  query.docs.forEach(d => {
+    const item = toChildUserDoc(d.id, d.data() as Partial<UserDoc>);
+    if (item) list.push(item);
+  });
+  return list;
 }
 
 export function subscribeLinkedChildren(
@@ -61,11 +84,15 @@ export function subscribeLinkedChildren(
 ) {
   return paths
     .users()
-    .where('role', '==', 'child')
     .where('parentUid', '==', parentUid)
     .onSnapshot(
       snap => {
-        cb(snap.docs.map(d => ({uid: d.id, ...(d.data() as UserDoc)})));
+        const list: Array<UserDoc & {uid: string}> = [];
+        snap.docs.forEach(d => {
+          const item = toChildUserDoc(d.id, d.data() as Partial<UserDoc>);
+          if (item) list.push(item);
+        });
+        cb(list);
       },
       err => console.warn('subscribeLinkedChildren error', err),
     );

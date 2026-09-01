@@ -185,7 +185,7 @@ def build_turn_detection():
 
 
 def build_sarvam_stt() -> stt.STT:
-    """Today's managed STT -- the default provider and the whisper fallback."""
+    """Managed Sarvam STT."""
     return sarvam.STT(
         model="saaras:v3",
         # English-only pass: hint English so Indian-accented English is not
@@ -196,32 +196,39 @@ def build_sarvam_stt() -> stt.STT:
     )
 
 
-def build_stt(provider: str, vad: inference.VAD) -> stt.STT:
-    """Select the STT stage from the remote `sttProvider` flag (Phase 5).
+def build_openai_whisper_stt(vad: inference.VAD) -> stt.STT:
+    """OpenAI hosted Whisper STT (model whisper-1) using OPENAI_API_KEY."""
+    whisper = openai.STT(
+        model="whisper-1",
+        api_key=os.environ.get("OPENAI_API_KEY"),
+        language=WHISPER_LANGUAGE or "en",
+    )
+    return stt.StreamAdapter(stt=whisper, vad=vad)
 
-    "whisper" = self-hosted faster-whisper on the GPU VM, spoken to through
-    the OpenAI-compatible /v1/audio/transcriptions API. It's a per-utterance
-    (non-streaming) backend, so the FallbackAdapter wraps it with our VAD --
-    and puts Sarvam behind it, meaning a stopped/unreachable GPU VM degrades
-    to exactly today's pipeline instead of a dead session.
+
+def build_stt(provider: str, vad: inference.VAD) -> stt.STT:
+    """Select the STT stage.
+
+    Uses OpenAI Whisper STT if Sarvam is not configured or if provider is whisper/openai.
     """
-    if provider == "whisper":
-        if not WHISPER_URL:
-            logger.warning(
-                "[config] sttProvider=whisper but ZUMI_WHISPER_URL is not set "
-                "-- using sarvam"
+    sarvam_key = os.environ.get("SARVAM_API_KEY", "").strip()
+    has_sarvam = bool(sarvam_key and not sarvam_key.startswith("sk_xxx") and not sarvam_key.startswith("sk_xxxx"))
+
+    if provider in ("whisper", "openai") or not has_sarvam:
+        if WHISPER_URL:
+            whisper = openai.STT(
+                model=WHISPER_MODEL,
+                base_url=WHISPER_URL,
+                api_key=os.environ.get("OPENAI_API_KEY") or "speaches",
+                language=WHISPER_LANGUAGE or "en",
+                detect_language=not WHISPER_LANGUAGE,
             )
-            return build_sarvam_stt()
-        whisper = openai.STT(
-            model=WHISPER_MODEL,
-            base_url=WHISPER_URL,
-            # speaches ignores auth; the openai client just needs a non-empty
-            # key and must not require the real OPENAI_API_KEY to be valid.
-            api_key=os.environ.get("OPENAI_API_KEY") or "speaches",
-            language=WHISPER_LANGUAGE or "en",
-            detect_language=not WHISPER_LANGUAGE,
-        )
-        return stt.FallbackAdapter([whisper, build_sarvam_stt()], vad=vad)
+            fallback = build_sarvam_stt() if has_sarvam else build_openai_whisper_stt(vad)
+            return stt.FallbackAdapter([whisper, fallback], vad=vad)
+
+        logger.info("[config] using OpenAI Whisper STT (whisper-1)")
+        return build_openai_whisper_stt(vad)
+
     return build_sarvam_stt()
 
 

@@ -17,7 +17,10 @@ Total time: **~30 minutes**.
      cd android && ./gradlew signingReport
      ```
      Copy the `SHA1` value under `Variant: debug` and paste it into the Firebase console. (You can add the release SHA-1 later when you generate a real upload keystore.)
-3. Download **`google-services.json`** and place it at `android/app/google-services.json`. (It is gitignored.)
+3. Download **`google-services.json`** for Android and place it at `apps/kids/android/app/google-services.json` (and `apps/guardian/android/app/google-services.json`).
+4. For **iOS**: Click **Add app → iOS** in Firebase Console:
+   - iOS Bundle ID: `com.kidsafe` (for ZKid) / `com.kidsafe.guardian` (for ZConnect).
+   - Download **`GoogleService-Info.plist`** and add it inside Xcode under `apps/kids/ios/kids/` and `apps/guardian/ios/guardian/`.
 
 ### Enable Firebase products
 

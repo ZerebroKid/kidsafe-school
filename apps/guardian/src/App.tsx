@@ -5,6 +5,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 import {RootNavigator} from './navigation/RootNavigator';
 import {useAuthStore} from './state/authStore';
+import {useThemeStore} from './state/themeStore';
 import {startParentListeners, stopParentListeners} from './services/parentListeners';
 import {registerForPush, onTokenRefresh} from './firebase/messaging';
 import {colors} from './theme';
@@ -28,6 +29,10 @@ export default function App() {
   // We intentionally gate parentListeners on primaryRole (not "roles includes
   // parent") -- a teacher-mode user shouldn't be pulling parent listeners.
   const primaryRole = useAuthStore(s => s.userDoc?.primaryRole);
+
+  useEffect(() => {
+    useThemeStore.getState().loadTheme();
+  }, []);
 
   useEffect(() => {
     if (!uid || primaryRole !== 'parent') {

@@ -2,7 +2,9 @@ import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, Switch, Text, View} from 'react-native';
 import Svg, {Defs, LinearGradient, Rect, Stop} from 'react-native-svg';
 
-import {colors, radius, softShadow, spacing, tileGradientFor} from '../../theme';
+import {useParentTheme} from '../../state/themeStore';
+import {parentRadius, parentSpacing} from './theme/parentTheme';
+import {tileGradientFor} from '../../theme';
 import {
   setAppBlocked,
   subscribeChildApps,
@@ -10,23 +12,8 @@ import {
 } from '@zerebro/shared-firebase/firestore';
 import type {AppEntry, ChildDoc} from '@zerebro/shared-types';
 
-/**
- * Apps list rendered inline inside `ChildDetailsScreen`'s outer `ScrollView`.
- *
- * Uses `View + .map()` rather than `FlatList` on purpose: a virtualised list nested inside
- * a `ScrollView` of the same orientation triggers a runtime warning and breaks both
- * virtualisation and scroll physics. A typical child's phone has well under a few hundred
- * apps, so the lost virtualisation is a fair trade for layout correctness.
- *
- * Three rendering states, driven by `ChildDoc.appsLastSyncedAt` so we can tell them apart:
- *   - never-synced (no device has opened KidSafe yet) -> instructional card.
- *   - synced + empty (child has zero installed apps, very unusual) -> "no apps" copy.
- *   - synced + non-empty -> the normal blockable list.
- */
-/** 44px rounded gradient tile with the app's first letter — fallback when no icon synced. */
 function GradientLetterTile({packageName, letter}: {packageName: string; letter: string}) {
   const pair = tileGradientFor(packageName);
-  // Gradient id must be unique per tile, otherwise sibling SVGs resolve the same def.
   const id = `tile-${packageName.replace(/[^a-zA-Z0-9]/g, '')}`;
   return (
     <View style={styles.tile}>
@@ -44,7 +31,18 @@ function GradientLetterTile({packageName, letter}: {packageName: string; letter:
   );
 }
 
+import {CosmicAssets} from '../../assets/cosmic';
+
+function getFallbackAppIcon(appName: string) {
+  const lower = appName.toLowerCase();
+  if (lower.includes('youtube')) return CosmicAssets.aYoutube;
+  if (lower.includes('photo')) return CosmicAssets.aPhotos;
+  if (lower.includes('quiz') || lower.includes('study') || lower.includes('kidsafe') || lower.includes('zerebro')) return CosmicAssets.aQuiz;
+  return null;
+}
+
 export function AppsTab({childUid}: {childUid: string}) {
+  const {theme, isDark} = useParentTheme();
   const [apps, setApps] = useState<AppEntry[]>([]);
   const [childDoc, setChildDoc] = useState<ChildDoc | null>(null);
   const [docLoaded, setDocLoaded] = useState(false);
@@ -64,9 +62,21 @@ export function AppsTab({childUid}: {childUid: string}) {
   if (neverSynced) {
     return (
       <View style={styles.container}>
-        <View style={styles.waitingCard}>
-          <Text style={styles.waitingTitle}>Waiting for your child's phone</Text>
-          <Text style={styles.waitingBody}>
+        <View
+          style={[
+            styles.waitingCard,
+            {
+              backgroundColor: isDark
+                ? 'rgba(23, 19, 79, 0.88)'
+                : theme.cardBg,
+              borderColor: theme.cardBorder,
+              borderLeftColor: theme.primary,
+            },
+          ]}>
+          <Text style={[styles.waitingTitle, {color: theme.text}]}>
+            Waiting for your child's phone
+          </Text>
+          <Text style={[styles.waitingBody, {color: theme.textMuted}]}>
             Ask your child to open KidSafe on their phone at least once. As soon as they do,
             their installed apps will appear here and you can choose which ones to block.
           </Text>
@@ -78,7 +88,7 @@ export function AppsTab({childUid}: {childUid: string}) {
   if (apps.length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={styles.empty}>
+        <Text style={[styles.empty, {color: theme.textMuted}]}>
           Synced — but no apps were reported by the child's phone yet.
         </Text>
       </View>
@@ -87,82 +97,111 @@ export function AppsTab({childUid}: {childUid: string}) {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={CosmicAssets.tApps}
+        style={styles.heroBannerImg}
+        resizeMode="cover"
+      />
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Installed Apps</Text>
-        <Text style={styles.sectionCount}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            {color: isDark ? '#C4B5FD' : theme.textSubtle},
+          ]}>
+          Installed Apps
+        </Text>
+        <Text style={[styles.sectionCount, {color: theme.textMuted}]}>
           {apps.length} {apps.length === 1 ? 'app' : 'apps'}
         </Text>
       </View>
-      {apps.map(item => (
-        <View key={item.packageName} style={styles.card}>
-          {item.icon ? (
-            <Image source={{uri: item.icon}} style={styles.icon} />
-          ) : (
-            <GradientLetterTile
-              packageName={item.packageName}
-              letter={item.appName.charAt(0).toUpperCase()}
+      {apps.map(item => {
+        const fallbackIcon = getFallbackAppIcon(item.appName);
+        return (
+          <View
+            key={item.packageName}
+            style={[
+              styles.card,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(23, 19, 79, 0.88)'
+                  : theme.cardBg,
+                borderColor: theme.cardBorder,
+              },
+            ]}>
+            {item.icon ? (
+              <Image source={{uri: item.icon}} style={styles.icon} />
+            ) : fallbackIcon ? (
+              <Image source={fallbackIcon} style={styles.icon} resizeMode="contain" />
+            ) : (
+              <GradientLetterTile
+                packageName={item.packageName}
+                letter={item.appName.charAt(0).toUpperCase()}
+              />
+            )}
+            <View style={styles.body}>
+              <Text
+                style={[styles.name, {color: theme.text}]}
+                numberOfLines={1}>
+                {item.appName}
+              </Text>
+            </View>
+            <Switch
+              value={item.isBlocked}
+              onValueChange={v => setAppBlocked(childUid, item.packageName, v)}
+              trackColor={{
+                true: theme.danger,
+                false: isDark ? 'rgba(255, 255, 255, 0.2)' : '#EADFDA',
+              }}
+              thumbColor="#ffffff"
             />
-          )}
-          <View style={styles.body}>
-            <Text style={styles.name} numberOfLines={1}>
-              {item.appName}
-            </Text>
           </View>
-          <Switch
-            value={item.isBlocked}
-            onValueChange={v => setAppBlocked(childUid, item.packageName, v)}
-            trackColor={{true: colors.danger, false: colors.border}}
-            thumbColor="#ffffff"
-          />
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.lg,
-    gap: spacing.sm + 4,
+    paddingHorizontal: parentSpacing.lg,
+    paddingBottom: parentSpacing.lg,
+    gap: parentSpacing.sm + 4,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: spacing.xs,
-    marginBottom: spacing.xs,
+    marginTop: parentSpacing.xs,
+    marginBottom: parentSpacing.xs,
   },
   sectionTitle: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 1.5,
   },
   sectionCount: {
-    color: colors.textMuted,
     fontSize: 12,
+    fontWeight: '600',
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg - 4,
-    padding: spacing.md,
-    gap: spacing.md - 4,
-    ...softShadow,
+    borderRadius: parentRadius.lg,
+    padding: parentSpacing.md,
+    gap: 12,
+    borderWidth: 1,
   },
   body: {flex: 1, minWidth: 0},
   icon: {
     width: 44,
     height: 44,
-    borderRadius: radius.md,
+    borderRadius: 14,
   },
   tile: {
     width: 44,
     height: 44,
-    borderRadius: radius.md,
+    borderRadius: 14,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -173,32 +212,35 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   name: {
-    color: colors.text,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
   empty: {
-    color: colors.textMuted,
     textAlign: 'center',
-    padding: spacing.lg,
+    padding: parentSpacing.lg,
+    fontSize: 14,
   },
   waitingCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg - 4,
-    padding: spacing.lg,
-    gap: spacing.sm,
+    borderRadius: parentRadius.lg,
+    padding: parentSpacing.lg,
+    gap: parentSpacing.sm,
     borderLeftWidth: 4,
-    borderLeftColor: colors.primary,
-    ...softShadow,
+    borderWidth: 1,
   },
   waitingTitle: {
-    color: colors.text,
     fontSize: 15,
     fontWeight: '700',
   },
   waitingBody: {
-    color: colors.textMuted,
     fontSize: 13,
-    lineHeight: 19,
+    lineHeight: 18,
+  },
+  heroBannerImg: {
+    width: '100%',
+    height: 140,
+    borderRadius: 22,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(168,85,247,0.24)',
   },
 });

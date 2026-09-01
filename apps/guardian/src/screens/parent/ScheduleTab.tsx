@@ -12,7 +12,8 @@ import {
   View,
 } from 'react-native';
 
-import {colors, radius, spacing} from '../../theme';
+import {useParentTheme} from '../../state/themeStore';
+import {parentRadius, parentSpacing} from './theme/parentTheme';
 import {setSchedule, subscribeChildApps, subscribeChildDoc} from '@zerebro/shared-firebase/firestore';
 import type {AppEntry, ChildDoc, Schedule} from '@zerebro/shared-types';
 
@@ -53,7 +54,10 @@ const TIME_OPTIONS = Array.from(
   },
 );
 
+import {CosmicAssets} from '../../assets/cosmic';
+
 export function ScheduleTab({childUid}: Props) {
+  const {theme, isDark} = useParentTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [apps, setApps] = useState<AppEntry[]>([]);
@@ -127,7 +131,7 @@ export function ScheduleTab({childUid}: Props) {
   if (loading) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color={colors.primary} />
+        <ActivityIndicator color={theme.primary} />
       </View>
     );
   }
@@ -136,11 +140,27 @@ export function ScheduleTab({childUid}: Props) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
+      <Image
+        source={CosmicAssets.tSchedule}
+        style={styles.heroBannerImg}
+        resizeMode="cover"
+      />
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: isDark
+              ? 'rgba(23, 19, 79, 0.88)'
+              : theme.cardBg,
+            borderColor: theme.cardBorder,
+          },
+        ]}>
         <View style={styles.row}>
           <View style={styles.rowText}>
-            <Text style={styles.title}>Enable schedule</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, {color: theme.text}]}>
+              Enable schedule
+            </Text>
+            <Text style={[styles.subtitle, {color: theme.textMuted}]}>
               During the window only the apps you tick below stay usable. Everything else is
               blocked.
             </Text>
@@ -148,14 +168,26 @@ export function ScheduleTab({childUid}: Props) {
           <Switch
             value={draft.enabled}
             onValueChange={v => setDraft(d => ({...d, enabled: v}))}
-            trackColor={{true: colors.primary, false: colors.border}}
+            trackColor={{
+              true: theme.primary,
+              false: isDark ? 'rgba(255, 255, 255, 0.2)' : '#EADFDA',
+            }}
             thumbColor="#ffffff"
           />
         </View>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionLabel}>Days</Text>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: isDark
+              ? 'rgba(23, 19, 79, 0.88)'
+              : theme.cardBg,
+            borderColor: theme.cardBorder,
+          },
+        ]}>
+        <Text style={[styles.sectionLabel, {color: theme.text}]}>Days</Text>
         <View style={styles.dayRow}>
           {DAY_LABELS.map((label, idx) => {
             const on = draft.daysOfWeek.includes(idx);
@@ -163,8 +195,28 @@ export function ScheduleTab({childUid}: Props) {
               <Pressable
                 key={label}
                 onPress={() => toggleDay(idx)}
-                style={[styles.dayChip, on && styles.dayChipOn]}>
-                <Text style={[styles.dayChipLabel, on && styles.dayChipLabelOn]}>
+                style={[
+                  styles.dayChip,
+                  {
+                    backgroundColor: on
+                      ? theme.primary
+                      : isDark
+                      ? 'rgba(255, 255, 255, 0.08)'
+                      : '#FFFFFF',
+                    borderColor: on ? theme.primary : theme.cardBorder,
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.dayChipLabel,
+                    {
+                      color: on
+                        ? '#FFFFFF'
+                        : isDark
+                        ? theme.textMuted
+                        : theme.text,
+                    },
+                  ]}>
                   {label}
                 </Text>
               </Pressable>
@@ -173,36 +225,62 @@ export function ScheduleTab({childUid}: Props) {
         </View>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionLabel}>Time window</Text>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: isDark
+              ? 'rgba(23, 19, 79, 0.88)'
+              : theme.cardBg,
+            borderColor: theme.cardBorder,
+          },
+        ]}>
+        <Text style={[styles.sectionLabel, {color: theme.text}]}>
+          Time window
+        </Text>
         <View style={styles.timeRow}>
           <TimeField
             label="Start"
             minutes={draft.startMinutes}
             onChange={m => setDraft(d => ({...d, startMinutes: m}))}
           />
-          <Text style={styles.dash}>—</Text>
+          <Text style={[styles.dash, {color: theme.textMuted}]}>—</Text>
           <TimeField
             label="End"
             minutes={draft.endMinutes}
             onChange={m => setDraft(d => ({...d, endMinutes: m}))}
           />
         </View>
-        {wrapsMidnight && <Text style={styles.helper}>End time is on the next day.</Text>}
+        {wrapsMidnight && (
+          <Text style={[styles.helper, {color: theme.warning}]}>
+            End time is on the next day.
+          </Text>
+        )}
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionLabel}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: isDark
+              ? 'rgba(23, 19, 79, 0.88)'
+              : theme.cardBg,
+            borderColor: theme.cardBorder,
+          },
+        ]}>
+        <Text style={[styles.sectionLabel, {color: theme.text}]}>
           Allowed apps ({draft.allowedPackages.length})
         </Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.subtitle, {color: theme.textMuted}]}>
           These apps stay open during the window. Phone, Settings and the launcher are always
           available.
         </Text>
       </View>
 
       {sortedApps.length === 0 ? (
-        <Text style={styles.empty}>No apps synced yet from the child's phone.</Text>
+        <Text style={[styles.empty, {color: theme.textMuted}]}>
+          No apps synced yet from the child's phone.
+        </Text>
       ) : (
         <View style={styles.appList}>
           {sortedApps.map(item => {
@@ -211,25 +289,61 @@ export function ScheduleTab({childUid}: Props) {
               <Pressable
                 key={item.packageName}
                 onPress={() => togglePackage(item.packageName)}
-                style={[styles.appRow, checked && styles.appRowOn]}>
+                style={[
+                  styles.appRow,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(23, 19, 79, 0.88)'
+                      : theme.cardBg,
+                    borderColor: checked ? theme.primary : theme.cardBorder,
+                  },
+                ]}>
                 {item.icon ? (
                   <Image source={{uri: item.icon}} style={styles.icon} />
                 ) : (
-                  <View style={[styles.icon, styles.iconFallback]}>
-                    <Text style={styles.iconFallbackText}>
+                  <View
+                    style={[
+                      styles.icon,
+                      styles.iconFallback,
+                      {
+                        backgroundColor: isDark
+                          ? 'rgba(109, 63, 231, 0.25)'
+                          : '#EFE7F8',
+                      },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.iconFallbackText,
+                        {color: theme.text},
+                      ]}>
                       {item.appName.charAt(0).toUpperCase()}
                     </Text>
                   </View>
                 )}
                 <View style={styles.appText}>
-                  <Text style={styles.appName} numberOfLines={1}>
+                  <Text
+                    style={[styles.appName, {color: theme.text}]}
+                    numberOfLines={1}>
                     {item.appName}
                   </Text>
-                  <Text style={styles.appPkg} numberOfLines={1}>
+                  <Text
+                    style={[styles.appPkg, {color: theme.textMuted}]}
+                    numberOfLines={1}>
                     {item.packageName}
                   </Text>
                 </View>
-                <View style={[styles.checkbox, checked && styles.checkboxOn]}>
+                <View
+                  style={[
+                    styles.checkbox,
+                    {
+                      borderColor: checked
+                        ? theme.primary
+                        : theme.cardBorderSubtle,
+                      backgroundColor: checked
+                        ? theme.primary
+                        : 'transparent',
+                    },
+                  ]}>
                   {checked && <Text style={styles.checkboxTick}>✓</Text>}
                 </View>
               </Pressable>
@@ -241,9 +355,13 @@ export function ScheduleTab({childUid}: Props) {
       <Pressable
         onPress={handleSave}
         disabled={saving}
-        style={[styles.saveBtn, saving && styles.saveBtnDisabled]}>
+        style={[
+          styles.saveBtn,
+          {backgroundColor: theme.primary},
+          saving && styles.saveBtnDisabled,
+        ]}>
         {saving ? (
-          <ActivityIndicator color={colors.primaryText} />
+          <ActivityIndicator color="#FFFFFF" />
         ) : (
           <Text style={styles.saveBtnLabel}>Save schedule</Text>
         )}
@@ -261,40 +379,88 @@ function TimeField({
   minutes: number;
   onChange: (m: number) => void;
 }) {
+  const {theme, isDark} = useParentTheme();
   const [open, setOpen] = useState(false);
   const safeValue = normalizeToStep(minutes);
 
   return (
     <View style={styles.timeFieldWrap}>
-      <Text style={styles.timeFieldLabel}>{label}</Text>
-      <Pressable style={styles.timeFieldButton} onPress={() => setOpen(true)}>
-        <Text style={styles.timeFieldButtonText}>{formatTime(safeValue)}</Text>
+      <Text style={[styles.timeFieldLabel, {color: theme.textMuted}]}>
+        {label}
+      </Text>
+      <Pressable
+        style={[
+          styles.timeFieldButton,
+          {
+            backgroundColor: isDark
+              ? 'rgba(255, 255, 255, 0.08)'
+              : '#FFFFFF',
+            borderColor: theme.cardBorder,
+          },
+        ]}
+        onPress={() => setOpen(true)}>
+        <Text style={[styles.timeFieldButtonText, {color: theme.text}]}>
+          {formatTime(safeValue)}
+        </Text>
       </Pressable>
-      <Modal transparent visible={open} animationType="fade" onRequestClose={() => setOpen(false)}>
+      <Modal
+        transparent
+        visible={open}
+        animationType="fade"
+        onRequestClose={() => setOpen(false)}>
         <View style={styles.modalBackdrop}>
-          <Pressable style={styles.modalDismissArea} onPress={() => setOpen(false)} />
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Select {label.toLowerCase()} time</Text>
+          <Pressable
+            style={styles.modalDismissArea}
+            onPress={() => setOpen(false)}
+          />
+          <View
+            style={[
+              styles.modalCard,
+              {
+                backgroundColor: isDark ? '#0C1035' : '#FFFFFF',
+                borderColor: theme.cardBorder,
+              },
+            ]}>
+            <Text style={[styles.modalTitle, {color: theme.text}]}>
+              Select {label.toLowerCase()} time
+            </Text>
             <ScrollView contentContainerStyle={styles.modalList}>
               {TIME_OPTIONS.map(option => {
                 const active = option.minutes === safeValue;
                 return (
                   <Pressable
                     key={`${label}-${option.minutes}`}
-                    style={[styles.timeOption, active && styles.timeOptionActive]}
+                    style={[
+                      styles.timeOption,
+                      {
+                        backgroundColor: active
+                          ? theme.primary
+                          : isDark
+                          ? 'rgba(255, 255, 255, 0.06)'
+                          : '#F2EDEA',
+                      },
+                    ]}
                     onPress={() => {
                       onChange(option.minutes);
                       setOpen(false);
                     }}>
-                    <Text style={[styles.timeOptionLabel, active && styles.timeOptionLabelActive]}>
+                    <Text
+                      style={[
+                        styles.timeOptionLabel,
+                        {color: active ? '#FFFFFF' : theme.text},
+                      ]}>
                       {option.label}
                     </Text>
                   </Pressable>
                 );
               })}
             </ScrollView>
-            <Pressable style={styles.modalCloseButton} onPress={() => setOpen(false)}>
-              <Text style={styles.modalCloseText}>Close</Text>
+            <Pressable
+              style={styles.modalCloseButton}
+              onPress={() => setOpen(false)}>
+              <Text style={[styles.modalCloseText, {color: theme.primary}]}>
+                Close
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -305,159 +471,142 @@ function TimeField({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.lg,
-    gap: spacing.md,
+    paddingHorizontal: parentSpacing.lg,
+    paddingBottom: parentSpacing.lg,
+    gap: parentSpacing.md,
   },
   loading: {
-    paddingVertical: spacing.xl,
+    paddingVertical: parentSpacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
+    borderRadius: parentRadius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
+    padding: parentSpacing.md,
   },
-  row: {flexDirection: 'row', alignItems: 'center', gap: spacing.md},
+  row: {flexDirection: 'row', alignItems: 'center', gap: parentSpacing.md},
   rowText: {flex: 1},
-  title: {color: colors.text, fontSize: 16, fontWeight: '700'},
-  subtitle: {color: colors.textMuted, fontSize: 13, marginTop: 4},
+  title: {fontSize: 16, fontWeight: '700'},
+  subtitle: {fontSize: 13, marginTop: 4, lineHeight: 18},
   sectionLabel: {
-    color: colors.text,
     fontSize: 14,
     fontWeight: '700',
-    marginBottom: spacing.sm,
+    marginBottom: parentSpacing.sm,
   },
-  dayRow: {flexDirection: 'row', justifyContent: 'space-between', gap: 4},
+  dayRow: {flexDirection: 'row', justifyContent: 'space-between', gap: 6},
   dayChip: {
     flex: 1,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
+    paddingVertical: 9,
+    borderRadius: 12,
+    borderWidth: 1,
     alignItems: 'center',
   },
-  dayChipOn: {backgroundColor: colors.primary},
-  dayChipLabel: {color: colors.textMuted, fontSize: 12, fontWeight: '600'},
-  dayChipLabelOn: {color: colors.primaryText},
-  timeRow: {flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm},
+  dayChipLabel: {fontSize: 12, fontWeight: '700'},
+  timeRow: {flexDirection: 'row', alignItems: 'flex-end', gap: 8},
   timeFieldWrap: {flex: 1},
-  timeFieldLabel: {color: colors.textMuted, fontSize: 12, marginBottom: 4},
+  timeFieldLabel: {fontSize: 12, marginBottom: 4},
   timeFieldButton: {
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: 12,
     alignItems: 'center',
   },
   timeFieldButtonText: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 19,
+    fontWeight: '800',
     letterSpacing: 0.5,
   },
-  dash: {color: colors.textMuted, paddingHorizontal: spacing.xs, paddingBottom: spacing.md},
-  helper: {color: colors.warning, fontSize: 12, marginTop: spacing.sm},
+  dash: {paddingHorizontal: 4, paddingBottom: 14, fontSize: 16},
+  helper: {fontSize: 12, marginTop: parentSpacing.sm},
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
-    padding: spacing.lg,
+    padding: parentSpacing.lg,
   },
   modalDismissArea: {
     ...StyleSheet.absoluteFillObject,
   },
   modalCard: {
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
+    borderRadius: parentRadius.xl,
     borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
+    padding: parentSpacing.md,
     maxHeight: '70%',
   },
   modalTitle: {
-    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
-    marginBottom: spacing.sm,
+    marginBottom: parentSpacing.sm,
   },
   modalList: {
-    gap: spacing.xs,
-    paddingBottom: spacing.sm,
+    gap: 6,
+    paddingBottom: parentSpacing.sm,
   },
   timeOption: {
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
-    paddingVertical: spacing.sm,
+    borderRadius: 12,
+    paddingVertical: 10,
     alignItems: 'center',
-  },
-  timeOptionActive: {
-    backgroundColor: colors.primary,
   },
   timeOptionLabel: {
-    color: colors.text,
     fontSize: 15,
-    fontWeight: '600',
-  },
-  timeOptionLabelActive: {
-    color: colors.primaryText,
+    fontWeight: '700',
   },
   modalCloseButton: {
-    marginTop: spacing.sm,
+    marginTop: parentSpacing.sm,
     alignItems: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: parentSpacing.sm,
   },
   modalCloseText: {
-    color: colors.text,
     fontWeight: '700',
     fontSize: 14,
   },
-  appList: {gap: spacing.sm},
+  appList: {gap: 8},
   appRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.md,
+    borderRadius: parentRadius.lg,
+    padding: parentSpacing.md,
+    gap: 12,
     borderWidth: 1,
-    borderColor: colors.border,
   },
-  appRowOn: {borderColor: colors.primary},
   appText: {flex: 1},
-  icon: {width: 36, height: 36, borderRadius: 8},
+  icon: {width: 38, height: 38, borderRadius: 10},
   iconFallback: {
-    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconFallbackText: {color: colors.text, fontSize: 16, fontWeight: '700'},
-  appName: {color: colors.text, fontSize: 14, fontWeight: '600'},
-  appPkg: {color: colors.textMuted, fontSize: 11, marginTop: 2},
+  iconFallbackText: {fontSize: 16, fontWeight: '700'},
+  appName: {fontSize: 14, fontWeight: '600'},
+  appPkg: {fontSize: 11, marginTop: 2},
   checkbox: {
     width: 24,
     height: 24,
-    borderRadius: 6,
+    borderRadius: 7,
     borderWidth: 2,
-    borderColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkboxOn: {backgroundColor: colors.primary, borderColor: colors.primary},
-  checkboxTick: {color: colors.primaryText, fontWeight: '700'},
+  checkboxTick: {color: '#FFFFFF', fontWeight: '800', fontSize: 13},
   empty: {
-    color: colors.textMuted,
     textAlign: 'center',
-    paddingVertical: spacing.lg,
+    paddingVertical: parentSpacing.lg,
+    fontSize: 13,
   },
   saveBtn: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: radius.md,
+    paddingVertical: 14,
+    borderRadius: 16,
     alignItems: 'center',
-    marginTop: spacing.sm,
+    marginTop: parentSpacing.xs,
   },
   saveBtnDisabled: {opacity: 0.6},
-  saveBtnLabel: {color: colors.primaryText, fontSize: 16, fontWeight: '700'},
+  saveBtnLabel: {color: '#FFFFFF', fontSize: 15, fontWeight: '700'},
+  heroBannerImg: {
+    width: '100%',
+    height: 140,
+    borderRadius: 22,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(168,85,247,0.24)',
+  },
 });

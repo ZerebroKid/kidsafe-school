@@ -17,10 +17,26 @@
  */
 
 import auth from '@react-native-firebase/auth';
-import React, {createContext, useContext, useMemo} from 'react';
+import React, {createContext, useContext, useEffect, useMemo} from 'react';
+import {MMKV} from 'react-native-mmkv';
 
 import {useAuthStore} from '../state/authStore';
 import {useChildClassId, useChildGrade} from '../firebase/study';
+
+const profileStorage = new MMKV({id: 'kidsafe.profile_cache'});
+
+function getCachedGrade(uid: string | null): number | null {
+  if (!uid) return null;
+  const val = profileStorage.getNumber(`grade_${uid}`);
+  return typeof val === 'number' ? val : null;
+}
+
+function setCachedGrade(uid: string | null, grade: number | null) {
+  if (!uid) return;
+  if (typeof grade === 'number') {
+    profileStorage.set(`grade_${uid}`, grade);
+  }
+}
 
 /** Highest grade that gets the Zumi voice "Fun" experience (inclusive). */
 export const ZUMI_MAX_GRADE = 6;
@@ -41,7 +57,7 @@ export interface ChildProfile {
   childGrade: number | null;
   /** True only when we positively know the child is grade <= 6. */
   isFunMode: boolean;
-  /** True while the grade is still resolving. */
+  /** True while the grade is still resolving and not yet cached. */
   loading: boolean;
 }
 
@@ -59,8 +75,15 @@ export function ChildProfileProvider({children}: {children: React.ReactNode}) {
   const classState = useChildClassId(uid);
   const gradeState = useChildGrade(classState.data);
 
+  useEffect(() => {
+    if (uid && typeof gradeState.data === 'number') {
+      setCachedGrade(uid, gradeState.data);
+    }
+  }, [uid, gradeState.data]);
+
   const value = useMemo<ChildProfile>(() => {
-    const childGrade = gradeState.data;
+    const cachedGrade = getCachedGrade(uid);
+    const effectiveGrade = gradeState.data ?? cachedGrade;
     let name = (displayName ?? '').trim();
     if (!name) {
       const fbName = auth().currentUser?.displayName;
@@ -68,13 +91,14 @@ export function ChildProfileProvider({children}: {children: React.ReactNode}) {
         name = fbName.trim().split(/\s+/)[0];
       }
     }
+    const isLoading = (classState.loading || gradeState.loading) && effectiveGrade === null;
     return {
       childName: name,
-      childGrade,
-      isFunMode: isZumiGrade(childGrade),
-      loading: classState.loading || gradeState.loading,
+      childGrade: effectiveGrade,
+      isFunMode: isZumiGrade(effectiveGrade),
+      loading: isLoading,
     };
-  }, [displayName, gradeState.data, classState.loading, gradeState.loading]);
+  }, [uid, displayName, gradeState.data, classState.loading, gradeState.loading]);
 
   return (
     <ChildProfileCtx.Provider value={value}>

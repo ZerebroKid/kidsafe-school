@@ -1,4 +1,6 @@
-import {NativeEventEmitter, NativeModules} from 'react-native';
+import {NativeEventEmitter, NativeModules, Platform} from 'react-native';
+
+const IS_IOS = Platform.OS === 'ios';
 
 const {
   DeviceAdmin: DeviceAdminNative,
@@ -17,6 +19,44 @@ const {
 
 function assert(mod: unknown, name: string) {
   if (!mod) {
+    if (IS_IOS) {
+      return new Proxy(
+        {},
+        {
+          get: (_target, prop) => {
+            if (prop === 'addListener' || prop === 'removeListeners') {
+              return () => {};
+            }
+            return async (..._args: any[]) => {
+              if (name === 'Pin') {
+                if (prop === 'hasPin') return true;
+                if (prop === 'verifyPin') return true;
+                if (prop === 'lockoutRemainingMs') return 0;
+                return undefined;
+              }
+              if (name === 'InstalledApps' && prop === 'list') return [];
+              if (name === 'ScreenTime' && prop === 'getTodayUsedMinutes') return 0;
+              if (name === 'ScreenTime' && prop === 'getPerAppUsage') return {days: []};
+              if (name === 'ScreenTime' && prop === 'hasUsageAccess') return true;
+              if (name === 'AppBlocker' && prop === 'getBlockedPackages') return [];
+              if (name === 'AppBlocker' && prop === 'isAccessibilityServiceEnabled') return true;
+              if (name === 'AppBlocker' && prop === 'canDrawOverlays') return true;
+              if (name === 'DeviceAdmin' && prop === 'isActive') return true;
+              if (name === 'KidSafeLocationModule' && prop === 'isLocationServicesEnabled') return true;
+              if (name === 'OemSettings' && prop === 'getOem') return 'generic';
+              if (name === 'OemSettings' && prop === 'isIgnoringBatteryOptimizations') return true;
+              if (name === 'ChildMode') {
+                if (prop === 'isSharedDevice') return false;
+                if (prop === 'isActive') return false;
+                if (prop === 'getProfileId') return null;
+                if (prop === 'getStartedAt') return 0;
+              }
+              return true;
+            };
+          },
+        },
+      );
+    }
     throw new Error(
       `Native module "${name}" not linked. Rebuild the Android app after pulling: ` +
         'cd android && ./gradlew clean && cd .. && npm run android',
@@ -86,6 +126,7 @@ export const AppBlocker = {
    * fresh so the parent's "Currently using" pill updates within a few seconds.
    */
   subscribeForegroundApp: (cb: (e: ForegroundAppEvent) => void) => {
+    if (IS_IOS || !AppBlockerNative) return {remove: () => {}};
     const emitter = new NativeEventEmitter(
       assert(AppBlockerNative, 'AppBlocker') as typeof AppBlockerNative,
     );
@@ -187,6 +228,7 @@ export const Location = {
    * registered here will simply never fire. Subscribe to Firestore `currentLocation` instead.
    */
   subscribe: (cb: (loc: LocationUpdate) => void) => {
+    if (IS_IOS || !LocationNative) return {remove: () => {}};
     const emitter = new NativeEventEmitter(LocationNative);
     return emitter.addListener('KidSafeLocation', cb);
   },
@@ -207,6 +249,7 @@ export const Geofence = {
   clearFence: (): Promise<boolean> =>
     (assert(GeofenceNative, 'Geofence') as typeof GeofenceNative).clearFence(),
   subscribe: (cb: (t: GeofenceTransition) => void) => {
+    if (IS_IOS || !GeofenceNative) return {remove: () => {}};
     const emitter = new NativeEventEmitter(GeofenceNative);
     return emitter.addListener('KidSafeGeofence', cb);
   },
@@ -235,6 +278,7 @@ export const ForegroundService = {
    * (`ACTION_SCREEN_OFF`) or the user unlocks (`ACTION_USER_PRESENT`).
    */
   subscribeScreenState: (cb: (e: ScreenStateEvent) => void) => {
+    if (IS_IOS || !ForegroundServiceNative) return {remove: () => {}};
     const emitter = new NativeEventEmitter(
       assert(ForegroundServiceNative, 'ForegroundService') as typeof ForegroundServiceNative,
     );

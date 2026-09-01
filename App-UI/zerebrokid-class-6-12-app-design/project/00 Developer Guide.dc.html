@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#14142B"/><text x="50" y="46" font-family="sans-serif" font-size="20" font-weight="800" fill="#8B62FF" text-anchor="middle">DEV</text><text x="50" y="70" font-family="sans-serif" font-size="16" font-weight="700" fill="#FFB020" text-anchor="middle">MAP</text></svg></template>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E6E6F0;-webkit-font-smoothing:antialiased}a{color:#6D3BFF;text-decoration:none}a:hover{color:#4E24E0}</style>
+</helmet>
+
+<div style="min-height:100vh;background:#E6E6F0;padding:56px;display:flex;flex-direction:column;gap:32px;font-family:Inter,sans-serif;box-sizing:border-box">
+
+  <header style="display:flex;flex-direction:column;gap:10px;max-width:1000px">
+    <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">ZerebroKid · developer handoff</span>
+    <h1 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:38px;line-height:44px;font-weight:800;letter-spacing:-.02em;color:#14142B">Screen map — what goes where</h1>
+    <p style="margin:0;font-family:Inter,sans-serif;font-size:16px;line-height:26px;color:#33334D;max-width:820px;text-wrap:pretty">Read this page first. Every Figma page is numbered in build order. Inside each page, screens run left to right in the order the student meets them. Frame names match the class names in the markup, so a screen in Figma maps 1:1 to a component in code.</p>
+  </header>
+
+  <section style="display:flex;flex-direction:column;gap:14px;width:1120px;background:#FFFFFF;border-radius:24px;padding:28px;box-sizing:border-box;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:700;color:#14142B">Figma pages, in build order</span>
+
+    <div style="display:flex;align-items:flex-start;gap:16px;padding:16px;border-radius:16px;background:#F5F5FB">
+      <span style="width:52px;height:52px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#EDE6FF;font-family:'Space Grotesk',monospace;font-size:19px;font-weight:700;color:#4E24E0">01</span>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#14142B">Design System</span>
+        <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;color:#33334D">Build this into your theme file before any screen. Colours, type scale, spacing (4px base), radius, elevation, icons, buttons, cards, progress, navigation. Nothing else may introduce a new value.</span>
+        <span style="font-family:'Space Grotesk',monospace;font-size:12px;font-weight:700;color:#8B62FF">theme / tokens · shared widgets</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:16px;padding:16px;border-radius:16px;background:#F5F5FB">
+      <span style="width:52px;height:52px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#EDE6FF;font-family:'Space Grotesk',monospace;font-size:19px;font-weight:700;color:#4E24E0">02</span>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#14142B">Onboarding &amp; Home <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#12B76A">← use v2, ignore v1</span></span>
+        <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;color:#33334D">First launch: Splash → Popup 1 (rewards, ₹150 price comparison) → Popup 2 (no tuition needed) → Home. Popup copy is locked marketing copy — do not shorten a single line. Home has no XP, coins, streak or leaderboard.</span>
+        <span style="font-family:'Space Grotesk',monospace;font-size:12px;font-weight:700;color:#8B62FF">SplashActivity · OnboardingPopup1 · OnboardingPopup2 · HomeFragment</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:16px;padding:16px;border-radius:16px;background:#F5F5FB">
+      <span style="width:52px;height:52px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#EDE6FF;font-family:'Space Grotesk',monospace;font-size:19px;font-weight:700;color:#4E24E0">03</span>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#14142B">Learn Navigation</span>
+        <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;color:#33334D">Study tab: Subject list → Subject detail (chapters) → Topic detail. Topic detail is the 7-section journey with the quiz as the final gate; three states shipped (not started / mid / all done). Locked rows must always state why they are locked.</span>
+        <span style="font-family:'Space Grotesk',monospace;font-size:12px;font-weight:700;color:#8B62FF">SubjectListFragment · SubjectDetailFragment · TopicDetailFragment</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:16px;padding:16px;border-radius:16px;background:#F5F5FB">
+      <span style="width:52px;height:52px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#EDE6FF;font-family:'Space Grotesk',monospace;font-size:19px;font-weight:700;color:#4E24E0">04</span>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#14142B">Learning, AI &amp; Quiz</span>
+        <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;color:#33334D">The 7 section screens, AI Doubt chat, quiz flow and results. No lives or hearts — "Try again" is always available, and every wrong answer shows the correct one plus a one-line reason. Quiz result posts to parent and teacher.</span>
+        <span style="font-family:'Space Grotesk',monospace;font-size:12px;font-weight:700;color:#8B62FF">SectionFragment (×7) · AiDoubtFragment · QuizFlowActivity · QuizResultFragment</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:16px;padding:16px;border-radius:16px;background:#F5F5FB">
+      <span style="width:52px;height:52px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#EDE6FF;font-family:'Space Grotesk',monospace;font-size:19px;font-weight:700;color:#4E24E0">05</span>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#14142B">Rewards, Focus &amp; Profile</span>
+        <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;color:#33334D">Rewards (Marina Restaurant is the only live partner — every other category renders in the "Opening soon" state), Focus Mode incl. the parent-locked variant, AI Exam Predictor, Profile with the parent's report card, Settings.</span>
+        <span style="font-family:'Space Grotesk',monospace;font-size:12px;font-weight:700;color:#8B62FF">RewardsFragment · FocusModeActivity · ExamPredictorFragment · ProfileFragment · SettingsFragment</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:16px;padding:16px;border-radius:16px;background:#EDE6FF">
+      <span style="width:52px;height:52px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#FFFFFF;font-family:'Space Grotesk',monospace;font-size:19px;font-weight:700;color:#4E24E0">06</span>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;line-height:24px;font-weight:700;color:#14142B">Junior (Nursery – Class 5) — separate app mode</span>
+        <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;color:#33334D">Do not mix with Class 6–12. Different font (Baloo 2), different palette, no bottom nav at all: Home tiles open Fun / Cartoons / Reels / Games and the top-left back arrow returns Home. Fun is a full-body Zumi stage with a mic as the only control; page 02b lists all nine Zumi action assets by filename.</span>
+        <span style="font-family:'Space Grotesk',monospace;font-size:12px;font-weight:700;color:#8B62FF">JuniorHomeFragment · JuniorFunFragment · JuniorCartoonsFragment · JuniorReelsFragment · JuniorGamesFragment</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;gap:20px;width:1120px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#14142B;border-radius:24px;padding:24px;box-sizing:border-box">
+      <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8B62FF">Rules that apply to every screen</span>
+      <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;color:#E8E8F2">No XP, coins, levels, streaks, leaderboards or achievements anywhere in Class 6–12. Motivation is one loop: today's mission → topic → quiz → unlock reward.</span>
+      <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;color:#E8E8F2">No emoji in product UI — use the icon set from page 01.</span>
+      <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;color:#E8E8F2">Any feature that is not live on launch day carries the "Coming soon" ribbon.</span>
+      <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;color:#E8E8F2">Light app throughout; the dark surface (#14142B) is only for video, Focus Mode, formula blocks, the quiz and Junior Games.</span>
+      <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;color:#E8E8F2">Frame is 390 × 844, side padding 20, bottom nav 72. All spacing is a multiple of 4.</span>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFFFF;border-radius:24px;padding:24px;box-sizing:border-box;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+      <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#C25200">Blocked until you supply assets</span>
+      <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;color:#33334D">Every photo and character in these files is an AI-generated stand-in. Cartoon stills, game art, food and product photography, and the Zumi character must be replaced with owned or licensed artwork in the same slots before release.</span>
+      <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;color:#33334D">The ZerebroKid logo is still a gradient "Z" placeholder on Splash.</span>
+      <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;color:#33334D">The ₹200 / ₹230 / ₹150 comparison needs signed partners per category; only Marina Restaurant is signed today.</span>
+    </div>
+  </section>
+</div>
+
+</x-dc>
+</body>
+</html>

@@ -8,6 +8,7 @@ import {useAuthStore} from './state/authStore';
 import {startChildSyncEngine, stopChildSyncEngine} from './services/childSyncEngine';
 import {registerForPush, onTokenRefresh} from './firebase/messaging';
 import {ChildProfileProvider} from './context/ChildProfileContext';
+import {ThemeProvider} from './context/ThemeContext';
 import {colors} from './theme';
 
 /**
@@ -44,10 +45,12 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{flex: 1, backgroundColor: colors.bg}}>
       <SafeAreaProvider>
-        <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
-        <ChildProfileProvider>
-          <RootNavigator />
-        </ChildProfileProvider>
+        <ThemeProvider>
+          <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
+          <ChildProfileProvider>
+            <RootNavigator />
+          </ChildProfileProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

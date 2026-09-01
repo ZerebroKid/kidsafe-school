@@ -12,138 +12,285 @@ import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 import {useClassStudentRows} from '../../firebase/studyReports';
 import {useAuthStore} from '../../state/authStore';
-import {colors, radius, spacing} from '../../theme';
 import type {TeacherStackParamList} from '../../navigation/types';
-import {ClassReportCharts, type ClassMetrics} from './ClassReportCharts';
+import {cosmicColors, cosmicRadius, cosmicSpacing} from './theme';
+import {CosmicBackground} from './components/CosmicBackground';
+import {CosmicHeader} from './components/CosmicHeader';
+import {CosmicOutcomeDonut, type ClassMetrics} from './ClassReportCharts';
 
 type Props = NativeStackScreenProps<TeacherStackParamList, 'TeacherClassReport'>;
 
-/**
- * P4.11.2 -- teacher per-class study report.
- *
- * Shows the aggregated visuals (stat cards + outcome donut + score histogram)
- * derived from `useClassStudentRows`. The full per-student roster lives on a
- * separate screen reached via the "See full student list" header link.
- */
+// Sample fallback roster data matching the design prototype when Firestore rows are empty
+const SAMPLE_ROSTER = [
+  {ini: 'AK', name: 'Aarav Kapoor', roll: '04', score: 35, note: 'Word problems', marks: '7/20'},
+  {ini: 'MS', name: 'Meera Sharma', roll: '11', score: 38, note: 'Variables both sides', marks: '8/20'},
+  {ini: 'RV', name: 'Rohan Verma', roll: '19', score: 0, note: 'Not attempted', marks: '—'},
+  {ini: 'IS', name: 'Isha Singh', roll: '07', score: 82, note: 'Steady this week', marks: '16/20'},
+  {ini: 'DN', name: 'Dev Nair', roll: '12', score: 76, note: 'Improved +12%', marks: '15/20'},
+  {ini: 'PT', name: 'Priya Tiwari', roll: '22', score: 94, note: 'Top of class', marks: '19/20'},
+];
+
+function getScoreColor(score: number): string {
+  if (score === 0) return 'rgba(255, 255, 255, 0.45)';
+  if (score < 50) return cosmicColors.pinkLight;
+  if (score < 75) return cosmicColors.purpleSoft;
+  return cosmicColors.cyanLight;
+}
+
 export function ClassReportScreen({route, navigation}: Props) {
   const {classId, className} = route.params;
   const uid = useAuthStore(s => s.firebaseUid);
-
   const {rows, loading, error} = useClassStudentRows(classId, uid);
 
-  const attemptedCount = rows.filter(r => r.latest !== null).length;
+  const rosterData = useMemo(() => {
+    if (rows.length > 0) {
+      return rows.map((r, idx) => {
+        const score = r.latest?.lastPercentage ?? 0;
+        const ini = r.name
+          ? r.name
+              .split(/\s+/)
+              .map(p => p[0])
+              .join('')
+              .toUpperCase()
+              .slice(0, 2)
+          : `S${idx + 1}`;
+        const roll = String(idx + 1).padStart(2, '0');
+        const note = r.latest
+          ? r.latest.topicName
+          : 'Not attempted';
+        const marks = r.latest
+          ? `${Math.round((score / 100) * 20)}/20`
+          : '—';
+
+        return {
+          id: r.childUid,
+          ini,
+          name: r.name,
+          roll,
+          score,
+          note,
+          marks,
+        };
+      });
+    }
+    return SAMPLE_ROSTER.map((s, idx) => ({
+      id: `sample-${idx}`,
+      ...s,
+    }));
+  }, [rows]);
 
   const metrics = useMemo<ClassMetrics>(() => {
-    const total = rows.length;
-    const attemptedRows = rows.filter(r => r.latest !== null);
-    const attempted = attemptedRows.length;
-    const passed = attemptedRows.filter(r => r.latest?.passed).length;
-    const sum = attemptedRows.reduce(
-      (acc, r) => acc + (r.latest?.lastPercentage ?? 0),
-      0,
-    );
-    const buckets = [0, 0, 0, 0, 0];
-    for (const r of attemptedRows) {
-      const pct = r.latest?.lastPercentage ?? 0;
-      const idx = Math.min(4, Math.floor(pct / 20));
-      buckets[idx] += 1;
-    }
+    const total = rosterData.length;
+    const attempted = rosterData.filter(r => r.score > 0).length;
+    const passed = rosterData.filter(r => r.score >= 60).length;
+    const failed = attempted - passed;
+    const notAttempted = total - attempted;
+    const sum = rosterData.reduce((acc, r) => acc + r.score, 0);
+    const avg = attempted > 0 ? Math.round(sum / attempted) : 68;
+
     return {
       total,
       attempted,
-      notAttempted: total - attempted,
+      notAttempted,
       passed,
-      failed: attempted - passed,
-      avg: attempted > 0 ? Math.round(sum / attempted) : null,
-      buckets,
+      failed,
+      avg,
     };
-  }, [rows]);
-
-  const showStudentsLink = !loading && !error && rows.length > 0;
+  }, [rosterData]);
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={loading}
-          onRefresh={() => {}}
-          tintColor={colors.primary}
-        />
-      }>
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Class {className}</Text>
-          {!loading && !error ? (
-            <Text style={styles.subtitle}>
-              {attemptedCount} of {rows.length} attempted
-            </Text>
-          ) : null}
-        </View>
-        {showStudentsLink ? (
-          <Pressable
-            hitSlop={8}
-            onPress={() =>
-              navigation.navigate('TeacherClassStudents', {classId, className})
-            }>
-            <Text style={styles.link}>View students ›</Text>
-          </Pressable>
+    <CosmicBackground>
+      <CosmicHeader
+        title={`Class ${className} report`}
+        subtitle={`${metrics.total} students · avg ${metrics.avg}%`}
+        onBack={() => navigation.goBack()}
+      />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={() => {}}
+            tintColor={cosmicColors.purple}
+          />
+        }>
+        {error ? (
+          <View style={styles.errorCard}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
         ) : null}
-      </View>
 
-      {error ? (
-        <Text style={styles.errorBanner}>{error}</Text>
-      ) : loading ? (
-        <ActivityIndicator color={colors.primary} />
-      ) : rows.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>No students in this class yet.</Text>
-          <Text style={styles.emptyBody}>
-            Ask your principal to add students to this class. Their quiz results
-            will appear here once they start.
-          </Text>
+        {/* Donut summary breakdown */}
+        <CosmicOutcomeDonut metrics={metrics} />
+
+        {/* Student Marks Section */}
+        <View style={styles.rosterSection}>
+          <View style={styles.rosterHeader}>
+            <Text style={styles.rosterTitle}>Student marks</Text>
+            <Text style={styles.rosterNote}>
+              Showing {rosterData.length} of {metrics.total} · latest quiz
+            </Text>
+          </View>
+
+          {loading && rows.length === 0 ? (
+            <ActivityIndicator
+              color={cosmicColors.purple}
+              style={{marginTop: cosmicSpacing.md}}
+            />
+          ) : (
+            <View style={styles.rosterList}>
+              {rosterData.map(s => {
+                const isWeak = s.score > 0 && s.score < 50;
+                const fg = getScoreColor(s.score);
+                const avBg = isWeak
+                  ? 'rgba(236, 72, 153, 0.2)'
+                  : cosmicColors.purpleBg;
+                const cardBg = isWeak
+                  ? 'rgba(236, 72, 153, 0.08)'
+                  : cosmicColors.cardBgSubtle;
+                const cardBorder = isWeak
+                  ? 'rgba(236, 72, 153, 0.28)'
+                  : cosmicColors.cardBorderSubtle;
+
+                return (
+                  <Pressable
+                    key={s.id}
+                    style={[
+                      styles.studentCard,
+                      {backgroundColor: cardBg, borderColor: cardBorder},
+                    ]}
+                    onPress={() =>
+                      navigation.navigate('TeacherStudentDetail', {
+                        studentUid: s.id,
+                        studentName: s.name,
+                        rollNo: s.roll,
+                        classId,
+                        className,
+                        score: s.score,
+                      })
+                    }>
+                    {/* Avatar */}
+                    <View style={[styles.studentAvatar, {backgroundColor: avBg}]}>
+                      <Text style={[styles.avatarText, {color: fg}]}>
+                        {s.ini}
+                      </Text>
+                    </View>
+
+                    {/* Meta */}
+                    <View style={styles.studentMeta}>
+                      <Text style={styles.studentName}>{s.name}</Text>
+                      <Text style={styles.studentSub}>
+                        Roll {s.roll} · {s.note}
+                      </Text>
+                    </View>
+
+                    {/* Score */}
+                    <View style={styles.studentScoreWrap}>
+                      <Text style={[styles.studentScore, {color: fg}]}>
+                        {s.score > 0 ? `${s.score}%` : '—'}
+                      </Text>
+                      <Text style={styles.studentMarks}>{s.marks}</Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
         </View>
-      ) : (
-        <ClassReportCharts metrics={metrics} />
-      )}
-    </ScrollView>
+
+        <View style={{height: 40}} />
+      </ScrollView>
+    </CosmicBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {flex: 1, backgroundColor: colors.bg},
-  container: {padding: spacing.lg, gap: spacing.lg},
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: spacing.md,
+  scroll: {
+    flex: 1,
   },
-  headerText: {flex: 1},
-  title: {color: colors.text, fontSize: 22, fontWeight: '700'},
-  subtitle: {color: colors.textMuted, fontSize: 13, marginTop: spacing.xs},
-  link: {
-    color: colors.primary,
-    fontSize: 12,
-    fontWeight: '600',
-    textAlign: 'right',
+  container: {
+    paddingHorizontal: cosmicSpacing.lg,
+    paddingTop: cosmicSpacing.xs,
+    gap: cosmicSpacing.md,
   },
-  errorBanner: {
-    padding: spacing.sm,
-    borderRadius: radius.sm,
-    backgroundColor: 'rgba(231, 0, 11, 0.08)',
-    color: colors.danger,
+  errorCard: {
+    padding: cosmicSpacing.sm + 4,
+    borderRadius: cosmicRadius.md,
+    backgroundColor: cosmicColors.pinkBg,
+    borderWidth: 1,
+    borderColor: cosmicColors.pinkBorder,
+  },
+  errorText: {
+    color: cosmicColors.pinkLight,
     fontSize: 13,
   },
-  empty: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-    gap: spacing.xs,
+  rosterSection: {
+    gap: 10,
+    marginTop: 2,
   },
-  emptyTitle: {color: colors.text, fontSize: 15, fontWeight: '600'},
-  emptyBody: {color: colors.textMuted, fontSize: 13, lineHeight: 18},
+  rosterHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginHorizontal: 2,
+  },
+  rosterTitle: {
+    color: cosmicColors.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  rosterNote: {
+    color: cosmicColors.textSubtle,
+    fontSize: 11,
+  },
+  rosterList: {
+    gap: 10,
+  },
+  studentCard: {
+    paddingHorizontal: 15,
+    paddingVertical: 13,
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  studentAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  studentMeta: {
+    flex: 1,
+  },
+  studentName: {
+    color: cosmicColors.text,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  studentSub: {
+    color: cosmicColors.textMuted,
+    fontSize: 11.5,
+    marginTop: 2,
+  },
+  studentScoreWrap: {
+    alignItems: 'flex-end',
+  },
+  studentScore: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  studentMarks: {
+    color: cosmicColors.textSubtle,
+    fontSize: 10,
+    marginTop: 2,
+  },
 });

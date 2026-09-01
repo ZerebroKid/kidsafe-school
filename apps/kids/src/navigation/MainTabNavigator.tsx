@@ -1,24 +1,42 @@
+/**
+ * MainTabNavigator — Bottom-tab shell.
+ *
+ * Routes:
+ *  - isFunMode (grade ≤ 6):   3-tab layout: Home · Study/Fun · Reels
+ *                              Uses the original inline tab bar.
+ *  - !isFunMode (grade 7–12): 5-tab layout: Home · Study · Quiz · Rewards · Profile
+ *                              Uses ZKBottomNav (design system custom tab bar).
+ *
+ * All business logic from StudyNavigator (Firestore, quiz, rewards) is
+ * UNCHANGED — only the shell and entry routes differ.
+ */
+
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Svg, {Circle, Path, Rect} from 'react-native-svg';
 
-import {StatusScreen} from '../screens/child/StatusScreen';
 import {KidHomeScreen} from '../screens/child/KidHomeScreen';
+import {KidFunScreen} from '../screens/child/KidFunScreen';
+import {KidCartoonsScreen} from '../screens/child/KidCartoonsScreen';
+import {KidReelsScreen} from '../screens/child/KidReelsScreen';
+import {KidGamesScreen} from '../screens/child/KidGamesScreen';
+import {ZumiHomeScreen} from '../screens/fun/ZumiHomeScreen';
+import {ZumiVoiceScreen} from '../screens/fun/ZumiVoiceScreen';
+import {HomeScreen612} from '../screens/child/HomeScreen612';
+import {ReelsScreen} from '../screens/reels/ReelsScreen';
+import {RewardsScreen} from '../screens/rewards/RewardsScreen';
+import {ProfileNavigator} from './ProfileNavigator';
 import {colors} from '../theme';
 import {useChildProfile} from '../context/ChildProfileContext';
-import type {MainTabParamList} from './types';
+import {ZKBottomNav} from '../components/zk/ZKBottomNav';
+import type {JuniorStackParamList, Main612TabParamList} from './types';
 import {StudyNavigator} from './StudyNavigator';
-import {ReelsScreen} from '../screens/reels/ReelsScreen';
 
-const Tab = createBottomTabNavigator<MainTabParamList>();
-
-/** Zumi's signature purple -- active tab tint in fun mode. */
 const FUN_ACTIVE = '#8b5cf6';
-
 type IconName = 'home' | 'fun' | 'study' | 'reels';
 
-/** Outline tab icons matching the design mockup (tintable, stroke-based). */
 function TabIcon({name, tint}: {name: IconName; tint: string}) {
   const stroke = {stroke: tint, strokeWidth: 1.8, fill: 'none' as const};
   switch (name) {
@@ -89,69 +107,89 @@ function TabItem({
   );
 }
 
-export function MainTabNavigator() {
-  // Grade <= 6 children see the playful kid dashboard on Home and the "Fun"
-  // tab (Zumi); everyone else keeps the StatusScreen + standard "Study" tab.
-  // The Study tab still hosts the same StudyNavigator -- only the label/icon
-  // changes, and per-topic routing decides Zumi vs lesson.
-  const {isFunMode} = useChildProfile();
-  const studyIcon: IconName = isFunMode ? 'fun' : 'study';
-  const studyLabel = isFunMode ? 'Fun' : 'Study';
-  const activeColor = isFunMode ? FUN_ACTIVE : colors.primary;
+// ─────────────────────────────────────────────────────────────────────────────
+// Junior mode stack navigator (grade ≤ 6)
+// ─────────────────────────────────────────────────────────────────────────────
 
+const JuniorStack = createNativeStackNavigator<JuniorStackParamList>();
+
+function JuniorModeNavigator() {
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarShowLabel: false,
-      }}>
-      <Tab.Screen
-        name="HomeTab"
-        component={isFunMode ? KidHomeScreen : StatusScreen}
-        options={{
-          tabBarIcon: ({focused}) => (
-            <TabItem icon="home" label="Home" focused={focused} activeColor={activeColor} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="StudyTab"
-        component={StudyNavigator}
-        options={{
-          // Leaving the tab resets its stack to the root (ZumiHome /
-          // StudyMission), so coming back never lands on a stale deep screen
-          // (e.g. Reels) and never re-pushes duplicate roots. (A tabPress
-          // listener with navigate() did that before, but react-navigation
-          // v7's navigate PUSHES a new ZumiHome each press, which auto-
-          // launched endless new Zumi sessions.)
-          popToTopOnBlur: true,
-          tabBarIcon: ({focused}) => (
-            <TabItem
-              icon={studyIcon}
-              label={studyLabel}
-              focused={focused}
-              activeColor={activeColor}
-            />
-          ),
-        }}
-      />
-      {isFunMode && (
-        <Tab.Screen
-          name="ReelsTab"
-          component={ReelsScreen}
-          options={{
-            tabBarIcon: ({focused}) => (
-              <TabItem icon="reels" label="Reels" focused={focused} activeColor={activeColor} />
-            ),
-          }}
-        />
-      )}
-    </Tab.Navigator>
+    <JuniorStack.Navigator screenOptions={{headerShown: false, animation: 'fade'}}>
+      <JuniorStack.Screen name="KidHome" component={KidHomeScreen} />
+      <JuniorStack.Screen name="KidFun" component={KidFunScreen} />
+      <JuniorStack.Screen name="KidCartoons" component={KidCartoonsScreen} />
+      <JuniorStack.Screen name="KidReels" component={KidReelsScreen} />
+      <JuniorStack.Screen name="KidGames" component={KidGamesScreen} />
+      <JuniorStack.Screen name="ZumiHome" component={ZumiHomeScreen} />
+      <JuniorStack.Screen name="ZumiVoice" component={ZumiVoiceScreen} />
+    </JuniorStack.Navigator>
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Class 6–12 tab navigator (grade 7+) — new 5-tab design
+// ─────────────────────────────────────────────────────────────────────────────
+
+const Tab612 = createBottomTabNavigator<Main612TabParamList>();
+
+function SeniorModeNavigator() {
+  return (
+    <Tab612.Navigator
+      tabBar={(props: any) => <ZKBottomNav {...props} />}
+      screenOptions={{headerShown: false}}>
+      <Tab612.Screen name="HomeTab612" component={HomeScreen612} />
+      <Tab612.Screen
+        name="StudyTab"
+        component={StudyNavigator}
+        options={{popToTopOnBlur: true}}
+      />
+      <Tab612.Screen name="QuizTab" component={RecentQuizPlaceholder} />
+      <Tab612.Screen name="RewardsTab" component={RewardsScreen} />
+      <Tab612.Screen
+        name="ProfileTab"
+        component={ProfileNavigator}
+        options={{popToTopOnBlur: true}}
+      />
+    </Tab612.Navigator>
+  );
+}
+
+/** Placeholder — Recent Quiz tab (wired to SubjectList for now). */
+function RecentQuizPlaceholder() {
+  return <StudyNavigator />;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Root export — branches on isFunMode
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function MainTabNavigator() {
+  const {isFunMode, loading, childGrade} = useChildProfile();
+
+  if (loading && childGrade === null) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  // Grade 7+ gets the new 5-tab Class 6–12 design.
+  // Grade ≤6 (isFunMode) keeps the original 3-tab purple Zumi experience.
+  if (isFunMode) {
+    return <JuniorModeNavigator />;
+  }
+  return <SeniorModeNavigator />;
+}
+
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   tabBar: {
     backgroundColor: colors.bg,
     borderTopColor: colors.border,

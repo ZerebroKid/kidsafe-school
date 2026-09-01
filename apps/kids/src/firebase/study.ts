@@ -598,13 +598,22 @@ export function useRewardUnlock(
 }
 
 function todayInSchoolTz(): string {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: SCHOOL_TIMEZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date());
-  const lookup: Record<string, string> = {};
-  for (const p of parts) lookup[p.type] = p.value;
-  return `${lookup.year}-${lookup.month}-${lookup.day}`;
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: SCHOOL_TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date());
+    const lookup: Record<string, string> = {};
+    for (const p of parts) lookup[p.type] = p.value;
+    return `${lookup.year}-${lookup.month}-${lookup.day}`;
+  } catch {
+    // Fallback for JS runtimes (like RN iOS JSC) that don't support IANA timeZone in Intl
+    const kolkataDate = new Date(Date.now() + 5.5 * 3600 * 1000);
+    const y = kolkataDate.getUTCFullYear();
+    const m = String(kolkataDate.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(kolkataDate.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
 }

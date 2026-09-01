@@ -1,44 +1,31 @@
 import React, {useState} from 'react';
-import {Alert, Pressable, StyleSheet, Text} from 'react-native';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 import {callFn} from '@zerebro/shared-firebase';
 import {signOut} from '@zerebro/shared-firebase/auth';
+import {useParentTheme} from '../../state/themeStore';
+import {ParentBackground} from './components/ParentBackground';
+import {ParentHeader} from './components/ParentHeader';
+import {parentRadius, parentSpacing} from './theme/parentTheme';
 
-import {Button} from '../../components/Button';
-import {Screen} from '../../components/Screen';
-import {TextInput} from '../../components/TextInput';
-import {colors, spacing} from '../../theme';
+export function JoinSchoolScreen({onBack}: {onBack?: () => void}) {
+  const navigation = useNavigation();
+  const {theme, isDark} = useParentTheme();
 
-/**
- * P4.4 -- parent-side onboarding for the school invite code.
- *
- * Mounted by RoleOnboardingGate when the user picks "I'm a parent" from the
- * intent picker AND `users/{uid}.roles[]` does NOT yet include 'parent'.
- * Replaces the previous P4.3 `ParentComingSoon` placeholder.
- *
- * Flow:
- *   1. Parent enters the 8-char school inviteCode that their principal
- *      shared manually (WhatsApp / SMS / in person).
- *   2. Parent enters their display name.
- *   3. Submit calls the `joinSchoolAsParent` callable. On success the
- *      server array-unions 'parent' into `users/{uid}.roles`. The
- *      RootNavigator's user-doc onSnapshot fires on the same tick,
- *      unmounts this gate, and drops the user into ParentNavigator --
- *      no app restart, no manual refresh.
- *
- * UNLIKE the teacher flow there is NO pending state. Either the code is
- * valid (and the role is granted instantly) or it isn't (and the user
- * sees an inline error and can retry). The "Approval gate" was explicitly
- * removed from this flow because the only thing parent role grants is
- * "manage my own child", which is already gated by pairing.
- *
- * `onBack` lets the parent return to the intent picker if they tapped the
- * wrong tile.
- */
-export function JoinSchoolScreen({onBack}: {onBack: () => void}) {
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleBack = onBack ?? (() => navigation.goBack());
 
   async function onSubmit() {
     const trimmedCode = code.trim().toUpperCase();
@@ -60,8 +47,6 @@ export function JoinSchoolScreen({onBack}: {onBack: () => void}) {
         inviteCode: trimmedCode,
         displayName: trimmedName,
       });
-      // No UI swap here -- RootNavigator's user-doc listener picks up the
-      // new role on the same tick and re-mounts us into ParentNavigator.
     } catch (err) {
       Alert.alert(
         'Could not join',
@@ -74,51 +59,184 @@ export function JoinSchoolScreen({onBack}: {onBack: () => void}) {
   }
 
   return (
-    <Screen
-      title="Join your child's school"
-      subtitle="Enter the school code your principal shared with you. You'll only do this once.">
-      <TextInput
-        label="School code"
-        autoCapitalize="characters"
-        autoCorrect={false}
-        value={code}
-        onChangeText={t => setCode(t.toUpperCase())}
-        placeholder="ABCD1234"
-        maxLength={12}
-        style={styles.codeInput}
+    <ParentBackground>
+      <ParentHeader
+        title="Join School"
+        subtitle="Connect with your child's school"
+        onBack={handleBack}
       />
-      <TextInput
-        label="Your full name"
-        autoCapitalize="words"
-        value={name}
-        onChangeText={setName}
-        placeholder="e.g. Priya Sharma"
-      />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: isDark
+                ? 'rgba(23, 19, 79, 0.88)'
+                : theme.cardBg,
+              borderColor: theme.cardBorder,
+            },
+          ]}>
+          <Text style={[styles.cardTitle, {color: theme.text}]}>
+            School Connection Code
+          </Text>
+          <Text style={[styles.cardSub, {color: theme.textMuted}]}>
+            Enter the 8-character school code your principal shared with you.
+          </Text>
 
-      <Button title="Join school" onPress={onSubmit} loading={loading} />
+          <View style={styles.formGroup}>
+            <Text style={[styles.inputLabel, {color: theme.textMuted}]}>
+              SCHOOL CODE
+            </Text>
+            <TextInput
+              autoCapitalize="characters"
+              autoCorrect={false}
+              value={code}
+              onChangeText={t => setCode(t.toUpperCase())}
+              placeholder="ABCD1234"
+              placeholderTextColor={theme.textSubtle}
+              maxLength={12}
+              style={[
+                styles.codeInput,
+                {
+                  color: theme.text,
+                  backgroundColor: isDark
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : '#FFFFFF',
+                  borderColor: theme.cardBorder,
+                },
+              ]}
+            />
+          </View>
 
-      <Pressable onPress={onBack}>
-        <Text style={styles.linkMuted}>Back to options</Text>
-      </Pressable>
-      <Pressable
-        onPress={() => {
-          signOut().catch(err => console.warn('signOut failed', err));
-        }}>
-        <Text style={styles.linkMuted}>Sign out</Text>
-      </Pressable>
-    </Screen>
+          <View style={styles.formGroup}>
+            <Text style={[styles.inputLabel, {color: theme.textMuted}]}>
+              YOUR FULL NAME
+            </Text>
+            <TextInput
+              autoCapitalize="words"
+              value={name}
+              onChangeText={setName}
+              placeholder="e.g. Priya Sharma"
+              placeholderTextColor={theme.textSubtle}
+              style={[
+                styles.nameInput,
+                {
+                  color: theme.text,
+                  backgroundColor: isDark
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : '#FFFFFF',
+                  borderColor: theme.cardBorder,
+                },
+              ]}
+            />
+          </View>
+
+          <Pressable
+            disabled={loading}
+            style={[
+              styles.submitBtn,
+              {backgroundColor: theme.primary},
+              loading && styles.submitBtnDisabled,
+            ]}
+            onPress={onSubmit}>
+            <Text style={styles.submitBtnText}>
+              {loading ? 'Joining school...' : 'Join School'}
+            </Text>
+          </Pressable>
+        </View>
+
+        <Pressable onPress={handleBack} style={styles.linkBtn}>
+          <Text style={[styles.linkText, {color: theme.textMuted}]}>
+            Back to options
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            signOut().catch(err => console.warn('signOut failed', err));
+          }}
+          style={styles.linkBtn}>
+          <Text style={[styles.linkText, {color: theme.danger}]}>
+            Sign out
+          </Text>
+        </Pressable>
+
+        <View style={{height: 40}} />
+      </ScrollView>
+    </ParentBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  codeInput: {
-    fontSize: 22,
-    letterSpacing: 4,
-    textAlign: 'center',
+  scroll: {
+    flex: 1,
   },
-  linkMuted: {
-    color: colors.textMuted,
+  container: {
+    paddingHorizontal: parentSpacing.lg,
+    paddingTop: parentSpacing.xs,
+    gap: parentSpacing.md,
+  },
+  card: {
+    padding: 18,
+    borderRadius: parentRadius.xl,
+    borderWidth: 1,
+    gap: parentSpacing.md,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  cardSub: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  formGroup: {
+    gap: 6,
+  },
+  inputLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  codeInput: {
+    fontSize: 20,
+    letterSpacing: 3,
     textAlign: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    fontWeight: '700',
+  },
+  nameInput: {
+    fontSize: 15,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  submitBtn: {
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 6,
+  },
+  submitBtnDisabled: {
+    opacity: 0.6,
+  },
+  submitBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  linkBtn: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  linkText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

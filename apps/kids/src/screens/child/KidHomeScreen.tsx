@@ -1,116 +1,129 @@
-/**
- * KidHomeScreen -- the fun-mode (grade <= 6) Home tab.
- *
- * Replaces the parental StatusScreen for young kids with the playful purple
- * dashboard from the design: coin + heart pills up top, Zumi the mascot with a
- * breathing bob, a speech-bubble greeting, and a 2x2 grid of action cards
- * (Fun / Cartoons / Reels / Games). Grade 7+ children still get StatusScreen
- * (see MainTabNavigator).
- *
- * Coins and hearts are STATIC placeholders for now -- the real economy comes
- * later. Cartoons and Games are card-only: tapping gives a playful bounce and
- * a "coming soon" toast instead of navigating.
- */
-
-import React, {useRef} from 'react';
+import React from 'react';
 import {
-  Animated,
-  Easing,
-  Platform,
+  Image,
   Pressable,
+  StatusBar,
   StyleSheet,
   Text,
-  ToastAndroid,
   View,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import Svg, {Circle, Defs, LinearGradient, Path, Rect, Stop} from 'react-native-svg';
-import type {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
-
+import Svg, {Circle, Path, Rect} from 'react-native-svg';
+import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useChildProfile} from '../../context/ChildProfileContext';
-import {spacing} from '../../theme';
-import type {MainTabParamList} from '../../navigation/types';
+import {fonts, junior, neutral, radius, shadows, spacing} from '../../theme';
+import type {JuniorStackParamList} from '../../navigation/types';
 
-const ZUMI_IDLE = require('../../assets/zumi/zumi_idle.png');
+import {useAuthStore} from '../../state/authStore';
 
-// Placeholder economy values -- wire to Firestore later.
-const COINS = 240;
-const HEARTS = '3/10';
+const KID_HERO = require('../../assets/kid-hero.png');
+const KID_FUN = require('../../assets/kid-fun.png');
+const KID_CARTOONS = require('../../assets/kid-cartoons.png');
+const KID_REELS = require('../../assets/kid-reels.png');
+const KID_GAMES = require('../../assets/kid-games.png');
 
-type Props = BottomTabScreenProps<MainTabParamList, 'HomeTab'>;
+type Props = NativeStackScreenProps<JuniorStackParamList, 'KidHome'>;
 
 export function KidHomeScreen({navigation}: Props) {
   const {childName} = useChildProfile();
-  const greeting = `Hi ${childName || 'dost'}! Kaise ho? 🎉`;
+  const userDoc = useAuthStore(s => s.userDoc);
+  const coins = (userDoc as any)?.coins ?? 240;
+  const lives = (userDoc as any)?.lives ?? 3;
+  const heartsText = `${lives}/10`;
 
   return (
     <View style={styles.root}>
-      <Svg style={StyleSheet.absoluteFill}>
-        <Defs>
-          <LinearGradient id="homeBg" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#7c3aed" />
-            <Stop offset="0.55" stopColor="#8b5cf6" />
-            <Stop offset="1" stopColor="#a855f7" />
-          </LinearGradient>
-        </Defs>
-        <Rect width="100%" height="100%" fill="url(#homeBg)" />
-      </Svg>
-      <Sparkle style={{top: '12%', left: '8%'}} char="✦" />
-      <Sparkle style={{top: '9%', right: '10%'}} char="＋" />
-      <Sparkle style={{top: '30%', left: '5%'}} char="＋" />
-      <Sparkle style={{top: '27%', right: '6%'}} char="✦" />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      {/* Background Sparkles */}
+      <Sparkle style={{top: 120, right: 34, width: 10, height: 10}} />
+      <Sparkle style={{top: 210, left: 30, width: 12, height: 12}} />
+      <Sparkle style={{top: 290, right: 56, width: 9, height: 9}} />
+      <Sparkle style={{top: 340, left: 60, width: 8, height: 8}} />
 
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.pillRow}>
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        {/* Topbar */}
+        <View style={styles.topbar}>
           <View style={styles.pill}>
-            <Text style={styles.pillIcon}>🪙</Text>
-            <Text style={styles.pillText}>{COINS}</Text>
+            <View style={styles.coinBadge}>
+              <Text style={styles.coinSym}>₹</Text>
+            </View>
+            <Text style={styles.pillText}>{coins}</Text>
           </View>
           <View style={styles.pill}>
-            <Text style={styles.pillIcon}>💜</Text>
-            <Text style={styles.pillText}>{HEARTS}</Text>
+            <Svg width={24} height={24} viewBox="0 0 24 24" fill="#FF4D8D">
+              <Path d="M12 21s-7.5-4.7-7.5-10A4.5 4.5 0 0 1 12 7.6 4.5 4.5 0 0 1 19.5 11c0 5.3-7.5 10-7.5 10z" />
+            </Svg>
+            <Text style={styles.pillText}>{heartsText}</Text>
           </View>
         </View>
 
-        <BreathingZumi />
-
-        <View style={styles.bubble}>
-          <Text style={styles.bubbleText}>{greeting}</Text>
+        {/* Hero Section */}
+        <View style={styles.heroWrap}>
+          <Image source={KID_HERO} style={styles.heroImg} resizeMode="cover" />
+          <View style={styles.bubble}>
+            <Text style={styles.bubbleTitle}>Hi {childName || 'Aalya'}!</Text>
+            <Text style={styles.bubbleSub}>Kaise ho?</Text>
+          </View>
         </View>
 
+        {/* Grid */}
         <View style={styles.grid}>
           <View style={styles.gridRow}>
             <HomeCard
-              color="#f59e0b"
-              icon="cookie"
+              color="#F0921A"
+              imageSrc={KID_FUN}
               title="Fun"
               subtitle="Play with Zumi"
-              // The Fun stack resets to its root (ZumiHome) whenever the tab
-              // blurs (popToTopOnBlur), so a plain tab switch lands on Zumi.
-              onPress={() => navigation.navigate('StudyTab')}
+              iconNode={
+                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#F5A623" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                  <Path d="M6 9h12a4 4 0 0 1 4 4v2a3 3 0 0 1-3 3c-1.2 0-2.2-.6-2.8-1.6L15.5 15h-7l-.7 1.4A3.3 3.3 0 0 1 5 18a3 3 0 0 1-3-3v-2a4 4 0 0 1 4-4z" />
+                  <Path d="M8 12v3M6.5 13.5h3M15.5 12h.01M17.5 14h.01" />
+                </Svg>
+              }
+              onPress={() => navigation.navigate('ZumiHome')}
             />
             <HomeCard
-              color="#ec4899"
-              icon="video"
+              color="#E8407F"
+              imageSrc={KID_CARTOONS}
               title="Cartoons"
               subtitle="Watch & giggle"
-              comingSoon
+              iconNode={
+                <Svg width={22} height={22} viewBox="0 0 24 24" fill="#FF0000">
+                  <Path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8C22 15.2 22 12 22 12s0-3.2-.4-4.8z" />
+                  <Path d="M10 15.5v-7l6 3.5z" fill="#fff" />
+                </Svg>
+              }
+              onPress={() => navigation.navigate('KidCartoons')}
             />
           </View>
           <View style={styles.gridRow}>
             <HomeCard
-              color="#3b82f6"
-              icon="video"
+              color="#5B3BE8"
+              imageSrc={KID_REELS}
               title="Reels"
               subtitle="Cool clips"
-              onPress={() => navigation.navigate('ReelsTab')}
+              iconNode={
+                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                  <Rect x={3} y={3} width={18} height={18} rx={5} />
+                  <Circle cx={12} cy={12} r={4} />
+                  <Path d="M17.5 6.5h.01" />
+                </Svg>
+              }
+              iconBgColor="#D62976"
+              onPress={() => navigation.navigate('KidReels')}
             />
             <HomeCard
-              color="#10b981"
-              icon="gamepad"
+              color="#0E9E63"
+              imageSrc={KID_GAMES}
               title="Games"
               subtitle="Win coins!"
-              comingSoon
+              iconNode={
+                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="#12B76A" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                  <Path d="M6 9h12a4 4 0 0 1 4 4v2a3 3 0 0 1-3 3c-1.2 0-2.2-.6-2.8-1.6L15.5 15h-7l-.7 1.4A3.3 3.3 0 0 1 5 18a3 3 0 0 1-3-3v-2a4 4 0 0 1 4-4z" />
+                  <Path d="M8 12v3M6.5 13.5h3M15.5 12h.01M17.5 14h.01" />
+                </Svg>
+              }
+              onPress={() => navigation.navigate('KidGames')}
             />
           </View>
         </View>
@@ -119,244 +132,205 @@ export function KidHomeScreen({navigation}: Props) {
   );
 }
 
-/** Zumi idle art with the same gentle breathing bob as ZumiCharacter. */
-function BreathingZumi() {
-  const bob = useRef(new Animated.Value(0)).current;
-
-  React.useEffect(() => {
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(bob, {
-          toValue: -8,
-          duration: 1300,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(bob, {
-          toValue: 0,
-          duration: 1300,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [bob]);
-
+function Sparkle({style}: {style: any}) {
   return (
-    <Animated.Image
-      source={ZUMI_IDLE}
-      resizeMode="contain"
-      style={[styles.zumi, {transform: [{translateY: bob}]}]}
-    />
+    <View style={[styles.sparkle, style]}>
+      <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="#FFD84D">
+        <Path d="M12 0L14.64 9.36L24 12L14.64 14.64L12 24L9.36 14.64L0 12L9.36 9.36L12 0Z" />
+      </Svg>
+    </View>
   );
-}
-
-function Sparkle({style, char}: {style: object; char: string}) {
-  return <Text style={[styles.sparkle, style]}>{char}</Text>;
-}
-
-type CardIconName = 'cookie' | 'video' | 'gamepad';
-
-/**
- * White line icons matching the design mockup (cookie / video-play /
- * gamepad). `accent` is the card color, used for the cookie's chips so they
- * read as holes punched through the white cookie.
- */
-function CardIcon({name, accent}: {name: CardIconName; accent: string}) {
-  const stroke = {stroke: '#ffffff', strokeWidth: 1.8, fill: 'none' as const};
-  switch (name) {
-    case 'cookie':
-      return (
-        <Svg width={26} height={26} viewBox="0 0 24 24">
-          <Path
-            d="M12 3a9 9 0 109 9 3.4 3.4 0 01-4-3.3A3.6 3.6 0 0112.6 5 3.4 3.4 0 0112 3z"
-            fill="#ffffff"
-          />
-          <Circle cx={9} cy={10} r={1.3} fill={accent} />
-          <Circle cx={13.5} cy={14.5} r={1.3} fill={accent} />
-          <Circle cx={8.5} cy={15} r={1.1} fill={accent} />
-        </Svg>
-      );
-    case 'video':
-      return (
-        <Svg width={26} height={26} viewBox="0 0 24 24">
-          <Rect x={3.75} y={3.75} width={16.5} height={16.5} rx={4.5} {...stroke} />
-          <Path
-            d="M10.25 9.25l5 2.75-5 2.75v-5.5z"
-            fill="#ffffff"
-            strokeLinejoin="round"
-          />
-        </Svg>
-      );
-    case 'gamepad':
-      return (
-        <Svg width={26} height={26} viewBox="0 0 24 24">
-          <Rect x={2.75} y={7.75} width={18.5} height={9.5} rx={4.75} {...stroke} />
-          <Path d="M7.5 10.5v4M5.5 12.5h4" {...stroke} strokeLinecap="round" />
-          <Circle cx={15.5} cy={13.5} r={1.1} fill="#ffffff" />
-          <Circle cx={18} cy={11.5} r={1.1} fill="#ffffff" />
-        </Svg>
-      );
-  }
 }
 
 function HomeCard({
   color,
-  icon,
+  imageSrc,
+  iconNode,
+  iconBgColor = '#FFFFFF',
   title,
   subtitle,
   onPress,
-  comingSoon,
 }: {
   color: string;
-  icon: CardIconName;
+  imageSrc: any;
+  iconNode: React.ReactNode;
+  iconBgColor?: string;
   title: string;
   subtitle: string;
   onPress?: () => void;
-  comingSoon?: boolean;
 }) {
-  const scale = useRef(new Animated.Value(1)).current;
-
-  const handlePress = () => {
-    if (comingSoon) {
-      // Playful bounce + toast instead of navigation.
-      Animated.sequence([
-        Animated.timing(scale, {
-          toValue: 1.06,
-          duration: 90,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scale, {
-          toValue: 1,
-          friction: 3,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      if (Platform.OS === 'android') {
-        ToastAndroid.show('Jald aa raha hai! 🚀', ToastAndroid.SHORT);
-      }
-      return;
-    }
-    onPress?.();
-  };
-
   return (
-    <Animated.View style={[styles.cardWrap, {transform: [{scale}]}]}>
+    <View style={styles.cardWrap}>
       <Pressable
-        onPress={handlePress}
+        onPress={() => onPress?.()}
         android_ripple={{color: 'rgba(255,255,255,0.25)'}}
         style={({pressed}) => [
           styles.card,
           {backgroundColor: color},
-          pressed && !comingSoon && styles.cardPressed,
+          pressed && styles.cardPressed,
         ]}>
-        <View style={styles.cardIconChip}>
-          <CardIcon name={icon} accent={color} />
+        <Image source={imageSrc} style={styles.cardImg} resizeMode="cover" />
+
+        <View style={[styles.cardIconBox, {backgroundColor: iconBgColor}]}>
+          {iconNode}
         </View>
-        <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardSubtitle}>{subtitle}</Text>
+
+        <View style={styles.cardBottom}>
+          <Text style={styles.cardTitle}>{title}</Text>
+          <Text style={styles.cardSubtitle}>{subtitle}</Text>
+        </View>
       </Pressable>
-    </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {flex: 1, backgroundColor: '#8b5cf6'},
+  root: {
+    flex: 1,
+    backgroundColor: junior.bgHome,
+  },
+  sparkle: {
+    position: 'absolute',
+  },
   safe: {
     flex: 1,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
   },
-  pillRow: {
+  topbar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: spacing.md,
+    gap: spacing.md12,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md12,
   },
   pill: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#ffffff',
-    borderRadius: 999,
-    paddingVertical: 8,
-    elevation: 4,
-    shadowColor: '#4c1d95',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    shadowOffset: {width: 0, height: 3},
+    gap: spacing.sm,
+    height: 46,
+    borderRadius: radius.pill,
+    backgroundColor: neutral.surface,
+    ...shadows.card,
   },
-  pillIcon: {fontSize: 15},
-  pillText: {fontSize: 16, fontWeight: '800', color: '#7c3aed'},
-  zumi: {
-    alignSelf: 'center',
-    width: 180,
-    height: 180,
-    marginTop: spacing.md,
-  },
-  sparkle: {
-    position: 'absolute',
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 16,
-    pointerEvents: 'none',
-  },
-  bubble: {
-    alignSelf: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 22,
-    marginTop: spacing.md,
-    elevation: 4,
-    shadowColor: '#4c1d95',
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    shadowOffset: {width: 0, height: 3},
-  },
-  bubbleText: {fontSize: 17, fontWeight: '800', color: '#312e81'},
-  grid: {
-    flex: 1,
-    marginTop: spacing.lg,
-    gap: spacing.md,
-  },
-  gridRow: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  cardWrap: {flex: 1},
-  card: {
-    flex: 1,
-    borderRadius: 24,
-    padding: spacing.md,
-    justifyContent: 'flex-end',
-    elevation: 6,
-    shadowColor: '#4c1d95',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: {width: 0, height: 4},
-  },
-  cardPressed: {opacity: 0.9},
-  cardIconChip: {
-    position: 'absolute',
-    top: spacing.md,
-    left: spacing.md,
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+  coinBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: junior.yellowCoinBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardTitle: {fontSize: 22, fontWeight: '900', color: '#ffffff'},
+  coinSym: {
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 14,
+    color: junior.yellowCoinText,
+    top: 1,
+  },
+  pillText: {
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 22,
+    color: junior.purplePillText,
+    top: 1,
+  },
+  heroWrap: {
+    height: 348,
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+    backgroundColor: junior.bgHome,
+    marginVertical: spacing.xs,
+  },
+  heroImg: {
+    width: '100%',
+    height: 348,
+    position: 'absolute',
+  },
+  bubble: {
+    position: 'absolute',
+    left: spacing.md12,
+    bottom: 34,
+    zIndex: 2,
+    width: 116,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    borderRadius: radius.lg,
+    borderBottomLeftRadius: spacing.xs,
+    backgroundColor: neutral.surface,
+    ...shadows.cardMd,
+  },
+  bubbleTitle: {
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 21,
+    lineHeight: 24,
+    color: junior.textHeaderDark,
+  },
+  bubbleSub: {
+    fontFamily: fonts.heading,
+    fontSize: 15,
+    lineHeight: 19,
+    color: '#3B2E6E',
+  },
+  grid: {
+    paddingHorizontal: 14,
+    paddingBottom: 14,
+    gap: spacing.md12,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    gap: spacing.md12,
+  },
+  cardWrap: {
+    flex: 1,
+  },
+  card: {
+    height: 191,
+    borderRadius: radius.card,
+    overflow: 'hidden',
+    ...shadows.cardMd,
+  },
+  cardPressed: {
+    opacity: 0.9,
+  },
+  cardImg: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  cardIconBox: {
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: neutral.surface,
+  },
+  cardBottom: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: spacing.md12,
+    paddingTop: 34,
+    paddingBottom: spacing.md12,
+  },
+  cardTitle: {
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 24,
+    lineHeight: 27,
+    color: neutral.surface,
+    textShadowColor: 'rgba(0,0,0,0.45)',
+    textShadowOffset: {width: 0, height: 1},
+    textShadowRadius: 6,
+  },
   cardSubtitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.9)',
-    marginTop: 2,
+    fontFamily: fonts.heading,
+    fontSize: 15,
+    lineHeight: 19,
+    color: 'rgba(255,255,255,0.95)',
+    textShadowColor: 'rgba(0,0,0,0.45)',
+    textShadowOffset: {width: 0, height: 1},
+    textShadowRadius: 5,
   },
 });

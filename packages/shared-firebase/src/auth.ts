@@ -296,7 +296,7 @@ async function withFirestoreRetry<T>(fn: () => Promise<T>, attempts = 3): Promis
         throw err;
       }
       // Exponential backoff: 400ms, 800ms, 1600ms
-      await new Promise(res => setTimeout(res, 400 * Math.pow(2, i)));
+      await new Promise(res => setTimeout(() => res(null), 400 * Math.pow(2, i)));
     }
   }
   throw lastError;

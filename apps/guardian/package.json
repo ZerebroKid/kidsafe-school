@@ -5,6 +5,7 @@
   "description": "ZConnect — parent + teacher Android app (KidSafe parent + Zerebro teacher mode).",
   "scripts": {
     "android": "react-native run-android",
+    "ios": "react-native run-ios",
     "start": "react-native start",
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit",

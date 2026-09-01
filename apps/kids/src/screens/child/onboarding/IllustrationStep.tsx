@@ -60,7 +60,7 @@ export function IllustrationStep({
       if (state !== 'active') {return;}
       if (!returningFromAction.current) {return;}
       returningFromAction.current = false;
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(() => r(null), 400));
       const granted = await recheck();
       if (!granted) {setShowVerify(true);}
     });
@@ -110,7 +110,7 @@ export function IllustrationStep({
     if (step.check) {
       // Honest re-check after a delay, same logic as InstructionStep — caters for OEMs that
       // flush the secure setting asynchronously.
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(() => r(null), 600));
       try {
         const ok = await step.check();
         if (ok) {
@@ -140,6 +140,7 @@ export function IllustrationStep({
         onYes={handleVerifyYes}
         onNo={() => {
           setShowVerify(false);
+          returningFromAction.current = false;
           handleCta();
         }}
       />

@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<template id="__bundler_thumbnail"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#6D3BFF"/><text x="50" y="58" font-size="34" font-family="sans-serif" font-weight="800" fill="#fff" text-anchor="middle">Z</text></svg></template>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#E6E6F0;-webkit-font-smoothing:antialiased}
+a{color:#6D3BFF;text-decoration:none}
+a:hover{color:#4E24E0}
+@keyframes zk-pulse{0%,100%{box-shadow:0 0 0 0 rgba(109,59,255,.34)}50%{box-shadow:0 0 0 12px rgba(109,59,255,0)}}
+@keyframes zk-shimmer{0%{opacity:.4}50%{opacity:1}100%{opacity:.4}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important}}
+</style>
+</helmet>
+
+<div class="ds-canvas" style="min-height:100vh;background:#E6E6F0;padding:56px;display:flex;flex-direction:column;gap:56px;font-family:Inter,sans-serif;box-sizing:border-box">
+
+  <header class="ds-masthead" style="display:flex;flex-direction:column;gap:20px;max-width:900px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="logo-placeholder" style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(78,36,224,.22)">
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:#fff;letter-spacing:-.02em">Z</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Phase 1 of 5 · Foundations &amp; components</span>
+        <h1 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:34px;line-height:40px;font-weight:800;letter-spacing:-.02em;color:#14142B">ZerebroKid Design System</h1>
+      </div>
+    </div>
+    <p style="margin:0;font-family:Inter,sans-serif;font-size:15px;line-height:24px;color:#33334D;max-width:740px;text-wrap:pretty">Six boards, left to right: Foundations → Icons → Buttons &amp; Inputs → Cards → Progress &amp; Feedback → Navigation. Everything Phases 2–5 inherit lives here. Anything badged <strong style="font-weight:600;color:#6D3BFF">TAP</strong> is live — click it instead of reading a static grid.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;background:#EDE6FF;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#4E24E0">390 × 844 base frame</span>
+      <span style="display:flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;background:#DCF7EA;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#0B7B48">4px spacing base</span>
+      <span style="display:flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;background:#FFF3DC;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#8A5A00">Flexbox only — Auto Layout safe</span>
+    </div>
+  </header>
+
+  <div class="ds-boards" style="display:flex;flex-direction:row;align-items:flex-start;gap:140px;width:max-content">
+
+    <!-- BOARD 1 — FOUNDATIONS -->
+    <section class="board board-foundations" style="flex:none;display:flex;flex-direction:column;gap:28px;width:880px;background:#F5F5FB;border-radius:24px;padding:32px;box-shadow:0 2px 8px rgba(20,20,43,.06);box-sizing:border-box">
+      <div class="board-head" style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8B62FF">Board 1</span>
+        <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:#14142B">Foundations</h2>
+      </div>
+
+      <div class="group group-brand" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Brand · primary</span>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="swatch" style="width:200px;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="height:72px;background:#4E24E0"></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">violet-700</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">#4E24E0</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Pressed, deep gradient stop</span>
+            </div>
+          </div>
+          <div class="swatch swatch-primary" style="width:200px;border:2px solid #6D3BFF;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="height:72px;background:#6D3BFF;display:flex;align-items:flex-end;padding:10px;box-sizing:border-box">
+              <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#FFFFFF">Primary</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">violet-600</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">#6D3BFF</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Buttons, active nav, accents</span>
+            </div>
+          </div>
+          <div class="swatch" style="width:200px;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="height:72px;background:#8B62FF"></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">violet-500</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">#8B62FF</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Hover, secondary fills</span>
+            </div>
+          </div>
+          <div class="swatch" style="width:200px;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="height:72px;background:#EDE6FF"></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">violet-100</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">#EDE6FF</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Tinted bg, selected chips</span>
+            </div>
+          </div>
+          <div class="swatch swatch-gradient" style="width:412px;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="height:72px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%)"></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">grad-primary</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">135deg · #7C4DFF → #4E24E0</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Primary CTA, splash, quiz gate. Two stops only — converts cleanly.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-semantic" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Semantic · support</span>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div class="swatch-pair" style="width:200px;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="display:flex;height:60px"><div style="flex:2;background:#2F6BFF"></div><div style="flex:1;background:#E4EDFF"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">blue-600 / 100</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">#2F6BFF · #E4EDFF</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Information, video, links</span>
+            </div>
+          </div>
+          <div class="swatch-pair" style="width:200px;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="display:flex;height:60px"><div style="flex:2;background:#12B76A"></div><div style="flex:1;background:#DCF7EA"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">green-600 / 100</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">#12B76A · #DCF7EA</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Correct, success, savings</span>
+            </div>
+          </div>
+          <div class="swatch-pair" style="width:200px;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="display:flex;height:60px"><div style="flex:2;background:#E5484D"></div><div style="flex:1;background:#FDE7E7"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">red-600 / 100</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">#E5484D · #FDE7E7</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Wrong answer only — never "you failed"</span>
+            </div>
+          </div>
+          <div class="swatch-pair" style="width:200px;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="display:flex;height:60px"><div style="flex:2;background:#FF7A1A"></div><div style="flex:1;background:#FFEDDF"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">orange-600 / 100</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">#FF7A1A · #FFEDDF</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Streak, urgency, timer</span>
+            </div>
+          </div>
+          <div class="swatch-pair" style="width:200px;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF;display:flex;flex-direction:column">
+            <div style="display:flex;height:60px"><div style="flex:2;background:#FFB020"></div><div style="flex:1;background:#FFF3DC"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">gold-500 / 100</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">#FFB020 · #FFF3DC</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;color:#6B6B85">Coins, rewards, trophies</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-neutrals" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Neutrals</span>
+        <div class="swatch-ramp" style="display:flex;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden;background:#FFFFFF">
+          <div style="flex:1;display:flex;flex-direction:column">
+            <div style="height:60px;background:#14142B"></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding:10px 12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">ink-900</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#14142B</span>
+              <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">Headlines</span>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;border-left:1px solid #E8E8F2">
+            <div style="height:60px;background:#33334D"></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding:10px 12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">ink-700</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#33334D</span>
+              <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">Body</span>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;border-left:1px solid #E8E8F2">
+            <div style="height:60px;background:#6B6B85"></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding:10px 12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">ink-500</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#6B6B85</span>
+              <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">Secondary</span>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;border-left:1px solid #E8E8F2">
+            <div style="height:60px;background:#A9A9C0"></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding:10px 12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">ink-300</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#A9A9C0</span>
+              <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">Disabled</span>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;border-left:1px solid #E8E8F2">
+            <div style="height:60px;background:#E8E8F2"></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding:10px 12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">line-200</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#E8E8F2</span>
+              <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">Borders</span>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;border-left:1px solid #E8E8F2">
+            <div style="height:60px;background:#F5F5FB"></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding:10px 12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">bg-app</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#F5F5FB</span>
+              <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">Never pure white</span>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;border-left:1px solid #E8E8F2">
+            <div style="height:60px;background:#FFFFFF"></div>
+            <div style="display:flex;flex-direction:column;gap:1px;padding:10px 12px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">bg-card</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#FFFFFF</span>
+              <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">Cards</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-sections" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">7-section identity colors — students navigate by memory of these hues</span>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div class="chip-section" style="width:118px;display:flex;flex-direction:column;gap:8px;padding:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px">
+            <div style="width:44px;height:44px;border-radius:14px;background:#EDE6FF;display:flex;align-items:center;justify-content:center;color:#6D3BFF">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 1 3.5 10.9V17h-7v-3.1A6 6 0 0 1 12 3z"/><path d="M9.5 20.5h5"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">1 Explanation</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#6D3BFF</span>
+            </div>
+          </div>
+          <div class="chip-section" style="width:118px;display:flex;flex-direction:column;gap:8px;padding:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px">
+            <div style="width:44px;height:44px;border-radius:14px;background:#E4EDFF;display:flex;align-items:center;justify-content:center;color:#2F6BFF">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="12" height="12" rx="2"/><path d="M15 11l6-3.5v9L15 13z"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">2 Watch &amp; Learn</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#2F6BFF</span>
+            </div>
+          </div>
+          <div class="chip-section" style="width:118px;display:flex;flex-direction:column;gap:8px;padding:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px">
+            <div style="width:44px;height:44px;border-radius:14px;background:#DCF7EA;display:flex;align-items:center;justify-content:center;color:#12B76A">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">3 Practice</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#12B76A</span>
+            </div>
+          </div>
+          <div class="chip-section" style="width:118px;display:flex;flex-direction:column;gap:8px;padding:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px">
+            <div style="width:44px;height:44px;border-radius:14px;background:#FFF3DC;display:flex;align-items:center;justify-content:center;color:#B87900">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M9.6 9.4A2.5 2.5 0 0 1 14.5 10c0 1.7-2.5 2-2.5 3.5"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">4 Curiosity</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#FFB020</span>
+            </div>
+          </div>
+          <div class="chip-section" style="width:118px;display:flex;flex-direction:column;gap:8px;padding:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px">
+            <div style="width:44px;height:44px;border-radius:14px;background:#DFF3F3;display:flex;align-items:center;justify-content:center;color:#0FA3A3">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16"/><path d="M12 4c2.6 3.2 2.6 12.8 0 16-2.6-3.2-2.6-12.8 0-16z"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">5 Real-Life</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#0FA3A3</span>
+            </div>
+          </div>
+          <div class="chip-section" style="width:118px;display:flex;flex-direction:column;gap:8px;padding:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px">
+            <div style="width:44px;height:44px;border-radius:14px;background:#FFEDDF;display:flex;align-items:center;justify-content:center;color:#FF7A1A">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">6 Mistakes</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#FF7A1A</span>
+            </div>
+          </div>
+          <div class="chip-section" style="width:118px;display:flex;flex-direction:column;gap:8px;padding:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px">
+            <div style="width:44px;height:44px;border-radius:14px;background:#FDE4F0;display:flex;align-items:center;justify-content:center;color:#E8368F">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6L5.4 18.6A2 2 0 0 0 7.2 21.5h9.6a2 2 0 0 0 1.8-2.9L14 9V3"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B">7 Experiment</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">#E8368F</span>
+            </div>
+          </div>
+          <div class="chip-section chip-section-quiz" style="width:118px;display:flex;flex-direction:column;gap:8px;padding:12px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);border-radius:16px">
+            <div style="width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#FFFFFF">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 3M16 6h3a3 3 0 0 1-3 3"/><path d="M12 13v4M9 21h6"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#FFFFFF">Quiz — the gate</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:rgba(255,255,255,.72)">grad-primary</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-type" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Type scale — real ZerebroKid content, no lorem</span>
+        <div style="display:flex;flex-direction:column;gap:0;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden">
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">Display · 34/40 · 800</span>
+            <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:34px;line-height:40px;font-weight:800;letter-spacing:-.02em;color:#14142B">Today's Mission</span>
+          </div>
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">H1 · 26/32 · 700</span>
+            <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:#14142B">Word Problems on Linear Equations</span>
+          </div>
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">H2 · 20/26 · 700</span>
+            <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;line-height:26px;font-weight:700;color:#14142B">Section 4 — Curiosity</span>
+          </div>
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">H3 · 17/22 · 600</span>
+            <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Assigned by your teacher today</span>
+          </div>
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">Body · 15/24 · 400</span>
+            <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#33334D;max-width:440px">An equation is a balance. Whatever you do to one side, do to the other — that single idea solves every word problem in this topic.</span>
+          </div>
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">Body-strong · 15/24 · 600</span>
+            <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:600;color:#14142B">Result goes to your parent &amp; teacher</span>
+          </div>
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">Caption · 13/18 · 500</span>
+            <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#6B6B85">12 min · 5 questions · 60 XP</span>
+          </div>
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">Micro · 11/14 · 600 · +.04em</span>
+            <span style="font-family:Inter,sans-serif;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Class 8 · Mathematics</span>
+          </div>
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">Stat-L · 32/34 · Grotesk</span>
+            <div style="display:flex;align-items:baseline;gap:16px">
+              <span style="font-family:'Space Grotesk',monospace;font-size:32px;line-height:34px;font-weight:700;color:#14142B">1,240</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:32px;line-height:34px;font-weight:700;color:#FF7A1A">7</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:32px;line-height:34px;font-weight:700;color:#12B76A">86%</span>
+            </div>
+          </div>
+          <div class="type-row" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">Stat-S · 18/20 · Grotesk</span>
+            <div style="display:flex;align-items:baseline;gap:16px">
+              <span style="font-family:'Space Grotesk',monospace;font-size:18px;line-height:20px;font-weight:700;color:#14142B">+20 XP</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:18px;line-height:20px;font-weight:700;color:#B87900">24:00</span>
+            </div>
+          </div>
+          <div class="type-row type-row-devanagari" style="display:flex;align-items:baseline;gap:20px;padding:16px 20px;border-top:1px solid #E8E8F2;background:#F5F5FB">
+            <span style="width:170px;flex:none;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">Noto Sans Devanagari</span>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-family:'Noto Sans Devanagari',sans-serif;font-size:20px;line-height:30px;font-weight:600;color:#14142B">रैखिक समीकरण के शब्द प्रश्न</span>
+              <span style="font-family:'Noto Sans Devanagari',sans-serif;font-size:15px;line-height:26px;font-weight:400;color:#33334D">आज का पाठ पूरा करें और अपना इनाम पाएँ।</span>
+            </div>
+          </div>
+        </div>
+        <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#6B6B85">Rule: max 2 competing type sizes in any card. Never centre-align a paragraph.</span>
+      </div>
+
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <div class="group group-spacing" style="display:flex;flex-direction:column;gap:12px;flex:1;min-width:380px">
+          <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Spacing · 4px base</span>
+          <div style="display:flex;flex-direction:column;gap:8px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">4</span><div style="height:12px;width:4px;background:#8B62FF;border-radius:2px"></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">8</span><div style="height:12px;width:8px;background:#8B62FF;border-radius:2px"></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">12</span><div style="height:12px;width:12px;background:#8B62FF;border-radius:2px"></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">16</span><div style="height:12px;width:16px;background:#7C4DFF;border-radius:2px"></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">20</span><div style="height:12px;width:20px;background:#7C4DFF;border-radius:2px"></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">24</span><div style="height:12px;width:24px;background:#6D3BFF;border-radius:2px"></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">32</span><div style="height:12px;width:32px;background:#6D3BFF;border-radius:2px"></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">40</span><div style="height:12px;width:40px;background:#5A2EF0;border-radius:2px"></div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:34px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">56</span><div style="height:12px;width:56px;background:#4E24E0;border-radius:2px"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;padding-top:8px;border-top:1px solid #E8E8F2">
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#6B6B85">Screen side padding 20 · card inner 16 (compact) / 20 (feature)</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#6B6B85">Gap between cards 12 · between sections 28</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group group-radius" style="display:flex;flex-direction:column;gap:12px;flex:1;min-width:380px">
+          <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Radius</span>
+          <div style="display:flex;gap:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+              <div style="width:72px;height:56px;background:#EDE6FF;border:1.5px solid #8B62FF;border-radius:24px"></div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">24 cards</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+              <div style="width:72px;height:56px;background:#EDE6FF;border:1.5px solid #8B62FF;border-radius:16px"></div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">16 inner</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+              <div style="width:72px;height:56px;background:#EDE6FF;border:1.5px solid #8B62FF;border-radius:14px"></div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">14 chips</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+              <div style="width:72px;height:56px;background:#EDE6FF;border:1.5px solid #8B62FF;border-radius:20px"></div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">20 media</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+              <div style="width:72px;height:56px;background:#EDE6FF;border:1.5px solid #8B62FF;border-radius:999px"></div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">999 pill</span>
+            </div>
+          </div>
+          <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Elevation</span>
+          <div style="display:flex;gap:20px;background:#F5F5FB;border:1px solid #E8E8F2;border-radius:16px;padding:24px 16px">
+            <div style="display:flex;flex-direction:column;gap:10px;align-items:center;flex:1">
+              <div style="width:100%;height:56px;background:#FFFFFF;border-radius:16px;box-shadow:0 2px 8px rgba(20,20,43,.06)"></div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">card</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;align-items:center;flex:1">
+              <div style="width:100%;height:56px;background:#FFFFFF;border-radius:16px;box-shadow:0 8px 24px rgba(20,20,43,.10)"></div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">raised</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;align-items:center;flex:1">
+              <div style="width:100%;height:56px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);border-radius:16px;box-shadow:0 12px 32px rgba(78,36,224,.22)"></div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">float · CTA only</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-grid" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Frame &amp; safe areas — 390 × 844</span>
+        <div style="display:flex;gap:20px;align-items:flex-start">
+          <div class="frame-spec" style="width:390px;height:340px;background:#F5F5FB;border:1px solid #E8E8F2;border-radius:20px;position:relative;overflow:hidden;flex:none">
+            <div style="position:absolute;left:0;top:0;width:100%;height:44px;background:rgba(109,59,255,.10);display:flex;align-items:center;justify-content:center">
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#4E24E0">SAFE TOP 44</span>
+            </div>
+            <div style="position:absolute;left:0;top:0;width:20px;height:100%;background:rgba(232,54,143,.08)"></div>
+            <div style="position:absolute;right:0;top:0;width:20px;height:100%;background:rgba(232,54,143,.08)"></div>
+            <div style="position:absolute;left:0;bottom:0;width:100%;height:34px;background:rgba(109,59,255,.10);display:flex;align-items:center;justify-content:center">
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#4E24E0">SAFE BOTTOM 34</span>
+            </div>
+            <div style="position:absolute;left:0;bottom:34px;width:100%;height:72px;background:rgba(18,183,106,.10);border-top:1px dashed #12B76A;display:flex;align-items:center;justify-content:center">
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#0B7B48">BOTTOM NAV 72</span>
+            </div>
+            <div style="position:absolute;left:20px;right:20px;top:64px;bottom:126px;border:1px dashed #A9A9C0;border-radius:12px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px">
+              <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#6B6B85">CONTENT · 350 wide</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;flex:1">
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Component sizes</span>
+            <div style="display:flex;flex-direction:column;gap:6px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+              <div style="display:flex;justify-content:space-between;gap:12px"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#33334D">Primary button</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#14142B">56</span></div>
+              <div style="display:flex;justify-content:space-between;gap:12px"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#33334D">Secondary button</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#14142B">48</span></div>
+              <div style="display:flex;justify-content:space-between;gap:12px"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#33334D">Chip</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#14142B">34</span></div>
+              <div style="display:flex;justify-content:space-between;gap:12px"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#33334D">Icon chip</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#14142B">44 × 44</span></div>
+              <div style="display:flex;justify-content:space-between;gap:12px"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#33334D">Avatar nav / profile / hero</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#14142B">40 / 64 / 88</span></div>
+              <div style="display:flex;justify-content:space-between;gap:12px"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#33334D">Progress ring stroke</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#14142B">8</span></div>
+              <div style="display:flex;justify-content:space-between;gap:12px"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#33334D">Progress bar height</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#14142B">10</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;background:#EDE6FF;border-radius:16px;padding:16px">
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#4E24E0">Thumb rule</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#33334D">Primary action always in the bottom third. Nothing critical in the top corners except close and notifications.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOARD 2 — ICONS -->
+    <section class="board board-icons" style="flex:none;display:flex;flex-direction:column;gap:24px;width:520px;background:#F5F5FB;border-radius:24px;padding:32px;box-shadow:0 2px 8px rgba(20,20,43,.06);box-sizing:border-box">
+      <div class="board-head" style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8B62FF">Board 2</span>
+        <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:#14142B">Icons</h2>
+        <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#6B6B85">24 × 24 · 2px stroke · round caps · currentColor · one geometric-rounded family everywhere</span>
+      </div>
+      <div class="icon-grid" style="display:flex;flex-wrap:wrap;gap:8px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">home</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 3v18"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">study</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12.5h18M12 8v13"/><path d="M12 8C9.8 8 7 7.2 7 5.6 7 4.2 9.4 3.4 12 8c2.6-4.6 5-3.8 5-2.4C17 7.2 14.2 8 12 8z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">rewards</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a4 4 0 0 0-4 4 3 3 0 0 0 0 6 3.5 3.5 0 0 0 4 3.4z"/><path d="M12 5a4 4 0 0 1 4 4 3 3 0 0 1 0 6 3.5 3.5 0 0 1-4 3.4z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">ai-doubt</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">profile</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5l11 7-11 7z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">play</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">lock</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.6-1.6"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">unlock</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">check</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">close</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">chevron</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#FF7A1A"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4 4.6 6 7.2 6 10.2A6 6 0 0 1 6 13.2c0-2 1-3.6 2.4-5"/><path d="M12 20a2.6 2.6 0 0 1-1.4-4.6c.9-.7 1.4-1.5 1.4-2.4 1.6 1.6 2.6 3 2.6 4.4A2.6 2.6 0 0 1 12 20z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">flame</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#FFB020"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M9.5 8.5h4a2 2 0 0 1 0 4h-4"/><path d="M9.5 12.5h3.2M9.5 16l3.5-3.5"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">coin</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#6D3BFF"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">xp-bolt</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#FFB020"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 3M16 6h3a3 3 0 0 1-3 3"/><path d="M12 13v4M9 21h6"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">trophy</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">target</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a4 4 0 0 0-4 4 3 3 0 0 0-.5 6 3.5 3.5 0 0 0 4.5 3.4z"/><path d="M12 4a4 4 0 0 1 4 4 3 3 0 0 1 .5 6 3.5 3.5 0 0 1-4.5 3.4z"/><path d="M12 4v13.4"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">brain</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#FFB020"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 1 3.5 10.9V17h-7v-3.1A6 6 0 0 1 12 3z"/><path d="M9.5 20.5h5"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">lightbulb</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#E8368F"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6L5.4 18.6A2 2 0 0 0 7.2 21.5h9.6a2 2 0 0 0 1.8-2.9L14 9V3"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">flask</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#FF7A1A"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">warning</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#0FA3A3"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16"/><path d="M12 4c2.6 3.2 2.6 12.8 0 16-2.6-3.2-2.6-12.8 0-16z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">globe</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M20 18v3H6.5"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">book</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#2F6BFF"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="12" height="12" rx="2"/><path d="M15 11l6-3.5v9L15 13z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">video</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.6l3 1.8"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">clock</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">calendar</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">bell</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">share</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4.6L6 21z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">bookmark</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 12a7 7 0 0 0 14 0M12 19v3"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">mic</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2 2 0 0 1 5 6.5h2L8.5 4h7L17 6.5h2a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.4"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">camera</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#6D3BFF"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.5l7 3 3 7z"/><path d="M21 3l-11 11"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">send</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">filter</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5L21 21"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">search</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M4.5 7.5l2.6 1.5M16.9 15l2.6 1.5M4.5 16.5l2.6-1.5M16.9 9l2.6-1.5"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">settings</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M6.5 21v-6M11.5 21V7M16.5 21v-9M20.5 21V4"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">chart</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#FFB020"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14.5" r="5.5"/><path d="M8.5 3l3.5 5.5L15.5 3"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">medal</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12.5h18M12 8v13"/><path d="M12 8C9.8 8 7 7.2 7 5.6 7 4.2 9.4 3.4 12 8c2.6-4.6 5-3.8 5-2.4C17 7.2 14.2 8 12 8z"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">gift</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M16 5.6a3.4 3.4 0 0 1 0 6.8M17.5 15.2c2.2.6 3.5 2.2 3.5 4.8"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">users</span></div>
+        <div class="icon-cell" style="width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0"><span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><path d="M12 16V4M8 8l4-4 4 4"/></svg></span><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;color:#6B6B85">upload</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;background:#EDE6FF;border-radius:16px;padding:16px">
+        <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#4E24E0">Emoji policy — locked</span>
+        <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#33334D">No emoji anywhere in the product, including rewards and celebration. Every glyph in this pack replaces one — gift, flame, coin, trophy, medal, flask, warning, globe.</span>
+      </div>
+    </section>
+
+    <!-- BOARD 3 — BUTTONS & INPUTS -->
+    <section class="board board-controls" style="flex:none;display:flex;flex-direction:column;gap:24px;width:560px;background:#F5F5FB;border-radius:24px;padding:32px;box-shadow:0 2px 8px rgba(20,20,43,.06);box-sizing:border-box">
+      <div class="board-head" style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8B62FF">Board 3</span>
+        <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:#14142B">Buttons &amp; Inputs</h2>
+      </div>
+
+      <div class="group group-btn-primary" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Primary · 56px · gradient · float shadow</span>
+        <div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">DEFAULT — live, hover and press it</span>
+            <button class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border:none;border-radius:999px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);box-shadow:0 12px 32px rgba(78,36,224,.22);cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#FFFFFF;transition:transform .2s ease-out,box-shadow .2s ease-out" style-hover="box-shadow:0 14px 36px rgba(78,36,224,.34)" style-active="transform:scale(.98);background:#4E24E0">
+              <span>Start Today's Mission</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">PRESSED</span>
+            <div class="btn-primary-pressed" style="display:flex;align-items:center;justify-content:center;height:56px;border-radius:999px;background:#4E24E0;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#FFFFFF">Start Today's Mission</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">LOADING</span>
+            <div class="btn-primary-loading" style="display:flex;align-items:center;justify-content:center;gap:10px;height:56px;border-radius:999px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#FFFFFF">
+              <span style="display:flex;gap:5px">
+                <span style="width:8px;height:8px;border-radius:999px;background:#FFFFFF;animation:zk-shimmer 1s ease-in-out infinite"></span>
+                <span style="width:8px;height:8px;border-radius:999px;background:#FFFFFF;animation:zk-shimmer 1s ease-in-out .15s infinite"></span>
+                <span style="width:8px;height:8px;border-radius:999px;background:#FFFFFF;animation:zk-shimmer 1s ease-in-out .3s infinite"></span>
+              </span>
+              <span>Loading</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">DISABLED</span>
+            <div class="btn-primary-disabled" style="display:flex;align-items:center;justify-content:center;height:56px;border-radius:999px;background:#E8E8F2;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#A9A9C0">Complete section 3 to unlock</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-btn-rest" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Secondary · tertiary · destructive · icon · FAB</span>
+        <div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <button class="btn-secondary" style="display:flex;align-items:center;justify-content:center;height:48px;border:none;border-radius:999px;background:#EDE6FF;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#4E24E0" style-hover="background:#E1D6FF" style-active="background:#D5C6FF">Review answers</button>
+          <div style="display:flex;gap:12px">
+            <button class="btn-tertiary" style="display:flex;align-items:center;justify-content:center;height:48px;padding:0 16px;border:none;background:transparent;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#6D3BFF" style-hover="color:#4E24E0">Skip for now</button>
+            <button class="btn-destructive" style="display:flex;align-items:center;justify-content:center;height:48px;padding:0 20px;border:1.5px solid #FDE7E7;border-radius:999px;background:#FDE7E7;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#E5484D" style-hover="border-color:#E5484D">End Focus Mode</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <button class="btn-icon" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1.5px solid #E8E8F2;border-radius:14px;background:#FFFFFF;cursor:pointer;color:#33334D" style-hover="border-color:#8B62FF;color:#6D3BFF">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4.6L6 21z"/></svg>
+            </button>
+            <button class="btn-icon-ghost" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:none;border-radius:14px;background:#F5F5FB;cursor:pointer;color:#33334D" style-hover="background:#EDE6FF;color:#6D3BFF">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>
+            </button>
+            <div style="flex:1"></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+              <button class="fab-ai" style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;border:none;border-radius:999px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);box-shadow:0 12px 32px rgba(78,36,224,.22);cursor:pointer;color:#FFFFFF;animation:zk-pulse 2.6s ease-out infinite" style-active="transform:scale(.96)">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a4 4 0 0 0-4 4 3 3 0 0 0 0 6 3.5 3.5 0 0 0 4 3.4z"/><path d="M12 5a4 4 0 0 1 4 4 3 3 0 0 1 0 6 3.5 3.5 0 0 1-4 3.4z"/></svg>
+              </button>
+              <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">FAB · AI Doubt</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-chips" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Chips · 34px pill <span style="color:#6D3BFF">— TAP to toggle</span></span>
+        <div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="chip" style="{{ chipXp }}" onClick="{{ toggleXp }}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>
+              <span>In progress</span>
+            </button>
+            <button class="chip" style="{{ chipSubject }}" onClick="{{ toggleSubject }}"><span>Mathematics</span></button>
+            <button class="chip" style="{{ chipMastered }}" onClick="{{ toggleMastered }}"><span>Mastered</span><span style="font-family:'Space Grotesk',monospace;font-weight:700">12</span></button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid #E8E8F2">
+            <span class="chip-static-default" style="display:flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;background:#FFFFFF;border:1.5px solid #E8E8F2;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">Default</span>
+            <span class="chip-static-selected" style="display:flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;background:#EDE6FF;border:1.5px solid #8B62FF;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#4E24E0">Selected</span>
+            <span class="chip-xp" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:#EDE6FF;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#4E24E0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg><span style="font-family:'Space Grotesk',monospace;font-weight:700">+60 XP</span></span>
+            <span class="chip-coin" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:#FFF3DC;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#8A5A00"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M9.5 8.5h4a2 2 0 0 1 0 4h-4M9.5 16l3.5-3.5"/></svg><span style="font-family:'Space Grotesk',monospace;font-weight:700">25</span></span>
+            <span class="chip-streak" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:#FFEDDF;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#C25200"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4 4.6 6 7.2 6 10.2A6 6 0 0 1 6 13.2c0-2 1-3.6 2.4-5"/></svg><span style="font-family:'Space Grotesk',monospace;font-weight:700">7 day streak</span></span>
+            <span class="chip-disabled" style="display:flex;align-items:center;height:34px;padding:0 14px;border-radius:999px;background:#F5F5FB;border:1.5px solid #E8E8F2;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#A9A9C0">Disabled</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-inputs" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Inputs</span>
+        <div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <div class="input-field" style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#33334D">Your school</span>
+            <input type="text" placeholder="Search your school name" style="height:52px;padding:0 16px;border:1.5px solid #E8E8F2;border-radius:16px;background:#FFFFFF;font-family:Inter,sans-serif;font-size:15px;font-weight:400;color:#14142B;outline:none;box-sizing:border-box" style-focus="border-color:#6D3BFF" />
+          </div>
+          <div class="input-search" style="display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-radius:16px;background:#F5F5FB;box-sizing:border-box">
+            <span style="color:#6B6B85"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5L21 21"/></svg></span>
+            <input type="text" placeholder="Search topics, chapters, doubts" style="flex:1;border:none;background:transparent;font-family:Inter,sans-serif;font-size:15px;font-weight:400;color:#14142B;outline:none" />
+          </div>
+          <div class="input-error" style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;height:52px;padding:0 16px;border:1.5px solid #E5484D;border-radius:16px;background:#FFFFFF;box-sizing:border-box">
+              <span style="font-family:Inter,sans-serif;font-size:15px;color:#14142B">80920</span>
+            </div>
+            <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#E5484D">Enter a 10-digit mobile number</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-mcq" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">MCQ option <span style="color:#6D3BFF">— TAP an option, then Check answer</span></span>
+        <div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">The sum of three consecutive integers is 72. What is the smallest one?</span>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="mcq-option" style="{{ optA }}" onClick="{{ pickA }}">
+              <span style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#F5F5FB;font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#33334D">A</span>
+              <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:500;color:#14142B">21</span>
+            </div>
+            <div class="mcq-option" style="{{ optB }}" onClick="{{ pickB }}">
+              <span style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#F5F5FB;font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#33334D">B</span>
+              <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:500;color:#14142B">22</span>
+            </div>
+            <div class="mcq-option" style="{{ optC }}" onClick="{{ pickC }}">
+              <span style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#F5F5FB;font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#33334D">C</span>
+              <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:500;color:#14142B">23</span>
+            </div>
+            <div class="mcq-option" style="{{ optD }}" onClick="{{ pickD }}">
+              <span style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#F5F5FB;font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#33334D">D</span>
+              <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:500;color:#14142B">24</span>
+            </div>
+          </div>
+          <sc-if value="{{ mcqFeedbackRight }}" hint-placeholder-val="{{ false }}">
+            <div class="feedback-correct" style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:16px;background:#DCF7EA">
+              <span style="color:#12B76A"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+              <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:600;color:#0B7B48">Correct — x + (x+1) + (x+2) = 72, so x = 23.</span>
+              <span style="margin-left:auto;font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:#12B76A">+20 XP</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ mcqFeedbackWrong }}" hint-placeholder-val="{{ false }}">
+            <div class="feedback-wrong" style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:16px;background:#FDE7E7">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="color:#E5484D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+                <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#C21F24">The answer is 23</span>
+              </div>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#33334D">Three consecutive integers add to 3x + 3. Set 3x + 3 = 72 and x = 23. Try again — nothing is lost.</span>
+            </div>
+          </sc-if>
+          <div style="display:flex;gap:10px">
+            <button style="flex:1;height:48px;border:none;border-radius:999px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#FFFFFF" onClick="{{ checkMcq }}">Check answer</button>
+            <button style="height:48px;padding:0 18px;border:1.5px solid #E8E8F2;border-radius:999px;background:#FFFFFF;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#6B6B85" onClick="{{ resetMcq }}">Reset</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOARD 4 — CARDS -->
+    <section class="board board-cards" style="flex:none;display:flex;flex-direction:column;gap:24px;width:820px;background:#F5F5FB;border-radius:24px;padding:32px;box-shadow:0 2px 8px rgba(20,20,43,.06);box-sizing:border-box">
+      <div class="board-head" style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8B62FF">Board 4</span>
+        <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:#14142B">Cards</h2>
+        <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#6B6B85">All at 350px — the real content width inside a 390 frame.</span>
+      </div>
+
+      <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">CARD-MISSION · hero</span>
+          <div class="card-mission" style="width:350px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px;padding:20px;border-radius:24px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);box-shadow:0 12px 32px rgba(78,36,224,.22)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:rgba(255,255,255,.18);font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#FFFFFF">Mathematics</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,.78)">Chapter 2 · Linear Equations</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+                <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.72)">Today's mission</span>
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;line-height:26px;font-weight:700;color:#FFFFFF">Word Problems on Linear Equations</span>
+              </div>
+              <div style="width:76px;height:76px;flex:none;position:relative;display:flex;align-items:center;justify-content:center">
+                <svg width="76" height="76" viewBox="0 0 80 80"><circle cx="40" cy="40" r="36" fill="none" stroke="rgba(255,255,255,.24)" stroke-width="8"/><circle cx="40" cy="40" r="36" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-dasharray="226.19" stroke-dashoffset="90.48" transform="rotate(-90 40 40)"/></svg>
+                <span style="position:absolute;font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:#FFFFFF">60%</span>
+              </div>
+            </div>
+            <div class="progress-segments" style="display:flex;gap:5px">
+              <div style="flex:1;height:6px;border-radius:999px;background:#FFFFFF"></div>
+              <div style="flex:1;height:6px;border-radius:999px;background:#FFFFFF"></div>
+              <div style="flex:1;height:6px;border-radius:999px;background:#FFFFFF"></div>
+              <div style="flex:1;height:6px;border-radius:999px;background:#FFFFFF"></div>
+              <div style="flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.3)"></div>
+              <div style="flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.3)"></div>
+              <div style="flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.3)"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="display:flex;align-items:center;gap:5px;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,.86)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.6l3 1.8"/></svg>18 min left</span>
+              <span style="display:flex;align-items:center;gap:5px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#FFFFFF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>+140 XP</span>
+              <span style="display:flex;align-items:center;gap:5px;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#FFE9B8"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M9.5 8.5h4a2 2 0 0 1 0 4h-4M9.5 16l3.5-3.5"/></svg>25 coins</span>
+            </div>
+            <button style="display:flex;align-items:center;justify-content:center;gap:8px;height:56px;border:none;border-radius:999px;background:#FFFFFF;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#4E24E0" style-active="transform:scale(.98)">
+              <span>Continue Mission</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">CARD-CHAPTER · 4 states</span>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card-chapter card-chapter-progress" style="width:350px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:24px;background:#FFFFFF;border:1.5px solid #8B62FF;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#EDE6FF;font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:#4E24E0">02</span>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                  <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Linear Equations</span>
+                  <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">6 topics · 45 min · In progress</span>
+                </div>
+                <span style="color:#6D3BFF"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4.6L6 21z"/></svg></span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="flex:1;height:10px;border-radius:999px;background:#EDE6FF;overflow:hidden"><div style="width:60%;height:10px;border-radius:999px;background:#6D3BFF"></div></div>
+                <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#4E24E0">60%</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span style="display:flex;gap:3px;align-items:center"><span style="width:6px;height:6px;border-radius:999px;background:#FF7A1A"></span><span style="width:6px;height:6px;border-radius:999px;background:#FF7A1A"></span><span style="width:6px;height:6px;border-radius:999px;background:#E8E8F2"></span></span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">Medium</span>
+                <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
+                  <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#4E24E0">+140 XP</span>
+                  <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#B87900">25 coins</span>
+                </span>
+              </div>
+            </div>
+            <div class="card-chapter card-chapter-available" style="width:350px;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:16px;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+              <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#F5F5FB;font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:#6B6B85">03</span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Understanding Quadrilaterals</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">8 topics · 60 min · Not started</span>
+              </div>
+              <span style="color:#A9A9C0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+            </div>
+            <div class="card-chapter card-chapter-locked" style="width:350px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:24px;background:#F5F5FB;border:1.5px dashed #E8E8F2">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#E8E8F2;color:#A9A9C0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                  <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#6B6B85">Data Handling</span>
+                  <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#A9A9C0">5 topics · Locked</span>
+                </div>
+              </div>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#6B6B85;padding:10px 12px;border-radius:12px;background:#FFFFFF">Unlocks when your teacher assigns it in class.</span>
+            </div>
+            <div class="card-chapter card-chapter-mastered" style="width:350px;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:16px;border-radius:24px;background:#FFFFFF;border:1.5px solid #DCF7EA;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+              <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#DCF7EA;color:#12B76A"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Rational Numbers</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#0B7B48">Mastered · 94% accuracy</span>
+              </div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#12B76A">+180 XP</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">CARD-SECTION · locked / active / complete</span>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card-section card-section-active" style="width:350px;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:16px;border-radius:24px;background:#FFFFFF;border:2px solid #FFB020;box-shadow:0 8px 24px rgba(20,20,43,.10)">
+              <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#FFF3DC;color:#B87900"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M9.6 9.4A2.5 2.5 0 0 1 14.5 10c0 1.7-2.5 2-2.5 3.5"/><path d="M12 17h.01"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#B87900">Section 4 · now</span>
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Curiosity</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">Why &amp; what if · 5 min · +20 XP</span>
+              </div>
+              <span style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#FFB020;color:#FFFFFF;animation:zk-pulse 2.4s ease-out infinite"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+            </div>
+            <div class="card-section card-section-complete" style="width:350px;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:16px;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+              <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#DCF7EA;color:#12B76A"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#0B7B48">Section 3 · done</span>
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Practice</span>
+              </div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#12B76A">+20 XP</span>
+            </div>
+            <div class="card-section card-section-locked" style="width:350px;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:16px;border-radius:24px;background:#F5F5FB;border:1.5px dashed #E8E8F2">
+              <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#E8E8F2;color:#A9A9C0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#6B6B85">6 Common Mistakes</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#A9A9C0">Complete section 5 to unlock</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">CARD-REWARD · CARD-COUPON · COMING-SOON</span>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card-reward" style="width:350px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+              <div class="media-placeholder" style="height:140px;border-radius:20px;background:repeating-linear-gradient(135deg,#FFF3DC 0 10px,#FFE9C4 10px 20px);display:flex;align-items:center;justify-content:center">
+                <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;letter-spacing:.04em;color:#B87900">REWARD IMAGE 16:9</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Family pizza — large</span>
+                <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                  <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#A9A9C0;text-decoration:line-through">Shop ₹200</span>
+                  <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#A9A9C0;text-decoration:line-through">Online ₹230</span>
+                  <span style="font-family:'Space Grotesk',monospace;font-size:24px;font-weight:700;color:#14142B">₹150</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="display:flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;background:#DCF7EA;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#0B7B48">You save ₹80</span>
+                <button style="margin-left:auto;height:40px;padding:0 18px;border:none;border-radius:999px;background:#EDE6FF;cursor:pointer;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#4E24E0">Redeem · 120 coins</button>
+              </div>
+            </div>
+            <div class="card-coupon" style="width:350px;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:16px;border-radius:24px;background:#FFF3DC;border:1.5px dashed #FFB020">
+              <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#FFFFFF;color:#B87900"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12.5h18M12 8v13"/><path d="M12 8C9.8 8 7 7.2 7 5.6 7 4.2 9.4 3.4 12 8c2.6-4.6 5-3.8 5-2.4C17 7.2 14.2 8 12 8z"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                <span style="font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;letter-spacing:.06em;color:#14142B">ZK-STUDY-80</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#8A5A00">Valid till 12 Aug · one use</span>
+              </div>
+              <button style="height:36px;padding:0 14px;border:none;border-radius:999px;background:#FFB020;cursor:pointer;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#FFFFFF">Copy</button>
+            </div>
+            <div class="card-coming-soon" style="width:350px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06);position:relative;overflow:hidden">
+              <div class="ribbon-coming-soon" style="position:absolute;right:0;top:14px;display:flex;align-items:center;height:26px;padding:0 12px;border-radius:999px 0 0 999px;background:#EDE6FF">
+                <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#4E24E0">Coming soon</span>
+              </div>
+              <span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#FDE7E7;color:#E5484D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/></svg></span>
+              <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Live classes</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#6B6B85">Launching for Class 8 in September. We will tell you the day it opens — we never charge for what is not live.</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">CARD-STAT · CARD-STREAK · ROW-LEADERBOARD</span>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:12px;width:350px">
+              <div class="card-stat" style="flex:1;display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+                <span style="font-family:'Space Grotesk',monospace;font-size:32px;line-height:34px;font-weight:700;color:#14142B">86%</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">Quiz accuracy</span>
+                <span style="display:flex;align-items:center;gap:4px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#12B76A"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>+7 this week</span>
+              </div>
+              <div class="card-stat" style="flex:1;display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+                <span style="font-family:'Space Grotesk',monospace;font-size:32px;line-height:34px;font-weight:700;color:#14142B">1,240</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">Total XP</span>
+                <span style="display:flex;align-items:center;gap:4px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#6B6B85">Level 6 · Sharp</span>
+              </div>
+            </div>
+            <div class="card-streak" style="width:350px;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:16px 20px;border-radius:24px;background:#FFEDDF">
+              <span style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#FFFFFF;color:#FF7A1A"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4 4.6 6 7.2 6 10.2A6 6 0 0 1 6 13.2c0-2 1-3.6 2.4-5"/><path d="M12 20a2.6 2.6 0 0 1-1.4-4.6c.9-.7 1.4-1.5 1.4-2.4 1.6 1.6 2.6 3 2.6 4.4A2.6 2.6 0 0 1 12 20z"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                <span style="font-family:'Space Grotesk',monospace;font-size:32px;line-height:34px;font-weight:700;color:#C25200">7 days</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#8A3A00">Finish today's mission to make it 8. Your longest is 11.</span>
+              </div>
+            </div>
+            <div class="row-leaderboard" style="width:350px;box-sizing:border-box;display:flex;flex-direction:column;gap:0;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06);overflow:hidden">
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+                <span style="width:28px;font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#B87900">1</span>
+                <span style="width:40px;height:40px;border-radius:999px;background:#EDE6FF;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;color:#4E24E0">R</span>
+                <span style="flex:1;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#14142B">Rohan</span>
+                <span style="display:flex;align-items:center;gap:4px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#12B76A"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>2</span>
+                <span style="font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#14142B">1,920</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid #E8E8F2">
+                <span style="width:28px;font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#6B6B85">2</span>
+                <span style="width:40px;height:40px;border-radius:999px;background:#E4EDFF;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;color:#2F6BFF">S</span>
+                <span style="flex:1;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#14142B">Sanya</span>
+                <span style="font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#14142B">1,740</span>
+              </div>
+              <div class="row-leaderboard-you" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#EDE6FF;border-top:1px solid #E8E8F2">
+                <span style="width:28px;font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#4E24E0">4</span>
+                <span style="width:40px;height:40px;border-radius:999px;background:#6D3BFF;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;color:#FFFFFF">A</span>
+                <span style="flex:1;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#14142B">You · Aryan</span>
+                <span style="font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#4E24E0">1,240</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">CARD-VIDEO · CARD-TEACHER · CARD-ACHIEVEMENT</span>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card-video" style="width:350px;box-sizing:border-box;display:flex;flex-direction:column;gap:0;border-radius:24px;background:#14142B;overflow:hidden;box-shadow:0 8px 24px rgba(20,20,43,.10)">
+              <div style="height:180px;background:repeating-linear-gradient(135deg,#1E1E3C 0 12px,#252547 12px 24px);display:flex;align-items:center;justify-content:center;position:relative">
+                <span style="width:64px;height:64px;border-radius:999px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;color:#4E24E0"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5l11 7-11 7z"/></svg></span>
+                <span style="position:absolute;left:14px;top:14px;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.6)">VIDEO THUMBNAIL 16:9</span>
+                <span style="position:absolute;right:14px;bottom:14px;display:flex;align-items:center;height:24px;padding:0 8px;border-radius:6px;background:rgba(0,0,0,.6);font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#FFFFFF">08:42</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:16px">
+                <span style="width:40px;height:40px;border-radius:999px;background:#33334D;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#A9A9C0">IMG</span>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                  <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;line-height:20px;font-weight:600;color:#FFFFFF">Setting up the equation</span>
+                  <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#A9A9C0">Neha Sharma · 1.5× available</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-teacher" style="width:350px;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:16px;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+              <span style="width:56px;height:56px;flex:none;border-radius:999px;background:repeating-linear-gradient(135deg,#EDE6FF 0 8px,#E1D6FF 8px 16px);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#4E24E0">PHOTO</span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Neha Sharma</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">Mathematics · assigned today's topic</span>
+              </div>
+              <span style="color:#A9A9C0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+            </div>
+            <div style="display:flex;gap:12px;width:350px">
+              <div class="card-achievement" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+                <span style="width:56px;height:56px;border-radius:999px;background:#FFF3DC;display:flex;align-items:center;justify-content:center;color:#B87900"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14.5" r="5.5"/><path d="M8.5 3l3.5 5.5L15.5 3"/></svg></span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#14142B;text-align:center">7-day streak</span>
+              </div>
+              <div class="card-achievement card-achievement-locked" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;border-radius:24px;background:#F5F5FB;border:1.5px dashed #E8E8F2">
+                <span style="width:56px;height:56px;border-radius:999px;background:#E8E8F2;display:flex;align-items:center;justify-content:center;color:#A9A9C0"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#A9A9C0;text-align:center">30-day streak</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">BUBBLE-AI · student / AI / typing</span>
+          <div style="width:350px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:24px;background:#FFFFFF;box-shadow:0 2px 8px rgba(20,20,43,.06)">
+            <div class="bubble-student" style="align-self:flex-end;max-width:80%;padding:12px 16px;border-radius:20px 20px 6px 20px;background:#6D3BFF">
+              <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#FFFFFF">Why did we take x as the smallest number?</span>
+            </div>
+            <div class="bubble-ai" style="display:flex;gap:10px;align-items:flex-start">
+              <span style="width:32px;height:32px;flex:none;border-radius:999px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);display:flex;align-items:center;justify-content:center;color:#FFFFFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a4 4 0 0 0-4 4 3 3 0 0 0 0 6 3.5 3.5 0 0 0 4 3.4z"/><path d="M12 5a4 4 0 0 1 4 4 3 3 0 0 1 0 6 3.5 3.5 0 0 1-4 3.4z"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:8px;max-width:82%">
+                <div style="padding:12px 16px;border-radius:20px 20px 20px 6px;background:#F5F5FB">
+                  <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#14142B">You can take any of the three. Taking the smallest keeps the other two as x+1 and x+2 — only additions, no negatives to track.</span>
+                </div>
+                <div class="block-formula" style="padding:12px 14px;border-radius:16px;background:#EDE6FF">
+                  <span style="font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#4E24E0">x + (x+1) + (x+2) = 72</span>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <span style="display:flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;background:#FFFFFF;border:1.5px solid #E8E8F2;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#4E24E0">Show me a simpler way</span>
+                  <span style="display:flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;background:#FFFFFF;border:1.5px solid #E8E8F2;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#4E24E0">Explain like I'm 10</span>
+                </div>
+              </div>
+            </div>
+            <div class="bubble-ai-typing" style="display:flex;gap:10px;align-items:center">
+              <span style="width:32px;height:32px;flex:none;border-radius:999px;background:#EDE6FF"></span>
+              <span style="display:flex;gap:5px;padding:14px 16px;border-radius:20px 20px 20px 6px;background:#F5F5FB">
+                <span style="width:7px;height:7px;border-radius:999px;background:#A9A9C0;animation:zk-shimmer 1s ease-in-out infinite"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#A9A9C0;animation:zk-shimmer 1s ease-in-out .15s infinite"></span>
+                <span style="width:7px;height:7px;border-radius:999px;background:#A9A9C0;animation:zk-shimmer 1s ease-in-out .3s infinite"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#8B62FF">CALLOUT · 5 treatments, one per identity color</span>
+          <div style="display:flex;flex-direction:column;gap:12px;width:350px">
+            <div class="callout-tip" style="display:flex;gap:12px;padding:16px;border-radius:16px;background:#EDE6FF">
+              <span style="color:#6D3BFF;flex:none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 1 3.5 10.9V17h-7v-3.1A6 6 0 0 1 12 3z"/><path d="M9.5 20.5h5"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#4E24E0">Tip</span>
+                <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">Underline the numbers in the question before you write anything.</span>
+              </div>
+            </div>
+            <div class="callout-formula" style="display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:16px;background:#14142B">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#A9A9C0">Formula</span>
+                <button style="margin-left:auto;height:28px;padding:0 10px;border:1px solid #33334D;border-radius:999px;background:transparent;cursor:pointer;font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:#FFFFFF">Copy</button>
+              </div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:20px;line-height:26px;font-weight:700;color:#FFFFFF">3x + 3 = 72</span>
+              <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#8B62FF">Why it works ▾</span>
+            </div>
+            <div class="callout-mistake" style="display:flex;gap:12px;padding:16px;border-radius:16px;background:#FFEDDF">
+              <span style="color:#FF7A1A;flex:none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#C25200">Common mistake</span>
+                <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">Writing 3x = 72 and forgetting the +3 from x+1 and x+2.</span>
+              </div>
+            </div>
+            <div class="callout-real-life" style="display:flex;gap:12px;padding:16px;border-radius:16px;background:#DFF3F3">
+              <span style="color:#0FA3A3;flex:none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16"/><path d="M12 4c2.6 3.2 2.6 12.8 0 16-2.6-3.2-2.6-12.8 0-16z"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#0A7A7A">Real life</span>
+                <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">Splitting a ₹360 auto fare between three friends is the same equation.</span>
+              </div>
+            </div>
+            <div class="callout-memory" style="display:flex;gap:12px;padding:16px;border-radius:16px;background:#FFF3DC">
+              <span style="color:#B87900;flex:none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a4 4 0 0 0-4 4 3 3 0 0 0-.5 6 3.5 3.5 0 0 0 4.5 3.4z"/><path d="M12 4a4 4 0 0 1 4 4 3 3 0 0 1 .5 6 3.5 3.5 0 0 1-4.5 3.4z"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8A5A00">Memory trick</span>
+                <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">"Total" means add. "Times" means multiply. "Left" means subtract.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BOARD 5 — PROGRESS & FEEDBACK -->
+    <section class="board board-progress" style="flex:none;display:flex;flex-direction:column;gap:24px;width:560px;background:#F5F5FB;border-radius:24px;padding:32px;box-shadow:0 2px 8px rgba(20,20,43,.06);box-sizing:border-box">
+      <div class="board-head" style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8B62FF">Board 5</span>
+        <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:#14142B">Progress &amp; Feedback</h2>
+      </div>
+
+      <div class="group group-rings" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Progress ring · 8px stroke</span>
+        <div style="display:flex;gap:16px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="width:80px;height:80px;position:relative;display:flex;align-items:center;justify-content:center">
+              <svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="36" fill="none" stroke="#EDE6FF" stroke-width="8"/></svg>
+              <span style="position:absolute;font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:#A9A9C0">0%</span>
+            </div>
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Not started</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="width:80px;height:80px;position:relative;display:flex;align-items:center;justify-content:center">
+              <svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="36" fill="none" stroke="#EDE6FF" stroke-width="8"/><circle cx="40" cy="40" r="36" fill="none" stroke="#6D3BFF" stroke-width="8" stroke-linecap="round" stroke-dasharray="226.19" stroke-dashoffset="169.65" transform="rotate(-90 40 40)"/></svg>
+              <span style="position:absolute;font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:#14142B">25%</span>
+            </div>
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">2 of 7</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="width:80px;height:80px;position:relative;display:flex;align-items:center;justify-content:center">
+              <svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="36" fill="none" stroke="#EDE6FF" stroke-width="8"/><circle cx="40" cy="40" r="36" fill="none" stroke="#6D3BFF" stroke-width="8" stroke-linecap="round" stroke-dasharray="226.19" stroke-dashoffset="90.48" transform="rotate(-90 40 40)"/></svg>
+              <span style="position:absolute;font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:#14142B">60%</span>
+            </div>
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Mid mission</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="width:80px;height:80px;position:relative;display:flex;align-items:center;justify-content:center">
+              <svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="36" fill="none" stroke="#DCF7EA" stroke-width="8"/><circle cx="40" cy="40" r="36" fill="none" stroke="#12B76A" stroke-width="8" stroke-linecap="round" stroke-dasharray="226.19" stroke-dashoffset="0" transform="rotate(-90 40 40)"/></svg>
+              <span style="position:absolute;color:#12B76A"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+            </div>
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#0B7B48">Complete</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:20px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <div style="width:96px;height:96px;flex:none;position:relative;display:flex;align-items:center;justify-content:center">
+            <svg width="96" height="96" viewBox="0 0 80 80"><circle cx="40" cy="40" r="36" fill="none" stroke="#EDE6FF" stroke-width="8"/><circle cx="40" cy="40" r="36" fill="none" stroke="#6D3BFF" stroke-width="8" stroke-linecap="round" stroke-dasharray="{{ ringDash }}" stroke-dashoffset="{{ ringOffset }}" transform="rotate(-90 40 40)"/></svg>
+            <span style="position:absolute;font-family:'Space Grotesk',monospace;font-size:20px;font-weight:700;color:#14142B">{{ ringLabel }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;flex:1">
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6D3BFF">Live — drag to test any value</span>
+            <input type="range" min="0" max="100" step="1" value="{{ ringPct }}" onInput="{{ setRing }}" style="width:100%;accent-color:#6D3BFF" />
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="bar-progress" style="flex:1;height:10px;border-radius:999px;background:#EDE6FF;overflow:hidden"><div style="height:10px;border-radius:999px;background:#6D3BFF;width:{{ barWidth }}"></div></div>
+              <span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#4E24E0">{{ ringLabel }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-steps" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Segmented step progress · 7 sections</span>
+        <div style="display:flex;flex-direction:column;gap:14px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <div class="steps-7" style="display:flex;align-items:center;gap:6px">
+            <span style="width:24px;height:24px;border-radius:999px;background:#6D3BFF;display:flex;align-items:center;justify-content:center;color:#FFFFFF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+            <div style="flex:1;height:3px;background:#6D3BFF"></div>
+            <span style="width:24px;height:24px;border-radius:999px;background:#6D3BFF;display:flex;align-items:center;justify-content:center;color:#FFFFFF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+            <div style="flex:1;height:3px;background:#6D3BFF"></div>
+            <span style="width:24px;height:24px;border-radius:999px;background:#6D3BFF;display:flex;align-items:center;justify-content:center;color:#FFFFFF"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span>
+            <div style="flex:1;height:3px;background:#EDE6FF"></div>
+            <span style="width:24px;height:24px;border-radius:999px;background:#FFB020;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700;color:#FFFFFF">4</span>
+            <div style="flex:1;height:3px;background:#EDE6FF"></div>
+            <span style="width:24px;height:24px;border-radius:999px;background:#EDE6FF"></span>
+            <div style="flex:1;height:3px;background:#EDE6FF"></div>
+            <span style="width:24px;height:24px;border-radius:999px;background:#EDE6FF"></span>
+            <div style="flex:1;height:3px;background:#EDE6FF"></div>
+            <span style="width:24px;height:24px;border-radius:999px;background:#EDE6FF"></span>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="pill-level" style="display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 12px;border-radius:999px;background:#14142B;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#FFFFFF">Level 6<span style="display:flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;background:#6D3BFF;font-family:'Space Grotesk',monospace;font-size:11px;font-weight:700">Sharp</span></span>
+            <span class="pill-rank" style="display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;background:#E4EDFF;font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#1B4FD1">Rank <span style="font-family:'Space Grotesk',monospace;font-weight:700">4</span> in class</span>
+          </div>
+          <div class="meter-mastery" style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">Mastery · Mathematics</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#14142B">720 / 1000 XP</span></div>
+            <div style="display:flex;gap:3px">
+              <div style="flex:1;height:10px;border-radius:999px;background:#6D3BFF"></div>
+              <div style="flex:1;height:10px;border-radius:999px;background:#6D3BFF"></div>
+              <div style="flex:1;height:10px;border-radius:999px;background:#6D3BFF"></div>
+              <div style="flex:1;height:10px;border-radius:999px;background:#8B62FF"></div>
+              <div style="flex:1;height:10px;border-radius:999px;background:#E8E8F2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-states" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Empty · skeleton · error · offline</span>
+        <div class="state-empty" style="display:flex;flex-direction:column;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:28px 20px">
+          <span style="width:72px;height:72px;border-radius:999px;background:#EDE6FF;display:flex;align-items:center;justify-content:center;color:#8B62FF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span>
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">No mission yet today</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#6B6B85;text-align:center;max-width:280px">Your teacher marks the topic after class. Meanwhile, revise yesterday's chapter and keep your streak alive.</span>
+          <button style="height:48px;padding:0 20px;border:none;border-radius:999px;background:#EDE6FF;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#4E24E0">Revise yesterday</button>
+        </div>
+        <div class="state-skeleton" style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="width:44px;height:44px;border-radius:14px;background:#EDE6FF;animation:zk-shimmer 1.4s ease-in-out infinite"></div>
+            <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+              <div style="height:14px;width:70%;border-radius:999px;background:#EDE6FF;animation:zk-shimmer 1.4s ease-in-out infinite"></div>
+              <div style="height:12px;width:45%;border-radius:999px;background:#F0ECFF;animation:zk-shimmer 1.4s ease-in-out .2s infinite"></div>
+            </div>
+          </div>
+          <div style="height:10px;border-radius:999px;background:#EDE6FF;animation:zk-shimmer 1.4s ease-in-out .1s infinite"></div>
+        </div>
+        <div class="state-error" style="display:flex;gap:12px;background:#FDE7E7;border-radius:16px;padding:16px">
+          <span style="color:#E5484D;flex:none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg></span>
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+            <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:600;color:#C21F24">Could not load today's topic</span>
+            <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#33334D">Your progress is saved. Check your connection and try again.</span>
+            <button style="align-self:flex-start;height:40px;padding:0 16px;border:none;border-radius:999px;background:#FFFFFF;cursor:pointer;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#E5484D">Try again</button>
+          </div>
+        </div>
+        <div class="banner-offline" style="display:flex;align-items:center;gap:10px;background:#14142B;border-radius:16px;padding:14px 16px">
+          <span style="color:#FFB020;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A13 13 0 0 1 21 8.5M6.5 12.5a8.5 8.5 0 0 1 11 0M10 16.5a4 4 0 0 1 4 0M12 20h.01"/></svg></span>
+          <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#FFFFFF;flex:1">You are offline. Downloaded sections still work — your XP will sync later.</span>
+        </div>
+      </div>
+
+      <div class="group group-feedback" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Toast · snackbar · celebration <span style="color:#6D3BFF">— TAP to fire the toast</span></span>
+        <div style="display:flex;flex-direction:column;gap:12px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <button style="align-self:flex-start;height:40px;padding:0 16px;border:1.5px solid #E8E8F2;border-radius:999px;background:#FFFFFF;cursor:pointer;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#4E24E0" onClick="{{ fireToast }}">Fire XP toast</button>
+          <sc-if value="{{ toastOn }}" hint-placeholder-val="{{ true }}">
+            <div class="toast-xp" style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:16px;background:#14142B;box-shadow:0 8px 24px rgba(20,20,43,.10)">
+              <span style="width:32px;height:32px;border-radius:999px;background:#6D3BFF;display:flex;align-items:center;justify-content:center;color:#FFFFFF"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg></span>
+              <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:500;color:#FFFFFF;flex:1">Section complete</span>
+              <span style="font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:#FFB020">+20 XP</span>
+            </div>
+          </sc-if>
+          <div class="snackbar" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:#33334D">
+            <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:400;color:#FFFFFF;flex:1">Bookmark removed</span>
+            <button style="border:none;background:transparent;cursor:pointer;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#FFB020">Undo</button>
+          </div>
+          <div class="moment-celebration" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 20px;border-radius:20px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);position:relative;overflow:hidden">
+            <span style="position:absolute;left:24px;top:18px;width:8px;height:8px;border-radius:2px;background:#FFB020"></span>
+            <span style="position:absolute;left:64px;top:38px;width:6px;height:6px;border-radius:999px;background:#12B76A"></span>
+            <span style="position:absolute;right:34px;top:22px;width:10px;height:10px;border-radius:2px;background:#E8368F"></span>
+            <span style="position:absolute;right:72px;top:56px;width:6px;height:6px;border-radius:999px;background:#FFB020"></span>
+            <span style="position:absolute;left:40px;bottom:26px;width:8px;height:8px;border-radius:2px;background:#2F6BFF"></span>
+            <span style="position:absolute;right:28px;bottom:34px;width:7px;height:7px;border-radius:999px;background:#FFFFFF"></span>
+            <span style="width:72px;height:72px;border-radius:999px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;color:#FFB020"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 3M16 6h3a3 3 0 0 1-3 3"/><path d="M12 13v4M9 21h6"/></svg></span>
+            <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;line-height:26px;font-weight:700;color:#FFFFFF;text-align:center">Mission complete</span>
+            <div style="display:flex;gap:10px">
+              <span style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.16);font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#FFFFFF">+140 XP</span>
+              <span style="display:flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.16);font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#FFE9B8">+25 coins</span>
+            </div>
+            <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,.8)">Static frame — motion spec in handoff notes</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOARD 6 — NAVIGATION & CHROME -->
+    <section class="board board-nav" style="flex:none;display:flex;flex-direction:column;gap:24px;width:560px;background:#F5F5FB;border-radius:24px;padding:32px;box-shadow:0 2px 8px rgba(20,20,43,.06);box-sizing:border-box">
+      <div class="board-head" style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;line-height:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8B62FF">Board 6</span>
+        <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.01em;color:#14142B">Navigation &amp; Chrome</h2>
+      </div>
+
+      <div class="group group-bottom-nav" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Bottom nav · 72px · 5 items <span style="color:#6D3BFF">— TAP an item</span></span>
+        <div class="nav-bottom" style="width:390px;box-sizing:border-box;display:flex;align-items:stretch;background:#FFFFFF;border-top:1px solid #E8E8F2;box-shadow:0 -2px 8px rgba(20,20,43,.06)">
+          <button style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:72px;border:none;background:transparent;cursor:pointer" onClick="{{ setNav0 }}">
+            <span style="{{ navBar0 }}"></span>
+            <span style="color:{{ nav0 }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg></span>
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:{{ nav0 }}">Home</span>
+          </button>
+          <button style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:72px;border:none;background:transparent;cursor:pointer" onClick="{{ setNav1 }}">
+            <span style="{{ navBar1 }}"></span>
+            <span style="color:{{ nav1 }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 3v18"/></svg></span>
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:{{ nav1 }}">Study</span>
+          </button>
+          <button style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:72px;border:none;background:transparent;cursor:pointer" onClick="{{ setNav2 }}">
+            <span style="{{ navBar2 }}"></span>
+            <span style="color:{{ nav2 }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12.5h18M12 8v13"/><path d="M12 8C9.8 8 7 7.2 7 5.6 7 4.2 9.4 3.4 12 8c2.6-4.6 5-3.8 5-2.4C17 7.2 14.2 8 12 8z"/></svg></span>
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:{{ nav2 }}">Rewards</span>
+          </button>
+          <button style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:72px;border:none;background:transparent;cursor:pointer" onClick="{{ setNav3 }}">
+            <span style="{{ navBar3 }}"></span>
+            <span style="color:{{ nav3 }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a4 4 0 0 0-4 4 3 3 0 0 0 0 6 3.5 3.5 0 0 0 4 3.4z"/><path d="M12 5a4 4 0 0 1 4 4 3 3 0 0 1 0 6 3.5 3.5 0 0 1-4 3.4z"/></svg></span>
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:{{ nav3 }}">AI Doubt</span>
+          </button>
+          <button style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:72px;border:none;background:transparent;cursor:pointer" onClick="{{ setNav4 }}">
+            <span style="{{ navBar4 }}"></span>
+            <span style="color:{{ nav4 }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg></span>
+            <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;color:{{ nav4 }}">Profile</span>
+          </button>
+        </div>
+        <span style="font-family:Inter,sans-serif;font-size:13px;line-height:18px;font-weight:500;color:#6B6B85">Active = violet icon + violet label + 4px top bar. Import each of the 5 active states as a separate frame, then make it one component with a variant per tab.</span>
+      </div>
+
+      <div class="group group-appbar" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Top app bars</span>
+        <div class="appbar-default" style="width:390px;box-sizing:border-box;display:flex;align-items:center;gap:12px;height:60px;padding:0 20px;background:#FFFFFF;border-bottom:1px solid #E8E8F2">
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:700;color:#14142B;flex:1">Study</span>
+          <span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5L21 21"/></svg></span>
+          <span style="position:relative;color:#33334D">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+            <span class="badge-dot" style="position:absolute;right:1px;top:1px;width:9px;height:9px;border-radius:999px;background:#E5484D;border:2px solid #FFFFFF"></span>
+          </span>
+        </div>
+        <div class="appbar-back" style="width:390px;box-sizing:border-box;display:flex;align-items:center;gap:12px;height:60px;padding:0 20px;background:#FFFFFF;border-bottom:1px solid #E8E8F2">
+          <span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span>
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:600;color:#14142B;flex:1">Linear Equations</span>
+          <span style="color:#6D3BFF"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v17l-6-4.6L6 21z"/></svg></span>
+        </div>
+        <div class="appbar-progress" style="width:390px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;padding:12px 20px 14px;background:#FFFFFF;border-bottom:1px solid #E8E8F2">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="color:#33334D"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+            <span style="display:flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:#EDE6FF;font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#4E24E0">Section 1 · Explanation</span>
+            <span style="margin-left:auto;font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#6B6B85">3 / 9</span>
+          </div>
+          <div style="height:6px;border-radius:999px;background:#EDE6FF;overflow:hidden"><div style="width:33%;height:6px;border-radius:999px;background:#6D3BFF"></div></div>
+        </div>
+        <div class="appbar-transparent" style="width:390px;box-sizing:border-box;display:flex;align-items:center;gap:12px;height:80px;padding:20px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%)">
+          <span style="color:#FFFFFF"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span>
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;font-weight:600;color:#FFFFFF;flex:1">Rewards</span>
+          <span style="display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#FFFFFF">340 coins</span>
+        </div>
+      </div>
+
+      <div class="group group-tabs" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Tabs · segmented control <span style="color:#6D3BFF">— TAP</span></span>
+        <div style="display:flex;flex-direction:column;gap:14px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <div class="tabs" style="display:flex;border-bottom:1px solid #E8E8F2">
+            <button style="{{ tab0 }}" onClick="{{ setTab0 }}">Overview</button>
+            <button style="{{ tab1 }}" onClick="{{ setTab1 }}">Achievements</button>
+            <button style="{{ tab2 }}" onClick="{{ setTab2 }}">Statistics</button>
+          </div>
+          <sc-if value="{{ tabIsOverview }}" hint-placeholder-val="{{ true }}">
+            <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">Level 6 · 1,240 XP · 7-day streak · 12 topics mastered.</span>
+          </sc-if>
+          <sc-if value="{{ tabIsAchievements }}" hint-placeholder-val="{{ false }}">
+            <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">9 badges earned, 3 locked. Next: 10-day streak.</span>
+          </sc-if>
+          <sc-if value="{{ tabIsStats }}" hint-placeholder-val="{{ false }}">
+            <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">5h 20m studied this week · 86% average quiz accuracy.</span>
+          </sc-if>
+          <div class="segmented" style="display:flex;gap:4px;padding:4px;border-radius:999px;background:#F5F5FB">
+            <button style="{{ seg0 }}" onClick="{{ setSeg0 }}">Weekly XP</button>
+            <button style="{{ seg1 }}" onClick="{{ setSeg1 }}">Monthly XP</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-accordion" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Accordion <span style="color:#6D3BFF">— TAP to expand</span></span>
+        <div class="accordion" style="display:flex;flex-direction:column;gap:0;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;overflow:hidden">
+          <button style="display:flex;align-items:center;gap:12px;padding:16px;border:none;background:transparent;cursor:pointer;text-align:left" onClick="{{ toggleAcc }}">
+            <span style="width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#EDE6FF;color:#6D3BFF"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a4 4 0 0 0-4 4 3 3 0 0 0-.5 6 3.5 3.5 0 0 0 4.5 3.4z"/><path d="M12 4a4 4 0 0 1 4 4 3 3 0 0 1 .5 6 3.5 3.5 0 0 1-4.5 3.4z"/></svg></span>
+            <span style="flex:1;font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Deep dive — why the balance rule works</span>
+            <span style="color:#6B6B85"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+          </button>
+          <sc-if value="{{ accOpen }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:10px;padding:0 16px 16px">
+              <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">An equals sign is a promise that both sides weigh the same. Subtract 3 from one side and the promise breaks — unless you subtract 3 from the other side too.</span>
+              <div style="padding:12px 14px;border-radius:16px;background:#EDE6FF">
+                <span style="font-family:'Space Grotesk',monospace;font-size:15px;font-weight:700;color:#4E24E0">3x + 3 − 3 = 72 − 3</span>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div class="group group-sheet" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Bottom sheet <span style="color:#6D3BFF">— TAP the handle for peek / full</span></span>
+        <div style="width:390px;box-sizing:border-box;height:{{ sheetHeight }};display:flex;flex-direction:column;justify-content:flex-end;border-radius:0 0 20px 20px;background:#33334D;overflow:hidden">
+          <div class="sheet-bottom" style="display:flex;flex-direction:column;gap:14px;padding:12px 20px 20px;background:#FFFFFF;border-radius:24px 24px 0 0">
+            <button style="align-self:center;width:44px;height:5px;border:none;border-radius:999px;background:#E8E8F2;cursor:pointer;padding:0" onClick="{{ toggleSheet }}"></button>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#FFF3DC;color:#B87900"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M9.5 8.5h4a2 2 0 0 1 0 4h-4M9.5 16l3.5-3.5"/></svg></span>
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+                <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:17px;line-height:22px;font-weight:600;color:#14142B">Redeem family pizza</span>
+                <span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">120 coins · you have 340</span>
+              </div>
+            </div>
+            <sc-if value="{{ sheetFull }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;padding:12px 14px;border-radius:16px;background:#F5F5FB"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">Offline shop</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#A9A9C0;text-decoration:line-through">₹200</span></div>
+                <div style="display:flex;justify-content:space-between;padding:12px 14px;border-radius:16px;background:#F5F5FB"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:500;color:#6B6B85">Online store</span><span style="font-family:'Space Grotesk',monospace;font-size:13px;font-weight:700;color:#A9A9C0;text-decoration:line-through">₹230</span></div>
+                <div style="display:flex;justify-content:space-between;padding:12px 14px;border-radius:16px;background:#DCF7EA"><span style="font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:#0B7B48">On ZerebroKid</span><span style="font-family:'Space Grotesk',monospace;font-size:18px;font-weight:700;color:#0B7B48">₹150</span></div>
+                <button style="height:56px;border:none;border-radius:999px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);box-shadow:0 12px 32px rgba(78,36,224,.22);cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#FFFFFF">Confirm redemption</button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+
+      <div class="group group-modal" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Modal · full-screen popup shell <span style="color:#6D3BFF">— TAP to open</span></span>
+        <div style="width:390px;box-sizing:border-box;height:300px;position:relative;border-radius:20px;background:#F5F5FB;overflow:hidden;display:flex;align-items:center;justify-content:center">
+          <button style="height:48px;padding:0 20px;border:none;border-radius:999px;background:#EDE6FF;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#4E24E0" onClick="{{ openModal }}">Open modal</button>
+          <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+            <div class="overlay-dim" style="position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(20,20,43,.62);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box">
+              <div class="modal-dialog" style="width:100%;display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:24px;background:#FFFFFF;box-shadow:0 12px 32px rgba(20,20,43,.28)">
+                <div style="display:flex;align-items:flex-start;gap:12px">
+                  <span style="width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:14px;background:#EDE6FF;color:#6D3BFF"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 3M16 6h3a3 3 0 0 1-3 3"/><path d="M12 13v4M9 21h6"/></svg></span>
+                  <div style="display:flex;flex-direction:column;gap:4px;flex:1">
+                    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;line-height:26px;font-weight:700;color:#14142B">Start the quiz?</span>
+                    <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">5 questions. Your result goes to your parent and teacher. You can retry as many times as you like.</span>
+                  </div>
+                  <button style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;border:none;border-radius:999px;background:#F5F5FB;cursor:pointer;color:#6B6B85" onClick="{{ closeModal }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+                </div>
+                <div style="display:flex;gap:10px">
+                  <button style="flex:1;height:48px;border:1.5px solid #E8E8F2;border-radius:999px;background:#FFFFFF;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#6B6B85" onClick="{{ closeModal }}">Not yet</button>
+                  <button style="flex:1;height:48px;border:none;border-radius:999px;background:linear-gradient(135deg,#7C4DFF 0%,#4E24E0 100%);cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:#FFFFFF" onClick="{{ closeModal }}">Start quiz</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div class="group group-lang" style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#6B6B85">Language toggle — proves the Devanagari face <span style="color:#6D3BFF">— TAP</span></span>
+        <div style="display:flex;flex-direction:column;gap:14px;background:#FFFFFF;border:1px solid #E8E8F2;border-radius:16px;padding:16px">
+          <div style="display:flex;gap:10px">
+            <button style="{{ langEn }}" onClick="{{ setEn }}">English</button>
+            <button style="{{ langHi }}" onClick="{{ setHi }}">हिंदी</button>
+          </div>
+          <sc-if value="{{ isHindi }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:16px;background:#EDE6FF">
+              <span style="font-family:'Noto Sans Devanagari',sans-serif;font-size:20px;line-height:30px;font-weight:600;color:#14142B">आज का मिशन</span>
+              <span style="font-family:'Noto Sans Devanagari',sans-serif;font-size:15px;line-height:26px;font-weight:400;color:#33334D">रैखिक समीकरण के शब्द प्रश्न · 18 मिनट बाकी</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isEnglish }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-radius:16px;background:#F5F5FB">
+              <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;line-height:26px;font-weight:700;color:#14142B">Today's Mission</span>
+              <span style="font-family:Inter,sans-serif;font-size:15px;line-height:22px;font-weight:400;color:#33334D">Word Problems on Linear Equations · 18 min left</span>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- HANDOFF NOTES -->
+  <section class="handoff-notes" style="flex:none;display:flex;flex-direction:column;gap:24px;width:1180px;background:#14142B;border-radius:24px;padding:40px;box-sizing:border-box">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8B62FF">Phase 1 · deliverable</span>
+      <h2 style="margin:0;font-family:'Plus Jakarta Sans',sans-serif;font-size:26px;line-height:32px;font-weight:700;color:#FFFFFF">Handoff notes</h2>
+    </div>
+
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <div style="flex:1;min-width:340px;display:flex;flex-direction:column;gap:10px">
+        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#A9A9C0">Component inventory · 34</span>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">btn-primary — default · pressed · loading · disabled</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">btn-secondary · btn-tertiary · btn-destructive · btn-icon · fab-ai</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">chip — default · selected · disabled · chip-xp · chip-coin · chip-streak</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">input-field · input-search · input-error</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">mcq-option — default · selected · correct · wrong (+ feedback-correct / feedback-wrong)</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">card-mission · card-chapter (4 states) · card-section (3 states)</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">card-reward · card-coupon · card-coming-soon (+ ribbon-coming-soon)</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">card-stat · card-streak · card-achievement (2 states) · row-leaderboard (+ -you)</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">card-video · card-teacher · bubble-student · bubble-ai · bubble-ai-typing</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">callout-tip · callout-formula · callout-mistake · callout-real-life · callout-memory</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">ring-progress · bar-progress · steps-7 · pill-level · pill-rank · meter-mastery</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">state-empty · state-skeleton · state-error · banner-offline · toast-xp · snackbar · moment-celebration</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">nav-bottom (5 variants) · appbar-default / -back / -progress / -transparent</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">tabs · segmented · accordion · sheet-bottom (peek / full) · modal-dialog · overlay-dim · badge-dot</span>
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:340px;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#A9A9C0">Motion — could not be shown statically</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">Standard 200ms ease-out · emphasis 320ms cubic-bezier(.2,.8,.2,1).</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">XP gain: the number lifts 24px and fades over 320ms, then the total counts up.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">Coin: scale 0 → 1.2 → 1 with a gold radial burst, 320ms.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">Correct answer: green fill sweeps left to right in 200ms + one haptic tick.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">Section complete: the ring closes clockwise, then confetti for 900ms. The next section card un-dims and takes the pulse.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">FAB and the current section card carry a 2.4–2.6s ambient pulse. Everything respects prefers-reduced-motion.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#A9A9C0">Decisions locked in this phase</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">No lives or hearts. Motivation is streak + XP + coins + section unlock; "Try again" is always available.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">No emoji anywhere — every glyph in the pack replaces one.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">ribbon-coming-soon is mandatory on any feature that is not live on launch day.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">Wrong answers use red for the mark only — never for the student. Every wrong answer shows the correct one plus a one-line reason.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#E8E8F2">Dark surfaces (#14142B) are reserved for immersive moments: video, Focus Mode, formula blocks, quiz.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#A9A9C0">Still needs a decision</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#FFB020">The logo. Everything currently uses a gradient "Z" placeholder — send the real mark before Phase 2 splash.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#FFB020">Reward imagery. Every reward card uses a striped placeholder; real photography or an illustrator is needed.</span>
+          <span style="font-family:Inter,sans-serif;font-size:15px;line-height:24px;font-weight:400;color:#FFB020">Whether the ₹200 / ₹230 / ₹150 comparison ships — it needs signed partners. Phase 5 will carry an in-app-only fallback.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+class Component extends DCLogic {
+  state = {
+    chips: { xp: true, subject: false, mastered: false },
+    mcq: null,
+    mcqChecked: false,
+    acc: false,
+    nav: 0,
+    tab: 0,
+    seg: 0,
+    sheet: 'peek',
+    modal: false,
+    toast: false,
+    ring: 60,
+    lang: 'en'
+  };
+
+  optStyle(i) {
+    const base = 'display:flex;align-items:center;gap:12px;padding:16px;border-radius:16px;background:#FFFFFF;cursor:pointer;font-family:Inter,sans-serif;';
+    const s = this.state;
+    if (s.mcqChecked && i === 2) return base + 'border:2px solid #12B76A;background:#DCF7EA';
+    if (s.mcqChecked && i === s.mcq) return base + 'border:2px solid #E5484D;background:#FDE7E7';
+    if (!s.mcqChecked && i === s.mcq) return base + 'border:2px solid #6D3BFF;background:#EDE6FF';
+    return base + 'border:1.5px solid #E8E8F2';
+  }
+
+  navItemColor(i) { return this.state.nav === i ? '#6D3BFF' : '#A9A9C0'; }
+  navBarStyle(i) {
+    return 'position:absolute;left:16px;right:16px;top:0;height:4px;border-radius:999px;background:' + (this.state.nav === i ? '#6D3BFF' : 'transparent');
+  }
+  tabStyle(i) {
+    const on = this.state.tab === i;
+    return 'flex:1;display:flex;align-items:center;justify-content:center;height:40px;border:none;background:transparent;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;color:' + (on ? '#6D3BFF' : '#6B6B85') + ';border-bottom:2px solid ' + (on ? '#6D3BFF' : 'transparent');
+  }
+  segStyle(i) {
+    const on = this.state.seg === i;
+    return 'flex:1;height:36px;border:none;border-radius:999px;cursor:pointer;font-family:Inter,sans-serif;font-size:13px;font-weight:600;background:' + (on ? '#FFFFFF' : 'transparent') + ';color:' + (on ? '#4E24E0' : '#6B6B85') + ';box-shadow:' + (on ? '0 2px 8px rgba(20,20,43,.06)' : 'none');
+  }
+  chipStyle(key) {
+    const on = this.state.chips[key];
+    return 'display:flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:999px;cursor:pointer;font-family:Inter,sans-serif;font-size:13px;font-weight:500;background:' + (on ? '#EDE6FF' : '#FFFFFF') + ';color:' + (on ? '#4E24E0' : '#6B6B85') + ';border:1.5px solid ' + (on ? '#8B62FF' : '#E8E8F2');
+  }
+
+  renderVals() {
+    const s = this.state;
+    const C = 2 * Math.PI * 36;
+    return {
+      ringPct: s.ring,
+      ringLabel: s.ring + '%',
+      ringOffset: (C * (1 - s.ring / 100)).toFixed(2),
+      ringDash: C.toFixed(2),
+      barWidth: s.ring + '%',
+      setRing: (e) => this.setState({ ring: Number(e.target.value) }),
+
+      optA: this.optStyle(0), optB: this.optStyle(1), optC: this.optStyle(2), optD: this.optStyle(3),
+      pickA: () => this.setState({ mcq: 0, mcqChecked: false }),
+      pickB: () => this.setState({ mcq: 1, mcqChecked: false }),
+      pickC: () => this.setState({ mcq: 2, mcqChecked: false }),
+      pickD: () => this.setState({ mcq: 3, mcqChecked: false }),
+      checkMcq: () => this.setState({ mcqChecked: this.state.mcq !== null }),
+      resetMcq: () => this.setState({ mcq: null, mcqChecked: false }),
+      mcqFeedbackRight: s.mcqChecked && s.mcq === 2,
+      mcqFeedbackWrong: s.mcqChecked && s.mcq !== null && s.mcq !== 2,
+
+      chipXp: this.chipStyle('xp'), chipSubject: this.chipStyle('subject'), chipMastered: this.chipStyle('mastered'),
+      toggleXp: () => this.setState(p => ({ chips: Object.assign({}, p.chips, { xp: !p.chips.xp }) })),
+      toggleSubject: () => this.setState(p => ({ chips: Object.assign({}, p.chips, { subject: !p.chips.subject }) })),
+      toggleMastered: () => this.setState(p => ({ chips: Object.assign({}, p.chips, { mastered: !p.chips.mastered }) })),
+
+      accOpen: s.acc,
+      toggleAcc: () => this.setState({ acc: !this.state.acc }),
+
+      nav0: this.navItemColor(0), nav1: this.navItemColor(1), nav2: this.navItemColor(2), nav3: this.navItemColor(3), nav4: this.navItemColor(4),
+      navBar0: this.navBarStyle(0), navBar1: this.navBarStyle(1), navBar2: this.navBarStyle(2), navBar3: this.navBarStyle(3), navBar4: this.navBarStyle(4),
+      setNav0: () => this.setState({ nav: 0 }), setNav1: () => this.setState({ nav: 1 }), setNav2: () => this.setState({ nav: 2 }), setNav3: () => this.setState({ nav: 3 }), setNav4: () => this.setState({ nav: 4 }),
+
+      tab0: this.tabStyle(0), tab1: this.tabStyle(1), tab2: this.tabStyle(2),
+      setTab0: () => this.setState({ tab: 0 }), setTab1: () => this.setState({ tab: 1 }), setTab2: () => this.setState({ tab: 2 }),
+      tabIsOverview: s.tab === 0, tabIsAchievements: s.tab === 1, tabIsStats: s.tab === 2,
+
+      seg0: this.segStyle(0), seg1: this.segStyle(1),
+      setSeg0: () => this.setState({ seg: 0 }), setSeg1: () => this.setState({ seg: 1 }),
+
+      sheetFull: s.sheet === 'full',
+      sheetHeight: s.sheet === 'full' ? '360px' : '150px',
+      toggleSheet: () => this.setState({ sheet: this.state.sheet === 'full' ? 'peek' : 'full' }),
+
+      modalOpen: s.modal,
+      openModal: () => this.setState({ modal: true }),
+      closeModal: () => this.setState({ modal: false }),
+
+      toastOn: s.toast,
+      fireToast: () => { this.setState({ toast: true }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: false }), 2600); },
+
+      isHindi: s.lang === 'hi',
+      isEnglish: s.lang === 'en',
+      langEn: 'flex:1;height:48px;border-radius:16px;cursor:pointer;font-family:Inter,sans-serif;font-size:15px;font-weight:600;border:1.5px solid ' + (s.lang === 'en' ? '#8B62FF' : '#E8E8F2') + ';background:' + (s.lang === 'en' ? '#EDE6FF' : '#FFFFFF') + ';color:' + (s.lang === 'en' ? '#4E24E0' : '#33334D'),
+      langHi: "flex:1;height:48px;border-radius:16px;cursor:pointer;font-family:'Noto Sans Devanagari',sans-serif;font-size:15px;font-weight:600;border:1.5px solid " + (s.lang === 'hi' ? '#8B62FF' : '#E8E8F2') + ';background:' + (s.lang === 'hi' ? '#EDE6FF' : '#FFFFFF') + ';color:' + (s.lang === 'hi' ? '#4E24E0' : '#33334D'),
+      setEn: () => this.setState({ lang: 'en' }),
+      setHi: () => this.setState({ lang: 'hi' })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

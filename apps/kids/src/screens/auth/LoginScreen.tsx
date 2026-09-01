@@ -19,6 +19,7 @@ export function LoginScreen({navigation}: Props) {
   const [error, setError] = useState<string | null>(null);
 
   async function onLogin() {
+    console.log('Login attempt for email:', email);
     if (!email.trim() || !password) {
       setError('Enter your email and password.');
       return;
