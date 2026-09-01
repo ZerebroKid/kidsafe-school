@@ -80,7 +80,7 @@ export function KidHomeScreen({navigation}: Props) {
                   <Path d="M8 12v3M6.5 13.5h3M15.5 12h.01M17.5 14h.01" />
                 </Svg>
               }
-              onPress={() => navigation.navigate('ZumiHome')}
+              onPress={() => navigation.navigate('KidFun')}
             />
             <HomeCard
               color="#E8407F"
