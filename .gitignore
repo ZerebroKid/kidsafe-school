@@ -40,6 +40,19 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
+# Python
+#
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
 # Monorepo build outputs
 .turbo/
 **/.turbo/
