@@ -113,6 +113,11 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/schools/$(schoolId))
         && get(/databases/$(database)/documents/schools/$(schoolId)).data.principalUid == myUid();
     }
+    function isActiveAccountant(schoolId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/schools/$(schoolId)/accountants/$(myUid()))
+        && get(/databases/$(database)/documents/schools/$(schoolId)/accountants/$(myUid())).data.status == 'active';
+    }
 
     // NOTE — Phase 1.6.2: the v1 `parentOwns(...)` helper + every `_shared`
     // doc-id branch was removed alongside the rest of shared mode. ZConnect
@@ -398,6 +403,45 @@ service cloud.firestore {
         allow create, update, delete: if false;
       }
 
+      // School Web roster. Clients read; callables write.
+      match /students/{studentId} {
+        allow read: if isAdmin()
+          || belongsToSchool(schoolId)
+          || (isTeacher() && myUid() in resource.data.readerIds);
+        allow create, update, delete: if false;
+      }
+
+      // One doc per class per day: {classId}_{YYYY-MM-DD}
+      match /attendance/{attendanceId} {
+        allow read: if isAdmin()
+          || belongsToSchool(schoolId)
+          || (isTeacher()
+              && exists(/databases/$(database)/documents/schools/$(schoolId)/classes/$(resource.data.classId))
+              && myUid() in get(/databases/$(database)/documents/schools/$(schoolId)/classes/$(resource.data.classId)).data.teacherIds);
+        allow create, update, delete: if false;
+      }
+
+      match /accountants/{accountantId} {
+        allow read: if isAdmin()
+          || belongsToSchool(schoolId)
+          || (isSignedIn() && resource.data.userId == myUid());
+        allow create, update, delete: if false;
+      }
+
+      match /fees/{feeId} {
+        allow read: if isAdmin()
+          || belongsToSchool(schoolId)
+          || isActiveAccountant(schoolId);
+        allow create, update, delete: if false;
+      }
+
+      match /leaves/{leaveId} {
+        allow read: if isAdmin()
+          || belongsToSchool(schoolId)
+          || (isSignedIn() && resource.data.teacherUid == myUid());
+        allow create, update, delete: if false;
+      }
+
       // parents subcollection (P4.4)
       //   `joinSchoolAsParent` callable writes here via Admin SDK; clients
       //   only READ. UNLIKE teachers, the principal does NOT get read access
@@ -468,6 +512,12 @@ service cloud.firestore {
     //   (`requestTeacherJoin`, `approveTeacher`, `rejectTeacher`) mutate
     //   `teachers/*` docs.
     match /{path=**}/teachers/{teacherId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == myUid());
+      allow write: if false;
+    }
+
+    match /{path=**}/accountants/{accountantId} {
       allow read: if isAdmin()
         || (isSignedIn() && resource.data.userId == myUid());
       allow write: if false;

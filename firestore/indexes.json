@@ -120,6 +120,71 @@
         {"fieldPath": "active", "order": "ASCENDING"},
         {"fieldPath": "gradeBand", "arrayConfig": "CONTAINS"}
       ]
+    },
+    {
+      "collectionGroup": "students",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "classId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "students",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "classId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "readerIds", "arrayConfig": "CONTAINS"}
+      ]
+    },
+    {
+      "collectionGroup": "teachers",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "phone", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "accountants",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "phone", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "accountants",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {"fieldPath": "userId", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "fees",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "month", "order": "ASCENDING"},
+        {"fieldPath": "pending", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "leaves",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "teacherUid", "order": "ASCENDING"},
+        {"fieldPath": "status", "order": "ASCENDING"}
+      ]
+    },
+    {
+      "collectionGroup": "schools",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "principalUid", "order": "ASCENDING"},
+        {"fieldPath": "app", "order": "ASCENDING"}
+      ]
     }
   ],
   "fieldOverrides": []

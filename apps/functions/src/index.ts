@@ -98,3 +98,17 @@ export {cancelSubscription} from './callable/subscription/cancelSubscription';
 export {adminActivateSubscription} from './callable/subscription/adminActivateSubscription';
 export {getPaymentHistory} from './callable/subscription/getPaymentHistory';
 export {razorpayWebhook} from './http/razorpayWebhook';
+
+// School Web -- own school, student roster, teacher invite, class attendance
+export {bootstrapSchoolWeb} from './callable/bootstrapSchoolWeb';
+export {upsertStudent} from './callable/upsertStudent';
+export {importClassStudents} from './callable/importClassStudents';
+export {markStudentLeft} from './callable/markStudentLeft';
+export {addSchoolTeacher} from './callable/addSchoolTeacher';
+export {addSchoolAccountant} from './callable/addSchoolAccountant';
+export {claimStaffSeat} from './callable/claimStaffSeat';
+export {importSchoolFees} from './callable/importSchoolFees';
+export {submitTeacherLeave} from './callable/submitTeacherLeave';
+export {cancelTeacherLeave} from './callable/cancelTeacherLeave';
+export {decideTeacherLeave} from './callable/decideTeacherLeave';
+export {submitClassAttendance} from './callable/submitClassAttendance';
